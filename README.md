@@ -1,0 +1,2 @@
+# dap.js
+dap may stand for "declarative, asynchronous &amp; parallel" — this is what it is about
