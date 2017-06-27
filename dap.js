@@ -80,8 +80,6 @@ var dap	=(function(){
 		
 		uri	:Uri.neutral,
 		
-		location:function(req){return window.location.href},
-
 		xml	:Parse.Xml,
 		text	:Env.text,
 		
@@ -110,34 +108,18 @@ var dap	=(function(){
 	
 			num	:function(value){ return String(value).replace(/[^-.0-9]+/g,"").replace(/\B(?=(...)*$)/g," "); },	/// digit groups 
 			"~num"	:function(value){ return value.replace(/[^-.0-9]+/g,""); }
-		},
-		
-		seo	: (function(){
-		
-				var	yandex="a b v g d e zh z i j k l m n o p r s t u f H c ch sh shch  y  eh yu ya  jo".split(' ');
-				
-				return	{
-				
-					translit: function (src) {
-						if(!src)return src;
-						src=src.toLowerCase();
-						var	n=src.length,
-							lat=new Array(n);
-						while(n--) {
-							var c = src.charCodeAt(n)-1072;
-							lat[n] = c<0 ? src[n] : yandex[c];
-						}
-						return lat.join('').replace(/([cseh])H/g,"$1kh").toLowerCase().replace(/[^a-z0-9]+/g,'-');
-					}
-				}
-				 
-			})(),
+			},
 		
 		// some costants
 		
-		tab	:function(){ return '\t'; },
-		newline	:function(){ return '\n'; },
-		para	:function(){ return "\n\n"; }
+		CHAR	:{
+			tab	:function(){ return '\t'; },
+			newline	:function(){ return '\n'; },
+			para	:function(){ return "\n\n"; }
+			},
+		
+		ENV	:function(){ return window; } // access to environment properties
+		
 	},
 	
 	flatten	:{
