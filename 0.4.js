@@ -1532,10 +1532,10 @@ var dap	=(function(){
 					return p;
 				},
 				
-			d	:function(attr,stuff)	{ return this.set("d",attr,stuff) },
-			a	:function(attr,stuff)	{ return this.set("a",attr,stuff) },
-			u	:function(attr)		{ return this.set("u",attr ) },
-			e	:function(event,attr)	{ return this.set(event,attr,null,event) },
+			d	:function(rule,...stuff){ return this.set("d",rule,stuff) },
+			a	:function(rule,...stuff){ return this.set("a",rule,stuff) },
+			u	:function(rule)		{ return this.set("u",rule ) },
+			e	:function(event,rule)	{ return this.set(event,rule,null,event) },
 			
 			r	:function(rule)		{ return new Rule(this.ns,rule) },
 				
