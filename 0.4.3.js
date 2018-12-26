@@ -45,31 +45,13 @@ const	dap=(function( Env ){
 		
 		"++"	:num=>++num,
 		
-		query	:req=>Env.query(req,true),
-		sync	:req=>Env.query(req,false),
+		sync	:req=>Env.query(null,req),
+		query	:req=>Env.query(new Execute.Postpone(),req),
 		
-		json	:Env.JSON.decode,
+		json	:Env.Json.decode,
 		value	:Env.value,
 		text	:Env.text,
 		copy	:Env.copy,		
-	
-		split	:{
-				space	:value=>split(value,/\s+/),
-				comma	:value=>split(value,/\s*,\s*/),
-				colon	:value=>split(value,/\s*:\s*/),
-				para	:value=>split(value,/\n\n+/),
-				lfc	:value=>split(split(value,/\s*\n\s*/),/(?:\s+|^):\s?/),
-				
-				urlenc	:Env.Uri.query
-			},
-		
-		// some costants
-		
-		chr	:{
-			tab	:()=>"\t",
-			newline	:()=>"\n",
-			para	:()=>"\n\n"
-		}
 	},
 	
 	flatten	:{
@@ -123,8 +105,8 @@ const	dap=(function( Env ){
 		"d!"	:(value,alias,node)=>	{ Execute.update(value||node); },
 		"a!"	:(value,alias,node)=> 	{ Execute.a(value||node); },
 		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
-		"a?"	:(value,alias,node)=>	{ Env.After.put(Execute.a,value||node); },
-		"u?"	:(value,alias,node)=>	{ Env.After.put(Execute.u,value||node); },//{ Execute.u(value||node); }, //
+		"a?"	:(value,alias,node)=>	{ After.put(Execute.a,value||node); },
+		"u?"	:(value,alias,node)=>	{ After.put(Execute.u,value||node); },//{ Execute.u(value||node); }, //
 		
 		"log"	:(value,alias,node)=>	{ Env.log(alias+" : "+value); },	
 		
@@ -136,9 +118,6 @@ const	dap=(function( Env ){
 		}
 		
 	}),
-	
-	
-	
 	
 	Box	=(value,alias)=>{
 		const r={};
@@ -796,10 +775,18 @@ const	dap=(function( Env ){
 	
 	Execute	= (function(){
 	
-		let	stackDepth	= 0,
-			postpone	= null,
-			REUSE		= Env.REUSE;
-					
+		const	REUSE	= Env.REUSE,
+			ctx	=(data,$,rowset,updata)=>{
+				const datarow = data instanceof Object ? data : {"#":data}
+				datarow['']=updata;
+				return [{'':datarow},$,rowset];
+			},			
+			update	=(node,$)=>{ node.P.spawn($||node.$,node.parentNode,node) },
+			trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] )
+			;
+			
+		let	stackDepth	= 0;
+
 		function Branch($,node,up,route){
 			this.$		= $||node.$;
 			this.node	= node;
@@ -811,14 +798,15 @@ const	dap=(function( Env ){
 			exec:
 			function(todo,place,instead){
 				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
-				var	node	= this.node,
-					empty	= todo && this.execBranch(todo) && !node.childNodes.length;// && !node.attributes.length;
+				const	branch	= todo && this.execBranch(todo);
 					
-				if(postpone){
-					postpone.locate(place,instead);
-					postpone.branch=this;
-					return;
+				if(branch instanceof Postpone){
+					branch.locate(place,instead);
+					return branch.put({branch:this});
 				}
+				
+				let	node	= this.node,
+					empty	= branch && !node.childNodes.length;// && !node.attributes.length;
 					
 				if(empty==true)node=Env.mute(node);
 				if((empty==null)&&instead)Env.dim(instead);
@@ -842,11 +830,9 @@ const	dap=(function( Env ){
 				
 				for(let step;todo&&(step=todo[0]);todo=(flow==null)&&todo[1]){
 					if(step.todo){
-						new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
-						if(postpone){
-							postpone.todo=[new Compile.Step(null,postpone.todo),todo[1]];
-							return;
-						}
+						let branch = new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
+						if(branch instanceof Postpone)
+							return branch.put({todo:[new Compile.Step(null,postpone.todo),todo[1]]})
 					}else					
 						if(!step.feed)
 							Warn("no feed");
@@ -869,19 +855,16 @@ const	dap=(function( Env ){
 								// true		- skip to next step
 								// array	- rowset subscopes
 								// ? object	- subscope
-								if(postpone){
+								if(flow instanceof Postpone){
+									//if(--stackDepth<0)throw Fail("stack underflow");
 									tokens	= tokens.slice(0,i);// no need to slice values and tags
-									tokens[i] = postpone.token;
-									
-									postpone.todo=[
+									tokens[i] = flow.token;
+									return flow.put({todo:[
 										new Compile.Step(
 											values && new Compile.Feed(values,tags,tokens,operate),
-											postpone.todo
-										),
-										todo[1]
-									];
-									if(--stackDepth<0)throw Fail("stack underflow");
-									return;
+											flow.todo
+										),todo[1]
+									]});
 								}
 							}
 								
@@ -949,8 +932,8 @@ const	dap=(function( Env ){
 							i	= values.length; //tokens.length;
 							
 							while(i--){
-								values[i]=this.execToken(values[i],tokens[i]);
-								if(postpone){
+								value=this.execToken(values[i],tokens[i]);
+								if(value instanceof Postpone){
 									tokens = tokens.slice(0,i);
 									tokens[i]=postpone.token;
 									
@@ -959,9 +942,9 @@ const	dap=(function( Env ){
 									parts = parts.slice(0,p);
 									parts[p] = new Compile.Rvalue(feed,path);
 									
-									postpone.token = new Compile.Token(parts,converts);
-									return;
+									return value.put({token:new Compile.Token(parts,converts)});
 								}
+								values[i]=value;
 							}
 						
 						value = feed.op(values,tags);
@@ -984,7 +967,7 @@ const	dap=(function( Env ){
 					if(convert)
 						for(let c=convert.length; c--; ){
 							value=convert[c](value);
-							if(postpone){
+							if(value instanceof Postpone){
 								converts= converts.slice(0,p);
 								converts[p]=c>0 && convert.slice(0,c);
 								
@@ -993,7 +976,7 @@ const	dap=(function( Env ){
 								
 								token	= new Compile.Token(parts,converts);
 								
-								y.target = y.token = token;
+								return value.put({token,target:token})
 							}
 						}
 						if(value==null)value="";
@@ -1044,11 +1027,8 @@ const	dap=(function( Env ){
 				if(rule)
 					route=this.execBranch(todo||rule.todo||rule.engage().todo)||route;
 				
-				if(postpone){
-					postpone.branch=this;
-					postpone.instead=snitch;
-					return;
-				}
+				if(route instanceof Postpone)
+					return route.put({branch:this,instead:snitch});
 					
 				for(let i in this.up)
 					if(!defs||!defs[i])
@@ -1103,18 +1083,47 @@ const	dap=(function( Env ){
 			}
 		};
 		
-		const
-			ctx	=(data,$,rowset,updata)=>{
-				const datarow = data instanceof Object ? data : {"#":data}
-				datarow['']=updata;
-				return [{'':datarow},$,rowset];
-			},
-			
-			update	=(node,$)=>{ node.P.spawn($||node.$,node.parentNode,node) },
-			
-			trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] )
-			
-			;
+		function Postpone(info){
+			this.instead	= null;
+			this.place	= null;
+			this.target	= null;
+			this.branch	= null;
+			this.todo	= null;
+			this.token	= null;
+			this.time	= Date.now();
+			this.info	=info;
+		};
+		Postpone.prototype = {
+			locate	:function(place,instead){
+					if(this.instead=instead){
+						this.place=place;
+						if(instead.replacer)instead.replacer.dismiss();
+						instead.replacer=this;
+					}
+				},
+			put	:function(obj){
+					for(let i in obj)this[i]=obj[i];
+					return this;
+				},
+				
+			dismiss	:function(){
+					this.branch=null;
+				},
+			resolve	:function(value){
+					if(this.branch){
+						Perf("wait: "+this.info,this.time);
+						this.target.value=value;
+						After.hold();
+						Perf("exec: "+this.info,Date.now(),
+							this.branch.up
+							?this.branch.checkUp(this.instead,this.todo)
+							:this.branch.exec(this.todo,this.place,this.instead)
+						);
+						After.run();
+					}
+					this.instead=null;
+				}
+		};
 		
 		return	{
 		
@@ -1122,9 +1131,9 @@ const	dap=(function( Env ){
 			a	:function(node,rule)	{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).exec( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
 			u	:function(node,event)	{ new Branch(node.$,node,{},event).checkUp(); },
 			
-			Branch	:Branch,
-			
-			update	: update,
+			Branch,
+			Postpone,
+			update,
 
 			async	: true
 		};
@@ -1135,9 +1144,9 @@ const	dap=(function( Env ){
 		
 		function Handle(e){
 			Env.Event.stop(e);
-			Env.After.hold();
+			After.hold();
 			Perf(e.type,Date.now(),Execute.u(e.currentTarget||e.srcElement,e.type));
-			Env.After.run();				
+			After.run();				
 			return true;
 		}
 			
@@ -1154,12 +1163,50 @@ const	dap=(function( Env ){
 		}
 	})(),
 
+	After	= (function(){
+		
+		function Job(handler,subject,before){
+			this.handler=handler;
+			this.subject=subject;
+		};
+
+		let	phase	= 0; // 0:hold; 1:running; 2:finished
+	
+		const
+		
+		queue	= [],
+			
+		put	=(job,before)=>{
+			if(before)queue.push(job);
+			else queue.unshift(job);
+			if(phase==2)run(); // afterdone
+		},
+
+		run	=()=>{
+			if(phase==1)return;
+			phase=1; // being executed
+			for(let job; job=queue.pop();)
+				if(job.handler(job.subject))	// true -> suspend execution of the rest of the queue
+					return phase=0;		// buffering
+			return phase=2; // done
+		};
+		
+		return	{
+			hold	: function(){phase=0},
+			put	: function(handler,subject,before){ put( new Job(handler,subject),before||false); },
+			run	: run
+		};
+
+	})(),
+		
+
 	STD	= {
 		Env,
 		Util,
 		
 		Parse,
 		Execute,
+		After,
 		
 		async	:function(holder){
 				const f=holder.resolve;
@@ -1257,82 +1304,8 @@ const	dap=(function( Env ){
 			return tmp.firstChild;			
 		}
 		
-		function Postpone(info){
-			this.instead	= null;
-			this.place	= null;
-			this.target	= null;
-			this.branch	= null;
-			this.todo	= null;
-			this.token	= null;
-			this.time	= Date.now();
-			this.info	=info;
-		};
-		Postpone.prototype = {
-			locate	:function(place,instead){
-					if(this.instead=instead){
-						this.place=place;
-						if(instead.replacer)instead.replacer.dismiss();
-						instead.replacer=this;
-					}
-				},			
-			dismiss	:function(){
-					this.branch=null;
-				},
-			resolve	:function(value){
-					if(this.branch){
-						Perf("wait: "+this.info,this.time);
-						this.target.value=value;
-						After.hold();
-						Perf("exec: "+this.info,Date.now(),
-							this.branch.up
-							?this.branch.checkUp(this.instead,this.todo)
-							:this.branch.exec(this.todo,this.place,this.instead)
-						);
-						After.run();
-					}
-					this.instead=null;
-				}
-		};
-		
-
 		const
 
-		After	= (function(){
-			
-			function Job(handler,subject,before){
-				this.handler=handler;
-				this.subject=subject;
-			};
-
-			let	phase	= 0; // 0:hold; 1:running; 2:finished
-		
-			const
-			
-			queue	= [],
-				
-			put	=(job,before)=>{
-				if(before)queue.push(job);
-				else queue.unshift(job);
-				if(phase==2)run(); // afterdone
-			},
-
-			run	=()=>{
-				if(phase==1)return;
-				phase=1; // being executed
-				for(let job; job=queue.pop();)
-					if(job.handler(job.subject))	// true -> suspend execution of the rest of the queue
-						return phase=0;		// buffering
-				return phase=2; // done
-			};
-			
-			return	{
-				hold	: function(){phase=0},
-				put	: function(handler,subject,before){ put( new Job(handler,subject),before||false); },
-				run	: run
-			};
-
-		})(),
-		
 		Event	= (function(){
 			
 			var
@@ -1494,79 +1467,51 @@ const	dap=(function( Env ){
 		})(),
 		
 		Http	= (function(){
-		
-			var	IEsucks = (function(){ // hack for ie, which doesn't allow to assign own properties to XHR object
-				var active = [];
-				return	{
-					put	: function(key,target) {
-							active.push({key:key,target:target});
-						},
-					pull	: function(key){
-							var found=null;
-							for(let i=active.length;i--;)
-								if(active[i].key===key){
-									found=ieXHRsucks[i];
-									active.splice(i,1);
-								}
-							return found && found.target;
-						}
-				};
-			})();
-
-			function query( method,async,contentType,headers,url,body ){
-			
-				const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP');
-				
-				request.open( method,request.url=Uri.absolute(url),async );
-				request.setRequestHeader("Content-Type",contentType);//||"text/xml"
-				
-				if(headers)
-					for(let i in headers)
-						request.setRequestHeader(i,headers[i]);
-				
-				if(async){
-					request.onreadystatechange=progress;
-					const postpone = new Execute.Postpone("requesting "+url);
-					request.postpone = postpone;
-					if(!request.postpone)IEsucks.put(request,postpone);
-				}
-				
-				try	{
-					request.send(body||null);
-				}catch(e){
-					Warn(e.message);
-				}
-				
-				return
-				
-				if(async)throw(postpone);
-				else return consume(request);
-			};
-			
-			function progress(){
-				if(this.readyState!=4)return;
-				var postpone=this.postpone || IEsucks.pull(this) || Fail("No target for request",this);
-				postpone.resolve(consume(this));
-			};
 
 			function consume(request){
 				if(Math.floor(request.status/100)!=2)return;
 				switch(request.getResponseHeader('content-type').split(";")[0]){
-					case"application/xml":
-						return request.responseXML.documentElement;
-					case"application/json":
-						return Dataset.unpack(JSON.parse(request.responseText),request.getResponseHeader("X-Columns"));
 					case"text/plain":
 						return request.responseText;
+					case"application/json":
+						return Json.decode(request.responseText);//Dataset.unpack(,request.getResponseHeader("X-Columns"));
+					case"application/xml":
+						return request.responseXML.documentElement;
 					default:
 						return request;
 				}
 			};
-		
-	 		return {
-				GET	: function( async,headers,contentType,url )	{ return query("GET" ,async,contentType,headers,url); },
-				POST	: function( async,headers,contentType,url,body ){ return query("POST",async,contentType,headers,url,body); }
+			
+			function query( postpone,req ){//url,body,headers,method,contentType,)
+			
+				if(typeof req === "string") req={url:req};
+			
+				const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
+					method	= req.method || ( req.body ? "POST" : "GET" );
+				
+				request.open( method,Uri.absolute(req.url),!!postpone );
+				request.setRequestHeader("Content-Type",req.contentType);
+				
+				if(req.headers)
+					for(let i in req.headers)
+						request.setRequestHeader(i,req.headers[i]);
+				
+				if(postpone)
+					request.onreadystatechange=function (){
+						if(this.readyState!=4)return postpone
+							? postpone.resolve(consume(this))
+							: Warn("No target for request",this);
+					}
+				
+				try	{request.send(req.body||null);}
+				catch(e){Warn(e.message);}
+				
+				return postpone||consume(request);
 			};
+			
+			return {
+				query
+			}
 		})(),
 		
 		Request	= (function(){
@@ -1604,7 +1549,19 @@ const	dap=(function( Env ){
 			}
 			
 		})(),
-	
+
+		Json	={
+			encode	:value	=>{var r=0; return value&&JSON.stringify(value,(k,v)=>(k||!r++)?v:undefined)},
+			decode	:value	=>value&&JSON.parse(value)
+			},
+
+		Storage	={
+			put	:function(data)	{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
+			get	:function(key)	{try{JSON.parse(localStorage.getItem(key))}catch(e){return null};}
+			},
+
+
+		
 		Style	= {
 		
 			
@@ -1669,33 +1626,18 @@ const	dap=(function( Env ){
 			REUSE,
 		
 			State,
-			Postpone,
-			After,
 			Uri,
 			Http,
 			Event,
 			Style,
 			Native,
+			Json,
+			Storage,
 			
 			base	: window.location.href.replace(/[?!#].*$/,""), // const
 			
-			query	:function(req,async,verb){					
-					const	//a = async && Execute.async,
-						h = null;//Qookie.headers();
-					return	req.body?	Http.POST	(async,h,req.mime,req.url,req.body) :
-						req.url ?	Http.GET	(async,h,"text/xml",req.url) :
-						(typeof req == "string") && Http.GET(async,h,"text/xml",req); 
-				},
+			query	:Http.query, // to be generalized
 			
-			JSON	:{
-				encode	:(value)=>{var r=0; return value&&JSON.stringify(value,(k,v)=>(k||!r++)?v:undefined)},
-				decode	:value=>value&&JSON.parse(value)
-				},
-
-			Storage	:{
-				put	:function(data)	{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
-				get	:function(key)	{try{JSON.parse(localStorage.getItem(key))}catch(e){return null};}
-				},
 			
 			print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
 			

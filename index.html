@@ -1,0 +1,99 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Dap.js</title>
+	<style>
+	body{max-width: 80em; margin:2em auto; font-family:sans-serif; }
+	</style>
+</head>
+<body>
+
+<h1>Dap.js: Javascript for massively interactive web-applications.</h1>
+
+
+<h3>Natively reactive</h3>
+<p>
+Reactivity is the base concept of dap. No need to manually track changes in your application's status, or even bother to bind update events — all dependencies are resolved naturally under the hood. Dap renders and updates all the dependent elements interactively, based on their dap-rules.
+</p>
+
+
+<pre>
+'sample'.d("$choice="
+	,'selected'.d("! title ($choice what)?")
+	,'UL.options'.d("* option"
+		'LI'.d("! .option").ui("$choice=.option")
+	)
+)
+.DEF({
+title:"My favorite fruit is ",
+what:"what?",
+	options:["apple","orange","tomato","banana"]
+})
+</pre>
+
+
+
+<h3>Simple to start, easy to advance</h3>
+
+<h3>Clear, concise and observable</h3>
+<p>Dap syntax is designed to focus on data and logic, instead of syntactic decoration. Dap application pre may be times smaller than similar pre in other reactive environments. You can well observe your pre without digging through sparse lines of curly brackets and boilerplate pre.</p>
+<pre>
+'H1'.d(" `Hello,world!")
+</pre>
+
+<h3>Fast and lightweight</h3>
+<p>Dap will not introduce any noticeable latency to your Web UI. The dap support script weighs less than 20kiB, dap-rules are parsed lazily, DOM manipulations are precise and deterministic, and only involve affected elements.</p>
+
+Flexible and expandable
+
+<pre>
+'toh'.d(
+	,'H1'.d("! dict.apptitle")
+	,'lists'.d("? $hero:!"
+		,'dashboard'.d("?? $page@dashboard"
+			,'H2'.d("! dict.dashboard")
+			,'heroes'.d("* $heroes@"
+				,'hero'.d("! .name").ui("$hero=$")
+			)
+		)
+		,'myheroes'.d("?? $page@heroes"
+			,'H2'.d("! dict.myheroes")
+			
+		)
+	)
+	,'details'.d("? $hero; $name=$hero.name"
+		,'H2'.d("! (dict.details $name)tuck")
+		,'id'.d("! `id: $hero.id")
+		,'INPUT.name'.d("! $hero.name; !! dict.name@label").e("keyup","$name=#:value")
+		,'done'.ui("$hero=").d(""
+			,'BUTTON.back'.ui("")
+			,'BUTTON.save'.ui("$hero.name=$name")
+		)
+	)
+	,'messages'
+)
+.DEF({
+	dict	:{
+		apptitle	:"Tour of heroes",
+		dashboard	:"Top heroes"
+	},
+	
+	heroes	:[
+		{ id: 11, name: 'Mr. Nice' },
+		{ id: 12, name: 'Narco' },
+		{ id: 13, name: 'Bombasto' },
+		{ id: 14, name: 'Celeritas' },
+		{ id: 15, name: 'Magneta' },
+		{ id: 16, name: 'RubberMan' },
+		{ id: 17, name: 'Dynama' },
+		{ id: 18, name: 'Dr IQ' },
+		{ id: 19, name: 'Magma' },
+		{ id: 20, name: 'Tornado' }
+		]
+})
+</pre>
+
+</body>
+</html>
+
+

@@ -9,7 +9,7 @@ dap().Infect(String.prototype);
 
 dap(
 
-	'UL.heroes'.d("* heroes:query,json"//! `Heroes"//"* 
+	'UL.heroes'.d("* (heroes)concat:query"//! `Heroes"//"* 
 		,'LI.hero'.d("! .name; !! .id@title")
 	)
 
