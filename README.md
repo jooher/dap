@@ -3,7 +3,7 @@
 Dap (initially stood for "data access page") is a lightweight javascript framework for interactive data-driven web applications.
 
 ## Clear, concise and observable
-Dap is designed to focus on data and logic, instead of syntactic decoration. Dap application tend to be times smaller than similar solutions in other reactive environments. You can well observe your code without digging through sparse lines of curly brackets and boilerplate code.
+Dap is designed to focus on data and logic, instead of syntactic decoration. Dap code tends to be times smaller than equivalent solutions in other reactive environments. Dap code is clean and observable, without sparse lines of curly brackets and boilerplate code.
 
 ## Natively reactive
 Native reactivity is the base concept of dap. No need to manually track changes in your application's status, or even bother binding events to dependent elements — all dependencies are resolved naturally under the hood. Dap renders and updates all (and only!) the dependent elements interactively, based on their dap-rules.
