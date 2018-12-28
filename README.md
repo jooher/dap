@@ -1,4 +1,4 @@
-# Dap.js: Declarative script for massively interactive web-applications.
+# Dap.js: for massively interactive web-applications.
 
 Dap (initially stood for "data access page") is a lightweight javascript framework for interactive data-driven web applications.
 
