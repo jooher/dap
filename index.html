@@ -1,155 +1,73 @@
-<!DOCTYPE html>
 <html>
-	<head>
-		<title>dap — Data Access Pages</title>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<link href="styles.css" rel="stylesheet" type="text/css"/>
-	</head>
-	<body>
-		<table>
-			<tr>
-				<td class="left">
-					<div id="Layer1" style="position: fixed;">
-						<img src="/logo/dap-96px.gif" width="96" height="96"/>
-						<h3><br/>Contents</h3>
-						<a href="#whatisdap">What is dap?</a>
-						<a href="#howitworks">How it works?</a>
-						<a href="#dapinaction">Dap in action</a>
-						<a href="#licensing">Licensing</a>
-<!--
-						<h3><br/>Tutorials</h3>
-						<a href="/0.1.7/1-helloworld.html">Hello, world!</a>
-						<a href="/0.1.7/2-accessing-data.html">Data Access</a>
-						<a href="/0.1.7/sk/">Starter Kit</a>
-						<h3><br/>Examples</h3>
-						<a href="http://mariachi.ru/">E-shop</a>
-						<a href="/apps/bankreports/">Bank Reports</a>
--->
-					</div>
-				</td>
-				<td class="main"><a name="whatisdap" id="whatisdap"/></a>				
-					<h1>What is dap?</h1>
-					<p>"D. A. P." stands for Data Access Page. It is a language of rules for data interpretation in terms of document markup. It is mostly aimed to be utilized in client parts of data-centric web-applications.</p>
-					<p>It is totally client-side. It does not need any dedicated support infrastructure — neither on web-server (beyond the web-server itself), nor in web browser (beyond javascript enabled). It does not need neither any compilers, optimizers etc., nor dedicated IDE's for development. It allows to write very concise and extremely flexible markup. Dap encourages "write once, use everywhere" development style.</p>
-					<p>Current implementation provides dap support for javascript-enabled W3C DOM-compliant documents, such as HTML/XHTML pages. Correctly written dap documents work stable and similar in all modern mainstream browsers. Dap can be easily added into any valid HTML markup or stock HTML/CSS template.</p>
-					<h3>Is it yet another library of grids, drop-downs and tree-views?</h3>
-					<p>No. Dap itself is not a library of snippets and widgets, but a language of rules for document generation and transformation in response to received data and user activity. It allows to easily reproduce the traditional controls' logic, and to define custom controls with whatever specific logic.</p>
-					<h3>Is it heavy, verbose, slow and ugly?</h3>
-					<p>No. It is lightweight, concise, fast and a pleasure to code.</p>
-					<h3>Is it a good choice for "My First Website ;-)))" ?</h3>
-					<p>No, again. It does require some brain activity involved. Also, there is no visual "drag-and-drop" dap constructor yet.</p>
-					<h3>Is it free?</h3>
-					<p>Well, yes [<a href="#licensing">details</a>]. Dap core (DAPMX core script) is free for use ("free" as in "free beer", not as in "free speech") in web-applications (websites) publicly available over WWW. Dap Starter-Kit libraries are distributed under GNU LGPL. For details, please refer <a href="#licensing">Licensing Information</a>.</p>
-					<h3>What is dap good for, and what for it is not</h3>
-					<p>Dap might be the right choice for building dynamic web-reports and interactive front-ends to datasources, such as SQL-databases or web sevices. Both internet and intranet, and even local-machine applications may benefit from utilizing dap.</p>
-					<p>However, you should realize, that dap core contains no any pre-baked visual controls or pretty-looking buttons, so visual appearance is a separate task. There are lots of HTML/CSS template repositories on the web — all that stuff can be used in dap-enabled HTML documents just as in ordinary HTML.</p>
-					<p>Dap itself doesn't require any server-side infrastructure beyond a barebone web-server — neither any backend scripts, nor any server extensions. However, if you plan to employ datasources (such as SQL databases), you will probably need a server-side adaptor to communicate with SQL-server over http.</p>
-					<p>Also, when building dap applications for web, you should remember, that dap page itself does not contain the data it shows (unlike, say, php or asp pages which come to client along with all the data they actually display), thus if you want your data were indexed by web-crawlers, you will have to take additional measures to provide indexable content to the crawlers by traditional server-side techniques.</p>
-					<hr/>
-					<a name="howitworks" id="howitworks"/></a>
-					<h1>How it works</h1>
-					<p>To make an XHTML page dap-enabled, you simply link DAPMX core script to it. The DAPMX core script is currently written in javascript and is compatible with all modern mainstream web browsers (successfully tested with Mozilla Firefox, Opera, Google Chrome, even MSIE6+). Nodes' dap-rules are specified by means of dedicated attributes: <code>d</code> — for d-rule, <code>u</code> — for u-rule.</p>
-					<p>Once the page and the DAPMX core script are loaded into browser, the dap root node (by default, the <code>body</code> element) is cut off the DOM, rebuilt by its d-rule and inserted back to the place. Since that, it is dap-enabled.</p>
-					<p>Dap-enabled nodes are built and re-built dynamically, using the markup specified in the source file as templates. Dap rules specify the templates to use, fill those templates with actual data from datasources, define logical dependencies between generated elements, assign appropriate event listeners to them and so on... Finally, these generated elements are inserted into DOM as regular HTML markup. Generated elements having event listeners, when their events happen, launch rebuild process, that makes changes to application status and updates all dependent elements. The rebuild process only affects nodes, that actually do depend on the changes, leaving irrelevant nodes intact.</p>
-					<h2>Dap syntax</h2>
-					<p>Dap syntax was developed with two main concerns:</p>
-					<ol>
-						<li>to be easily parsable</li>
-						<li>to be concise, yet human-readable</li>
-					</ol>
-					<!-- Since dap is a brand new thing, written from the scratch, its consequent versions are significantly different. -->
-					<p>The latest documented version at the moment is 0.1.7. Current version 0.2.2 has many improvements and significantly different syntax (way more clear and friendly; in fact, VM for version 0.2 was rewritten from scratch), but unfortunately, documentation for version 0.2 is not ready yet.</p>
-					<ul>
-						<li><a href="http://dapmx.org/0.1.7">dap version 0.1.7</a> Quick Tour</li>
-						<li><a href="http://dapmx.org/0.1.6">dap version 0.1.6</a> Quick Tour</li>
-						<li><a href="http://dapmx.org/0.1.5">dap version 0.1.5</a> Quick Tour</li>
-					</ul>
-					<hr/>
-					<h2>So is it "dap" or "DAPMX"?</h2>
-					<p>The term "dap" refers to the language itself. This language, generally speaking, is not bound to HTML or XML documents; it is not bound to W3C DOM, but, being appropriately implemented, may be used to define generation and transformation rules for any hierarchial structure.</p>
-					<p>In contrast, the term "DAPMX" (dap Markup eXtension) refers to particular dap implementation for W3C DOM compliant documents. This implementation "extends" normal document markup with two dap-dedicated attributes: <code>d</code> and <code>u</code> — that is why "markup extension".</p>
-					<hr/>
-					<a name="dapatwork" id="dapinaction"/></a>
-					<h1>Dap in action</h1>
-					<p>In this section, interesting dap powered projects will be listed and studied.</p>
-					<ul>
-						<li>
-							<a href="http://mariachi.ru" target="_blank">http://mariachi.ru</a>
-							<p>An e-shop of wind musical instruments. This site has been the dap playground, providing the real-life challenges and thus helping in formulation and optimization of dap principles.</p>
-							<p>Since this is a real commercial project, only its public part may be revealed at the moment (say, can't be given here the access to money/orders/warehouse management interface, wich is also built with dap). However, an educatory version of this project — with comprehensive comments and full access to all possibilities will be accessible soon.</p>
-						</li>
-					</ul>
-					<hr/>
-<a name="licensing" id="licensing"/>
-					<h1>Licensing Information</h1>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Dap.js</title>
+	<style>
+	body{max-width: 80em; margin:2em auto; font-family:sans-serif; }
+	</style>
+</head>
+<body>
 
-					<h3>Dap <a href="/0.1.7/starter-kit/">Starter-Kit</a> extension libraries are available under GNU LGPL</h3>
-					<p>Feel free to use, study, modify and redistribute dap Starter-Kit libraries as defined in GNU LGPL. This note is included in all libraries of the Starter-Kit Package:</p>
+<h1>Dap.js: Declarative script for massively interactive web-applications.</h1>
+
+<a name="why-dap"/>
+<h2>Why dap?</h2>
+
+<h3>Natively reactive</h3>
+<p>
+Reactivity is the base concept of dap. No need to manually track changes in your application's status, or even bother to bind update events — all dependencies are resolved naturally under the hood. Dap renders and updates all the dependent elements interactively, based on their dap-rules.
+</p>
+
+
 <pre>
-	Dap Starter-Kit Package is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published 
-	by the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dap Starter-Kit Package is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-	See the GNU Lesser General Public License for more details.
-
-	You should have received <a href="/zip/LGPL.zip">a copy</a> of the GNU Lesser General Public License
-	along with Dap Starter-Kit Package. If not, see <a href="http://www.gnu.org/licenses/" target="_blank">http://www.gnu.org/licenses/</a>.
+'sample'.d("$choice="
+	,'selected'.d("! title ($choice not-yet)?")
+	,'UL.options'.d("* option"
+		'LI'.d("! .option").ui("$choice=.option")
+	)
+)
+.DEF({
+	title:"My favorite fruit is ",
+	options:["apple","orange","tomato","banana"]
+	"not-yet":"what?",
+})
 </pre>
 
-					<h3>DAPMX core script is free for non-commercial or public commercial use</h3>
-					<p>DAPMX core script [<a href="/zip/core-0.1.6.zip">download</a>] is shareware. To avoid premature fork of dap evolution process, decision was made to make the DAPMX core script free for (public || non-commercial) use, but NOT Open-Source. Also, to help faster dap spread, please consider placing dap advertisement (the small "powered by dap" logo with hyperlink to dap homepage) on your dap-enabled page (preferably around the bottom-left corner), using this or equivalent code:</p>
-<pre>&lt;a target="_blank" href="http://dapmx.org"&gt;
- &lt;img src="http://dapmx.org/logo/powered-by-dapmx-0-1.gif"
-  alt="Powered by dap 0.1" border="0" style="border:none" /&gt;
-&lt;/a&gt;
+
+<h3>Clear, concise and observable</h3>
+<p>Dap syntax is designed to focus on data and logic, instead of syntactic decoration. Dap application may be times smaller than similar pre in other reactive environments. You can well observe your pre without digging through sparse lines of curly brackets and boilerplate pre.</p>
+<pre>
+'H1'.d("! `Hello,world!")
 </pre>
-<a target="_blank" href="http://dapmx.org"><img src="http://dapmx.org/logo/powered-by-dapmx-0-1.gif" alt="Powered by dap 0.1" border="0" style="border:none" /></a>
+
+<h3>Simple to start, easy to advance</h3>
+<p>Whole a lot of magic can be done with the few "stantard" dap operations. But when it's time to go beyond — you can easily import 3rd party extensions or expand dap with your own custom operations.</p>
 
 
-					<h4>Free for non-commercial use</h4>
-					<p>DAPMX core script is licensed for use in non-commercial derived work <b>free of charge.</b></p>
-   
-   
-					<h4>Free for public commercial use</h4>
-					<p>DAPMX core script is licensed for use in commercial derived work <b>free of charge</b>, provided that the derived work is available for public access via World Wide Web free of charge.</p>
-					
-					<h4>By using DAPMX core script free of charge, one expessly agrees:</h4>
-					<ul>
-						<li>not to modify and not to rename DAPMX core script, and</li>
-						<li>not to merge DAPMX core script with other files, and</li>
-						<li>not to copy any parts of DAPMX core script into other files.</li>
-					</ul>
-					
-					<h4>Commercial licences are also available</h4>
-					<p>Commercial license is required for <b>commercial</b> applications, which:</p>
-					<ul>
-						<li>use renamed, or modified version of DAPMX core script, or</li>
-						<li>use DAPMX core script in (at least one page not publicly available via WWW free of charge).</li>
-					</ul>
-					<p>To obtain commercial license, please contact: funds@dapmx.org</p>
-					
-					<h3>Sponsorship & partnership</h3>
-					<p>If you don't use dap in a way that requires a commercial license, yet want to donate some funds on dap project support, you are welcome. There are some options which may give a practical sense to your good will:</p>
-					<ul>
-						<li>Your logo in the Sponsors section</li>
-						<li>Proportional priority in consultations</li>
-					</ul>
-					<p>I am also interested in and available (on confirmation) for participating in development of dap-powered projects.</p>
-					<h1>Feedback</h1>
-					<p>If you have any questions, please contact me by:
-						<ul>
-							<li>E-mail: joox@dapmx.org</li>
-							<li>Skype: m.sajin</li>
-						</ul>
-					 </p>
-					<hr/>
-					<i>Copyright 2008-2018 Maxim Sajin &lt;joox@dapmx.org&gt;</i>
-				</td>
-			</tr>
-		</table>
-	</body>
+<h3>Fast and lightweight</h3>
+<p>Dap will not introduce any noticeable latency to your Web UI. The dap support script weighs less than 20kiB, dap-rules are parsed lazily, DOM manipulations are precise and deterministic, and only involve affected elements.</p>
+
+Flexible and expandable
+
+<pre>
+
+</pre>
+
+<h2>Code examples</h2>
+<!--
+<p>Dap is a narrowly specific framework for massively interactive and data-driven web-applications ("D.A.P." was initially an acronym for "Data Access Pages"), so it competes to some fra</p>
+-->
+<p>Here are a few simple examples of how easily data/even-driven applications can be built with dap. Examples below are inspired by the examples from other reactive frameworks, such as React.js, Angular, etc. so if you're familiar with any of those, you can compare the ideas and approaches behind dap and other frameworks.</p>
+<p>Important notice: dap does not imply any specific directory structure organization for your application. Simple web-applications can easily consist of a single, static HTML file, maybe accompanied with a CSS stylesheet or other usual stuff, plus any related data sources.</p>
+<p>The examples below are exactly the simplest dap applications, and completely fit into a single HTML file.</p>
+
+<h3>Tic Tac Toe</h3>
+<p>This example is inspired by the <a href="https://reactjs.org/tutorial/tutorial.html" rel="nofollow">React.js tutorial</a></p>
+<pre>
+</pre>
+
+
+</body>
 </html>
+
+

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<title>tictactoe</title>
+	<script src="../0.4.3-.js"></script>
+	
+	<style>
+		body{font:normal 1em sans-serif}
+		.board,.history{ display:inline-block; width:10em; vertical-align:top; }
+		.square{border:1px solid black; width:2em; height:2em; padding:.5em; display:inline-block; vertical-align:top;}
+		.history>button{display:block}
+		.winner{color:lime}
+	</style>
+</head>
+
+<body>
+
+<script>
+dap().Infect(String.prototype);
+
+var TicTacToe=(function(){
+
+	var	lines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ]
+	
+	function emptyBoard(){return Array(9).fill(null)}
+
+	function addMove($){
+		history=history.slice(0,++move);
+		history.push(squares=squares.slice());
+		squares[$.n]=$.key;
+		return gotoMove(move);
+	}
+	
+	function haveWinner(){
+		  for (var i = 0, t, a; i < lines.length; i++)
+			if (( t=lines[i]) && (a=squares[t[0]]) && a === squares[t[1]] && a === squares[t[2]])
+				return a;
+	}
+
+	function gotoMove(m){
+		move=m;
+		squares=history[m];
+		return	{
+			history,
+			squares,
+			move,
+			turn:move%2==0,
+			winner:haveWinner(),
+		}
+	}
+
+	var	move=0,
+		squares=emptyBoard(),
+		history=[squares];
+		
+	return	{
+		emptyBoard,
+		gotoMove,
+		addMove
+	}
+
+})();
+
+dap(
+
+	'game'.d("$game=:gotoMove`0 $squares=:emptyBoard"
+		,'H1.winner'.d("? $game.winner; ! `Winner: $game.winner")
+		,'H1.turn'.d("?:! $game.winner; ! `Turn: .key=($game.turn:# @+`X @-`O)case")
+		,'board'.d(".n=`0; * $squares@key"
+			,'square'.d("! .key; ..n=.n:++=..n").ui("? (.key $game.winner)?:!; ! .key=..key; $game=(.n .key):addMove")
+		)
+		,'history'.d(".m=`0; * $game.history@"
+			,'BUTTON.move'.d("! `Move# ..m=.m:++=..m").ui("$game=.m:gotoMove $squares=$game.squares")
+		)
+	)
+	
+	.EXT({
+		convert:TicTacToe
+	})
+);
+/**/
+			
+</script>
+</html>
+</body>
