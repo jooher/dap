@@ -33,8 +33,10 @@ Reactivity is the base concept of dap. No need to manually track changes in your
 <p>Dap will not introduce any noticeable latency to your Web UI. The dap support script weighs less than 20kiB, dap-rules are parsed lazily, DOM manipulations are precise and deterministic, and only involve affected elements.</p>
 	
 <h3>Simple to start, easy to advance</h3>
-<p>A whole lot of magic can be done with the few "stantard" dap operations. But when it's time to go beyond — you can easily import 3-rd party extensions or expand dap with your own custom operations.</p>
+<p>A whole lot of magic can be done with the few "stantard" dap operations. But when it's time to go beyond — you can easily expand dap with your own custom operations or use 3-rd party extensions.</p>
 
+	<h3></h3>
+	<p></p>
 <h2>Code examples</h2>
 <p>Important notice: unlike some other frameworks, dap does not imply any specific directory structure organization for your application. Simple web-applications can easily consist of a single, static HTML file, maybe accompanied with a CSS stylesheet or other usual stuff, plus any related data sources. For more complex projects, organization is up to the developer.</p>
 <p>The examples below are exactly the simplest dap applications, and completely fit into a single HTML file.</p>
@@ -42,12 +44,12 @@ Reactivity is the base concept of dap. No need to manually track changes in your
 <pre>
 'favorite-fruit'.d("$choice=" // a {DIV class="favorite-fruit"} element, with $choice status variable defined in its scope 
 	,'B.selected'.d("! title ($choice not-yet)?") // a {B class="selected"} with textual content involving $choice value
-	,'UL.options'.d("* fruit" // this UL element will repeat its content for each row in the fruit dataset from dictionary
-		'LI'	.d("! .fruit") //  make LI element, show fruit value for given row, and
+	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
+		,'LI'	.d("! .fruit") // LI elements show fruit value for every given row, and
 			.ui("$choice=.fruit") // on UI event (click by default) update the $choice status variable
 	)
 )
-.DEF({ // constants are supposed to be defined here, not inside the rules
+.DEF({ // strings and other constants are supposed to be defined here, not inside the rules
 	title:"My favorite fruit is ", // all textual messages gathered in one place are easier to maintain
 	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
 	fruit:["apple","orange","tomato","banana"] // static datasets data may be ordinary arrays
@@ -59,7 +61,8 @@ Reactivity is the base concept of dap. No need to manually track changes in your
 
 
 	<ul>
-	<li><a href="0.4.3/titactoe.html">Tic Tac Toe</a>. Example inspired by the <a href="https://reactjs.org/tutorial/tutorial.html" rel="nofollow">React.js tutorial</a></li>
+		<li><a href="samples/0.4.3/titactoe.html">Tic Tac Toe</a>. Example inspired by the <a href="https://reactjs.org/tutorial/tutorial.html" target="_blank" rel="nofollow">React tutorial</a></li>
+		<li><a href="samples/0.4.3/toh.html"></a>Tour of heroes</li>. Inspired by <a href="https://angular.io/tutorial" target="_blank" rel="nofollow">Angular tutorial</a>
 	</ul>
 </body>
 
