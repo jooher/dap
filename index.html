@@ -4,8 +4,10 @@
 	<title>Dap.js</title>
 	<style>
 	body{max-width: 80em; margin:2em auto; padding:1em; font-family:sans-serif; }
-	pre{padding:2em; background-color:lavender;}
-		h3{margin-top:2em;}
+	pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1em/1.5 monospace;}
+	pre>i{color:cornflowerblue;}
+	pre>em{background:lavender;}
+	h3{margin-top:2em;}
 	</style>
 </head>
 <body>
@@ -27,21 +29,6 @@
 Reactivity is the base concept of dap. No need to manually track changes in your application's status, or even bother to bind update events — all dependencies are resolved naturally under the hood. Dap renders and updates all the dependent elements interactively, based on their dap-rules.
 </p>
 
-<pre>
-'sample'.d("$choice="	// make a {DIV class="sample"} element, and in its scope define a $choice status variable 
-	,'B.selected'.d("! title ($choice not-yet)?")	// print a message with $choice, mixed with some text from dictionary
-	,'UL.options'.d("* fruit"	// make UL element, and for each row in fruit dataset, repeat:
-		'LI'	.d("! .fruit")	//  make LI element, show fruit value for given row, and
-			.ui("$choice=.fruit") // on UI event (click by default) update the $choice status variable
-	)
-)
-.DEF({
-	fruit:["apple","orange","tomato","banana"], // rowset data is a usual array
-	title:"My favorite fruit is ",	// messages are defined here, in dictionary - not inside the rules
-	"not-yet":"what?"	// hyphens and other symbols are okay for entry names, as long as they are quoted
-})
-</pre>
-
 <h3>Fast and lightweight</h3>
 <p>Dap will not introduce any noticeable latency to your Web UI. The dap support script weighs less than 20kiB, dap-rules are parsed lazily, DOM manipulations are precise and deterministic, and only involve affected elements.</p>
 	
@@ -49,16 +36,35 @@ Reactivity is the base concept of dap. No need to manually track changes in your
 <p>A whole lot of magic can be done with the few "stantard" dap operations. But when it's time to go beyond — you can easily import 3-rd party extensions or expand dap with your own custom operations.</p>
 
 <h2>Code examples</h2>
-<p>Below are a few simple examples of how easily data/event-driven applications can be built with dap. Examples below are inspired by the examples from other reactive frameworks, such as React.js, Angular, etc. so if you're familiar with any of those, you can compare the ideas and approaches behind dap and other frameworks.</p>
 <p>Important notice: unlike some other frameworks, dap does not imply any specific directory structure organization for your application. Simple web-applications can easily consist of a single, static HTML file, maybe accompanied with a CSS stylesheet or other usual stuff, plus any related data sources. For more complex projects, organization is up to the developer.</p>
 <p>The examples below are exactly the simplest dap applications, and completely fit into a single HTML file.</p>
+
+<pre>
+'favorite-fruit'.d("$choice=" // a {DIV class="favorite-fruit"} element, with $choice status variable defined in its scope 
+	,'B.selected'.d("! title ($choice not-yet)?") // a {B class="selected"} with textual content involving $choice value
+	,'UL.options'.d("* fruit" // this UL element will repeat its content for each row in the fruit dataset from dictionary
+		'LI'	.d("! .fruit") //  make LI element, show fruit value for given row, and
+			.ui("$choice=.fruit") // on UI event (click by default) update the $choice status variable
+	)
+)
+.DEF({ // constants are supposed to be defined here, not inside the rules
+	title:"My favorite fruit is ", // all textual messages gathered in one place are easier to maintain
+	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
+	fruit:["apple","orange","tomato","banana"] // static datasets data may be ordinary arrays
+})
+</pre>
+
+
+<p>Below are a few simple examples of how easily data/event-driven applications can be built with dap. Examples below are inspired by the examples from other reactive frameworks, such as React.js, Angular, etc. so if you're familiar with any of those, you're welcome compare the ideas and approaches behind dap and other frameworks.</p>
+
 
 	<ul>
 	<li><a href="0.4.3/titactoe.html">Tic Tac Toe</a>. Example inspired by the <a href="https://reactjs.org/tutorial/tutorial.html" rel="nofollow">React.js tutorial</a></li>
 	</ul>
-
-
 </body>
+
+<script src="dapify.js"></script>
+
 </html>
 
 

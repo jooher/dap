@@ -194,7 +194,6 @@ const	dap=
 	Compile	= (function(){
 		
 		const
-			
 		makePath= str=>str.split(".").reverse(), //str&&
 		append	=(obj,key,value)=>(obj[key]=obj[key]&&(value.charAt(0)===';')?obj[key]+value:value), /// ???
 		
@@ -300,14 +299,17 @@ const	dap=
 				stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
 			
 			return function(ref,base,ready){
-				var uri = Env.Uri.absolute(ref,base);
+				const uri = Env.Uri.absolute(ref,base);
 				return registry[uri] || (registry[uri]=new Ns(uri,ready));
 			}
 			
-		})();
+		})(),
+		
+		rootns	= Namespace(null,null,true).Monads(Monads);//Uri.absolute()
+
 	
 		function Proto(ns,utag){
-			this.ns		= ns||STD.rootns;
+			this.ns		= ns||rootns;
 			this.utag	= utag;
 			
 			this.elem	= null;
@@ -335,12 +337,6 @@ const	dap=
 			
 			r	:function(rule)			{ return new Rule(this.ns,rule) },
 			
-			USE	:function(libs){
-					return this;
-				},
-				
-			NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
-			
 			DEF	:function(dict){
 					this.ns.Dict(dict);//=Namespace(dict.URI);
 					return this;
@@ -351,6 +347,12 @@ const	dap=
 					return this;
 				},
 				
+			USE	:function(libs){
+					return this;
+				},
+				
+			NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
+			
 			set	:function(key,stuff,react){
 					var p = this.tgt || new Proto(this.ns,this.utag).$$();
 					if(stuff[0].replace)	append(p.attrs,key,stuff.shift());
@@ -409,7 +411,7 @@ const	dap=
 						if(!react[i])rules[react[i]=Env.uievent(node)]=rules[""];
 						React.bind(node,react[i]);
 					}
-/**/					
+					
 				new Execute.Branch(node.$,node).exec(d.todo||d.engage().todo,place,instead);
 				
 				if(a)a.todo||a.engage();
@@ -422,7 +424,7 @@ const	dap=
 				return this.rules[key]||this.rules.u;//||Fail("No rule for "+key);
 			},
 			
-			run	:function(data){Env.inline(this,data)}
+			INLINE	:function(data){Env.inline(this,data)}
 			
 		};
 					
@@ -1168,10 +1170,9 @@ const	dap=
 			run	: run
 		};
 
-	})(),
-		
-
-	STD	= {
+	})()
+	
+	return	{
 		Env,
 		Util,
 		
@@ -1191,491 +1192,486 @@ const	dap=
 				}
 			},
 		
-		rootns	:Compile.Namespace(null,null,true).Monads(Monads),//Uri.absolute()
-		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
 				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=
 					function(...x){return Compile.Proto.prototype.$(this)[a](...x)}
 				);
-			}
+			},
+			
+		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RUN(data)
 	}
 			
-	return function(proto,data){
-		if(!proto)return STD;
-		if(proto instanceof Function)proto=proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff));
-		if(proto instanceof Compile.Proto)Env.inline(proto,data);
-	}
+})((function(){
 	
-})(
-
-	Env	= (function(){
-	
-		const	isIE	= false,
-			doc	= window.document,
-			isArray	= Array.prototype.isArray,
-			
-			DEFAULT	= {
-				TAG	: "div",
-				ELEMENT	: doc.createElement("div"),
-				EVENT	: "click"
-			},
-			
-			REUSE	={
-				EMPTY	: "",
-				STUB	: {},
-				
-				NONE	: [],
-				DUMMY	: [null],
-				DUMMIES	: {},
-				
-				NODE	: null,
-				THENODE	: [null],
-				SCOPE	: ['']
-			},
-			
-		log	=	m=>{if(window.console)window.console.log("DAP "+m);return m;},
+	const	isIE	= false,
+		doc	= window.document,
+		isArray	= Array.prototype.isArray,
 		
-		newStub	= 	c=> doc.createComment(c),
-		newElem	=	e=> doc.createElement(e),//try{}catch(er){alert("newElem fail:"+e)}
-		newText	=	t=> doc.createTextNode(t),
-		newElemText=(e,t)=>{const et=newElem(e);et.appendChild(newText(t));return et; },
-		
-		newError=(e,$,P)=>{const n = newElemText("dap-error",e.message); n.$=$; n.P=P; return n; },// n.setAttribute("title",P.rules.d.rulestring);
-		newMute	=($,P)	=>{const n = doc.createComment(P.elem?P.elem.nodeName:"*"); n.$=$; n.P=P; return n; },
-				
-/*
-		Native	=(str,ui)=>{
-			if(!str)return DEFAULT.ELEMENT;
-			const	space	= str.indexOf(" "),
-				extra	= space<0 ? null : str.substr(space),
-				head	= (extra ? str.substr(0,space) : str).split('#'),
-				uniform	= head.shift()+(ui||""),
-				id	= head.length&&head[0]
-				;
-
-			if(!uniform&&!extra)return DEFAULT.ELEMENT;
-			
-				const
-			
-			if(!uniform||uniform[0]!=uniform[0].toUpperCase())uniform.unshift(DEFAULT.TAG);	// class	-> DIV.class
-			var	tag	= uniform.shift().toLowerCase(), // does xhtml really care about case?
-				elem	= extra ? parseWithExtra(tag,extra) : newElem(tag||DEFAULT.TAG); 
-			if(uniform.length)elem.className = uniform.join(" ").toLowerCase();
-			if(id)elem.id=id;
-			return elem;
-			
-			return NativeElement(uniform&&uniform.split("."),extra,id); // like, FORM#id METHOD="POST"
-			
-		},		
-		NativeElement=(uniform,extra,id)=>{ // create a native (HTML) node from dap uniform notation
-			
-		}
-		
-
-*/
-		Native	=(str,ui)=>{
-			if(!str)return DEFAULT.ELEMENT;
-			const	space	= str.indexOf(" "),
-				extra	= space<0 ? null : str.substr(space),
-				head	= (extra ? str.substr(0,space) : str).split('#'),
-				type	= (head.shift()+(ui||"")).split("."),
-				id	= head.length&&head[0],
-				tag	= (type.length&&type[0]==type[0].toUpperCase()) ? type.shift().toLowerCase() : DEFAULT.TAG,
-				elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
-				
-			if(type.length)elem.className = type.join(" ").toLowerCase();
-			if(id)elem.id=id;
-			return elem;
-		};
-		
-		function parseWithExtra(tag,extra){
-			var tmp=newElem("div");
-			tmp.innerHTML="<"+tag+" "+extra+"></"+tag+">";
-			return tmp.firstChild;			
-		}
-		
-		const
-
-		Event	= (function(){
-			
-			const
-			
-			listen	= doc.addEventListener	? function(node,event,handler,capture){node.addEventListener(event,handler,capture||false)}:
-				  doc.attachEvent	? function(node,event,handler){node.attachEvent("on"+event,handler,false)}
-							: function(node,event,handler){node["on"+event]=handler},
-							
-			stop	= window.Event		? function(e){ e.stopPropagation(); e.preventDefault(); return e; }
-							: function(){ e=window.event; e.cancelBubble=true; e.returnValue=false; return e; }
-			;
-			
-			return	{
-				stop	: stop,
-				attach	: (node,event,handler,hilite)=>{if(hilite)Style.attach(node,hilite);listen(node,event,handler);},
-				fire	: (function(){
-					
-					var createEvent = document.createEvent
-						? function(signal){var e = document.createEvent('Event'); e.initEvent(signal, true, true); return e}
-						: function(signal){return new window.Event(signal)};
-						
-					return	document.dispatchEvent ? function(signal){document.dispatchEvent(createEvent(signal))} :
-						document.fireEvent ? function(signal){
-							var e=
-							document.fireEvent(signal);
-						} :
-						function(signal){Warn("Failed to fire event: "+signal)}
-				})()
-			}
-		})(),
-
-		Uri	= (function(){
-		
-			const	keys = ["source","origin","protocol","authority","userinfo","username","password","host","hostname","port","relative","path","directory","file","query","anchor"],
-				regx = /^(([^:\/?#]+:)?\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?(([^:\/?#]*)(?::(\d*))?))?)((((?:[^?#\/]*\/)*)([^?#]*))(\?[^#]*)?(#.*)?)/,
-				
-			parse	=(str)=>{// based on code from http://blog.stevenlevithan.com/archives/parseuri
-				const uri = {};
-				regx.exec(str).map((i,val)=>{uri[keys[i]]=val});
-				return uri;
-			},
-
-			hash	=(qstr,target)=>{
-				if(!target)target={};
-				if(qstr)
-					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;){
-						var	nv = tups[i].split('='),
-							key = nv[0]; //(remap&&remap[key])||
-						if(nv.length>1)target[key]=decodeURIComponent(nv[1]);
-						else target['!']=key;
-					}
-				return target;
-			},
-			
-			feed	=(qstr,tgt)=>{
-			
-				if(!tgt)tgt={values:[],tags:[]};
-
-				if(qstr)
-					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;)
-						if(tups[i]){
-							const	nv = tups[i].split('='),
-								value = decodeURIComponent(nv.pop()),
-								key = nv.length&&nv[0];
-							tgt.values.push(value);
-							tgt.tags.push(key);//(remap&&remap[key])||
-						}
-				return tgt;
-			},
-
-			neutral	=(hash)=>{
-				const arg=[];
-				hash.keys().map((i,k)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
-				return arg.join('&').replace(/%20/g,'+');
-			},
-			
-			ordered	=(values,tags,emptytoo)=>{
-				let uri="";
-				for(let i=values.length,v,t;i--;)
-					if((v=values[i])||(v===0)||emptytoo)
-						uri+=(t=tags[i]) ? "&"+t+"="+ encodeURIComponent(v) : v;
-				return uri.replace(/%20/g,'+');
-			};
-			
-			
-			return	{
-				parse,
-			
-				neutral,
-				ordered,
-				full	:(values,tags)=>ordered(values,tags,true),
-				
-				feed	:feed,
-				hash	:hash,
-				
-				query	:(function(regx){
-					
-					return	{
-						pairs	:function(str,tgt){
-							if(!tgt)tgt=[];
-							str.replace(regx,function($0,$1,$2){
-								tgt.push([$1,decodeURIComponent($2)]);
-							})
-							return tgt;
-						},
-						hash	:function(str,tgt){
-							if(!tgt)tgt={};
-							str.replace( regx, function($0,$1,$2){ 
-								if($1)tgt[$1]=decodeURIComponent($2);
-							});
-							return tgt;
-						},
-						feed	:function(str,tgt){
-							if(!tgt)tgt={values:[],tags:[]};
-							str.replace(regx,function($0,$1,$2){
-								tgt.values.push(decodeURIComponent($2));
-								tgt.tags.push($1);
-							})
-							return tgt;
-						}
-					}
-				})(/(?:^|&)([^&=]*)=?([^&]*)/g),
-				
-				absolute:	/// evaluate absolute URL from relative to base URL
-				function(href,from){
-					
-					if(!from)from=Env.base;
-					if(!href)return from;
-					if(/^\w*:\/\//.test(href))return href;
-									
-					var	uri	= parse(from);
-					
-					switch(href.charAt(0)){
-						case'*': return base;
-						case'/': return uri.origin+href;
-						case'?': return uri.origin+uri.path+href;
-						case'#': return uri.origin+uri.path+uri.query+href;
-						case'.': 
-							var up = href.match(/\.\.\//g);
-							if(up){
-								uri.directory=uri.directory.split("/").slice(0,-up.length).join('/');
-								href=href.substr(up.length*3);
-							};
-					}
-					return uri.origin+uri.directory+href;
-				}
-			}
-
-		})(),
-		
-		Http	= (function(){
-
-			function consume(request){
-				if(Math.floor(request.status/100)!=2)return;
-				switch(request.getResponseHeader('content-type').split(";")[0]){
-					case"text/plain":
-						return request.responseText;
-					case"application/json":
-						return Json.decode(request.responseText);//Dataset.unpack(,request.getResponseHeader("X-Columns"));
-					case"application/xml":
-						return request.responseXML.documentElement;
-					default:
-						return request;
-				}
-			};
-			
-			function query( postpone,req ){//url,body,headers,method,contentType,)
-			
-				if(typeof req === "string") req={url:req};
-			
-				const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
-					method	= req.method || ( req.body ? "POST" : "GET" );
-				
-				request.open( method,Uri.absolute(req.url),!!postpone );
-				request.setRequestHeader("Content-Type",req.contentType);
-				
-				if(req.headers)
-					for(let i in req.headers)
-						request.setRequestHeader(i,req.headers[i]);
-				
-				if(postpone)
-					request.onreadystatechange=function (){
-						if(this.readyState!=4)return postpone
-							? postpone.resolve(consume(this))
-							: Warn("No target for request",this);
-					}
-				
-				try	{request.send(req.body||null);}
-				catch(e){Warn(e.message);}
-				
-				return postpone||consume(request);
-			};
-			
-			return {
-				query
-			}
-		})(),
-		
-		Request	= (function(){
-
-			function Post(url){
-				this.url=url;
-				this.body=null;
-				this.mime=null;
-			};
-			
-			Post.prototype={
-				addForm	: function(values,tags){
-						var body="";
-						for(let i=values.length,v,t;i--;)
-							if(v=values[i])
-								body += (t=tags[i])
-								? "&"+t+"="+ encodeURIComponent( typeof v=="object" ? Json(v) : v ) 
-								: Json(v);
-						this.body=body;
-						v=body.charAt(0);
-						this.mime= v=='<'?"text/xml" : v=='&'?"application/x-www-form-urlencoded" : "text/plain";
-						return this;
-					},
-					
-				addBlob	: function(value,tag){
-						this.body=value;
-						this.mime=tag||"blob";
-						return this;
-					}
-			}
-			
-			return	{
-				post	:(url,values,tags)=>	new Post(url).addForm(values,tags),
-				blob	:(url,value,tag)=>	new Post(url).addBlob(value,tag)
-			}
-			
-		})(),
-
-		Json	={
-			encode	:value	=>{var r=0; return value&&JSON.stringify(value,(k,v)=>(k||!r++)?v:undefined)},
-			decode	:value	=>value&&JSON.parse(value)
-			},
-
-		Storage	={
-			put	:function(data)	{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
-			get	:function(key)	{try{JSON.parse(localStorage.getItem(key))}catch(e){return null};}
-			},
-
-
-		
-		Style	= {
-		
-			
-			attach	:function(node,cls){Style.mark(node,cls,true)},
-			detach	:function(node,cls){Style.mark(node,cls,false)},
-				
-			mark	:function(node,cls,on){
-					var	c	= " "+node.className+" ",
-						was	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
-					if(on)	{if(!was) node.className = (c+cls).trim();}
-					else	{if(was ) node.className = c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ").trim();}
-				}
+		DEFAULT	= {
+			TAG	: "div",
+			ELEMENT	: doc.createElement("div"),
+			EVENT	: "click"
 		},
 		
-		State	= (function(){
+		REUSE	={
+			EMPTY	: "",
+			STUB	: {},
 			
-			var	historian = null,
-				href = null, //window.location.href;
-				
-				refresh=function(){
-					if(!historian)return;
-					if(decodeURI(href)!=decodeURI(href=window.location.href)){
-						var	proto=historian.P,
-							instead=historian;
-						historian=null;
-						Env.inline(proto,instead);
-					}
-				};
-				
-				window.addEventListener("hashchange", refresh, false);
-				
-			function toHashbang(value,tag,node){
-				if(!historian)historian=node;
-				href=Uri.base+"#!"+value;
-				if(decodeURI(href)!=decodeURI(window.location.href))
-					window.location.href=href;
-			};
-				
-			function fromUri(){
-
-					var	full	= window.location.href.split(/#!?/),
-						query	= full[0].split("?")[1],
-						state	= full[1],
-						rewrite	= query && query.indexOf("=")>0 && Uri.feed(query,Uri.feed(state));
-						
-					if(rewrite)
-						window.location.href=Uri.base+"#!"+Uri.ordered(rewrite.values,rewrite.tags);
-					else	
-						return Uri.hash(state);
-				};
-				
-			return	{
-				read	: fromUri,
-				write	: toHashbang					
-			}
-				
-		})();
-
-		return	{
+			NONE	: [],
+			DUMMY	: [null],
+			DUMMIES	: {},
 			
-			DEFAULT,
-			REUSE,
+			NODE	: null,
+			THENODE	: [null],
+			SCOPE	: ['']
+		},
 		
-			State,
-			Uri,
-			Http,
-			Event,
-			Style,
-			Native,
-			Json,
-			Storage,
-			
-			base	: window.location.href.replace(/[?!#].*$/,""), // const
-			
-			query	:Http.query, // to be generalized
-			
-			
-			print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
-			
-			log	:log,
-			attr	:function(value,alias,node){ if(value)node.setAttribute(alias,value); else node.removeAttribute(alias); }, //... 
-			mark	:function(value,alias,node){ Style.mark(node,alias,!!value); },
-			mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
-			dim	:function(elem){Style.attach(elem,"DIM"); return elem; },
-			error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);Warn(e.message)/*throw e*/},
-			
-			exec	:function(path,values){
-					var tgt=window;
-					for(let i=path.length;i--;)if(!(tgt=tgt[path[i]]))return;
-					if(tgt.apply)return tgt.apply(null,values);
-				},
-			
-			clone	:function(elem,$,P){var n=elem.cloneNode(false); n.$=$; n.P=P; return n; },
-			
-			value	:node=>(node.value||node.textContent||node.innerText||"").trim(),
-			text	:node=>(node.innerText||node.textContent||node.value||"").trim(),
-			copy	:item=>isArray(item)?item.slice(0):Object.assign({},item),
-			
-			uievent	:function(node){
-					return	node.nodeName.toLowerCase()=='input'	?'change':
-						node.nodeName.toLowerCase()=='select'	?'change':
-						node.isContentEditable	?'blur':
-						'click';
-				},
-
-			doc	:doc,
-			title	:function(text){return doc.title=text; },
-			open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
-			
-			script	:function(url){
-					var el=newElem("script");
-					el.src="url";
-					el.async=true;
-					el.onload=function(){doc.body.appendChild(el);};
-					return el;
-				},
-					
-			inline	:function(proto,instead){
-					if(!instead)instead = document.currentScript||document.script[document.script.length-1]||Fail("can't inline");
-					var place = instead.parentNode;
-					place.replaceChild( proto.spawn([{'':State.read()}],place) || newStub("dap"), instead );
-				},				
-				
-				
-			output	:{
-					element	:(str)=>Native(str),
-					value	:(element,str)=>element+=' '+str,
-					
-					print	:(element)=>lines.push(element),
-					execute	:()=>lines.join('\n')
-				}
+	log	=	m=>{if(window.console)window.console.log("DAP "+m);return m;},
 	
-				
+	newStub	= 	c=> doc.createComment(c),
+	newElem	=	e=> doc.createElement(e),//try{}catch(er){alert("newElem fail:"+e)}
+	newText	=	t=> doc.createTextNode(t),
+	newElemText=(e,t)=>{const et=newElem(e);et.appendChild(newText(t));return et; },
+	
+	newError=(e,$,P)=>{const n = newElemText("dap-error",e.message); n.$=$; n.P=P; return n; },// n.setAttribute("title",P.rules.d.rulestring);
+	newMute	=($,P)	=>{const n = doc.createComment(P.elem?P.elem.nodeName:"*"); n.$=$; n.P=P; return n; },
 			
-			}						
-		})()
+/*
+	Native	=(str,ui)=>{
+		if(!str)return DEFAULT.ELEMENT;
+		const	space	= str.indexOf(" "),
+			extra	= space<0 ? null : str.substr(space),
+			head	= (extra ? str.substr(0,space) : str).split('#'),
+			uniform	= head.shift()+(ui||""),
+			id	= head.length&&head[0]
+			;
+
+		if(!uniform&&!extra)return DEFAULT.ELEMENT;
+		
+			const
+		
+		if(!uniform||uniform[0]!=uniform[0].toUpperCase())uniform.unshift(DEFAULT.TAG);	// class	-> DIV.class
+		var	tag	= uniform.shift().toLowerCase(), // does xhtml really care about case?
+			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag||DEFAULT.TAG); 
+		if(uniform.length)elem.className = uniform.join(" ").toLowerCase();
+		if(id)elem.id=id;
+		return elem;
+		
+		return NativeElement(uniform&&uniform.split("."),extra,id); // like, FORM#id METHOD="POST"
+		
+	},		
+	NativeElement=(uniform,extra,id)=>{ // create a native (HTML) node from dap uniform notation
+		
+	}
+	
+
+*/
+	Native	=(str,ui)=>{
+		if(!str)return DEFAULT.ELEMENT;
+		const	space	= str.indexOf(" "),
+			extra	= space<0 ? null : str.substr(space),
+			head	= (extra ? str.substr(0,space) : str).split('#'),
+			type	= (head.shift()+(ui||"")).split("."),
+			id	= head.length&&head[0],
+			tag	= (type.length&&type[0]==type[0].toUpperCase()) ? type.shift().toLowerCase() : DEFAULT.TAG,
+			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
+			
+		if(type.length)elem.className = type.join(" ").toLowerCase();
+		if(id)elem.id=id;
+		return elem;
+	};
+	
+	function parseWithExtra(tag,extra){
+		var tmp=newElem("div");
+		tmp.innerHTML="<"+tag+" "+extra+"></"+tag+">";
+		return tmp.firstChild;			
+	}
+	
+	const
+
+	Event	= (function(){
+		
+		const
+		
+		listen	= doc.addEventListener	? function(node,event,handler,capture){node.addEventListener(event,handler,capture||false)}:
+			  doc.attachEvent	? function(node,event,handler){node.attachEvent("on"+event,handler,false)}
+						: function(node,event,handler){node["on"+event]=handler},
+						
+		stop	= window.Event		? function(e){ e.stopPropagation(); e.preventDefault(); return e; }
+						: function(){ e=window.event; e.cancelBubble=true; e.returnValue=false; return e; }
+		;
+		
+		return	{
+			stop	: stop,
+			attach	: (node,event,handler,hilite)=>{if(hilite)Style.attach(node,hilite);listen(node,event,handler);},
+			fire	: (function(){
+				
+				var createEvent = document.createEvent
+					? function(signal){var e = document.createEvent('Event'); e.initEvent(signal, true, true); return e}
+					: function(signal){return new window.Event(signal)};
+					
+				return	document.dispatchEvent ? function(signal){document.dispatchEvent(createEvent(signal))} :
+					document.fireEvent ? function(signal){
+						var e=
+						document.fireEvent(signal);
+					} :
+					function(signal){Warn("Failed to fire event: "+signal)}
+			})()
+		}
+	})(),
+
+	Uri	= (function(){
+	
+		const
+		
+		base = window.location.href.replace(/[?!#].*$/,""),
+
+		keys = ["source","origin","protocol","authority","userinfo","username","password","host","hostname","port","relative","path","directory","file","query","anchor"],
+		regx = /^(([^:\/?#]+:)?\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?(([^:\/?#]*)(?::(\d*))?))?)((((?:[^?#\/]*\/)*)([^?#]*))(\?[^#]*)?(#.*)?)/,
+			
+		parse	=(str)=>{// based on code from http://blog.stevenlevithan.com/archives/parseuri
+			const uri = {};
+			regx.exec(str).map((i,val)=>{uri[keys[i]]=val});
+			return uri;
+		},
+
+		hash	=(qstr,target)=>{
+			if(!target)target={};
+			if(qstr)
+				for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;){
+					var	nv = tups[i].split('='),
+						key = nv[0]; //(remap&&remap[key])||
+					if(nv.length>1)target[key]=decodeURIComponent(nv[1]);
+					else target['!']=key;
+				}
+			return target;
+		},
+		
+		feed	=(qstr,tgt)=>{
+		
+			if(!tgt)tgt={values:[],tags:[]};
+
+			if(qstr)
+				for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;)
+					if(tups[i]){
+						const	nv = tups[i].split('='),
+							value = decodeURIComponent(nv.pop()),
+							key = nv.length&&nv[0];
+						tgt.values.push(value);
+						tgt.tags.push(key);//(remap&&remap[key])||
+					}
+			return tgt;
+		},
+
+		neutral	=(hash)=>{
+			const arg=[];
+			hash.keys().map((i,k)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
+			return arg.join('&').replace(/%20/g,'+');
+		},
+		
+		ordered	=(values,tags,emptytoo)=>{
+			let uri="";
+			for(let i=values.length,v,t;i--;)
+				if((v=values[i])||(v===0)||emptytoo)
+					uri+=(t=tags[i]) ? "&"+t+"="+ encodeURIComponent(v) : v;
+			return uri.replace(/%20/g,'+');
+		};
+		
+		
+		return	{
+			parse,
+		
+			neutral,
+			ordered,
+			full	:(values,tags)=>ordered(values,tags,true),
+			
+			feed	:feed,
+			hash	:hash,
+			
+			query	:(function(regx){
+				
+				return	{
+					pairs	:function(str,tgt){
+						if(!tgt)tgt=[];
+						str.replace(regx,function($0,$1,$2){
+							tgt.push([$1,decodeURIComponent($2)]);
+						})
+						return tgt;
+					},
+					hash	:function(str,tgt){
+						if(!tgt)tgt={};
+						str.replace( regx, function($0,$1,$2){ 
+							if($1)tgt[$1]=decodeURIComponent($2);
+						});
+						return tgt;
+					},
+					feed	:function(str,tgt){
+						if(!tgt)tgt={values:[],tags:[]};
+						str.replace(regx,function($0,$1,$2){
+							tgt.values.push(decodeURIComponent($2));
+							tgt.tags.push($1);
+						})
+						return tgt;
+					}
+				}
+			})(/(?:^|&)([^&=]*)=?([^&]*)/g),
+			
+			absolute:	/// evaluate absolute URL from relative to base URL
+			function(href,from){
+				
+				if(!from)from=base;
+				if(!href)return from;
+				if(/^\w*:\/\//.test(href))return href;
+								
+				var	uri	= parse(from);
+				
+				switch(href.charAt(0)){
+					case'*': return base;
+					case'/': return uri.origin+href;
+					case'?': return uri.origin+uri.path+href;
+					case'#': return uri.origin+uri.path+uri.query+href;
+					case'.': 
+						var up = href.match(/\.\.\//g);
+						if(up){
+							uri.directory=uri.directory.split("/").slice(0,-up.length).join('/');
+							href=href.substr(up.length*3);
+						};
+				}
+				return uri.origin+uri.directory+href;
+			}
+		}
+
+	})(),
+	
+	Http	= (function(){
+
+		const
+		
+		MimeHandlers={
+			"text/plain": request => request.responseText,
+			"application/json": request => Json.decode(request.responseText),//,request.getResponseHeader("X-Columns")//Dataset.unpack();
+			"application/xml":request => request.responseXML.documentElement
+		},
+		
+		consume	=(request)=>{
+			if(Math.floor(request.status/100)!=2)return;
+			const handle=MimeHandlers[request.getResponseHeader('content-type').split(";")[0]];
+			return handle ? handle(request) : request;
+		},
+	
+		query	=(postpone,req)=>{//url,body,headers,method,contentType,)
+		
+			if(typeof req === "string") req={url:req};
+		
+			const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
+				method	= req.method || ( req.body ? "POST" : "GET" );
+			
+			request.open( method,Uri.absolute(req.url),!!postpone );
+			request.setRequestHeader("Content-Type",req.contentType);
+			
+			if(req.headers)
+				for(let i in req.headers)
+					request.setRequestHeader(i,req.headers[i]);
+			
+			if(postpone)
+				request.onreadystatechange=function (){
+					if(this.readyState!=4)return postpone
+						? postpone.resolve(consume(this))
+						: Warn("No target for request",this);
+				}
+			
+			try	{request.send(req.body||null);}
+			catch(e){Warn(e.message);}
+			
+			return postpone||consume(request);
+		};
+		
+		return {
+			MimeHandlers,
+			query
+		}
+	})(),
+	
+	Request	= (function(){
+
+		function Post(url){
+			this.url=url;
+			this.body=null;
+			this.mime=null;
+		};
+		
+		Post.prototype={
+			addForm	: function(values,tags){
+					var body="";
+					for(let i=values.length,v,t;i--;)
+						if(v=values[i])
+							body += (t=tags[i])
+							? "&"+t+"="+ encodeURIComponent( typeof v=="object" ? Json(v) : v ) 
+							: Json(v);
+					this.body=body;
+					v=body.charAt(0);
+					this.mime= v=='<'?"text/xml" : v=='&'?"application/x-www-form-urlencoded" : "text/plain";
+					return this;
+				},
+				
+			addBlob	: function(value,tag){
+					this.body=value;
+					this.mime=tag||"blob";
+					return this;
+				}
+		}
+		
+		return	{
+			post	:(url,values,tags)=>	new Post(url).addForm(values,tags),
+			blob	:(url,value,tag)=>	new Post(url).addBlob(value,tag)
+		}
+		
+	})(),
+
+	Json	={
+		encode	:value	=>{var r=0; return value&&JSON.stringify(value,(k,v)=>(k||!r++)?v:undefined)},
+		decode	:value	=>value&&JSON.parse(value)
+		},
+
+	Storage	={
+		put	:function(data)	{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
+		get	:function(key)	{try{JSON.parse(localStorage.getItem(key))}catch(e){return null};}
+		},
+	
+	Style	= {
+	
+		
+		attach	:function(node,cls){Style.mark(node,cls,true)},
+		detach	:function(node,cls){Style.mark(node,cls,false)},
+			
+		mark	:function(node,cls,on){
+				var	c	= " "+node.className+" ",
+					was	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
+				if(on)	{if(!was) node.className = (c+cls).trim();}
+				else	{if(was ) node.className = c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ").trim();}
+			}
+	},
+	
+	State	= (function(){
+		
+		var	historian = null,
+			href = null, //window.location.href;
+			
+			refresh=function(){
+				if(!historian)return;
+				if(decodeURI(href)!=decodeURI(href=window.location.href)){
+					var	proto=historian.P,
+						instead=historian;
+					historian=null;
+					Env.inline(proto,instead);
+				}
+			};
+			
+			window.addEventListener("hashchange", refresh, false);
+			
+		function toHashbang(value,tag,node){
+			if(!historian)historian=node;
+			href=Uri.base+"#!"+value;
+			if(decodeURI(href)!=decodeURI(window.location.href))
+				window.location.href=href;
+		};
+			
+		function fromUri(){
+
+				var	full	= window.location.href.split(/#!?/),
+					query	= full[0].split("?")[1],
+					state	= full[1],
+					rewrite	= query && query.indexOf("=")>0 && Uri.feed(query,Uri.feed(state));
+					
+				if(rewrite)
+					window.location.href=Uri.base+"#!"+Uri.ordered(rewrite.values,rewrite.tags);
+				else	
+					return Uri.hash(state);
+			};
+			
+		return	{
+			read	: fromUri,
+			write	: toHashbang					
+		}
+			
+	})();
+
+	return	{
+		
+		DEFAULT,
+		REUSE,
+	
+		State,
+		Event,
+		Style,
+		Uri,
+		Http,
+		Native,
+		Json,
+		Storage,
+		
+		query	:Http.query, // to be generalized
+		
+		
+		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
+		
+		log	:log,
+		attr	:function(value,alias,node){ if(value)node.setAttribute(alias,value); else node.removeAttribute(alias); }, //... 
+		mark	:function(value,alias,node){ Style.mark(node,alias,!!value); },
+		mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
+		dim	:function(elem){Style.attach(elem,"DIM"); return elem; },
+		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);Warn(e.message)/*throw e*/},
+		
+		exec	:function(path,values){
+				var tgt=window;
+				for(let i=path.length;i--;)if(!(tgt=tgt[path[i]]))return;
+				if(tgt.apply)return tgt.apply(null,values);
+			},
+		
+		clone	:function(elem,$,P){var n=elem.cloneNode(false); n.$=$; n.P=P; return n; },
+		
+		value	:node=>(node.value||node.textContent||node.innerText||"").trim(),
+		text	:node=>(node.innerText||node.textContent||node.value||"").trim(),
+		copy	:item=>isArray(item)?item.slice(0):Object.assign({},item),
+		
+		uievent	:function(node){
+				return	node.nodeName.toLowerCase()=='input'	?'change':
+					node.nodeName.toLowerCase()=='select'	?'change':
+					node.isContentEditable	?'blur':
+					'click';
+			},
+
+		doc	:doc,
+		title	:function(text){return doc.title=text; },
+		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
+		
+		script	:function(url){
+				var el=newElem("script");
+				el.src="url";
+				el.async=true;
+				el.onload=function(){doc.body.appendChild(el);};
+				return el;
+			},
+				
+		inline	:function(proto,instead){
+				if(!instead)instead = document.currentScript||document.script[document.script.length-1]||Fail("can't inline");
+				var place = instead.parentNode;
+				place.replaceChild( proto.spawn([{'':State.read()}],place) || newStub("dap"), instead );
+			},				
+			
+			
+		output	:{
+				element	:(str)=>Native(str),
+				value	:(element,str)=>element+=' '+str,
+				
+				print	:(element)=>lines.push(element),
+				execute	:()=>lines.join('\n')
+			}
+
+			
+		
+		}						
+	})()
 );
+
+dap.Infect(String.prototype);

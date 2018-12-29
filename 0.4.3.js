@@ -335,12 +335,6 @@ const	dap=
 			
 			r	:function(rule)			{ return new Rule(this.ns,rule) },
 			
-			USE	:function(libs){
-					return this;
-				},
-				
-			NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
-			
 			DEF	:function(dict){
 					this.ns.Dict(dict);//=Namespace(dict.URI);
 					return this;
@@ -351,6 +345,12 @@ const	dap=
 					return this;
 				},
 				
+			USE	:function(libs){
+					return this;
+				},
+				
+			NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
+			
 			set	:function(key,stuff,react){
 					var p = this.tgt || new Proto(this.ns,this.utag).$$();
 					if(stuff[0].replace)	append(p.attrs,key,stuff.shift());
@@ -409,7 +409,7 @@ const	dap=
 						if(!react[i])rules[react[i]=Env.uievent(node)]=rules[""];
 						React.bind(node,react[i]);
 					}
-/**/					
+					
 				new Execute.Branch(node.$,node).exec(d.todo||d.engage().todo,place,instead);
 				
 				if(a)a.todo||a.engage();
@@ -422,7 +422,7 @@ const	dap=
 				return this.rules[key]||this.rules.u;//||Fail("No rule for "+key);
 			},
 			
-			run	:function(data){Env.inline(this,data)}
+			RUN	:function(data){Env.inline(this,data)}
 			
 		};
 					

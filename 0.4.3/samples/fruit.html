@@ -1,0 +1,27 @@
+<head>
+	<title>Favorite fruit - dap sample</title>
+	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
+	<script src="../../0.4.3-.js"></script>
+	
+	<link href="styles.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+
+<script>
+'sample'.d("$choice=" // make a {DIV class="sample"} element, and in its scope define a $choice status variable 
+	,'B.selected'.d("! title ($choice not-yet)?") // print a message with $choice, mixed with some text from dictionary
+	,'UL.options'.d("* fruit" // make UL element, and for each row in fruit dataset, repeat:
+		,'LI'	.d("! .fruit") //  make LI element, show fruit value for given row, and
+			.ui("$choice=.fruit") // on UI event (click by default) update the $choice status variable
+	)
+)
+.DEF({
+	fruit:["apple","orange","tomato","banana"], // rowset data is a usual array
+	title:"My favorite fruit is ", // messages are defined here, in dictionary - not inside the rules
+	"not-yet":"what?" // hyphens and other symbols are okay for entry names, as long as they are quoted
+})
+.INLINE();
+</script>
+</html>
+</body>

@@ -4,7 +4,8 @@
 
 <head>
 	<title>tictactoe</title>
-	<script src="../0.4.3-.js"></script>
+	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
+	<script src="../../0.4.3-.js"></script>
 	
 	<style>
 		body{font:normal 1em sans-serif}
@@ -18,7 +19,6 @@
 <body>
 
 <script>
-dap().Infect(String.prototype);
 
 var TicTacToe=(function(){
 
@@ -63,24 +63,23 @@ var TicTacToe=(function(){
 
 })();
 
-dap(
 
-	'game'.d("$game=:gotoMove`0 $squares=:emptyBoard"
-		,'H1.winner'.d("? $game.winner; ! `Winner: $game.winner")
-		,'H1.turn'.d("?:! $game.winner; ! `Turn: .key=($game.turn:# @+`X @-`O)case")
-		,'board'.d(".n=`0; * $squares@key"
-			,'square'.d("! .key; ..n=.n:++=..n").ui("? (.key $game.winner)?:!; ! .key=..key; $game=(.n .key):addMove")
-		)
-		,'history'.d(".m=`0; * $game.history@"
-			,'BUTTON.move'.d("! `Move# ..m=.m:++=..m").ui("$game=.m:gotoMove $squares=$game.squares")
-		)
+'game'.d("$game=:gotoMove`0 $squares=:emptyBoard"
+	,'H1.winner'.d("? $game.winner; ! `Winner: $game.winner")
+	,'H1.turn'.d("?:! $game.winner; ! `Turn: .key=($game.turn:# @+`X @-`O)case")
+	,'board'.d(".n=`0; * $squares@key"
+		,'square'.d("! .key; ..n=.n:++=..n").ui("? (.key $game.winner)?:!; ! .key=..key; $game=(.n .key):addMove")
 	)
-	
-	.EXT({
-		convert:TicTacToe
-	})
-);
-/**/
+	,'history'.d(".m=`0; * $game.history@"
+		,'BUTTON.move'.d("! `Move# ..m=.m:++=..m").ui("$game=.m:gotoMove $squares=$game.squares")
+	)
+)
+
+.EXT({
+	convert:TicTacToe
+})
+
+.INLINE();
 			
 </script>
 </html>
