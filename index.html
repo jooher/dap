@@ -3,11 +3,15 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Dap.js</title>
 	<style>
-	body{max-width: 80em; margin:2em auto; padding:1em; font-family:sans-serif; }
-	pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1em/1.5 monospace;}
-	pre>i{color:cornflowerblue;}
-	pre>em{background:lavender;}
+	body{max-width: 80em; margin:2em auto; padding:1em; font:normal 1em sans-serif; }
 	h3{margin-top:2em;}
+	code{background:aliceblue; padding:2px}
+	
+	/* dapify styles */
+	pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1.2em/1.75 monospace;}
+	pre>i{color:cornflowerblue;}
+	pre>b{color:mediumblue}
+	pre>em{background:lavender; font-style:normal}
 	</style>
 </head>
 <body>
@@ -15,7 +19,7 @@
 <h1>Dap.js: for massively interactive web-applications</h1>
 <p>Dap (initially stood for "data access page") is a lightweight javascript framework for interactive data-driven web applications.</p>
 <pre>
-'H1.welcome'.d("! `Hello,dap!")
+'H1.welcome'.d("! `Hello,world!") // Create an &lt;H1 class="welcome"&gt; element and print "Hello,world!" text into it
 </pre>
 
 <a name="why-dap"/>
@@ -38,31 +42,33 @@ Reactivity is the base concept of dap. No need to manually track changes in your
 	<h3></h3>
 	<p></p>
 <h2>Code examples</h2>
-<p>Important notice: unlike some other frameworks, dap does not imply any specific directory structure organization for your application. Simple web-applications can easily consist of a single, static HTML file, maybe accompanied with a CSS stylesheet or other usual stuff, plus any related data sources. For more complex projects, organization is up to the developer.</p>
-<p>The examples below are exactly the simplest dap applications, and completely fit into a single HTML file.</p>
+<p>Dap code may seem a little bit unusual, but it is a pure Javascript, with slightly uncommon formatting to better reflex dap program structure. All you need to run dap in an .html document is a link to <code>http://jooher.github.io/dap/0.4.3.js</code> script somewhere before dap code (usually, in the <code>head</code> section).<!--You are also welcome to play with the code right here, the code examples are editable.--></p>
 
+<p>The example below shows a very basic pattern of selecting an option from a list.</p>
 <pre>
-'favorite-fruit'.d("$choice=" // a {DIV class="favorite-fruit"} element, with $choice status variable defined in its scope 
-	,'B.selected'.d("! title ($choice not-yet)?") // a {B class="selected"} with textual content involving $choice value
+'favorite-fruit'.d("$choice=" // a &lt;DIV class="favorite-fruit"&gt; element, with $choice status variable defined in its scope 
+	,'B.selected'.d("! title ($choice not-yet)?") // a &lt;B class="selected"&gt; with textual content involving $choice value
 	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
-		,'LI'	.d("! .fruit") // LI elements show fruit value for every given row, and
-			.ui("$choice=.fruit") // on UI event (click by default) update the $choice status variable
+		,'LI'	.d("! .fruit") // each LI element shows fruit value for its data row, and
+			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
 )
 .DEF({ // strings and other constants are supposed to be defined here, not inside the rules
-	title:"My favorite fruit is ", // all textual messages gathered in one place are easier to maintain
+	title:"My favorite fruit is ", // textual messages gathered in one place are easier to maintain and localize if needed
 	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
-	fruit:["apple","orange","tomato","banana"] // static datasets data may be ordinary arrays
+	fruit:["apple","orange","tomato","banana"] // datasets data may be ordinary arrays containing any kind of data
 })
+.INLINE() // render this dap into the current place of document
 </pre>
 
 
+<p>Unlike some other frameworks, dap does not imply any specific directory structure for your application. Simple web-applications can easily consist of a single, static HTML file, maybe accompanied with a CSS stylesheet or other usual stuff, plus any related data sources. For more complex projects, organization is up to the developer.</p>
 <p>Below are a few simple examples of how easily data/event-driven applications can be built with dap. Examples below are inspired by the examples from other reactive frameworks, such as React.js, Angular, etc. so if you're familiar with any of those, you're welcome compare the ideas and approaches behind dap and other frameworks.</p>
 
 
 	<ul>
 		<li><a href="samples/0.4.3/titactoe.html">Tic Tac Toe</a>. Example inspired by the <a href="https://reactjs.org/tutorial/tutorial.html" target="_blank" rel="nofollow">React tutorial</a></li>
-		<li><a href="samples/0.4.3/toh.html"></a>Tour of heroes</li>. Inspired by <a href="https://angular.io/tutorial" target="_blank" rel="nofollow">Angular tutorial</a>
+		<li><a href="samples/0.4.3/toh.html">Tour of heroes</a>. Inspired by <a href="https://angular.io/tutorial" target="_blank" rel="nofollow">Angular tutorial</a></li>
 	</ul>
 </body>
 
