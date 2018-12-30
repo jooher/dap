@@ -7,16 +7,7 @@
 	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
 	<script src="../../0.4.3-.js"></script>
 	<link href="styles.css" rel="stylesheet" type="text/css"/>	
-	<style>
-	.labelled {margin-top:2em; position:relative;}
-	.labelled::before{content:attr(label); color:gray; position:absolute; top:-1em;}	
-	[contenteditable]{background:wheat;outline:none;}
-	
-	.hero-icon{display:inline-block; padding:1em; margin:.5em; background:steelblue; color:white;}
-	
-	.tab{display:inline-block; padding:.5em; margin:.5em; }
-	.tab.selected{background:yellow}
-	</style>
+	<link href="toh.css" rel="stylesheet" type="text/css"/>	
 </head>
 
 <body>
@@ -24,11 +15,11 @@
 <script>
 'toh'.d("$message= $hero= $heroes=heroes"
 	,'H1'.d("! dict.apptitle")
-	,'lists'.d("? $hero:!; $page=`dashboard"
+	,'lists'.d("? $hero:!; $page=`Dashboard"
 		,'tabs'.d("* dict.page"
 			,'tab'.d("! .page; !? (.page $page)eq@selected").ui("$page=.")
 		)
-		,'dashboard'.d("?? $page@Dashboard"
+		,'page.dashboard'.d("?? $page@Dashboard"
 			,'H2'.d("! dict.dashboard")
 			,'heroes'.d("* $heroes:top5@"
 				,'hero-icon'.d("! .name").ui("$hero=$")
@@ -40,17 +31,18 @@
 				)
 			)
 		)
-		,'myheroes'.d("?? $page@Heroes"
+		,'page.myheroes'.d("?? $page@Heroes"
 			,'H2'.d("! dict.myheroes")
 			,'heroes'.d("* $heroes@"
-				,'hero-bar'.d("! .id"
+				,'hero-bar'.d(""
+					,'id'.d("! .id")
 					,'name'.d("! .name")
-					,'del'.d("! `X").ui("$heroes=($heroes .id):remove; ?")
+					,'del'.d("! `×; !! dict.remove@title").ui("$heroes=($heroes .id):remove; ?")
 				).ui("$hero=$")
 			)
 		)
 	)
-	,'details'.d("? $hero; $name=$hero.name"
+	,'page.details'.d("? $hero; $name=$hero.name"
 		,'H2'.d("! (dict.details $name:upper)space")
 		,'id.labelled'.d("! $hero.id; !! dict.id@label")
 		,'name.labelled contenteditable'.d("! $hero.name; !! dict.name@label").e("keyup","$name=#:value")
@@ -66,7 +58,10 @@
 		upper	:str=>str.toUpperCase(),
 		top5	:arr=>arr.slice(0,5),
 		search	:$=>$.heroes.filter(h=>h.name.indexOf($.match)>=0),
-		remove	:$=>{const hs=$.heroes,i=hs.findIndex(h=>h.id=$.id); return hs.slice(0,i).concat(hs.slice(i+1))}
+		remove	:$=>{
+			const hs=$.heroes,i=hs.findIndex(h=>h.id==$.id);
+			return hs.slice(0,i).concat(hs.slice(i+1));
+		}
 	}
 })
 .DEF({
@@ -80,7 +75,8 @@
 		name		:"Hero name",
 		back		:"Go back",
 		save		:"Save changes",
-		search		:"Hero search"
+		search		:"Hero search",
+		remove		:"Remove hero"
 	},
 	
 	heroes	:[
