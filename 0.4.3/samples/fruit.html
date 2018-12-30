@@ -1,26 +1,26 @@
 <head>
 	<title>Favorite fruit - dap sample</title>
-	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
-	<script src="../../0.4.3-.js"></script>	
+	<script src="http://jooher.github.io/dap/0.4.3.js"></script>
+	<!--script src="../../0.4.3-.js"></script-->
 	<link href="styles.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body>
 
 <script>
-'sample'.d("$choice=" // make a {DIV class="sample"} element, and in its scope define a $choice status variable 
-	,'B.selected'.d("! title ($choice not-yet)?") // print a message with $choice, mixed with some text from dictionary
-	,'UL.options'.d("* fruit" // make UL element, and for each row in fruit dataset, repeat:
-		,'LI'	.d("! .fruit") //  make LI element, show fruit value for given row, and
-			.ui("$choice=.fruit") // on UI event (click by default) update the $choice status variable
+'favorite-fruit'.d("$choice=" // a <DIV class="favorite-fruit"> element, with $choice status variable defined in its scope 
+	,'B.selected'.d("! title ($choice not-yet)?") // a <B class="selected"> with textual content involving $choice value
+	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
+		,'LI'	.d("! .fruit") // each LI element shows fruit value for its data row, and
+			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
 )
-.DEF({
-	fruit:["apple","orange","tomato","banana"], // rowset data is a usual array
-	title:"My favorite fruit is ", // messages are defined here, in dictionary - not inside the rules
-	"not-yet":"what?" // hyphens and other symbols are okay for entry names, as long as they are quoted
+.DEF({ // strings and other constants are supposed to be defined here, not inside the rules
+	title:"My favorite fruit is ", // textual messages gathered in one place are easier to maintain and localize if needed
+	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
+	fruit:["apple","orange","tomato","banana"] // datasets data may be ordinary arrays containing any kind of data
 })
-.INLINE();
+.INLINE(); // render this dap into the current place of document
 </script>
 </html>
 </body>
