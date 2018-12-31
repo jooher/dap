@@ -776,6 +776,7 @@ const	dap=
 				if(branch instanceof Postpone){
 					branch.locate(place,instead);
 					branch.put({branch:this});
+					branch=null;
 				}
 				
 				let	node	= this.node,
@@ -815,17 +816,16 @@ const	dap=
 							values	= feed.values,
 							tags	= feed.tags;
 
-						let	i	= tokens.length;//values.length;//
+						let	i	= tokens.length;
 							
 						while(i-- && !flow){
 							let value = this.execToken(values[i],tokens[i]);
 							if(value instanceof Postpone){
-								const	t = tokens.slice(0,i),
-									v = values.slice(0,i);// no need to slice tags
+								const	t = tokens.slice(0,i);// no need to slice tags
 								t[i] = value.token;
 								value.put({todo:[
 									new Compile.Step(
-										values && new Compile.Feed(v,tags,t,operate),
+										values && new Compile.Feed(values,tags,t,operate),
 										value.todo
 									),todo[1]
 								]});
@@ -1615,7 +1615,7 @@ const	dap=
 		attr	:function(value,alias,node){ if(value)node.setAttribute(alias,value); else node.removeAttribute(alias); }, //... 
 		mark	:function(value,alias,node){ Style.mark(node,alias,!!value); },
 		mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
-		dim	:function(elem){Style.attach(elem,"DIM"); return elem; },
+		dim		:function(elem){Style.attach(elem,"DIM"); return elem; },
 		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);Warn(e.message)/*throw e*/},
 		
 		exec	:function(path,values){
