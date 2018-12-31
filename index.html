@@ -8,7 +8,7 @@
 	code{background:aliceblue; padding:2px}
 	
 	/* dapify styles */
-	pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1.2em/1.75 monospace;}
+	pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1.2em/1.5 monospace;}
 	pre>i{color:cornflowerblue;}
 	pre>b{color:mediumblue}
 	pre>em{background:lavender; font-style:normal}
@@ -41,9 +41,7 @@ Reactivity is the base concept of dap. No need to manually track changes in your
 
 	<h3></h3>
 	<p></p>
-<h2>Code examples</h2>
-<p>Dap code may seem a little bit unusual, but it is a pure Javascript, with slightly uncommon formatting to better reflex dap program structure. All you need to run dap in an .html document is a <code>&lt;script src="http://jooher.github.io/dap/0.4.3.js"&gt;&lt;/script&gt;</code> somewhere before actual dap code (usually, in the <code>head</code> section).<!--You are also welcome to play with the code right here, the code examples are editable.--></p>
-
+<h2>Code example, explained</h2>
 <p>The example below shows a very basic pattern of selecting an option from a list.</p>
 <pre>
 'favorite-fruit'.d("$choice=" // a &lt;DIV class="favorite-fruit"&gt; element, with $choice status variable defined in its scope 
@@ -52,24 +50,41 @@ Reactivity is the base concept of dap. No need to manually track changes in your
 		,'LI'	.d("! .fruit") // each LI element shows fruit value for its data row, and
 			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
+	,'nothing'.d("? $choice:!; ! nothing") // if $choice is not set, print a message to let us know
 )
 .DEF({ // strings and other constants are supposed to be defined here, not inside the rules
 	title:"My favorite fruit is ", // textual messages gathered in one place are easier to maintain and localize if needed
+	nothing:"Nothing selected yet",
 	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
 	fruit:["apple","orange","tomato","banana"] // datasets data may be ordinary arrays containing any kind of data
 })
 .INLINE() // render this dap into the current place of document
 </pre>
+<p>Dap code may seem a little bit unusual, but it is a pure Javascript, with slightly uncommon formatting to better reflex dap program structure. All you need to run dap in an .html document is a <code>&lt;script src="http://jooher.github.io/dap/0.4.3.js"&gt;&lt;/script&gt;</code> somewhere before actual dap code (usually, in the <code>head</code> section).<!--You are also welcome to play with the code right here, the code examples are editable.--></p>
+<p>From this example you can see DOM-element protos being denoted by single quoted strings (in a slightly shorter notation than used in HTML). Single quotes are just a matter of style, they help to tell protos from other strings and facilitate code highlighting.</p>
+Protos are rendered into actual DOM elements, from parent node <em>down</em> to child elements, according to their d-rules ("down"-phase rules) specified by <code>.d()</code> method. Some protos have u-rules for "up"-phase, when some event bubbles <em>up</em> through the node towards the root. In the example above, the <code>LI</code>element is given its u-rule by means of <code>.ui()</code> method, which also binds a default UI event (usually, click) listener.</p>
+<p>Rules in the example are very simple. You can see the three most common dap operators here:</p>
+<ul>
+	<li><code>!</code> - "print" operator, that simply prints its arguments into resulting node</li>
+	<li><code>*</code> - "multiple", or "for each", repeats the rest of the rule for each row in a dataset</li>
+	<li><code>?</code> - "if" gate, that allows further rule execution only if its argument is truish</li>
+</ul>
+<p>Arguments can be of several kinds:</p>
+<ul>
+	<li>Status variables (<code>$choice</code> above) prefixed with a <code>$</code></li>
+	<li>Data row entries (<code>.fruit</code> above) prefixed with a <code>.</code></li>
+	<li>Constants (<code>title</code>,<code>not-yet</code> and <code>nothing</code> above) are not prefixed</li>
+	<li>Expressions (like <code>($choice not-yet)?</code> above), you can tell them by brackets</li>
+</ul>
+<p>So far, quite simple, isn't it? To dive deeper, please see the tutorial and specs.</p>
 
-
+<h3>Dap and other reactive frameworks</h3>
 <p>Unlike some other frameworks, dap does not imply any specific directory structure for your application. Simple web-applications can easily consist of a single, static HTML file, maybe accompanied with a CSS stylesheet or other usual stuff, plus any related data sources. For more complex projects, organization is up to the developer.</p>
 <p>Below are a few simple examples of how easily data/event-driven applications can be built with dap. Examples below are inspired by the examples from other reactive frameworks, such as React.js, Angular, etc. so if you're familiar with any of those, you're welcome compare the ideas and approaches behind dap and other frameworks.</p>
-
-
-	<ul>
-		<li><a href="samples/0.4.3/titactoe.html">Tic Tac Toe</a>. Example inspired by the <a href="https://reactjs.org/tutorial/tutorial.html" target="_blank" rel="nofollow">React tutorial</a></li>
-		<li><a href="samples/0.4.3/toh.html">Tour of heroes</a>. Inspired by <a href="https://angular.io/tutorial" target="_blank" rel="nofollow">Angular tutorial</a></li>
-	</ul>
+<ul>
+	<li><a href="0.4.3/samples/titactoe.html">Tic Tac Toe</a>. Inspired by the <a href="https://reactjs.org/tutorial/tutorial.html" target="_blank" rel="nofollow">React tutorial</a></li>
+	<li><a href="0.4.3/samples/toh.html">Tour of Heroes</a>. Inspired by <a href="https://angular.io/tutorial/" target="_blank" rel="nofollow">Angular tutorial</a></li>
+</ul>
 </body>
 
 <script src="dapify.js"></script>
