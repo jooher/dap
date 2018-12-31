@@ -775,7 +775,7 @@ const	dap=
 					
 				if(branch instanceof Postpone){
 					branch.locate(place,instead);
-					return branch.put({branch:this});
+					branch.put({branch:this});
 				}
 				
 				let	node	= this.node,
@@ -815,20 +815,21 @@ const	dap=
 							values	= feed.values,
 							tags	= feed.tags;
 
-						let	i	= values.length;//tokens.length;
+						let	i	= values.length;//tokens.length;//
 							
 						while(i-- && !flow){
 							let value = this.execToken(values[i],tokens[i]);
 							if(value instanceof Postpone){
-								//if(--stackDepth<0)throw Fail("stack underflow");
-								const t = tokens.slice(0,i);// no need to slice values and tags
+								const	t = tokens.slice(0,i),
+									v = values.slice(0,i);// no need to slice tags
 								t[i] = value.token;
-								return value.put({todo:[
+								value.put({todo:[
 									new Compile.Step(
-										values && new Compile.Feed(values,tags,t,operate),
+										values && new Compile.Feed(v,tags,t,operate),
 										value.todo
 									),todo[1]
 								]});
+								return value;
 							}
 							if(operate)
 								flow = operate(value,tags[i],node,$);

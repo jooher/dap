@@ -1,4 +1,5 @@
-.MUTE	{display:none !important;}
+.-MUTE	{display:none !important;}
+.MUTE {border:1px solid red}
 
 .button, .ui {cursor:pointer;}
 
