@@ -771,16 +771,16 @@ const	dap=
 			exec:
 			function(todo,place,instead){
 				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
-				let	branch	= todo && this.execBranch(todo);
+				const	node	= this.node,
+						branch	= todo && this.execBranch(todo);
+						
+				let		empty	= branch && !node.childNodes.length;// && !node.attributes.length;;
 					
 				if(branch instanceof Postpone){
 					branch.locate(place,instead);
 					branch.put({branch:this});
-					branch=null;
+					empty=null;
 				}
-				
-				let	node	= this.node,
-					empty	= branch && !node.childNodes.length;// && !node.attributes.length;
 					
 				if(empty==true)node=Env.mute(node);
 				if((empty==null)&&instead)Env.dim(instead);
