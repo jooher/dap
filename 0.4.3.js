@@ -771,7 +771,7 @@ const	dap=
 			exec:
 			function(todo,place,instead){
 				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
-				const	branch	= todo && this.execBranch(todo);
+				let	branch	= todo && this.execBranch(todo);
 					
 				if(branch instanceof Postpone){
 					branch.locate(place,instead);
