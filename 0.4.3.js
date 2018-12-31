@@ -1331,7 +1331,7 @@ const	dap=
 			
 		parse	=(str)=>{// based on code from http://blog.stevenlevithan.com/archives/parseuri
 			const uri = {};
-			regx.exec(str).map((i,val)=>{uri[keys[i]]=val});
+			regx.exec(str).map((val,i)=>{uri[keys[i]]=val});
 			return uri;
 		},
 
@@ -1365,7 +1365,7 @@ const	dap=
 
 		neutral	=(hash)=>{
 			const arg=[];
-			hash.keys().map((i,k)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
+			hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
 			return arg.join('&').replace(/%20/g,'+');
 		},
 		
