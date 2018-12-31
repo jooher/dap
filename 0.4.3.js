@@ -711,7 +711,7 @@ const	dap=
 				EMPTY	: new Rule(),
 		
 				engage	: function(){
-						var	epilog	= this.stuff && new Step( new Feed(this.stuff.reverse(),REUSE.DUMMY,REUSE.DUMMY,Print));//makeChildStep(this.ns,this.stuff);
+						var	epilog	= this.stuff && new Step( new Feed([this.stuff],REUSE.DUMMY,REUSE.DUMMY,Print));//makeChildStep(this.ns,this.stuff);
 				
 						if(this.rulestring){
 							var context=new Context(this.ns,Parse(this.rulestring));
@@ -815,7 +815,7 @@ const	dap=
 							values	= feed.values,
 							tags	= feed.tags;
 
-						let	i	= values.length;//tokens.length;//
+						let	i	= tokens.length;//values.length;//
 							
 						while(i-- && !flow){
 							let value = this.execToken(values[i],tokens[i]);
@@ -898,7 +898,7 @@ const	dap=
 							tags	= feed.tags,
 							tokens	= feed.tokens,
 							proto	= value||literal,
-							i	= values.length; //tokens.length;
+							i	= tokens.length;//values.length; //
 							
 							while(i--){
 								value=this.execToken(values[i],tokens[i]);
