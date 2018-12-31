@@ -1,0 +1,33 @@
+.-MUTE	{display:none !important;}
+.MUTE {border:1px solid red}
+
+.button, .ui {cursor:pointer;}
+
+BODY	{font:normal 10pt Georgia,serif; margin:2em 4em 8em 4em; }
+
+.action, .button{color:gray; font:normal .75em sans-serif; margin:1em 0;}
+.button	{display: inline-block; border:1px solid lightgray; padding: .5em; }
+.button:hover{box-shadow:1px 1px 2px gray; color:black; }
+
+.tie	{margin-bottom:2em; max-width:80em; min-width:40em; }
+.open	{padding-left:2em; border-left:1px solid lightgray; }
+.tie>.msg, .tie>.date, .tie>.author {display:inline; margin-right:1em; font:italic .75em sans-serif;}
+.head {font:bold 1.2em Georgia,serif; margin:.5em 0; }
+.body {max-height:80em; overflow-y:auto; white-space:pre-wrap; }
+
+[contenteditable]{background:linen; margin:.25em 0; padding:.25em; white-space: pre-wrap; }
+[contenteditable]:empty{font-style:italic; color:gray;}
+
+.input{border:1px solid gray; padding:1em; margin:.5em 0;}
+.reply{margin-bottom:1em;}
+
+
+.author:empty:before{content:"Your name";}
+.head:empty:before{content:"Message head";}
+.body:empty:before{content:"Message body";}
+
+.reply>.action:before	{content:"Reply to this";}
+.reply>.input>.button:before {content:"Send";}
+
+body>.entry>.reply>.button:before {content:"Create new thread";}
+body>.entry>.ties>.entry>.head {background:wheat; padding:.5em; font-weight:bold; }
