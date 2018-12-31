@@ -803,54 +803,49 @@ const	dap=
 				
 				for(let step;todo&&(step=todo[0]);todo=(flow==null)&&todo[1]){
 					if(step.todo){
-						let branch = new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
+						const branch = new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
 						if(branch instanceof Postpone)
 							return branch.put({todo:[new Compile.Step(null,postpone.todo),todo[1]]})
-					}else					
-						if(!step.feed)
-							Warn("no feed");
-					
-						var	feed	= step.feed,
+					}else										
+						flow	= null;
+							
+						const	feed	= step.feed,
 							operate	= feed.op,
 							tokens	= feed.tokens,
 							values	= feed.values,
-							tags	= feed.tags,
+							tags	= feed.tags;
 
-							i	= values.length;//tokens.length;
+						let	i	= values.length;//tokens.length;
 							
-						flow	= null;
-							
-						if(operate){
-							while(i-- && !flow){
-								flow = operate(this.execToken(values[i],tokens[i]),tags[i],node,$);
-								// null		- keep on
-								// false	- next operand, but not next step
-								// true		- skip to next step
-								// array	- rowset subscopes
-								// ? object	- subscope
-								if(flow instanceof Postpone){
-									//if(--stackDepth<0)throw Fail("stack underflow");
-									tokens	= tokens.slice(0,i);// no need to slice values and tags
-									tokens[i] = flow.token;
-									return flow.put({todo:[
-										new Compile.Step(
-											values && new Compile.Feed(values,tags,tokens,operate),
-											flow.todo
-										),todo[1]
-									]});
-								}
+						while(i-- && !flow){
+							let value = this.execToken(values[i],tokens[i]);
+							if(value instanceof Postpone){
+								//if(--stackDepth<0)throw Fail("stack underflow");
+								const t = tokens.slice(0,i);// no need to slice values and tags
+								t[i] = value.token;
+								return value.put({todo:[
+									new Compile.Step(
+										values && new Compile.Feed(values,tags,t,operate),
+										value.todo
+									),todo[1]
+								]});
 							}
-								
-							if(flow)
-								if(isArray(flow)){
-									var	updata = $[0][''];
-									for(let r=0,rows=flow.length; r<rows; r++)//if(flow[r]!=null)
-										empty	= new Branch(ctx(flow[r],$,flow,updata),node,this.up).exec(todo[1]) && empty;
-
-								}else
-									flow	= null;
-						}else
-							while(i--)this.execToken(values[i],tokens[i]);
+							if(operate)
+								flow = operate(value,tags[i],node,$);
+						}
+							
+						if(flow)
+							// null		- keep on
+							// false	- next operand, but not next step
+							// true		- skip to next step
+							// array	- rowset subscopes
+							// ? object	- subscope
+							if(isArray(flow)){
+								var	updata = $[0][''];
+								for(let r=0,rows=flow.length; r<rows; r++)//if(flow[r]!=null)
+									empty	= new Branch(ctx(flow[r],$,flow,updata),node,this.up).exec(todo[1]) && empty;
+							}else
+								flow	= null;
 				}
 				--stackDepth;
 				
@@ -1149,13 +1144,13 @@ const	dap=
 		
 		queue	= [],
 			
-		put	=(job,before)=>{
+		put	=function(job,before){
 			if(before)queue.push(job);
 			else queue.unshift(job);
 			if(phase==2)run(); // afterdone
 		},
 
-		run	=()=>{
+		run	=function(){
 			if(phase==1)return;
 			phase=1; // being executed
 			for(let job; job=queue.pop();)
@@ -1454,7 +1449,7 @@ const	dap=
 		},
 		
 		consume	=(request)=>{
-			if(Math.floor(request.status/100)!=2)return;
+			//if(Math.floor(request.status/100)!=2)return;
 			const handle=MimeHandlers[request.getResponseHeader('content-type').split(";")[0]];
 			return handle ? handle(request) : request;
 		},
@@ -1475,9 +1470,9 @@ const	dap=
 			
 			if(postpone)
 				request.onreadystatechange=function (){
-					if(this.readyState!=4)return postpone
-						? postpone.resolve(consume(this))
-						: Warn("No target for request",this);
+					if(this.readyState==4)
+						return	postpone ? postpone.resolve(consume(this))
+							: Warn("No target for request",this);
 				}
 			
 			try	{request.send(req.body||null);}
