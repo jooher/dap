@@ -26,7 +26,7 @@
 			)
 			,'search'.d("$match="
 				,'input.labelled contenteditable'.d("!! dict.search@label").e("keyup","$match=#:value")
-				,'list'.d("? ($heroes $match)!; * ($heroes $match):search"
+				,'list'.d("? ($heroes $match)!; * ($heroes $match):hero.search"
 					,'hero'.d("! .name").ui("$hero=$")
 				)
 			)
@@ -37,8 +37,12 @@
 				,'hero-bar'.d(""
 					,'id'.d("! .id")
 					,'name'.d("! .name")
-					,'del'.d("! `×; !! dict.remove@title").ui("$heroes=($heroes .id):remove; ?")
+					,'del'.d("! `×; !! dict.remove@title").ui("$heroes=($heroes .id):hero.remove; ?")
 				).ui("$hero=$")
+			)
+			,'addnew'.d("$name="
+				,'labelled contenteditable'.d("!! dict.addnew@label").e("keyup","$name=#:value")
+				,'BUTTON'.d("! dict.addnew").ui("$heroes=($heroes $name):hero.add $name=")
 			)
 		)
 	)
@@ -57,10 +61,17 @@
 	convert:{
 		upper	:str=>str.toUpperCase(),
 		top5	:arr=>arr.slice(0,5),
-		search	:$=>$.heroes.filter(h=>h.name.indexOf($.match)>=0),
-		remove	:$=>{
-			const hs=$.heroes,i=hs.findIndex(h=>h.id==$.id);
-			return hs.slice(0,i).concat(hs.slice(i+1));
+		
+		hero	:{
+			search	:$=>$.match&&$.heroes.filter(h=>h.name.toLowerCase().indexOf($.match.toLowerCase())>=0),
+			remove	:$=>{
+				const hs=$.heroes,i=hs.findIndex(h=>h.id==$.id);
+				return hs.slice(0,i).concat(hs.slice(i+1));
+			},
+			add		:$=>{
+				const id=$.heroes.reduce((i,h)=>h.id>i?h.id:i,0)+1;
+				return $.heroes.concat([{id:id,name:$.name}]);
+			}
 		}
 	}
 })
@@ -76,7 +87,8 @@
 		back		:"Go back",
 		save		:"Save changes",
 		search		:"Hero search",
-		remove		:"Remove hero"
+		remove		:"Remove hero",
+		addnew		:"Add new hero"
 	},
 	
 	heroes	:[
