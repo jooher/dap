@@ -772,19 +772,19 @@ const	dap=
 			function(todo,place,instead){
 				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
 				const	node	= this.node,
-						branch	= todo && this.execBranch(todo);
-						
-				let		empty	= branch && !node.childNodes.length;// && !node.attributes.length;;
+						branch	= todo && this.execBranch(todo),
+						empty	= branch && !node.childNodes.length;
 					
 				if(branch instanceof Postpone){
 					branch.locate(place,instead);
 					branch.put({branch:this});
-					empty=null;
+					if(instead)Env.dim(instead);
 				}
-					
-				if(empty==true)node=Env.mute(node);
-				if((empty==null)&&instead)Env.dim(instead);
-				else if(place)
+				else
+					if(empty==true)
+						Env.mute(node);
+				
+				if(place)//&&branch
 					instead ? place.replaceChild(node,instead) : place.appendChild(node);
 						
 				return empty;
@@ -819,9 +819,14 @@ const	dap=
 						let	i	= tokens.length;
 							
 						while(i-- && !flow){
+							// null		- keep on
+							// false	- next operand, but not next step
+							// true		- skip to next step
+							// array	- rowset subscopes
+							// ? object	- subscope
 							let value = this.execToken(values[i],tokens[i]);
 							if(value instanceof Postpone){
-								const	t = tokens.slice(0,i);// no need to slice tags
+								const	t = tokens.slice(0,i);
 								t[i] = value.token;
 								value.put({todo:[
 									new Compile.Step(
@@ -836,11 +841,6 @@ const	dap=
 						}
 							
 						if(flow)
-							// null		- keep on
-							// false	- next operand, but not next step
-							// true		- skip to next step
-							// array	- rowset subscopes
-							// ? object	- subscope
 							if(isArray(flow)){
 								var	updata = $[0][''];
 								for(let r=0,rows=flow.length; r<rows; r++)//if(flow[r]!=null)
@@ -1069,6 +1069,7 @@ const	dap=
 						if(instead.replacer)instead.replacer.dismiss();
 						instead.replacer=this;
 					}
+					return this;
 				},
 			put	:function(obj){
 					for(let i in obj)this[i]=obj[i];
