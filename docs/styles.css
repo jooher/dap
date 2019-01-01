@@ -1,0 +1,9 @@
+body{max-width: 64em; margin:2em auto; padding:1em; font:normal 1em/1.5 sans-serif; }
+h3{margin-top:2em;}
+code{background:aliceblue; padding:2px; white-space:nowrap; }
+
+/* dapify styles */
+pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1.2em/1.5 monospace;}
+pre>i{color:cornflowerblue;}
+pre>b{color:mediumblue}
+pre>em{background:lavender; font-style:normal}

@@ -1198,7 +1198,7 @@ const	dap=
 		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RUN(data)
 	}
 			
-})((function(){
+})((function(){ // Environment
 	
 	const	isIE	= false,
 		doc	= window.document,
@@ -1232,57 +1232,31 @@ const	dap=
 	
 	newError=(e,$,P)=>{const n = newElemText("dap-error",e.message); n.$=$; n.P=P; return n; },// n.setAttribute("title",P.rules.d.rulestring);
 	newMute	=($,P)	=>{const n = doc.createComment(P.elem?P.elem.nodeName:"*"); n.$=$; n.P=P; return n; },
-			
-/*
-	Native	=(str,ui)=>{
-		if(!str)return DEFAULT.ELEMENT;
-		const	space	= str.indexOf(" "),
-			extra	= space<0 ? null : str.substr(space),
-			head	= (extra ? str.substr(0,space) : str).split('#'),
-			uniform	= head.shift()+(ui||""),
-			id	= head.length&&head[0]
-			;
-
-		if(!uniform&&!extra)return DEFAULT.ELEMENT;
-		
-			const
-		
-		if(!uniform||uniform[0]!=uniform[0].toUpperCase())uniform.unshift(DEFAULT.TAG);	// class	-> DIV.class
-		var	tag	= uniform.shift().toLowerCase(), // does xhtml really care about case?
-			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag||DEFAULT.TAG); 
-		if(uniform.length)elem.className = uniform.join(" ").toLowerCase();
-		if(id)elem.id=id;
-		return elem;
-		
-		return NativeElement(uniform&&uniform.split("."),extra,id); // like, FORM#id METHOD="POST"
-		
-	},		
-	NativeElement=(uniform,extra,id)=>{ // create a native (HTML) node from dap uniform notation
-		
-	}
 	
-
-*/
+	unHTML=newElem("div"),
+	
+	parseWithExtra=(tag,extra)=>{
+		unHTML.innerHTML="<"+tag+" "+extra+"></"+tag+">";
+		return unHTML.firstChild;			
+	},	
+			
 	Native	=(str,ui)=>{
 		if(!str)return DEFAULT.ELEMENT;
 		const	space	= str.indexOf(" "),
 			extra	= space<0 ? null : str.substr(space),
 			head	= (extra ? str.substr(0,space) : str).split('#'),
-			type	= (head.shift()+(ui||"")).split("."),
+			type	= (head.shift()).split("."),
 			id	= head.length&&head[0],
 			tag	= (type.length&&type[0]==type[0].toUpperCase()) ? type.shift().toLowerCase() : DEFAULT.TAG,
 			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
-			
+		
+		if(ui)type.push(ui);
 		if(type.length)elem.className = type.join(" ").toLowerCase();
 		if(id)elem.id=id;
 		return elem;
 	};
 	
-	function parseWithExtra(tag,extra){
-		var tmp=newElem("div");
-		tmp.innerHTML="<"+tag+" "+extra+"></"+tag+">";
-		return tmp.firstChild;			
-	}
+
 	
 	const
 
@@ -1506,8 +1480,8 @@ const	dap=
 					for(let i=values.length,v,t;i--;)
 						if(v=values[i])
 							body += (t=tags[i])
-							? "&"+t+"="+ encodeURIComponent( typeof v=="object" ? Json(v) : v ) 
-							: Json(v);
+							? "&"+t+"="+ encodeURIComponent( typeof v=="object" ? Json.encode(v) : v ) 
+							: Json.encode(v);
 					this.body=body;
 					v=body.charAt(0);
 					this.mime= v=='<'?"text/xml" : v=='&'?"application/x-www-form-urlencoded" : "text/plain";
@@ -1529,7 +1503,7 @@ const	dap=
 	})(),
 
 	Json	={
-		encode	:value	=>{var r=0; return value&&JSON.stringify(value,(k,v)=>(k||!r++)?v:undefined)},
+		encode	:value	=>{let r=0; return value&&JSON.stringify(value,(k,v)=>(k||!r++)?v:undefined)},
 		decode	:value	=>value&&JSON.parse(value)
 		},
 
@@ -1540,13 +1514,12 @@ const	dap=
 	
 	Style	= {
 	
-		
 		attach	:function(node,cls){Style.mark(node,cls,true)},
 		detach	:function(node,cls){Style.mark(node,cls,false)},
 			
 		mark	:function(node,cls,on){
-				var	c	= " "+node.className+" ",
-					was	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
+				const	c	= " "+node.className+" ",
+						was	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
 				if(on)	{if(!was) node.className = (c+cls).trim();}
 				else	{if(was ) node.className = c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ").trim();}
 			}
@@ -1612,10 +1585,17 @@ const	dap=
 		
 		query	:Http.query, // to be generalized
 		
+		uievent	:node=>
+					node.nodeName.toLowerCase()=='input'	?'change':
+					node.nodeName.toLowerCase()=='select'	?'change':
+					node.isContentEditable	?'blur':
+					'click',
+
 		
 		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
 		
-		log	:log,
+		doc		:doc,
+		log		:log,
 		attr	:function(value,alias,node){ if(value)node.setAttribute(alias,value); else node.removeAttribute(alias); }, //... 
 		mark	:function(value,alias,node){ Style.mark(node,alias,!!value); },
 		mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
@@ -1623,30 +1603,22 @@ const	dap=
 		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);Warn(e.message)/*throw e*/},
 		
 		exec	:function(path,values){
-				var tgt=window;
-				for(let i=path.length;i--;)if(!(tgt=tgt[path[i]]))return;
-				if(tgt.apply)return tgt.apply(null,values);
-			},
+					let tgt=window;
+					for(let i=path.length;i--;)if(!(tgt=tgt[path[i]]))return;
+					if(tgt.apply)return tgt.apply(null,values);
+				},
 		
-		clone	:function(elem,$,P){var n=elem.cloneNode(false); n.$=$; n.P=P; return n; },
+		clone	:function(elem,$,P){const n=elem.cloneNode(false); n.$=$; n.P=P; return n; },
 		
 		value	:node=>(node.value||node.textContent||node.innerText||"").trim(),
 		text	:node=>(node.innerText||node.textContent||node.value||"").trim(),
 		copy	:item=>isArray(item)?item.slice(0):Object.assign({},item),
 		
-		uievent	:function(node){
-				return	node.nodeName.toLowerCase()=='input'	?'change':
-					node.nodeName.toLowerCase()=='select'	?'change':
-					node.isContentEditable	?'blur':
-					'click';
-			},
-
-		doc	:doc,
 		title	:function(text){return doc.title=text; },
 		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
 		
 		script	:function(url){
-				var el=newElem("script");
+				const el=newElem("script");
 				el.src="url";
 				el.async=true;
 				el.onload=function(){doc.body.appendChild(el);};
@@ -1655,22 +1627,11 @@ const	dap=
 				
 		inline	:function(proto,instead){
 				if(!instead)instead = document.currentScript||document.script[document.script.length-1]||Fail("can't inline");
-				var place = instead.parentNode;
+				const place = instead.parentNode;
 				place.replaceChild( proto.spawn([{'':State.read()}],place) || newStub("dap"), instead );
-			},				
-			
-			
-		output	:{
-				element	:(str)=>Native(str),
-				value	:(element,str)=>element+=' '+str,
-				
-				print	:(element)=>lines.push(element),
-				execute	:()=>lines.join('\n')
 			}
-
-			
+		}
 		
-		}						
 	})()
 );
 

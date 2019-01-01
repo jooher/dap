@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>My dap playground</title>
+  <script src="http://jooher.github.io/dap/0.4.3.js"></script>
+ </head>
+ <body>
+  Welcome to dap
+  <script>
+  
+'main'.d("$value=`hello" // d-rule defines a status variable named $value
+	,'H3.display'.d("! $value") // d-rule displays the variable
+	,'BUTTON'.d("! `cheese").ui("$value=`cheese") // u-rule updates the variable `
+	,'INPUT type="text"'.d("!! $value").ui("$value=#:value")
+)
+.INLINE() // inline this dap into the DOM
+   
+  </script>
+ </body>
+</html>
