@@ -1470,12 +1470,14 @@ const	dap=
 				for(let i in req.headers)
 					request.setRequestHeader(i,req.headers[i]);
 			
-			if(postpone)
+			if(postpone){
+				postpone.info=request.url;
 				request.onreadystatechange=function (){
 					if(this.readyState==4)
 						return	postpone ? postpone.resolve(consume(this))
 							: Warn("No target for request",this);
-				}
+				}				
+			}
 			
 			try	{request.send(req.body||null);}
 			catch(e){Warn(e.message);}
