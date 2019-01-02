@@ -391,7 +391,7 @@ const	dap=
 						this.react=null;
 					
 					if(this.utag)
-						this.elem=Env.Native(this.utag,this.rules[""]&&".ui");
+						this.elem=Env.Native(this.utag,this.rules[""]&&"ui");
 					
 					if(!this.elem && d && (d.defs||d.refs))
 						Fail("Entry must be an element",this);

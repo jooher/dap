@@ -3,17 +3,52 @@
  <head>
   <title>My dap playground</title>
   <script src="http://jooher.github.io/dap/0.4.3.js"></script>
+  <style>.ui{cursor:pointer}</style>
  </head>
  <body>
   Welcome to dap
   <script>
   
-'main'.d("$value=`hello" // d-rule defines a status variable named $value
-	,'H3.display'.d("! $value") // d-rule displays the variable
-	,'BUTTON'.d("! `cheese").ui("$value=`cheese") // u-rule updates the variable `
-	,'INPUT type="text"'.d("!! $value").ui("$value=#:value")
+'colored-fruits'.d("$color= $fruit="
+
+	,'H3'.d("! hint.color $color")
+	,'UL.colors'.d("* color"
+		,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
+	)
+	,'reset'.d("! hint.reset.color").ui("$color=")
+	
+	,'H3'.d("! hint.fruit $fruit")
+	,'UL.fruit'.d("* fruit"
+		,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
+	)
+	,'reset'.d("! hint.reset.fruit").ui("$fruit=")
+	
+	,'H2.summary'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
 )
-.INLINE() // inline this dap into the DOM
+.DEF({
+	color:["red","orange","yellow","green"],
+	fruit:["apple","pear","banana"],
+	
+	hint:{ // constants in the dictionary can be grouped...
+		color: "selected color: ",
+		fruit: "selected fruit: ",
+		reset :{ // ...to arbitrary depth
+			color: "Reset color",
+			fruit: "Reset fruit"
+		},
+		choice: "Your choice is"
+	}
+})
+.EXT({
+	flatten	:{
+		sentence: values=>values.reverse().join(" ")
+	},
+	convert	:{
+		uppercase: str=>str.toUpperCase(),
+		glitzy: str=>"*** "+str+" ***"
+	}
+})
+.INLINE()
    
   </script>
  </body>

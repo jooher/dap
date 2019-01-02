@@ -16,6 +16,7 @@
  <head>
   <title>My dap playground</title>
   <script src="http://jooher.github.io/dap/0.4.3.js"></script>
+  <style>.ui{cursor:pointer}</style>
  </head>
  <body>
   Welcome to dap
@@ -34,7 +35,7 @@
 &lt;html&gt;
  &lt;head&gt;
   &lt;title&gt;My dap playground&lt;/title&gt;
-  <b>&lt;script src="http://jooher.github.io/dap/0.4.3.js"&gt;&lt;/script&gt;</b>
+  <b>&lt;script src="https://jooher.github.io/dap/0.4.3.js"&gt;&lt;/script&gt;</b>
  &lt;/head&gt;
  &lt;body&gt;
   Welcome to dap
@@ -94,27 +95,27 @@
 <pre>
 'colored-fruits'.d("$color= $fruit="
 
-	'H3'.d("! hint.color")
+	,'H3'.d("! hint.color $color")
 	,'UL.colors'.d("* color"
-		,'LI'.d("! .color $fruit).ui("$color=.color")
+		,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
 	)
-	'reset'.d("! hint.reset.color").ui("$color=")
+	,'reset'.d("! hint.reset.color").ui("$color=")
 	
-	,'H3'.d("! hint.fruit")
+	,'H3'.d("! hint.fruit $fruit")
 	,'UL.fruit'.d("* fruit"
-		,'LI'.d("! $color .fruit").ui("$fruit=.fruit")
+		,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
 	)
-	'reset'.d("! hint.reset.fruit").ui("$fruit=")
+	,'reset'.d("! hint.reset.fruit").ui("$fruit=")
 	
-	'H2.summary'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
+	,'H2.summary'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
 )
 .DEF({
-	colors:["red","orange","yellow","green"],
+	color:["red","orange","yellow","green"],
 	fruit:["apple","pear","banana"],
 	
 	hint:{ // constants in the dictionary can be grouped...
-		color: "select color",
-		fruit: "select fruit",
+		color: "selected color: ",
+		fruit: "selected fruit: ",
 		reset :{ // ...to arbitrary depth
 			color: "Reset color",
 			fruit: "Reset fruit"
@@ -124,7 +125,7 @@
 })
 .EXT({
 	flatten	:{
-		sentence: values=>values.join(" ")
+		sentence: values=>values.reverse().join(" ")
 	},
 	convert	:{
 		uppercase: str=>str.toUpperCase(),
@@ -139,7 +140,7 @@
 
 <h2>Operators, flatteners and convertors</h2>
 <p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are similar to Javascript functions (in fact, they ARE Javascript functions) but with an imposed uniform contract:</p>
-<p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,fancy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.EXT</code> section</p>
+<p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.EXT</code> section</p>
 <p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into one single value. In the example above, the <code>sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single value) is then fed to the convertors.</p>
 </body>
 
