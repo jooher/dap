@@ -90,8 +90,7 @@
 
 
 <h3>Data context</h3>
-<p>Dap is all about data. Every element is bound to data context, usualy it is a data row in some dataset. Fields of a data row, or <em>data entries</em>, are immediately available within context of that data row, and can be read or modified. Data context can be shared among several elements, related to the same data row. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot).</p>
-<p>Data context scope is independent from status context scope.</p>
+<p>Dap is all about data. Every element is bound to data context, usualy it is a data row in some dataset. Fields of a data row, or <em>data entries</em>, are immediately available within context of that data row, and can be read or modified. Data context can be shared among several elements, related to the same data row. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
 <pre>
 'colored-fruits'.d("$color= $fruit="
 
@@ -135,9 +134,9 @@
 .INLINE()
 </pre>
 <p>Here, all elements inside the <code>'colored-fruits'</code> share the same status context with <code>$color</code> and <code>$fruit</code> status variables defined in it. However, each <code>LI</code> element in the two lists has its own data context, containing one data entry, either <code>.color</code> or <code>.fruit</code></p>
-<p>Another interesting point of this example is the <code>.EXT</code> section and the d-rule of <code>'H2.summary'</code> element. Okay, meet flatteners and convertors...</p>
+<p>Another interesting point of this example is the <code>.EXT</code> section and the d-rule of <code>'H2.summary'</code> element. Meet: flatteners and convertors...</p>
 
-<h2>Flatteners and convertors</h2>
+<h3>Flatteners and convertors</h3>
 <p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are similar to Javascript functions. In fact, they ARE ordinary Javascript functions — but with imposed uniform contracts:</p>
 <p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.EXT</code> section</p>
 <p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into one single value. In the example above, the <code>()sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single string) is then fed to the convertors.</p>
@@ -161,8 +160,11 @@
 <p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But the can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email)?@login</code>.</p>
 <p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as  URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value it as is.</p>
 <h2>Okay, what's next?</h2>
-<p>By this point, you should be able to read dap rules and easily tell status variables from data entries, flatteners from converters, and see the overall logic of a dap template.</p>
+<p>By this point, you should be able to read dap rules and easily tell status variables from data entries, flatteners from converters, and guess the overall logic of a dap template.</p>
 <img src="we_need_to_go_deeper.jpg" alt="But we need to go deeper" title="But we need to go deeper"/>
+
+<p>Coming soon: writing a real-world dap application</p>
+
 </body>
 
 <script src="dapify.js"></script>
