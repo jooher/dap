@@ -79,8 +79,8 @@
 <pre>
 'main'.d("$value=`hello" // d-rule defines a status variable named $value
 	,'H3.display'.d("! $value") // d-rule displays the variable
-	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rule updates the variable `
-	,'INPUT type="text"'.d("!! $value").ui("$value=#:value")
+	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rules update the variable `
+	,'INPUT placeholder="or type in here"'.d("!! $value").ui("$value=#:value")
 )
 .DEF({
 	cheese: "Say cheese!"
@@ -135,13 +135,34 @@
 .INLINE()
 </pre>
 <p>Here, all elements inside the <code>'colored-fruits'</code> share the same status context with <code>$color</code> and <code>$fruit</code> status variables defined in it. However, each <code>LI</code> element in the two lists has its own data context, containing one data entry, either <code>.color</code> or <code>.fruit</code></p>
-<p>Another interesting point of this example is the <code>.EXT</code> section and the d-rule of <code>'H2.summary'</code> element. Okay, meet operators, flatteners and convertors...</p>
+<p>Another interesting point of this example is the <code>.EXT</code> section and the d-rule of <code>'H2.summary'</code> element. Okay, meet flatteners and convertors...</p>
 
-
-<h2>Operators, flatteners and convertors</h2>
-<p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are similar to Javascript functions (in fact, they ARE Javascript functions) but with an imposed uniform contract:</p>
+<h2>Flatteners and convertors</h2>
+<p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are similar to Javascript functions. In fact, they ARE ordinary Javascript functions — but with imposed uniform contracts:</p>
 <p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.EXT</code> section</p>
-<p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into one single value. In the example above, the <code>sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single value) is then fed to the convertors.</p>
+<p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into one single value. In the example above, the <code>()sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single string) is then fed to the convertors.</p>
+<p>Another flattener featuring in <code>'H2.summary'</code> d-rule is dap's standard <code>()!</code> flattener, that tests if ALL of its arguments are <i>truish</i>. Its counterpart, <code>()?</code> flattener, that you will see in the example below, tests if ANY of its arguments is truish.</p>
+
+<h3>Named arguments</h3>
+<p>Having argument names provided along with values gives some extra possibilities to the flatteners. For example, parameter strings (parameterized URLs being typical example) can be built easily.</p>
+<pre>
+'stocks'.d("$code= $warehouse="
+	,'INPUT placeholder="Item code"'.ui("$code=#:value")
+	,'INPUT placeholder="Warehouse"'.ui("$warehouse=#:value")
+	,'summary'.d("? ($code $warehouse)?; ! hint (base@ $code $warehouse)uri")
+)
+.DEF({
+	hint: "Data for these goods might have been located somewhere at\n",
+	base: "https://mygoods.com/getstocks.php?"
+})
+</pre>
+<p>So, what new can we see here? A <code>#</code> special entry that evaluates to "this element" at run time, a standard <code>:value</code> converter that "converts" an element to its "value" (which is slightly different for various types of elements), and standard <code>()uri</code> flattener that "flattens" its arguments into a simple string using their values and names.</p>
+<p>Names of arguments are normally taken from their identifiers. For <code>$foo</code> variable, or <code>.foo</code> data entry, of <code>foo</code> constant, the name will be "foo". If argument is dot-routed, the name will be the tail part of its route: for <code>$customer.details.address</code> the name will be simply "address". The argument's default name can be altered with the <code>@</code> aliaser. For example, <code>$customer.details.address@ship-to</code> will be named "ship-to".</p>
+<p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But the can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email)?@login</code>.</p>
+<p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as  URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value it as is.</p>
+<h2>Okay, what's next?</h2>
+<p>By this point, you should be able to read dap rules and easily tell status variables from data entries, flatteners from converters, and see the overall logic of a dap template.</p>
+<img src="we_need_to_go_deeper.jpg" alt="But we need to go deeper" title="But we need to go deeper"/>
 </body>
 
 <script src="dapify.js"></script>
