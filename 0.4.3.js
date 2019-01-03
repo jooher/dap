@@ -1305,16 +1305,12 @@ const	dap=
 			
 			pairs	:function(str,tgt){
 				if(!tgt)tgt=[];
-				str&&str.replace(params,($0,$1,$2)=>{
-					tgt.push({name:$1,value:decodeURIComponent($2)});
-				})
+				str&&str.replace(params,($0,$1,$2)=>{tgt.push({name:$1,value:decodeURIComponent($2)})});
 				return tgt;
 			},
 			hash	:function(str,tgt){
 				if(!tgt)tgt={};
-				str&&str.replace( params,($0,$1,$2)=>{ 
-					if($1)tgt[$1]=decodeURIComponent($2);
-				});
+				str&&str.replace( params,($0,$1,$2)=>{if($1)tgt[$1]=decodeURIComponent($2)});
 				return tgt;
 			},
 			feed	:function(str,tgt){
