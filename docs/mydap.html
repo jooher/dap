@@ -2,21 +2,29 @@
 <html>
  <head>
   <title>My dap playground</title>
-  <script src="http://jooher.github.io/dap/0.4.3.js"></script>
+  <script src="../0.4.3.js"></script>
   <style>.ui{cursor:pointer}</style>
  </head>
  <body>
   <h2>Welcome to dap</h2>
   <script>
-  
-'stocks'.d("$code= $warehouse="
-	,'INPUT placeholder="Item code"'.ui("$code=#:value")
-	,'INPUT placeholder="Warehouse"'.ui("$warehouse=#:value")
-	,'summary'.d("? ($code $warehouse)?; ! hint (base@ $code $warehouse)uri")
+
+'dapify'.d("$code=`Hello"
+	,'PRE'.d("#.innerHTML=$code:dapify")
+	,'run'.d("sandbox($code)")
 )
 .DEF({
-	hint: "Data for these goods might have been located somewhere at\n",
-	base: "https://mygoods.com/getstocks.php?"
+	sandbox: 'IFRAME src="sandbox.html"'.d("")//.body=#:body body.innerHTML=.code")
+})
+.EXT({
+	convert:{
+		dapify : code=>code
+				.replace(/( \/\/.+?)\n/g,"<i>$1</i>\n") //comments
+				.replace(/('.+?')/g,"<em>$1</em>") // elements
+				.replace(/(\$[^\s=.;@:"()]*)/g,"<b>$1</b>")	// $status variables
+				,
+		body : iframe=>iframe.getElementsByTagName("body")[0]
+	}
 })
 .INLINE()
   </script>
