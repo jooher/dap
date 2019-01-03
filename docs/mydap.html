@@ -6,50 +6,19 @@
   <style>.ui{cursor:pointer}</style>
  </head>
  <body>
-  Welcome to dap
+  <h2>Welcome to dap</h2>
   <script>
   
-'colored-fruits'.d("$color= $fruit="
-
-	,'H3'.d("! hint.color $color")
-	,'UL.colors'.d("* color"
-		,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
-	)
-	,'reset'.d("! hint.reset.color").ui("$color=")
-	
-	,'H3'.d("! hint.fruit $fruit")
-	,'UL.fruit'.d("* fruit"
-		,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
-	)
-	,'reset'.d("! hint.reset.fruit").ui("$fruit=")
-	
-	,'H2.summary'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
+'stocks'.d("$code= $warehouse="
+	,'INPUT placeholder="Item code"'.ui("$code=#:value")
+	,'INPUT placeholder="Warehouse"'.ui("$warehouse=#:value")
+	,'summary'.d("? ($code $warehouse)?; ! hint (base@ $code $warehouse)uri")
 )
 .DEF({
-	color:["red","orange","yellow","green"],
-	fruit:["apple","pear","banana"],
-	
-	hint:{ // constants in the dictionary can be grouped...
-		color: "selected color: ",
-		fruit: "selected fruit: ",
-		reset :{ // ...to arbitrary depth
-			color: "Reset color",
-			fruit: "Reset fruit"
-		},
-		choice: "Your choice is"
-	}
-})
-.EXT({
-	flatten	:{
-		sentence: values=>values.reverse().join(" ")
-	},
-	convert	:{
-		uppercase: str=>str.toUpperCase(),
-		glitzy: str=>"*** "+str+" ***"
-	}
+	hint: "Data for these goods might have been located somewhere at\n",
+	base: "https://mygoods.com/getstocks.php?"
 })
 .INLINE()
-   
   </script>
  </body>
 </html>
