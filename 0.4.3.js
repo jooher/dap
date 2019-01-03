@@ -79,8 +79,8 @@ const	dap=
 		post	: (values,tags)	=> Env.Request.post( values.pop(),values,tags ),
 		upload	: (values,tags)	=> Env.Request.blob( values.pop(),values[0],tags[0] ),
 		
-		uri	: Env.Uri.ordered, // function(values,tags)	{ return Uri.encode( values,tags ); },
-		"uri*"	: Env.Uri.full
+		uri	: Env.QueryString.build.ordered, // function(values,tags)	{ return Uri.encode( values,tags ); },
+		//"uri*"	: Env.Uri.full
 
 	},
 	
@@ -755,10 +755,13 @@ const	dap=
 				return [{'':datarow},$,rowset];
 			},			
 			update	=(node,$)=>{ node.P.spawn($||node.$,node.parentNode,node) },
-			trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] )
+			trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] ),
+			
+			recap	=(arr,i,v)=>arr.slice(0,i).concat(v)
 			;
 			
-		let	stackDepth	= 0;
+		let	postpone	= null,
+			stackDepth	= 0;
 
 		function Branch($,node,up,route){
 			this.$		= $||node.$;
@@ -772,16 +775,17 @@ const	dap=
 			function(todo,place,instead){
 				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
 				const	node	= this.node,
-						branch	= todo && this.execBranch(todo),
-						empty	= branch && !node.childNodes.length;
+					branch	= todo && this.execBranch(todo),
+					empty	= branch && !node.childNodes.length;
 					
-				if(branch instanceof Postpone){
-					branch.locate(place,instead);
-					branch.put({branch:this});
+				if(postpone){
 					if(instead)Env.dim(instead);
+					postpone.branch=this;
+					postpone.locate(place,instead,);
+					postpone.ready();
 				}
 				else
-					if(empty==true)
+					if(empty===true)
 						Env.mute(node);
 				
 				if(place)//&&branch
@@ -805,8 +809,10 @@ const	dap=
 				for(let step;todo&&(step=todo[0]);todo=(flow==null)&&todo[1]){
 					if(step.todo){
 						const branch = new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
-						if(branch instanceof Postpone)
-							return branch.put({todo:[new Compile.Step(null,postpone.todo),todo[1]]})
+						if(postpone){
+							postpone.todo=[new Compile.Step(null,postpone.todo),todo[1]];
+							return;
+						}
 					}else										
 						flow	= null;
 							
@@ -823,30 +829,29 @@ const	dap=
 							// false	- next operand, but not next step
 							// true		- skip to next step
 							// array	- rowset subscopes
-							// ? object	- subscope
-							let value = this.execToken(values[i],tokens[i]);
-							if(value instanceof Postpone){
-								const	t = tokens.slice(0,i);
-								t[i] = value.token;
-								value.put({todo:[
-									new Compile.Step(
-										values && new Compile.Feed(values,tags,t,operate),
-										value.todo
-									),todo[1]
-								]});
-								return value;
+							// number	- loop
+							// object	- subscope
+							const value = this.execToken(values[i],tokens[i]);
+							if(postpone){
+								postpone.todo=[new Compile.Step(new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate),postpone.todo),todo[1]];//
+								return;
 							}
 							if(operate)
 								flow = operate(value,tags[i],node,$);
 						}
-							
-						if(flow)
-							if(isArray(flow)){
-								var	updata = $[0][''];
-								for(let r=0,rows=flow.length; r<rows; r++)//if(flow[r]!=null)
-									empty	= new Branch(ctx(flow[r],$,flow,updata),node,this.up).exec(todo[1]) && empty;
-							}else
-								flow	= null;
+						
+						if(flow===true)
+							flow = null; // skip to next step
+						
+						if(flow){
+							const	updata	= $[0][''],
+								rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
+							empty = rows.reduce(
+								(empty,row)=>
+									new Branch(ctx(row,$,flow,updata),node,this.up).exec(todo[1]) && empty,
+								empty
+							);
+						}
 				}
 				--stackDepth;
 				
@@ -897,21 +902,18 @@ const	dap=
 						var	values	= feed.values.slice(0),
 							tags	= feed.tags,
 							tokens	= feed.tokens,
-							proto	= value||literal,
-							i	= tokens.length;//values.length; //
+							proto	= value||literal;
 							
-							while(i--){
+							for(let i = tokens.length;i--;){
 								value=this.execToken(values[i],tokens[i]);
-								if(value instanceof Postpone){
-									tokens = tokens.slice(0,i);
-									tokens[i]=postpone.token;
-									
-									feed = values.length && new Compile.Feed(values,tags,tokens,feed.op);
-									
-									parts = parts.slice(0,p);
-									parts[p] = new Compile.Rvalue(feed,path);
-									
-									return value.put({token:new Compile.Token(parts,converts)});
+								if(postpone){
+									postpone.token=new Compile.Token(
+										recap(parts,p,new Compile.Rvalue(
+											values.length && new Compile.Feed(values,tags,recap(tokens,i,postpone.token),feed.op),		
+											path)
+										),converts
+									);
+									return;
 								}
 								values[i]=value;
 							}
@@ -936,16 +938,13 @@ const	dap=
 					if(convert)
 						for(let c=convert.length; c--; ){
 							value=convert[c](value);
-							if(value instanceof Postpone){
-								converts= converts.slice(0,p);
-								converts[p]=c>0 && convert.slice(0,c);
-								
-								parts	= parts.slice(0,p);
-								parts[p]= REUSE.STUB; // no Rvalue
-								
-								token	= new Compile.Token(parts,converts);
-								
-								return value.put({token,target:token})
+							if(postpone){
+								postpone.token = postpone.target = 
+								new Compile.Token(
+									recap(parts,p,REUSE.STUB),
+									recap(converts,p,c>0 && convert.slice(0,c))
+								);
+								return;
 							}
 						}
 						if(value==null)value="";
@@ -994,10 +993,13 @@ const	dap=
 					rule	= route==true ? null : ( node.reacts && node.reacts[route] ) || P.rules[route] || P.rules.u;
 					
 				if(rule)
-					route=this.execBranch(todo||rule.todo||rule.engage().todo)||route;
-				
-				if(route instanceof Postpone)
-					return route.put({branch:this,instead:snitch});
+					route	=this.execBranch(todo||rule.todo||rule.engage().todo)||route;
+					
+				if(postpone){
+					postpone.branch=this;
+					postpone.instead=snitch;
+					return;
+				}
 					
 				for(let i in this.up)
 					if(!defs||!defs[i])
@@ -1060,7 +1062,11 @@ const	dap=
 			this.todo	= null;
 			this.token	= null;
 			this.time	= Date.now();
-			this.info	=info;
+			this.info	= info;
+			
+			if(postpone)Warn("Orphan postpone: "+postpone.info);
+				
+			postpone	= this;
 		};
 		Postpone.prototype = {
 			locate	:function(place,instead){
@@ -1071,11 +1077,9 @@ const	dap=
 					}
 					return this;
 				},
-			put	:function(obj){
-					for(let i in obj)this[i]=obj[i];
-					return this;
-				},
-				
+			ready	:function(){
+					postpone=null;
+				},				
 			dismiss	:function(){
 					this.branch=null;
 				},
@@ -1185,7 +1189,7 @@ const	dap=
 				}
 				return	function(value){
 					holder.execute(value);
-					throw holder.post = new Execute.Postpone();
+					holder.post = new Execute.Postpone();
 				}
 			},
 		
@@ -1290,6 +1294,91 @@ const	dap=
 			})()
 		}
 	})(),
+	
+	QueryString = (function(){
+		
+		const
+		
+		params =/(?:^|&)([^&=]*)=?([^&]*)/g,
+		
+		parse	={
+			
+			pairs	:function(str,tgt){
+				if(!tgt)tgt=[];
+				str&&str.replace(params,($0,$1,$2)=>{
+					tgt.push({name:$1,value:decodeURIComponent($2)});
+				})
+				return tgt;
+			},
+			hash	:function(str,tgt){
+				if(!tgt)tgt={};
+				str&&str.replace( params,($0,$1,$2)=>{ 
+					if($1)tgt[$1]=decodeURIComponent($2);
+				});
+				return tgt;
+			},
+			feed	:function(str,tgt){
+				if(!tgt)tgt={values:[],tags:[]};
+				str&&str.replace(params,($0,$1,$2)=>{
+					tgt.values.push(decodeURIComponent($2));
+					tgt.tags.push($1);
+				})
+				return tgt;
+			}
+		},
+		
+		build	={
+			
+			hash	:(qstr,target)=>{
+				if(!target)target={};
+				if(qstr)
+					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;){
+						var	nv = tups[i].split('='),
+							key = nv[0]; //(remap&&remap[key])||
+						if(nv.length>1)target[key]=decodeURIComponent(nv[1]);
+						else target['!']=key;
+					}
+				return target;
+			},
+			
+			feed	:(qstr,tgt)=>{
+			
+				if(!tgt)tgt={values:[],tags:[]};
+
+				if(qstr)
+					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;)
+						if(tups[i]){
+							const	nv = tups[i].split('='),
+								value = decodeURIComponent(nv.pop()),
+								key = nv.length&&nv[0];
+							tgt.values.push(value);
+							tgt.tags.push(key);//(remap&&remap[key])||
+						}
+				return tgt;
+			},
+
+			neutral	:(hash)=>{
+				const arg=[];
+				hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
+				return arg.join('&').replace(/%20/g,'+');
+			},
+			
+			ordered	:(values,tags,emptytoo)=>{
+				let uri="";
+				for(let i=values.length,v,t;i--;)
+					if((v=values[i])||(v===0)||emptytoo)
+						uri+=(t=tags[i]) ? "&"+t+"="+ encodeURIComponent(v) : v;
+				return uri.replace(/%20/g,'+');
+			}
+		
+		},
+
+		merge	=(...str)=>{
+			str.reduce(parse.hash,{});
+		}
+
+		return	{ parse, build, merge }		
+	})(),
 
 	Uri	= (function(){
 	
@@ -1300,118 +1389,36 @@ const	dap=
 		keys = ["source","origin","protocol","authority","userinfo","username","password","host","hostname","port","relative","path","directory","file","query","anchor"],
 		regx = /^(([^:\/?#]+:)?\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?(([^:\/?#]*)(?::(\d*))?))?)((((?:[^?#\/]*\/)*)([^?#]*))(\?[^#]*)?(#.*)?)/,
 			
-		parse	=(str)=>{// based on code from http://blog.stevenlevithan.com/archives/parseuri
+		parse	= str=>{// based on code from http://blog.stevenlevithan.com/archives/parseuri
 			const uri = {};
 			regx.exec(str).map((val,i)=>{uri[keys[i]]=val});
 			return uri;
 		},
-
-		hash	=(qstr,target)=>{
-			if(!target)target={};
-			if(qstr)
-				for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;){
-					var	nv = tups[i].split('='),
-						key = nv[0]; //(remap&&remap[key])||
-					if(nv.length>1)target[key]=decodeURIComponent(nv[1]);
-					else target['!']=key;
-				}
-			return target;
-		},
 		
-		feed	=(qstr,tgt)=>{
-		
-			if(!tgt)tgt={values:[],tags:[]};
-
-			if(qstr)
-				for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;)
-					if(tups[i]){
-						const	nv = tups[i].split('='),
-							value = decodeURIComponent(nv.pop()),
-							key = nv.length&&nv[0];
-						tgt.values.push(value);
-						tgt.tags.push(key);//(remap&&remap[key])||
-					}
-			return tgt;
-		},
-
-		neutral	=(hash)=>{
-			const arg=[];
-			hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
-			return arg.join('&').replace(/%20/g,'+');
-		},
-		
-		ordered	=(values,tags,emptytoo)=>{
-			let uri="";
-			for(let i=values.length,v,t;i--;)
-				if((v=values[i])||(v===0)||emptytoo)
-					uri+=(t=tags[i]) ? "&"+t+"="+ encodeURIComponent(v) : v;
-			return uri.replace(/%20/g,'+');
-		};
-		
-		
-		return	{
-			base,
-			parse,
-		
-			neutral,
-			ordered,
-			full	:(values,tags)=>ordered(values,tags,true),
+		absolute=(href,rel)=>{	// evaluate absolute URL from relative to base URL
 			
-			feed	:feed,
-			hash	:hash,
+			if(!rel)rel=base;
+			if(!href)return rel;
+			if(/^\w*:\/\//.test(href))return href;
+							
+			const	uri	= parse(rel);
 			
-			query	:(function(regx){
-				
-				return	{
-					pairs	:function(str,tgt){
-						if(!tgt)tgt=[];
-						str.replace(regx,function($0,$1,$2){
-							tgt.push([$1,decodeURIComponent($2)]);
-						})
-						return tgt;
-					},
-					hash	:function(str,tgt){
-						if(!tgt)tgt={};
-						str.replace( regx, function($0,$1,$2){ 
-							if($1)tgt[$1]=decodeURIComponent($2);
-						});
-						return tgt;
-					},
-					feed	:function(str,tgt){
-						if(!tgt)tgt={values:[],tags:[]};
-						str.replace(regx,function($0,$1,$2){
-							tgt.values.push(decodeURIComponent($2));
-							tgt.tags.push($1);
-						})
-						return tgt;
-					}
-				}
-			})(/(?:^|&)([^&=]*)=?([^&]*)/g),
-			
-			absolute:	/// evaluate absolute URL from relative to base URL
-			function(href,from){
-				
-				if(!from)from=base;
-				if(!href)return from;
-				if(/^\w*:\/\//.test(href))return href;
-								
-				var	uri	= parse(from);
-				
-				switch(href.charAt(0)){
-					case'*': return base;
-					case'/': return uri.origin+href;
-					case'?': return uri.origin+uri.path+href;
-					case'#': return uri.origin+uri.path+uri.query+href;
-					case'.': 
-						var up = href.match(/\.\.\//g);
-						if(up){
-							uri.directory=uri.directory.split("/").slice(0,-up.length).join('/');
-							href=href.substr(up.length*3);
-						};
-				}
-				return uri.origin+uri.directory+href;
+			switch(href.charAt(0)){
+				case'*': return base;
+				case'/': return uri.origin+href;
+				case'?': return uri.origin+uri.path+href;
+				case'#': return uri.origin+uri.path+uri.query+href;
+				case'.': 
+					const up = href.match(/\.\.\//g);
+					if(up){
+						uri.directory=uri.directory.split("/").slice(0,-up.length).join('/');
+						href=href.substr(up.length*3);
+					};
 			}
+			return uri.origin+uri.directory+href;
 		}
+		
+		return	{ base, parse, absolute }
 
 	})(),
 	
@@ -1449,8 +1456,7 @@ const	dap=
 				postpone.info=request.url;
 				request.onreadystatechange=function (){
 					if(this.readyState==4)
-						return	postpone ? postpone.resolve(consume(this))
-							: Warn("No target for request",this);
+						postpone.resolve(consume(this)); //Warn("No target for request",this);
 				}				
 			}
 			
@@ -1460,10 +1466,7 @@ const	dap=
 			return postpone||consume(request);
 		};
 		
-		return {
-			MimeHandlers,
-			query
-		}
+		return { MimeHandlers, query }
 	})(),
 	
 	Request	= (function(){
@@ -1519,7 +1522,7 @@ const	dap=
 			
 		mark	:function(node,cls,on){
 				const	c	= " "+node.className+" ",
-						was	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
+					was	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
 				if(on)	{if(!was) node.className = (c+cls).trim();}
 				else	{if(was ) node.className = c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ").trim();}
 			}
@@ -1551,15 +1554,14 @@ const	dap=
 			
 		function fromUri(){
 
-				var	full	= window.location.href.split(/#!?/),
+				const	full	= window.location.href.split(/#!?/),
 					query	= full[0].split("?")[1],
-					state	= full[1],
-					rewrite	= query && query.indexOf("=")>0 && Uri.feed(query,Uri.feed(state));
+					state	= full[1];
 					
-				if(rewrite)
-					window.location.href=Uri.base+"#!"+Uri.ordered(rewrite.values,rewrite.tags);
+				if(query && query.indexOf("=")>0)
+					window.location.href=Uri.base+"#!"+QueryString.merge(query,state);//QueryString.build.ordered(rewrite.values,rewrite.tags);
 				else	
-					return Uri.hash(state);
+					return QueryString.parse.hash(state);
 			};
 			
 		return	{
@@ -1571,17 +1573,9 @@ const	dap=
 
 	return	{
 		
-		DEFAULT,
-		REUSE,
+		DEFAULT, REUSE,
 	
-		State,
-		Event,
-		Style,
-		Uri,
-		Http,
-		Native,
-		Json,
-		Storage,
+		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State, 
 		
 		query	:Http.query, // to be generalized
 		
@@ -1594,12 +1588,12 @@ const	dap=
 		
 		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
 		
-		doc		:doc,
-		log		:log,
+		doc	:doc,
+		log	:log,
 		attr	:function(value,alias,node){ if(value)node.setAttribute(alias,value); else node.removeAttribute(alias); }, //... 
 		mark	:function(value,alias,node){ Style.mark(node,alias,!!value); },
 		mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
-		dim		:function(elem){Style.attach(elem,"DIM"); return elem; },
+		dim	:function(elem){Style.attach(elem,"DIM"); return elem; },
 		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);Warn(e.message)/*throw e*/},
 		
 		exec	:function(path,values){
