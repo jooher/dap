@@ -2,50 +2,28 @@
 <html>
  <head>
   <title>My dap playground</title>
-  <script src="http://jooher.github.io/dap/0.4.3.js"></script>
+  <script src="../0.4.3.js"></script>
   <style>.ui{cursor:pointer}</style>
  </head>
  <body>
   Welcome to dap
   <script>
   
-'colored-fruits'.d("$color= $fruit="
-
-	,'H3'.d("! hint.color $color")
-	,'UL.colors'.d("* color"
-		,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
-	)
-	,'reset'.d("! hint.reset.color").ui("$color=")
-	
-	,'H3'.d("! hint.fruit $fruit")
-	,'UL.fruit'.d("* fruit"
-		,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
-	)
-	,'reset'.d("! hint.reset.fruit").ui("$fruit=")
-	
-	,'H2.summary'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
+'dapify'.d("$code=`Hello"
+	,'PRE'.d("#.innerHTML=$code:dapify")
+	,'run'.d("sandbox($code)")
 )
 .DEF({
-	color:["red","orange","yellow","green"],
-	fruit:["apple","pear","banana"],
-	
-	hint:{ // constants in the dictionary can be grouped...
-		color: "selected color: ",
-		fruit: "selected fruit: ",
-		reset :{ // ...to arbitrary depth
-			color: "Reset color",
-			fruit: "Reset fruit"
-		},
-		choice: "Your choice is"
-	}
+	sandbox: 'IFRAME src="sandbox.html"'.d("")//.body=#:body body.innerHTML=.code")
 })
 .EXT({
-	flatten	:{
-		sentence: values=>values.reverse().join(" ")
-	},
-	convert	:{
-		uppercase: str=>str.toUpperCase(),
-		glitzy: str=>"*** "+str+" ***"
+	convert:{
+		dapify : code=>code
+				.replace(/( \/\/.+?)\n/g,"<i>$1</i>\n") //comments
+				.replace(/('.+?')/g,"<em>$1</em>") // elements
+				.replace(/(\$[^\s=.;@:"()]*)/g,"<b>$1</b>")	// $status variables
+				,
+		body : iframe=>iframe.getElementsByTagName("body")[0]
 	}
 })
 .INLINE()

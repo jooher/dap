@@ -920,7 +920,7 @@ const	dap=
 						
 						if(proto){
 							value['']=this.$[0][''];
-							Print(this.node,proto,[{'':value},this.$,this.$[2]]);
+							Print(proto,null,this.node,[{'':value},this.$,this.$[2]]);
 						}							
 					}
 					
