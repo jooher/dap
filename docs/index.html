@@ -78,9 +78,9 @@
 <p>Status context entries, or <em>status variables</em> are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to the element's children. Status variables can be updated in u-rules. If status variable's value is changed, all elements that depend on it, will be updated. Status variables provide the main reactivity mechanism in dap.</p>
 <pre>
 'main'.d("$value=`hello" // d-rule defines a status variable named $value
-	,'H3.display'.d("! $value") // d-rule displays the variable
 	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rules update the variable `
 	,'INPUT placeholder="or type in here"'.d("!! $value").ui("$value=#:value")
+	,'H3.display'.d("! $value") // d-rule displays the variable
 )
 .DEF({
 	cheese: "Say cheese!"
@@ -154,6 +154,7 @@
 	hint: "Data for these goods might have been located somewhere at\n",
 	base: "https://mygoods.com/getstocks.php?"
 })
+.INLINE()
 </pre>
 <p>So, what new can we see here? A <code>#</code> special entry that evaluates to "this element" at run time, a standard <code>:value</code> converter that "converts" an element to its "value" (which is slightly different for various types of elements), and standard <code>()uri</code> flattener that "flattens" its arguments into a simple string using their values and names.</p>
 <p>Names of arguments are normally taken from their identifiers. For <code>$foo</code> variable, or <code>.foo</code> data entry, of <code>foo</code> constant, the name will be "foo". If argument is dot-routed, the name will be the tail part of its route: for <code>$customer.details.address</code> the name will be simply "address". The argument's default name can be altered with the <code>@</code> aliaser. For example, <code>$customer.details.address@ship-to</code> will be named "ship-to".</p>
