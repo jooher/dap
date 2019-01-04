@@ -302,8 +302,23 @@ operate	:{
 	})(),
 
 
+		function splitDeep(str,val){
+			if(Array.prototype.isArray(val))
+				for(let i=val.length;i--;)
+					val[i]=splitDeep(val[i],separator);
+			else if(value&&value.split)
+				value=value.split(separator);
+			return value;
+		};
+		
+,
 
-
+		 indepth:(alias,value,todo,target)=>{
+			if(value!=null)
+				if(typeof value != 'object')target=todo(alias,value,target);
+				else for(let i in value)if(i)target=indepth(i,value[i],todo,target);
+			return target;
+		}
 
 
 	Hub	= (function(){
