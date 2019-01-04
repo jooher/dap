@@ -4,17 +4,12 @@ function Check(value){
 	return value;
 }
 
-const	dap=
-
-(Env=>{
-
+const	dap=(Env=>
+{
 	"use strict";
 	
 	const
 
-	Perf	= (text,since)=>console.log("PERF "+(Date.now()-since)+" ms : "+text),
-	Log	= console.log,
-	Warn	= reason=>console.warn("dap warn: "+reason),
 	Fail	= reason=>{throw new Error("dap error: "+reason)},
 	
 	Canonical= ()=>({
@@ -105,7 +100,6 @@ const	dap=
 	O	= [],
 	E	= "",
 
-
 	isArray = Array.prototype.isArray,
 	Print	=(value,alias,place,$)=>{//(place,P,$)=>{
 			if(value==null)return;
@@ -114,11 +108,12 @@ const	dap=
 			else Env.print(place,value,alias)			
 		},
 		
-
-	
-	Util=	{
+	Util	={
 			
-		merge	: Object.assign || (tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]},
+		merge	: (tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;},//(Object.assign) ||
+		union	: (...src)=>src.reduce(merge,{}),
+
+		
 		reach	: (path,start)=>path.reduce(o,v=>o&&o[v],start),
 	
 		stub	: (tgt,map)=>map.keys.reduce((tgt,k)=>tgt.split(k).join(map[k]),tgt),
@@ -144,103 +139,99 @@ const	dap=
 		
 		Namespace = (function(){
 
+			const	registry={};
+				//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
+			
 			function Ns(uri,ready){
 				
-				Log("New namespace: "+uri);
+				Env.console.log("New namespace: "+uri);
 				
 				this.uri	= uri;
 				this.monads	= Monads;
 				this.dict	= {};
 				this.refs	= {};
 				
-				this.inherit	= stdns;
+				this.inherit	= null;
 				this.ready	= ready;
 			}
 			Ns.prototype=(function(){
+				
+				const
 			
-				function require(ns){
+				require	= ns=>{
 					if(!ns.ready){
-					
-						var	loaded	= Env.Http.GET(false,null,"text/plain",ns.uri) // application/javascript
-								||Fail("Cannot load namespace "+ns.uri);
+						const	loaded	= Env.Http.query({uri:ns.uri})||Fail("Cannot load namespace "+ns.uri);
 						ns.fromNode( loaded );
 						ns.ready=true;
 					}
 					return ns.dict;
-				};
+				},
 				
-				return	{
+				lookup	= function(domain,path,key){
 					
-					Inherit	:function(ns){
-							this.inherit=ns;
-							return this;
-						},
+						require(this);
 						
-					Refs	:function(refs){
-							for( var a = refs.trim().replace(/\s*::\s*/g,"::").split(/\s+/), i=a.length; i--; ){
-								var	ref	= a[i].split("::"),
-									alias	= ref[0],
-									path	= ref[1],
-									imported= Env.Uri.absolute(path,this.uri);
-								
-								if(this.refs[alias]!=null)Fail("Duplicate ref in "+this.uri+" for "+alias+" : "+imported, this);
-								this.refs[alias] = imported;
-							}
-							return this;
-						},
+						if(!key)
+							key= path.pop();
+						
+						const	d	= domain?this.monads[domain]:this.dict,
+							xtrn	= this.refs[key],
+							entry	= xtrn
+								? Namespace(xtrn).lookup(domain,path.length&&path)
+								: d&&d[key] || this.inherit&&this.inherit.lookup(domain,path,key);
+						
+						if(entry instanceof Ns)
+							entry = this.dict[key] = require(entry);
+						
+						return entry;
+					},						
+					
+				reach	= function(path,domain){					
+						let entry=this.lookup(domain,path) || domain&&Fail( domain+" not found: "+path, this );
+						while( entry && path.length ) entry = entry[path.pop()];	
+						return entry;
+					},
+					
+				USE	= function(refs){
+						for(let ns in refs)
+							this.refs[ns]=Env.Uri.absolute(refs[ns],this.uri);
+						return this;
+					},
 
-					Monads	:function(monads){
-							this.monads=monads;
-							return this;
-						},
-						
-					Dict	:function(dict){
-							for(let i in dict){
-								var p=(this.dict[i]=dict[i]);
-								if(p instanceof Proto)p.ns=this;
-							}
-							return this;
-						},
+				EXT	= function(monads){
+						for(let d in this.monads)
+							monads[d]=Util.union(this.monads[d],monads[d]);
+						this.monads=monads;
+						return this;
+					},
+					
+				DEF	= function(dict){
+						for(let i in dict){
+							var p=(this.dict[i]=dict[i]);
+							if(p instanceof Proto)p.ns=this;
+						}
+						return this;
+					},
 
-					poke	:function(path,value){
-							var	entry=this.dict,
-								i=path.length,
-								key;
-							while(--i)
-								entry=entry[key=path[i]]||(entry[key]={});
-							return entry[path[0]]=value;
-						},
-						
-					lookup	:function(domain,path,key){
-						
-							require(this);
-							
-							if(!key)
-								key= path.pop();
-							
-							var	d	= domain?this.monads[domain]:this.dict,
-								xtrn	= this.refs[key],
-								entry	= xtrn
-									? Namespace(xtrn).lookup(domain,path.length&&path)
-									: d&&d[key] || this.inherit&&this.inherit.lookup(domain,path,key);
-							
-							if(entry instanceof Ns)
-								entry = this.dict[key] = require(entry);
-							
-							return entry;
-						},						
-						
-					reach	:function(path,domain){					
-							var entry=this.lookup(domain,path) || domain&&Fail( domain+" not found: "+path, this );
-							while( entry && path.length ) entry = entry[path.pop()];	
-							return entry;
-						},						
-									
+				Inherit	= function(ns){
+						this.inherit=ns;
+						return this;
+					},
+					
+				poke	= function(path,value){
+						var	entry=this.dict,
+							i=path.length,
+							key;
+						while(--i)
+							entry=entry[key=path[i]]||(entry[key]={});
+						return entry[path[0]]=value;
 					}
+					
+								
+				return	{reach, lookup, DEF, EXT, USE}
+
+					
 			})();
-			
-			var	registry={},
-				stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
 			
 			return function(ref,base,ready){
 				const uri = Env.Uri.absolute(ref,base);
@@ -249,7 +240,7 @@ const	dap=
 			
 		})(),
 		
-		rootns	= Namespace(null,null,true).Monads(Monads);//Uri.absolute()
+		rootns	= Namespace(null,null,true);//EXT(Monads).EXT(Env.Monads);//Uri.absolute()
 
 	
 		function Proto(ns,utag){
@@ -282,16 +273,17 @@ const	dap=
 			r	:function(rule)			{ return new Rule(this.ns,rule) },
 			
 			DEF	:function(dict){
-					this.ns.Dict(dict);//=Namespace(dict.URI);
+					this.ns.DEF(dict);//=Namespace(dict.URI);
 					return this;
 				},
 				
 			EXT	:function(monads){
-					this.ns.Monads(monads);
+					this.ns.EXT(monads);
 					return this;
 				},
 				
-			USE	:function(libs){
+			USE	:function(refs){
+					this.ns.USE(refs);
 					return this;
 				},
 				
@@ -344,11 +336,14 @@ const	dap=
 			},
 			
 			spawn	:function($,place,instead){
-				var	rules	= this.rules||this.prepare(),
+				const	rules	= this.rules||this.prepare(),
 					d	= rules.d,
 					a	= rules.a,
-					node	= Env.clone( this.elem, !d ? null : !d.defs ? $ : [{'':$[0]['']},$,$[2]], this),
+					node	= Env.clone(this.elem),
 					react	= this.react;
+					
+				node.P=this;
+				if(d)node.$=!d.defs ? $ : [{'':$[0]['']},$,$[2]];
 					
 				if(react)
 					for(let i=react.length; i-->0;){
@@ -416,12 +411,12 @@ const	dap=
 		Rule.prototype=(function(){
 			
 			const	CLEANUP	= new RegExp([		
-					'^[;\s]+',		// leading semicolons
-					'[;\s]+$',		// trailing semicolons
-					'\/\*.*?\*\/',		// C-style /* inline comments */
-					'[;\s]*\/\/\*.*$',	// comments to end of line //*
-					'\s+(?==)'		// whitespace in front of assignment sign
-					].map(s=>"(?:"+s+")").join("|"),"g"
+					/^[;\s]+/,		// leading semicolons
+					/[;\s]+$/,		// trailing semicolons
+					/\/\*.*?\*\//,		// C-style /* inline comments */
+					/[;\s]*\/\/\*.*$/,	// comments to end of line //*
+					/\s+(?==)/		// whitespace in front of assignment sign
+					].map(s=>"(?:"+s.source+")").join("|"),"g"
 				),
 				SHRINK	= /\s\s+/g,		// shrink spaces
 				BRACKETS=/[({[][;\s]*([^(){}\[\]]*?)[;\s]*[\]})]/g,
@@ -675,16 +670,7 @@ const	dap=
 			}
 		})();		
 				
-		return	{
-			Namespace,
-			
-			Proto,
-			Rule,
-			Step,
-			Feed,
-			Token,
-			Rvalue
-		}
+		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue }
 		
 	})(),
 	
@@ -1006,7 +992,8 @@ const	dap=
 			this.time	= Date.now();
 			this.info	= info;
 			
-			if(postpone)Warn("Orphan postpone: "+postpone.info);
+			if(postpone)
+				Env.console.warn("Orphan postpone: "+postpone.info);
 				
 			postpone	= this;
 		};
@@ -1027,10 +1014,10 @@ const	dap=
 				},
 			resolve	:function(value){
 					if(this.branch){
-						Perf("wait: "+this.info,this.time);
+						perf("wait: "+this.info,this.time);
 						this.target.value=value;
 						After.hold();
-						Perf("exec: "+this.info,Date.now(),
+						Env.perf("exec: "+this.info,Date.now(),
 							this.branch.up
 							?this.branch.checkUp(this.instead,this.todo)
 							:this.branch.exec(this.todo,this.place,this.instead)
@@ -1047,32 +1034,31 @@ const	dap=
 			a	:function(node,rule)	{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).exec( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
 			u	:function(node,event)	{ new Branch(node.$,node,{},event).checkUp(); },
 			
-			Branch,
-			Postpone,
-			update
+			Postpone, Branch, update
 		};
 
 	})(),
 	
 	React	=(function(){
 		
-		function Handle(e){
-			Env.Event.stop(e);
+		function handle	(e){
+			e=Env.Event.normalize(e);
 			After.hold();
-			Perf(e.type,Date.now(),Execute.u(e.currentTarget||e.srcElement,e.type));
+			Env.perf(e.type,Date.now(),Execute.u(e.target,e.type));
 			After.run();				
 			return true;
 		}
 			
 		return	{
-			bind	:function(node,alias,value,hilite,capture){
+			bind	:function(node,alias,value,hilite){//,capture
 			
-				var	event	= alias||Env.DEFAULT.EVENT,
+				const	event	= alias||Env.DEFAULT.EVENT,
 					donor	= value||node.P,
 					rule	= donor.ubind ? donor.ubind(event) : donor[event] || donor.u;
 					
 				(node.reacts||(node.reacts={}))[event]=rule;
-				Env.Event.attach(node,event,Handle,hilite);
+				hilite && Env.Style.attach(node,hilite);
+				Env.Event.attach(node,event,handle);
 			}
 		}
 	})(),
@@ -1173,13 +1159,13 @@ const	dap=
 	log	=	m=>{if(window.console)window.console.log("DAP "+m);return m;},
 	
 	newStub	= 	c=> doc.createComment(c),
-	newElem	=	e=> doc.createElement(e),//try{}catch(er){alert("newElem fail:"+e)}
+	newElem	=	e=> doc.createElement(e),
 	newText	=	t=> doc.createTextNode(t),
 	newElemText=(e,t)=>{const et=newElem(e);et.appendChild(newText(t));return et; },
-	
+/*	
 	newError=(e,$,P)=>{const n = newElemText("dap-error",e.message); n.$=$; n.P=P; return n; },// n.setAttribute("title",P.rules.d.rulestring);
 	newMute	=($,P)	=>{const n = doc.createComment(P.elem?P.elem.nodeName:"*"); n.$=$; n.P=P; return n; },
-	
+*/	
 	unHTML=newElem("div"),
 	
 	parseWithExtra=(tag,extra)=>{
@@ -1187,6 +1173,8 @@ const	dap=
 		return unHTML.firstChild;			
 	},	
 			
+	perf	= (info,since)=>console.log("PERF "+(Date.now()-since)+" ms : "+info),
+	
 	Native	=(str,ui)=>{
 		if(!str)return DEFAULT.ELEMENT;
 		const	space	= str.indexOf(" "),
@@ -1210,31 +1198,16 @@ const	dap=
 		
 		const
 		
-		listen	= doc.addEventListener	? function(node,event,handler,capture){node.addEventListener(event,handler,capture||false)}:
-			  doc.attachEvent	? function(node,event,handler){node.attachEvent("on"+event,handler,false)}
-						: function(node,event,handler){node["on"+event]=handler},
+		stop	= window.Event		? (e)=>{ e.stopPropagation(); e.preventDefault(); return e; }
+						: ( )=>{ const e=window.event; e.cancelBubble=true; e.returnValue=false; return e; },
 						
-		stop	= window.Event		? function(e){ e.stopPropagation(); e.preventDefault(); return e; }
-						: function(){ e=window.event; e.cancelBubble=true; e.returnValue=false; return e; }
-		;
-		
-		return	{
-			stop	: stop,
-			attach	: (node,event,handler,hilite)=>{if(hilite)Style.attach(node,hilite);listen(node,event,handler);},
-			fire	: (function(){
+		attach	= doc.addEventListener	? (node,event,handler,capture)=>{node.addEventListener(event,handler,capture||false)}:
+			  doc.attachEvent	? (node,event,handler)=>{node.attachEvent("on"+event,handler,false)}
+						: console.warn("Can't listen to events"),//(node,event,handler)=>{node["on"+event]=handler},
+						
+		normalize = e=>{ stop(e); return {type:e.type, target:e.currentTarget||e.srcElement} }
 				
-				var createEvent = document.createEvent
-					? function(signal){var e = document.createEvent('Event'); e.initEvent(signal, true, true); return e}
-					: function(signal){return new window.Event(signal)};
-					
-				return	document.dispatchEvent ? function(signal){document.dispatchEvent(createEvent(signal))} :
-					document.fireEvent ? function(signal){
-						var e=
-						document.fireEvent(signal);
-					} :
-					function(signal){Warn("Failed to fire event: "+signal)}
-			})()
-		}
+		return	{ attach, normalize }
 	})(),
 	
 	QueryString = (function(){
@@ -1311,7 +1284,7 @@ const	dap=
 		
 		},
 
-		merge	=(...strs)=> strs.reduce(parse.hash,{}),
+		merge	=(...strs)=> strs.reduce(parse.hash,{});
 
 		return	{ parse, build, merge }		
 	})(),
@@ -1363,9 +1336,10 @@ const	dap=
 		const
 		
 		MimeHandlers={
-			"text/plain": request => request.responseText,
-			"application/json": request => Json.decode(request.responseText),//,request.getResponseHeader("X-Columns")//Dataset.unpack();
-			"application/xml":request => request.responseXML.documentElement
+			"text/plain"		: request => request.responseText,
+			"application/json"	: request => Json.decode(request.responseText),//,request.getResponseHeader("X-Columns")//Dataset.unpack();
+			"application/javascript": request => eval(request.responseText),
+			"application/xml"	: request => request.responseXML.documentElement
 		},
 		
 		consume	=(request)=>{
@@ -1392,12 +1366,12 @@ const	dap=
 				postpone.info=request.url;
 				request.onreadystatechange=function (){
 					if(this.readyState==4)
-						postpone.resolve(consume(this)); //Warn("No target for request",this);
+						postpone.resolve(consume(this));
 				}				
 			}
 			
 			try	{request.send(req.body||null);}
-			catch(e){Warn(e.message);}
+			catch(e){console.warn(e.message);}
 			
 			return postpone||consume(request);
 		};
@@ -1447,20 +1421,20 @@ const	dap=
 		},
 
 	Storage	={
-		put	:function(data)	{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
-		get	:function(key)	{try{JSON.parse(localStorage.getItem(key))}catch(e){return null};}
+		put	:(data)=>{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
+		get	:(key)=>{try{JSON.parse(localStorage.getItem(key))}catch(e){return null};}
 		},
 	
 	Style	= {
 	
-		attach	:function(node,cls){Style.mark(node,cls,true)},
-		detach	:function(node,cls){Style.mark(node,cls,false)},
+		attach	:(node,cls)=>{Style.mark(node,cls,true)},
+		detach	:(node,cls)=>{Style.mark(node,cls,false)},
 			
-		mark	:function(node,cls,on){
-				const	c	= " "+node.className+" ",
-					was	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
-				if(on)	{if(!was) node.className = (c+cls).trim();}
-				else	{if(was ) node.className = c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ").trim();}
+		mark	:(node,cls,on)=>{
+				const	classes	= node.className.split(" "),
+					found	= classes.findIndex(cls);
+				if(found&&!on?classes.splice(found,1):!found&&on?classes.push(cls):null)
+					node.className = have.join(" ");
 			}
 	},
 	
@@ -1509,23 +1483,24 @@ const	dap=
 
 	return	{
 		
-		doc, DEFAULT, REUSE, 
+		doc, perf, DEFAULT, REUSE, 
 	
-		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State, 
+		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State,
+
+		console	:window.console,
 		
-		uievent	:node=>
-					node.nodeName.toLowerCase()=='input'	?'change':
-					node.nodeName.toLowerCase()=='select'	?'change':
-					node.isContentEditable	?'blur':
-					'click',
+		uievent	:node=>	node.nodeName.toLowerCase()=='input'	?'change':
+				node.nodeName.toLowerCase()=='select'	?'change':
+				node.isContentEditable	?'blur':
+				DEFAULT.EVENT,//'click',
 		
 		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
+		clone	:elem=>elem.cloneNode(false),
+		
 		
 		mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
-		dim		:function(elem){Style.attach(elem,"DIM"); return elem; },
-		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);Warn(e.message)/*throw e*/},
-		
-		clone	:function(elem,$,P){const n=elem.cloneNode(false); n.$=$; n.P=P; return n; },
+		dim	:function(elem){Style.attach(elem,"DIM"); return elem; },
+		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
 		
 		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
 		
@@ -1533,23 +1508,20 @@ const	dap=
 				if(!instead)instead = document.currentScript||document.script[document.script.length-1]||Fail("can't inline");
 				const place = instead.parentNode;
 				place.replaceChild( proto.spawn([{'':State.read()}],place) || newStub("dap"), instead );
-			}
-		}
-		
-		EXT	:{
+			},
 			
-			convert	:{
-				log	: log,
+		Monads	:{
+			
+			convert	:{ log, Json, 
+				
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
-				json	: Json.decode,
 				
 				copy	: item=>isArray(item)?item.slice(0):Object.assign({},item),
 				script	: url=>Util.merge(newElem("script"),{src:"url",async:true,onload:()=>{doc.body.appendChild(el)}}),
 				
 				sync	: req=> Http.query(req,null),
 				query	: req=> dap.Async(req=>Http.query(req,true)), // to be generalized
-				
 			},
 			
 			flatten:	{
@@ -1570,13 +1542,14 @@ const	dap=
 			operate	:{
 				title	:(text)			=>{ doc.title=text; },
 				log	:(value,alias)		=>{ log(alias+" : "+value); },
-				
-				attr	:(value,alias,node)	=>{ if(value)node.setAttribute(alias,value); else node.removeAttribute(alias); }, //... 
 				mark	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
+				
+				attr	:(value,alias,node)	=>{ value ? node.setAttribute(alias,value) : node.removeAttribute(alias) }, //... 
 			}
 		}
+	}		
 		
-	})()
+})()
 );
 
 dap.Infect(String.prototype);

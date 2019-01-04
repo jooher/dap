@@ -395,4 +395,19 @@ return a;
 					if(part=str[i]) str[i] = sep ? branch(part,sep) : resolve(part);
 			}return str;
 		};
-*/		
+*/	
+
+			fire	: (function(){
+				
+				const	createEvent = document.createEvent
+					? function(signal){var e = document.createEvent('Event'); e.initEvent(signal, true, true); return e}
+					: function(signal){return new window.Event(signal)};
+					
+				return	document.dispatchEvent ? function(signal){document.dispatchEvent(createEvent(signal))} :
+					document.fireEvent ? function(signal){
+						var e=
+						document.fireEvent(signal);
+					} :
+					function(signal){console.warn("Failed to fire event: "+signal)}
+			})()
+	

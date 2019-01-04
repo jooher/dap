@@ -7,8 +7,7 @@
 <body>
 
 <h1>Understanding dap</h1>
-<p>Unlike many other reactive frameworks that build reactivity upon Javascript's expressive means, dap has its own "superscript" language that allows to take the dependency descriptions to a higher level of abstraction and let all the low-level bindings resolve under the hood. Dap-rules written in this superscript are extremely compact, efficient and human-readable at the same time; they are lazily parsed, precompiled and executed by the dap runtime script (less than 9kiB), and do not require any other code preparation steps.</p>
-<p>So you can start your dap experiments with an .html document like this:
+<p>All you need to use dap in your document is a reference to dap rintime script: <code>&lt;script src="https://dap.js.org/0.4.3.js"&gt;&lt;/script&gt;</code>. You can start your dap experiments with an .html document like this:</p>
 <!--
 <pre><![CDATA[
 <!DOCTYPE html>
@@ -35,7 +34,7 @@
 &lt;html&gt;
  &lt;head&gt;
   &lt;title&gt;My dap playground&lt;/title&gt;
-  <b>&lt;script src="https://jooher.github.io/dap/0.4.3.js"&gt;&lt;/script&gt;</b>
+  <b>&lt;script src="https://dap.js.org/0.4.3.js"&gt;&lt;/script&gt;</b>
  &lt;/head&gt;
  &lt;body&gt;
   &lt;h2&gt;Welcome to dap&lt;/h2&gt;
@@ -47,8 +46,7 @@
  &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<p>You may want to create such file on your Desktop (or anywhere else) to try the code examples given below. Save it as "mydap.html", then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working.</p>
-
+<p>Save it on your Desktop (or anywhere else), then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working.</p>
 
 
 <h2>Rules and contexts</h2>
