@@ -111,7 +111,7 @@ const	dap=(Env=>
 	Util	={
 			
 		merge	: (tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;},//(Object.assign) ||
-		union	: (...src)=>src.reduce(merge,{}),
+		union	: (...src)=>src.reduce(Util.merge,{}),
 
 		
 		reach	: (path,start)=>path.reduce(o,v=>o&&o[v],start),
@@ -142,6 +142,25 @@ const	dap=(Env=>
 			const	registry={};
 				//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
 			
+			require = uri=>Function(document.getElementById(uri).textContent)(dap),
+			
+			lookup	= function(ns,domain,path,key){
+			
+				if(!key)
+					key= path.pop();
+				
+				const	scope	= domain ? this.monads[domain] : this.dict;
+					xtrn	= this.refs[key],
+					entry	= xtrn
+						? lookup(Namespace(xtrn),domain,path.length&&path)
+						: scope&&scope[key] || ns.inherit&&this.inherit.lookup(domain,path,key);
+				
+				if(entry instanceof Ns)
+					entry = this.dict[key] = require(entry);
+				
+				return entry;
+			},						
+				
 			function Ns(uri,ready){
 				
 				Env.console.log("New namespace: "+uri);
@@ -154,72 +173,43 @@ const	dap=(Env=>
 				this.inherit	= null;
 				this.ready	= ready;
 			}
-			Ns.prototype=(function(){
+			Ns.prototype={
 				
-				const
-			
-				require	= ns=>{
-					if(!ns.ready){
-						const	loaded	= Env.Http.query({uri:ns.uri})||Fail("Cannot load namespace "+ns.uri);
-						ns.fromNode( loaded );
-						ns.ready=true;
-					}
-					return ns.dict;
-				},
-				
-				lookup	= function(domain,path,key){
-					
-						require(this);
-						
-						if(!key)
-							key= path.pop();
-						
-						const	d	= domain?this.monads[domain]:this.dict,
-							xtrn	= this.refs[key],
-							entry	= xtrn
-								? Namespace(xtrn).lookup(domain,path.length&&path)
-								: d&&d[key] || this.inherit&&this.inherit.lookup(domain,path,key);
-						
-						if(entry instanceof Ns)
-							entry = this.dict[key] = require(entry);
-						
-						return entry;
-					},						
-					
-				reach	= function(path,domain){					
-						let entry=this.lookup(domain,path) || domain&&Fail( domain+" not found: "+path, this );
-						while( entry && path.length ) entry = entry[path.pop()];	
-						return entry;
-					},
-					
-				USE	= function(refs){
+				USE	: function(refs){
 						for(let ns in refs)
-							this.refs[ns]=Env.Uri.absolute(refs[ns],this.uri);
+							this.refs[ns]=refs[ns]//Env.Uri.absolute(,this.uri);
 						return this;
 					},
 
-				EXT	= function(monads){
+				EXT	: function(monads){
 						for(let d in this.monads)
 							monads[d]=Util.union(this.monads[d],monads[d]);
 						this.monads=monads;
 						return this;
 					},
 					
-				DEF	= function(dict){
+				DEF	: function(dict){
 						for(let i in dict){
 							var p=(this.dict[i]=dict[i]);
 							if(p instanceof Proto)p.ns=this;
 						}
 						return this;
 					},
+					
+				reach	: function(path,domain){
+						let entry = domain ? lookup(this,makePath(path),domain)||Fail( domain+" not found: "+path):.lookup(this,path);
+						while( entry && path.length ) entry = entry[path.pop()];	
+						return entry;
+					},
 
-				Inherit	= function(ns){
+
+				Inherit	: function(ns){
 						this.inherit=ns;
 						return this;
 					},
 					
-				poke	= function(path,value){
-						var	entry=this.dict,
+				poke	: function(path,value){
+						let	entry=this.dict,
 							i=path.length,
 							key;
 						while(--i)
@@ -227,11 +217,8 @@ const	dap=(Env=>
 						return entry[path[0]]=value;
 					}
 					
-								
-				return	{reach, lookup, DEF, EXT, USE}
-
 					
-			})();
+			};
 			
 			return function(ref,base,ready){
 				const uri = Env.Uri.absolute(ref,base);
@@ -240,7 +227,7 @@ const	dap=(Env=>
 			
 		})(),
 		
-		rootns	= Namespace(null,null,true);//EXT(Monads).EXT(Env.Monads);//Uri.absolute()
+		rootns	= Namespace(null,null,true).EXT(Env.Monads);//Uri.absolute()
 
 	
 		function Proto(ns,utag){
@@ -273,7 +260,7 @@ const	dap=(Env=>
 			r	:function(rule)			{ return new Rule(this.ns,rule) },
 			
 			DEF	:function(dict){
-					this.ns.DEF(dict);//=Namespace(dict.URI);
+					this.ns.DEF(dict);
 					return this;
 				},
 				
@@ -287,7 +274,7 @@ const	dap=(Env=>
 					return this;
 				},
 				
-			NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
+			//NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
 			
 			set	:function(key,stuff,react){
 					var p = this.tgt || new Proto(this.ns,this.utag).$$();
@@ -480,7 +467,7 @@ const	dap=(Env=>
 				if(inherits){
 				
 					const	donor	= inherits.split("#"),
-						inherit	= context.ns.reach( makePath(donor[0]) ) || Fail( "Can't find "+donor[0] ),
+						inherit	= context.ns.reach( donor[0] ) || Fail( "Can't find "+donor[0] ),
 						rule	= inherit.ubind && inherit.ubind(donor[1]||"d") || Fail( "Can't inherit from "+donor[0] );
 						
 					if(rule){
@@ -502,7 +489,7 @@ const	dap=(Env=>
 				let	a	= !/[<$=]/.test(tokens[0]) && tokens.shift();// operate:convert@alias
 				const	alias	= a&&(a=   a.split("@")).length>1 ? a[1] : null,
 					convert	= a&&(a=a[0].split(":")).length>1 ? makeConverts(context,a[1]) : null,
-					operate	= a&&(a=a[0]) ? context.ns.reach(makePath(a),MONADS.OPERATE) : null;
+					operate	= a&&(a=a[0]) ? context.ns.reach(a,MONADS.OPERATE) : null;
 			
 				return new Step(
  					tokens.length
@@ -629,19 +616,15 @@ const	dap=(Env=>
 			
 			function makeArgsFeed(context,str){
 				let	a	= str.split(">");
-				const	flatten	= a[1]	? context.ns.reach(makePath(a[1]),MONADS.FLATTEN) : Util.hash,
+				const	flatten	= a[1]	? context.ns.reach(a[1],MONADS.FLATTEN) : Util.hash,
 					tokens	= a[0] && context.branchStack[a[0]].split(TOKENS);
 					
 				return	tokens ? makeTokens( context, tokens, flatten ) : Feed.prototype.EMPTY;
 			}
 			
-			function makeConverts(context,str){
-				const vector = str.split(",").reverse();
-				for(let i=vector.length,c; i--;)
-					if('function' != typeof (vector[i]=context.ns.reach(makePath(c=vector[i]),MONADS.CONVERT)||Fail("converter not found "+vector[i],context)))
-						Fail('convert '+c+' is not a function');
-				return vector;
-			}
+			const
+			
+			makeConverts=(context,str)=>str.split(",").reverse().map(path=>context.ns.reach(path,MONADS.CONVERT));
 			
 			return {
 				
@@ -1509,6 +1492,8 @@ const	dap=(Env=>
 				const place = instead.parentNode;
 				place.replaceChild( proto.spawn([{'':State.read()}],place) || newStub("dap"), instead );
 			},
+			
+		NS	:(name)=>Compile.Namespace(name),
 			
 		Monads	:{
 			
