@@ -6,19 +6,36 @@
 
 <script>
 'UL.heroes'.d("! heroes:sample.upper")
-)
 
 .DEF({
 	heroes:"heroes.json"
 })
 
 .USE({
-	sample	: "https://dap.js.org/google.js",
+	sample	: "sample-ns.js",
 })
 
 .INLINE();
 
 </script>
+
+<pre id="sample-ns.js">
+dap.NS("sample.js")
+
+.EXT({
+	convert	:{
+		upper	:str=>str.toUpperCase(),
+		lower	:str=>str.toLowerCase()
+	},
+	flatten	:{
+		here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
+	}
+})
+
+.DEF({
+	linebreak: document.createElement('HR')
+})
+</pre>
 
 </body>
 </html>

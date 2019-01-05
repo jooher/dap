@@ -66,8 +66,6 @@ const	dap=(Env=>
 		
 		"!"	:Print,
 		
-		"!!"	:Env.attr,
-		"!?"	:Env.mark,
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		
 		"u"	:(value,alias,node)=>	{ React.bind(node,alias,value); },
@@ -139,27 +137,33 @@ const	dap=(Env=>
 		
 		Namespace = (function(){
 
-			const	registry={};
+			const	registry={},
 				//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
 			
-			require = uri=>Function(document.getElementById(uri).textContent)(dap),
+			require = (ns)=>{
+				if(!ns)return;
+				if(!ns.ready)
+					Function(document.getElementById(ns.uri).textContent)(dap);
+				ns.ready=true;
+				return ns.dict;
+			},
 			
-			lookup	= function(ns,domain,path,key){
+			lookup	= (ns,path,domain,key)=>{
 			
 				if(!key)
 					key= path.pop();
 				
-				const	scope	= domain ? this.monads[domain] : this.dict;
-					xtrn	= this.refs[key],
+				const	scope	= domain ? ns.monads[domain] : ns.dict,
+					xtrn	= ns.refs[key],
 					entry	= xtrn
-						? lookup(Namespace(xtrn),domain,path.length&&path)
-						: scope&&scope[key] || ns.inherit&&this.inherit.lookup(domain,path,key);
+						? lookup(require(Namespace(xtrn)),path.length&&path,domain)
+						: scope&&scope[key] || lookup(ns.inherit,path,domain,key);
 				
 				if(entry instanceof Ns)
-					entry = this.dict[key] = require(entry);
+					entry = ns.dict[key] = require(entry);
 				
 				return entry;
-			},						
+			};						
 				
 			function Ns(uri,ready){
 				
@@ -197,8 +201,9 @@ const	dap=(Env=>
 					},
 					
 				reach	: function(path,domain){
-						let entry = domain ? lookup(this,makePath(path),domain)||Fail( domain+" not found: "+path):.lookup(this,path);
-						while( entry && path.length ) entry = entry[path.pop()];	
+						if(domain)path=makePath(path);
+						let entry = lookup(this,path,domain)||domain&&Fail( domain+" not found: "+path);
+						while( entry && path.length )entry = entry[path.pop()];	
 						return entry;
 					},
 
@@ -221,7 +226,7 @@ const	dap=(Env=>
 			};
 			
 			return function(ref,base,ready){
-				const uri = Env.Uri.absolute(ref,base);
+				const uri = ref;//Env.Uri.absolute(ref,base);
 				return registry[uri] || (registry[uri]=new Ns(uri,ready));
 			}
 			
@@ -1527,9 +1532,13 @@ const	dap=(Env=>
 			operate	:{
 				title	:(text)			=>{ doc.title=text; },
 				log	:(value,alias)		=>{ log(alias+" : "+value); },
-				mark	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
 				
-				attr	:(value,alias,node)	=>{ value ? node.setAttribute(alias,value) : node.removeAttribute(alias) }, //... 
+				"!!"	:(value,alias,node)	=>{ value ? node.setAttribute(alias,value) : node.removeAttribute(alias) }, //... 
+				"!?"	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
+/*
+				"!!"	:Env.attr,
+				"!?"	:Env.mark,
+*/
 			}
 		}
 	}		
