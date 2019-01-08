@@ -3,7 +3,7 @@ h3{margin-top:2em;}
 code{background:aliceblue; padding:2px; white-space:nowrap; }
 
 /* dapify styles */
-pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1.2em/1.5 monospace; width:100%; overflow:auto; }
+pre{padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1.2em/1.5 monospace; overflow:auto; }
 pre>i{color:cornflowerblue;}
 pre>b{color:mediumblue}
 pre>em{background:lavender; font-style:normal}
