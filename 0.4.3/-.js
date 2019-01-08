@@ -66,8 +66,6 @@ const	dap=(Env=>
 		
 		"!"	:Print,
 		
-		"!!"	:Env.attr,
-		"!?"	:Env.mark,
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		
 		"%"	:(value,alias,node,$)=>	{ const d=$[0]['']; if(alias)d[alias]=value; else for(let i in value)d[i]=value[i]; },
@@ -135,6 +133,7 @@ const	dap=(Env=>
 		append	=(obj,key,value)=>(obj[key]=obj[key]&&(value.charAt(0)===';')?obj[key]+value:value); /// ???
 		
 		
+<<<<<<< HEAD
 		function Namespace(uri){
 			
 			Env.console.log("New namespace: "+uri);
@@ -179,10 +178,27 @@ const	dap=(Env=>
 				},
 
 			lookup	: function(path,domain,key){
+=======
+		Namespace = (function(){
+
+			const	registry={},
+				//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
+			
+			require = (ns)=>{
+				if(!ns)return;
+				if(!ns.ready)
+					Function(document.getElementById(ns.uri).textContent)(dap);
+				ns.ready=true;
+				return ns.dict;
+			},
+			
+			lookup	= (ns,path,domain,key)=>{
+>>>>>>> ef88267c729e8cd21ceed7a408ff2302c2815a67
 			
 				if(!key)
 					key= path.pop();
 				
+<<<<<<< HEAD
 				const	scope	= domain ? this.monads[domain] : this.dict,
 					xtrn	= this.refs[key],
 					entry	= xtrn
@@ -196,6 +212,86 @@ const	dap=(Env=>
 			}						
 				
 		};
+=======
+				const	scope	= domain ? ns.monads[domain] : ns.dict,
+					xtrn	= ns.refs[key],
+					entry	= xtrn
+						? lookup(require(Namespace(xtrn)),path.length&&path,domain)
+						: scope&&scope[key] || lookup(ns.inherit,path,domain,key);
+				
+				if(entry instanceof Ns)
+					entry = ns.dict[key] = require(entry);
+				
+				return entry;
+			};						
+				
+			function Ns(uri,ready){
+				
+				Env.console.log("New namespace: "+uri);
+				
+				this.uri	= uri;
+				this.monads	= Monads;
+				this.dict	= {};
+				this.refs	= {};
+				
+				this.inherit	= null;
+				this.ready	= ready;
+			}
+			Ns.prototype={
+				
+				USE	: function(refs){
+						for(let ns in refs)
+							this.refs[ns]=refs[ns]//Env.Uri.absolute(,this.uri);
+						return this;
+					},
+
+				EXT	: function(monads){
+						for(let d in this.monads)
+							monads[d]=Util.union(this.monads[d],monads[d]);
+						this.monads=monads;
+						return this;
+					},
+					
+				DEF	: function(dict){
+						for(let i in dict){
+							var p=(this.dict[i]=dict[i]);
+							if(p instanceof Proto)p.ns=this;
+						}
+						return this;
+					},
+					
+				reach	: function(path,domain){
+						if(domain)path=makePath(path);
+						let entry = lookup(this,path,domain)||domain&&Fail( domain+" not found: "+path);
+						while( entry && path.length )entry = entry[path.pop()];	
+						return entry;
+					},
+
+
+				Inherit	: function(ns){
+						this.inherit=ns;
+						return this;
+					},
+					
+				poke	: function(path,value){
+						let	entry=this.dict,
+							i=path.length,
+							key;
+						while(--i)
+							entry=entry[key=path[i]]||(entry[key]={});
+						return entry[path[0]]=value;
+					}
+					
+					
+			};
+			
+			return function(ref,base,ready){
+				const uri = ref;//Env.Uri.absolute(ref,base);
+				return registry[uri] || (registry[uri]=new Ns(uri,ready));
+			}
+			
+		})(),
+>>>>>>> ef88267c729e8cd21ceed7a408ff2302c2815a67
 		
 		const		
 		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
@@ -1498,9 +1594,13 @@ const	dap=(Env=>
 			operate	:{
 				title	:(text)			=>{ doc.title=text; },
 				log	:(value,alias)		=>{ log(alias+" : "+value); },
-				mark	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
 				
-				attr	:(value,alias,node)	=>{ value ? node.setAttribute(alias,value) : node.removeAttribute(alias) }, //... 
+				"!!"	:(value,alias,node)	=>{ value ? node.setAttribute(alias,value) : node.removeAttribute(alias) }, //... 
+				"!?"	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
+/*
+				"!!"	:Env.attr,
+				"!?"	:Env.mark,
+*/
 			}
 		}
 	}		
