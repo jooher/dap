@@ -5,7 +5,7 @@
 <head>
 	<title>Tour of Heroes - dap example</title>
 	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
-	<script src="../../0.4.3.js"></script>
+	<script src="../--.js"></script>
 	<link href="styles.css" rel="stylesheet" type="text/css"/>	
 	<link href="toh.css" rel="stylesheet" type="text/css"/>	
 </head>
@@ -37,7 +37,7 @@
 				,'hero-bar'.d(""
 					,'id'.d("! .id")
 					,'name'.d("! .name")
-					,'del'.d("! `×; !! dict.remove@title").ui("$heroes=($heroes .id):hero.remove; ?")
+					,'del'.d("!! `× dict.remove@title").ui("$heroes=($heroes .id):hero.remove; ?")
 				).ui("$hero=$")
 			)
 			,'addnew'.d("$name="
@@ -47,9 +47,9 @@
 		)
 	)
 	,'page.details'.d("? $hero; $name=$hero.name"
-		,'H2'.d("! (dict.details $name:upper)space")
-		,'id.labelled'.d("! $hero.id; !! dict.id@label")
-		,'name.labelled contenteditable'.d("! $hero.name; !! dict.name@label").e("keyup","$name=#:value")
+		,'H2'.d("! (dict.details $name:upper)spaced")
+		,'id.labelled'.d("!! $hero.id@ dict.id@label")
+		,'name.labelled contenteditable'.d("!! $hero.name@ dict.name@label").e("keyup","$name=#:value")
 		,'done'.ui("$hero=").d(""
 			,'BUTTON.back'.d("! dict.back").ui("")
 			,'BUTTON.save'.d("? ($hero.name $name)ne; ! dict.save").ui("$hero.name=$name")
@@ -57,7 +57,7 @@
 	)
 	,'messages'.d("! $message")
 )
-.EXT({
+.FUNC({
 	convert:{
 		upper	:str=>str.toUpperCase(),
 		top5	:arr=>arr.slice(0,5),
@@ -75,7 +75,7 @@
 		}
 	}
 })
-.DEF({
+.DICT({
 	dict	:{
 		apptitle	:"Tour of heroes",
 		page		:["Dashboard","Heroes"],

@@ -66,8 +66,6 @@ const	dap=(Env=>
 		
 		"!"	:Print,
 		
-		"!!"	:Env.attr,
-		"!?"	:Env.mark,
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		
 		"%"	:(value,alias,node,$)=>	{ const d=$[0]['']; if(alias)d[alias]=value; else for(let i in value)d[i]=value[i]; },
@@ -126,7 +124,7 @@ const	dap=(Env=>
 	
 	},
 	
-	Monads	= Canonical(),
+	Func	= Canonical(),
 	
 	Compile	= (function(){
 		
@@ -140,9 +138,9 @@ const	dap=(Env=>
 			Env.console.log("New namespace: "+uri);
 			
 			this.uri	= uri;
-			this.monads	= Monads;
+			this.func	= Func;
 			this.dict	= {};
-			this.refs	= {};
+			this.uses	= {};
 			
 			this.inherit	= null;
 			
@@ -150,20 +148,20 @@ const	dap=(Env=>
 		}
 		Namespace.prototype={
 			
-			USE	: function(refs){
-					for(let ns in refs)
-						this.refs[ns]=refs[ns]//Env.Uri.absolute(,this.uri);
+			USES	: function(uses){
+					for(let ns in uses)
+						this.uses[ns]=uses[ns]//Env.Uri.absolute(,this.uri);
 					return this;
 				},
 
-			EXT	: function(monads){
-					for(let d in this.monads)
-						monads[d]=Util.union(this.monads[d],monads[d]);
-					this.monads=monads;
+			FUNC	: function(func){
+					for(let d in this.func)
+						func[d]=Util.union(this.func[d],func[d]);
+					this.func=func;
 					return this;
 				},
 				
-			DEF	: function(dict){
+			DICT	: function(dict){
 					for(let i in dict){
 						var p=(this.dict[i]=dict[i]);
 						if(p instanceof Proto)p.ns=this;
@@ -183,8 +181,8 @@ const	dap=(Env=>
 				if(!key)
 					key= path.pop();
 				
-				const	scope	= domain ? this.monads[domain] : this.dict,
-					xtrn	= this.refs[key],
+				const	scope	= domain ? this.func[domain] : this.dict,
+					xtrn	= this.uses[key],
 					entry	= xtrn
 						? require(xtrn).lookup(path.length&&path,domain)
 						: scope&&scope[key] || this.inherit&&this.inherit.lookup(path,domain,key);
@@ -198,9 +196,9 @@ const	dap=(Env=>
 		};
 		
 		const		
-		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
+		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Func(Func);
 		require	= uri => namespaces[uri]||(namespaces[uri]=Function('return '+document.getElementById(uri).textContent)(dap)),
-		rootns	= new Namespace(Env.Uri.base).EXT(Env.Monads);//Uri.absolute()
+		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
 
 		function Proto(ns,utag){
 			this.ns		= ns||rootns;
@@ -231,18 +229,18 @@ const	dap=(Env=>
 			
 			r	:function(rule)			{ return new Rule(this.ns,rule) },
 			
-			DEF	:function(dict){
-					this.ns.DEF(dict);
+			DICT	:function(dict){
+					this.ns.DICT(dict);
 					return this;
 				},
 				
-			EXT	:function(monads){
-					this.ns.EXT(monads);
+			FUNC	:function(func){
+					this.ns.FUNC(func);
 					return this;
 				},
 				
-			USE	:function(refs){
-					this.ns.USE(refs);
+			USES	:function(uses){
+					this.ns.USES(uses);
 					return this;
 				},
 				
@@ -288,7 +286,7 @@ const	dap=(Env=>
 					if(this.utag)
 						this.elem=Env.Native(this.utag,this.rules[""]&&"ui");
 					
-					if(!this.elem && d && (d.defs||d.refs))
+					if(!this.elem && d && (d.defs||d.uses))
 						Fail("Entry must be an element",this);
 				}
 				return this.rules;
@@ -330,7 +328,7 @@ const	dap=(Env=>
 			this.ns	  = ns;
 			this.branchStack = branchStack;
 			this.defs = null;
-			this.refs = null;
+			this.uses = null;
 		}
 
 		function Step(feed,todo){
@@ -365,7 +363,7 @@ const	dap=(Env=>
 			
 			this.todo	= null;
 			this.defs	= null;
-			this.refs	= null;
+			this.uses	= null;
 		}
 		Rule.prototype=(function(){
 			
@@ -393,7 +391,7 @@ const	dap=(Env=>
 				STEPS	= /(?:;\s+)+/,
 				TOKENS	= /\s+/,
 				
-				MONADS	= {
+				FUNCS	= {
 					OPERATE	: "operate",
 					FLATTEN	: "flatten",
 					CONVERT	: "convert"
@@ -444,7 +442,7 @@ const	dap=(Env=>
 						
 					if(rule){
 						for(let i in rule.defs)(context.defs||(context.defs={}))[i]=true;
-						for(let i in rule.refs)(context.refs||(context.refs={}))[i]=true;
+						for(let i in rule.uses)(context.uses||(context.uses={}))[i]=true;
 						todo = rule.todo||rule.engage().todo;
 					}
 				}
@@ -461,7 +459,7 @@ const	dap=(Env=>
 				let	a	= !/[<$=]/.test(tokens[0]) && tokens.shift();// operate:convert@alias
 				const	alias	= a&&(a=   a.split("@")).length>1 ? a[1] : null,
 					convert	= a&&(a=a[0].split(":")).length>1 ? makeConverts(context,a[1]) : null,
-					operate	= a&&(a=a[0]) ? context.ns.reach(a,MONADS.OPERATE) : null;
+					operate	= a&&(a=a[0]) ? context.ns.reach(a,FUNCS.OPERATE) : null;
 			
 				return new Step(
  					tokens.length
@@ -542,7 +540,7 @@ const	dap=(Env=>
 								
 									case'$'	:
 										if(entry=entry.substr(1))
-											(context.refs||(context.refs={}))[entry]=true;
+											(context.uses||(context.uses={}))[entry]=true;
 										//else entry=SCOPE;
 										path[top]=entry;
 										break;
@@ -588,7 +586,7 @@ const	dap=(Env=>
 			
 			function makeArgsFeed(context,str){
 				let	a	= str.split(">");
-				const	flatten	= a[1]	? context.ns.reach(a[1],MONADS.FLATTEN) : Util.hash,
+				const	flatten	= a[1]	? context.ns.reach(a[1],FUNCS.FLATTEN) : Util.hash,
 					tokens	= a[0] && context.branchStack[a[0]].split(TOKENS);
 					
 				return	tokens ? makeTokens( context, tokens, flatten ) : Feed.prototype.EMPTY;
@@ -596,7 +594,7 @@ const	dap=(Env=>
 			
 			const
 			
-			makeConverts=(context,str)=>str.split(",").reverse().map(path=>context.ns.reach(path,MONADS.CONVERT));
+			makeConverts=(context,str)=>str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
 			
 			return {
 				
@@ -608,7 +606,7 @@ const	dap=(Env=>
 						if(this.rulestring){
 							var context=new Context(this.ns,Parse(this.rulestring));
 							this.todo = makeBranch( context, 0, epilog );
-							this.refs = context.refs;
+							this.uses = context.uses;
 							this.defs = context.defs;
 						}
 						else 	this.todo = epilog ? [epilog] : REUSE.DUMMY;
@@ -959,8 +957,8 @@ const	dap=(Env=>
 					const	$	= node.$,
 						$0	= $[0],
 						defs	= !snitch&&d.defs,
-						refs	= d&&d.refs,
-						affs	= a&&a.refs;
+						uses	= d&&d.uses,
+						affs	= a&&a.uses;
 						
 					let	rebuild	= false,
 						repaint	= false,
@@ -969,7 +967,7 @@ const	dap=(Env=>
 					for(let i in dn)
 						if($0[i]!=null){
 							if(!defs||!defs[i])(sift||(sift={}))[i]=$0[i]=dn[i];
-							if(refs&&refs[i])rebuild=true;
+							if(uses&&uses[i])rebuild=true;
 							if(affs&&affs[i])repaint=true;
 						}
 					
@@ -1116,7 +1114,6 @@ const	dap=(Env=>
 	newMute	=($,P)	=>{const n = doc.createComment(P.elem?P.elem.nodeName:"*"); n.$=$; n.P=P; return n; },
 */	
 	unHTML=newElem("div"),
-	
 	parseWithExtra=(tag,extra)=>{
 		unHTML.innerHTML="<"+tag+" "+extra+"></"+tag+">";
 		return unHTML.firstChild;			
@@ -1378,16 +1375,16 @@ const	dap=(Env=>
 		detach	:(node,cls)=>{Style.mark(node,cls,false)},
 			
 		mark	:(node,cls,on)=>{
-				const	classes	= node.className.split(" "),
-					found	= classes.findIndex(cls);
-				if(found&&!on?classes.splice(found,1):!found&&on?classes.push(cls):null)
-					node.className = have.join(" ");
+				const	c	= " "+node.className+" ",
+					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
+				if(!on!=!found)
+					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
 			}
 	},
 	
 	State	= (function(){
 		
-		var	historian = null,
+		let	historian = null,
 			href = null, //window.location.href;
 			
 			refresh=function(){
@@ -1453,7 +1450,6 @@ const	dap=(Env=>
 			
 		clone	:elem=>elem.cloneNode(false),
 		
-		
 		mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
 		dim	:function(elem){Style.attach(elem,"DIM"); return elem; },
 		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
@@ -1466,7 +1462,7 @@ const	dap=(Env=>
 				place.replaceChild( proto.spawn([{'':State.read()}],place) || newStub("dap"), instead );
 			},
 			
-		Monads	:{
+		Func	:{
 			
 			convert	:{ log, Json, 
 				
@@ -1498,9 +1494,12 @@ const	dap=(Env=>
 			operate	:{
 				title	:(text)			=>{ doc.title=text; },
 				log	:(value,alias)		=>{ log(alias+" : "+value); },
-				mark	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
 				
-				attr	:(value,alias,node)	=>{ value ? node.setAttribute(alias,value) : node.removeAttribute(alias) }, //... 
+				"!!"	:(value,alias,node)	=>{
+						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);
+						else node.appendChild(newText(value));
+					},
+				"!?"	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
 			}
 		}
 	}		

@@ -5,7 +5,7 @@
 <head>
 	<title>Hello Forum</title>
 	<!--<script src="https://dap.js.org/0.4.3.js"></script>-->
-	<script src="../../0.4.3.js"></script>
+	<script src="../--.js"></script>
 	<link rel="stylesheet" href="helloforum.css"/>
 </head>
 
@@ -29,7 +29,7 @@ const	grc={
 
 'helloforum'.d("! (.msg:# Entry@+ Ties@-)case")
 
-.DEF({
+.DICT({
 	base	:'https://dapmx.org/samples/helloforum/helloforum.php?',
 
 	Entry	:'msg'.d("$!!=; * (base@ `read.msg .msg)uri:query"
@@ -64,7 +64,7 @@ const	grc={
 		}
 })
 
-.EXT({
+.FUNC({
 	convert	:{
 		grc:dap.async(grc)
 	}

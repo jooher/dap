@@ -7,7 +7,7 @@
 <pre id="sample-ns.js">
 dap.NS("sample.js")
 
-.EXT({
+.FUNC({
 	convert	:{
 		upper	:str=>str.toUpperCase(),
 		lower	:str=>str.toLowerCase()
@@ -17,7 +17,7 @@ dap.NS("sample.js")
 	}
 })
 
-.DEF({
+.DICT({
 	linebreak: document.createElement('HR')
 })
 </pre>
@@ -25,11 +25,11 @@ dap.NS("sample.js")
 <script>
 'test'.d("! (`io heroes)uri:sample.upper")
 
-.DEF({
+.DICT({
 	heroes:"heroes.json"
 })
 
-.USE({
+.USES({
 	sample	: "sample-ns.js",
 })
 

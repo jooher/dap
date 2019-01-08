@@ -1,6 +1,6 @@
 dap.NS("sample.js")
 
-.EXT({
+.FUNC({
 	convert	:{
 		upper	:str=>str.toUpperCase(),
 		lower	:str=>str.toLowerCase()
@@ -10,6 +10,6 @@ dap.NS("sample.js")
 	}
 })
 
-.DEF({
+.DICT({
 	linebreak: "linebreak"
 })
