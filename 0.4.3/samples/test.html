@@ -1,6 +1,6 @@
 <html>
 <head>
-	<script src="../-.js"></script>
+	<script src="../--.js"></script>
 </head>
 <body>
 
@@ -13,7 +13,9 @@ dap.NS("sample.js")
 		lower	:str=>str.toLowerCase()
 	},
 	flatten	:{
-		here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
+		here	: (values,tags)=>
+				tags.reduce((str,tag,i)=>
+					str.split('{'+tag+'}').join(values[i]),values.pop())
 	}
 })
 
@@ -23,10 +25,11 @@ dap.NS("sample.js")
 </pre>
 
 <script>
-'test'.d("! (`io heroes)uri:sample.upper")
+'test'.d("! (here (`io heroes)uri:sample.upper@heroes)here")
 
 .DICT({
-	heroes:"heroes.json"
+	heroes:"heroes.json",
+	here:"heroes go here: {heroes} right?"
 })
 
 .USES({

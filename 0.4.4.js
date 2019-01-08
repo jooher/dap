@@ -50,9 +50,6 @@ const	dap=(Env=>
 		join	:(values)=>values.reverse().join(values.shift()),
 		concat	:(values)=>values.reverse().join(""),
 		spaced	:(values)=>values.reverse().join(" ").replace(/\s\s+/g," ").trim(),
-						
-		alert	:(values)	=>{ for(let i=values.length;i--;)Env.alert(values[i]); },
-		confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(Env.confirm(values[i]))return tags[i]||true; },
 		
 		"case"	: (values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; },
 	},
@@ -308,7 +305,7 @@ const	dap=(Env=>
 						Env.react(node,react[i],null,Execute.React);
 					}
 					
-				new Execute.Branch(node.$,node).exec(d.todo||d.engage().todo,place,instead);
+				new Execute.Branch(node.$,node).runDown(d.todo||d.engage().todo,place,instead);
 				
 				if(a)a.todo||a.engage();
 				
@@ -615,7 +612,7 @@ const	dap=(Env=>
 					},
 					
 				spawn	: function($,node){
-						new Execute.Branch($,node).exec(this.todo||this.engage().todo);
+						new Execute.Branch($,node).runDown(this.todo||this.engage().todo);
 					},
 					
 				ubind	: function(event){ return this }
@@ -679,7 +676,7 @@ const	dap=(Env=>
 
 		})(),
 		
-		Append	=(node,$,todo)	=>{ new Branch($,node).exec(todo) },
+		Append	=(node,$,todo)	=>{ new Branch($,node).runDown(todo) },
 		Rebuild	=(node,$)	=>{ node.P.spawn($||node.$,node.parentNode,node) },				
 	
 		Update	=(node,event)	=>{ new Branch(node.$,node,{},event).checkUp() },		
@@ -702,29 +699,6 @@ const	dap=(Env=>
 		}
 		Branch.prototype={
 
-			exec:
-			function(todo,place,instead){
-				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
-				const	node	= this.node,
-					branch	= todo && this.execBranch(todo),
-					empty	= branch && !node.childNodes.length;
-					
-				if(postpone){
-					if(instead)Env.dim(instead);
-					postpone.branch=this;
-					postpone.locate(place,instead,);
-					postpone.ready();
-				}
-				else
-					if(empty===true)
-						Env.mute(node);
-				
-				if(place)//&&branch
-					instead ? place.replaceChild(node,instead) : place.appendChild(node);
-						
-				return empty;
-			},
-			
 			execBranch: //returns true if empty
 			function(todo){
 				
@@ -742,6 +716,7 @@ const	dap=(Env=>
 					if(step.todo){
 						const branch = new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
 						if(postpone){
+							postpone.branch=this;
 							postpone.todo=[new Compile.Step(null,postpone.todo),todo[1]];
 							return;
 						}
@@ -765,6 +740,7 @@ const	dap=(Env=>
 							// object	- subscope
 							const value = this.execToken(values[i],tokens[i]);
 							if(postpone){
+								postpone.branch=this;
 								postpone.todo=[new Compile.Step(new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate),postpone.todo),todo[1]];//
 								return;
 							}
@@ -780,7 +756,7 @@ const	dap=(Env=>
 								rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
 							empty = rows.reduce(
 								(empty,row)=>
-									new Branch(ctx(row,$,flow,updata),node,this.up).exec(todo[1]) && empty,
+									new Branch(ctx(row,$,flow,updata),node,this.up).runDown(todo[1]) && empty,
 								empty
 							);
 						}
@@ -798,7 +774,7 @@ const	dap=(Env=>
 			
 				if(!token)return literal;
 				
-				const	converts= token.converts,
+				let	converts= token.converts,
 					parts	= token.parts;
 			
 				let	value	= token.value || null, // might had been set as async target
@@ -871,7 +847,7 @@ const	dap=(Env=>
 							value=convert[c](value);
 							if(postpone){
 								postpone.info	= value;
-								postpone.token	= postpone.target = 
+ 								postpone.token	= postpone.target = 
 								new Compile.Token(
 									recap(parts,p,REUSE.STUB),
 									recap(converts,p,c>0 && convert.slice(0,c))
@@ -880,7 +856,7 @@ const	dap=(Env=>
 							}
 						}
 						if(value==null)value="";
-				
+						
 					if(p--){
 						let	path	= parts[p],
 							i	= path.length,
@@ -913,6 +889,28 @@ const	dap=(Env=>
 				return value;
 			},
 
+			runDown:
+			function(todo,place,instead){
+				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
+				const	node	= this.node,
+					branch	= todo && this.execBranch(todo),
+					empty	= branch && !node.childNodes.length;
+					
+				if(postpone){
+					if(instead)Env.dim(instead);
+					postpone.locate(place,instead);
+					postpone.ready();
+				}
+				else
+					if(empty===true)
+						Env.mute(node);
+				
+				if(place)//&&branch
+					instead ? place.replaceChild(node,instead) : place.appendChild(node);
+						
+				return empty;
+			},
+			
 			checkUp:
 			function(snitch,todo){
 			
@@ -929,8 +927,8 @@ const	dap=(Env=>
 					route	=this.execBranch(todo||rule.todo||rule.engage().todo)||route;
 					
 				if(postpone){
-					postpone.branch=this;
 					postpone.instead=snitch;
+					postpone.ready();
 					return;
 				}
 					
@@ -1015,6 +1013,7 @@ const	dap=(Env=>
 				},
 			ready	:function(){
 					postpone=null;
+					return this;
 				},				
 			dismiss	:function(){
 					this.branch=null;
@@ -1024,10 +1023,10 @@ const	dap=(Env=>
 						Perf("wait: "+this.info,this.time);
 						this.target.value=this.handle ? this.handle(value) : value;
 						After.hold();
-						Perf("exec: "+this.info,Date.now(),
+						Perf("work: "+this.info,Date.now(),
 							this.branch.up
 							?this.branch.checkUp(this.instead,this.todo)
-							:this.branch.exec(this.todo,this.place,this.instead)
+							:this.branch.runDown(this.todo,this.place,this.instead)
 						);
 						After.run();
 					}
@@ -1044,7 +1043,7 @@ const	dap=(Env=>
 			
 			d	:Print,
 			u	:Update,
-			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).exec( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
+			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).runDown( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
 		};
 
 	})();
@@ -1291,7 +1290,7 @@ const	dap=(Env=>
 				method	= req.method || ( req.body ? "POST" : "GET" );
 			
 			request.open( method,Uri.absolute(req.url),!!postpone );
-			request.setRequestHeader("Content-Type",req.contentType);
+			request.setRequestHeader("Content-Type",req.mime);
 			
 			if(req.headers)
 				for(let i in req.headers)
@@ -1305,7 +1304,7 @@ const	dap=(Env=>
 			try	{request.send(req.body||null);}
 			catch(e){console.warn(e.message);}
 			
-			return postpone ? request.url : consume(request);
+			return postpone ? req.url : consume(request);
 		};
 				
 		return { MimeHandlers, query }
@@ -1469,6 +1468,9 @@ const	dap=(Env=>
 				post	: (values,tags)	=> Request.post( values.pop(),values,tags ),
 				upload	: (values,tags)	=> Request.blob( values.pop(),values[0],tags[0] ),
 				
+				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
+				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
+				
 				exec	: (path,values)=>{
 						let tgt=Util.reach(path.split("."),window);
 						if(tgt&&tgt.apply)return tgt.apply(null,values);
@@ -1480,8 +1482,8 @@ const	dap=(Env=>
 			},
 			
 			operate	:{
-				title	:(text)			=>{ doc.title=text; },
-				log	:(value,alias)		=>{ log(alias+": "+value); },
+				title	:(text)		=>{ doc.title=text; },
+				log	:(value,alias)	=>{ log(alias+": "+value); },
 				
 				"!!"	:(value,alias,node)=>{
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);

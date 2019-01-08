@@ -5,28 +5,12 @@
 <head>
 	<title>Hello Forum</title>
 	<!--<script src="https://dap.js.org/0.4.3.js"></script>-->
-	<script src="../--.js"></script>
+	<script src="/0.4.4.js"></script>
 	<link rel="stylesheet" href="helloforum.css"/>
 </head>
 
 <body>
 <script>
-
-function reCaptchaReady(){
-	grecaptcha.render("grc-container",{
-		size	: "invisible",
-		sitekey	: "6Lc4_0YUAAAAAAmOA7FOm9VQAkOPss7sR_1ZYG08",
-		callback: grc.resolve
-	})
-}
-
-const	grc={
-	execute	: dummy=>grecaptcha.execute(),
-	resolve	: token=>grecaptcha.reset()||token
-};
-
-
-
 'helloforum'.d("! (.msg:# Entry@+ Ties@-)case")
 
 .DICT({
@@ -42,7 +26,7 @@ const	grc={
 						,'head contenteditable'.ui("$head=#:value")
 						,'body contenteditable'.ui("$body=#:text")
 					).u("?")
-					,'button.submit'.ui("? ($author $head $body)! (dict.incomplete)alert; $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response:grc)post:query (dict.error)alert")
+					,'button.submit'.ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=:grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
 				).u("$?=")
 			).u("?")
 			,'ties'.d("$!!; ! Ties")
@@ -60,22 +44,26 @@ const	grc={
 		
 	dict	:{
 		incomplete: "Please, fill in all fields:\nyour name, message head and message body",
+		badcaptcha: "Google reCAPTCHA thinks you're bot, sorry",
 		error	: "Server communication error"
 		}
 })
 
 .FUNC({
 	convert	:{
-		grc:dap.async(grc)
+		grc: ()=>{
+			const	async	= dap.Async(),
+				sitekey	= '6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC';
+			grecaptcha.execute(sitekey,{action:'sendmessage'}).then(token=>async.resolve(token));
+			return "grecaptcha execute";
+		}
 	}
 })
 
 .INLINE();
 
 </script>
-<div id="grc-container"></div>
 </body>
 
-<!--
-<script src="https://www.google.com/recaptcha/api.js?onload=reCaptchaReady&render=explicit" async defer></script>
--->
+<script src='https://www.google.com/recaptcha/api.js?render=6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC'></script>
+</html>
