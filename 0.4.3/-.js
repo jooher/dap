@@ -70,18 +70,17 @@ const	dap=(Env=>
 		"!?"	:Env.mark,
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		
-		"u"	:(value,alias,node)=>	{ React.bind(node,alias,value); },
-		"ui"	:(value,alias,node)=>	{ React.bind(node,alias,value,"ui"); },
-		
-		
 		"%"	:(value,alias,node,$)=>	{ const d=$[0]['']; if(alias)d[alias]=value; else for(let i in value)d[i]=value[i]; },
 		"%%"	:(value,alias,node,$)=>	{ const d=$[0][''],f=alias.split(','); for(let i=f.length;i--;)d[f[i]]=value[i]; },	// example: %% str:split.colon@a,b,c
 
+		"u"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React); },
+		"ui"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React,"ui"); },
+		
 		"d!"	:(value,alias,node)=>	{ Execute.update(value||node); },
 		"a!"	:(value,alias,node)=> 	{ Execute.a(value||node); },
 		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
-		"a?"	:(value,alias,node)=>	{ After.put(Execute.a,value||node); },
-		"u?"	:(value,alias,node)=>	{ After.put(Execute.u,value||node); },//{ Execute.u(value||node); }, //
+		"a?"	:(value,alias,node)=>	{ Execute.After.put(Execute.a,value||node); },
+		"u?"	:(value,alias,node)=>	{ Execute.After.put(Execute.u,value||node); },//{ Execute.u(value||node); }, //
 		
 		"*"	:(value,alias)=>	value && (alias?value.map(v=>Box(v,alias)):value), //!value ? false : !alias ? value : Dataset.mapGrid( alias.split(","), value ),
 		"?"	:(value,alias)=>	!!value,
@@ -101,12 +100,11 @@ const	dap=(Env=>
 	E	= "",
 
 	isArray = Array.prototype.isArray,
-	Print	=(value,alias,place,$)=>{//(place,P,$)=>{
-			if(value==null)return;
-			if(isArray(value))value.forEach(v=>Print(v,null,place,$));
-			else if(value.spawn)value.spawn($,place);
-			else Env.print(place,value,alias)			
-		},
+	Print	= (value,alias,place,$)=> value!=null&&(
+			isArray(value)	? value.forEach(v=>Print(v,null,place,$)) :
+			value.spawn	? value.spawn($,place) :
+			Env.print(place,value,alias)			
+		),
 		
 	Util	={
 			
@@ -134,102 +132,76 @@ const	dap=(Env=>
 		
 		const
 		makePath= str=>str.split(".").reverse(), //str&&
-		append	=(obj,key,value)=>(obj[key]=obj[key]&&(value.charAt(0)===';')?obj[key]+value:value), /// ???
+		append	=(obj,key,value)=>(obj[key]=obj[key]&&(value.charAt(0)===';')?obj[key]+value:value); /// ???
 		
 		
-		Namespace = (function(){
+		function Namespace(uri){
+			
+			Env.console.log("New namespace: "+uri);
+			
+			this.uri	= uri;
+			this.monads	= Monads;
+			this.dict	= {};
+			this.refs	= {};
+			
+			this.inherit	= null;
+			
+			namespaces[uri]	= this;
+		}
+		Namespace.prototype={
+			
+			USE	: function(refs){
+					for(let ns in refs)
+						this.refs[ns]=refs[ns]//Env.Uri.absolute(,this.uri);
+					return this;
+				},
 
-			const	registry={};
-				//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
-			
-			require = uri=>Function(document.getElementById(uri).textContent)(dap),
-			
-			lookup	= function(ns,domain,path,key){
+			EXT	: function(monads){
+					for(let d in this.monads)
+						monads[d]=Util.union(this.monads[d],monads[d]);
+					this.monads=monads;
+					return this;
+				},
+				
+			DEF	: function(dict){
+					for(let i in dict){
+						var p=(this.dict[i]=dict[i]);
+						if(p instanceof Proto)p.ns=this;
+					}
+					return this;
+				},
+				
+			reach	: function(path,domain){
+					if(domain)path=makePath(path);
+					let entry = this.lookup(path,domain);//||domain&&Fail( domain+" not found: "+path);
+					while( entry && path.length ) entry = entry[path.pop()];	
+					return entry;
+				},
+
+			lookup	: function(path,domain,key){
 			
 				if(!key)
 					key= path.pop();
 				
-				const	scope	= domain ? this.monads[domain] : this.dict;
+				const	scope	= domain ? this.monads[domain] : this.dict,
 					xtrn	= this.refs[key],
 					entry	= xtrn
-						? lookup(Namespace(xtrn),domain,path.length&&path)
-						: scope&&scope[key] || ns.inherit&&this.inherit.lookup(domain,path,key);
+						? require(xtrn).lookup(path.length&&path,domain)
+						: scope&&scope[key] || this.inherit&&this.inherit.lookup(path,domain,key);
 				
-				if(entry instanceof Ns)
-					entry = this.dict[key] = require(entry);
+//				if(entry instanceof Ns)
+//					entry = ns.dict[key] = require(entry);
 				
 				return entry;
-			},						
+			}						
 				
-			function Ns(uri,ready){
-				
-				Env.console.log("New namespace: "+uri);
-				
-				this.uri	= uri;
-				this.monads	= Monads;
-				this.dict	= {};
-				this.refs	= {};
-				
-				this.inherit	= null;
-				this.ready	= ready;
-			}
-			Ns.prototype={
-				
-				USE	: function(refs){
-						for(let ns in refs)
-							this.refs[ns]=refs[ns]//Env.Uri.absolute(,this.uri);
-						return this;
-					},
-
-				EXT	: function(monads){
-						for(let d in this.monads)
-							monads[d]=Util.union(this.monads[d],monads[d]);
-						this.monads=monads;
-						return this;
-					},
-					
-				DEF	: function(dict){
-						for(let i in dict){
-							var p=(this.dict[i]=dict[i]);
-							if(p instanceof Proto)p.ns=this;
-						}
-						return this;
-					},
-					
-				reach	: function(path,domain){
-						let entry = domain ? lookup(this,makePath(path),domain)||Fail( domain+" not found: "+path):.lookup(this,path);
-						while( entry && path.length ) entry = entry[path.pop()];	
-						return entry;
-					},
-
-
-				Inherit	: function(ns){
-						this.inherit=ns;
-						return this;
-					},
-					
-				poke	: function(path,value){
-						let	entry=this.dict,
-							i=path.length,
-							key;
-						while(--i)
-							entry=entry[key=path[i]]||(entry[key]={});
-						return entry[path[0]]=value;
-					}
-					
-					
-			};
-			
-			return function(ref,base,ready){
-				const uri = Env.Uri.absolute(ref,base);
-				return registry[uri] || (registry[uri]=new Ns(uri,ready));
-			}
-			
-		})(),
+		};
 		
-		rootns	= Namespace(null,null,true).EXT(Env.Monads);//Uri.absolute()
+		const		
+		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Monads(Monads);
+		require	= uri => namespaces[uri]||(namespaces[uri]=Function('return '+document.getElementById(uri).textContent)(dap)),
+		rootns	= new Namespace(Env.Uri.base).EXT(Env.Monads);//Uri.absolute()
 
-	
 		function Proto(ns,utag){
 			this.ns		= ns||rootns;
 			this.utag	= utag;
@@ -335,7 +307,7 @@ const	dap=(Env=>
 				if(react)
 					for(let i=react.length; i-->0;){
 						if(!react[i])rules[react[i]=Env.uievent(node)]=rules[""];
-						React.bind(node,react[i]);
+						Env.react(node,react[i],null,Execute.React);
 					}
 					
 				new Execute.Branch(node.$,node).exec(d.todo||d.engage().todo,place,instead);
@@ -659,17 +631,67 @@ const	dap=(Env=>
 	
 	Execute	= (function(){
 	
-		const	REUSE	= Env.REUSE,
-			ctx	=(data,$,rowset,updata)=>{
-				const datarow = data instanceof Object ? data : {"#":data}
-				datarow['']=updata;
-				return [{'':datarow},$,rowset];
-			},			
-			update	=(node,$)=>{ node.P.spawn($||node.$,node.parentNode,node) },
-			trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] ),
+		const
+		
+		REUSE	= Env.REUSE,
+		Perf	= (info,since)=>console.log("PERF "+(Date.now()-since)+" ms : "+info),
+	
+		ctx	=(data,$,rowset,updata)=>{
+			const datarow = data instanceof Object ? data : {"#":data}
+			datarow['']=updata;
+			return [{'':datarow},$,rowset];
+		},			
+		trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] ),
+		
+		recap	=(arr,i,v)=>arr.slice(0,i).concat(v),
 			
-			recap	=(arr,i,v)=>arr.slice(0,i).concat(v)
-			;
+		After	=(function(){
+		
+			function Job(handler,subject,before){
+				this.handler=handler;
+				this.subject=subject;
+			};
+
+			let	phase	= 0; // 0:hold; 1:running; 2:finished
+		
+			const
+			
+			queue	= [],
+				
+			put	=function(job,before){
+				if(before)queue.push(job);
+				else queue.unshift(job);
+				if(phase==2)run(); // afterdone
+			},
+
+			run	=function(){
+				if(phase==1)return;
+				phase=1; // being executed
+				for(let job; job=queue.pop();)
+					if(job.handler(job.subject))	// true -> suspend execution of the rest of the queue
+						return phase=0;		// buffering
+				return phase=2; // done
+			};
+			
+			return	{
+				hold	: function(){phase=0},
+				put	: function(handler,subject,before){ put( new Job(handler,subject),before||false); },
+				run	: run
+			};
+
+		})(),
+		
+		Append	=(node,$,todo)	=>{ new Branch($,node).exec(todo) },
+		Rebuild	=(node,$)	=>{ node.P.spawn($||node.$,node.parentNode,node) },				
+	
+		Update	=(node,event)	=>{ new Branch(node.$,node,{},event).checkUp() },		
+		React	= e=>{
+			e=Env.Event.normalize(e);
+			After.hold();
+			Perf(e.type,Date.now(),Update(e.target,e.type));
+			After.run();				
+			return true;
+		};
 			
 		let	postpone	= null,
 			stackDepth	= 0;
@@ -708,10 +730,11 @@ const	dap=(Env=>
 			execBranch: //returns true if empty
 			function(todo){
 				
-				var	node	= this.node,
-					$	= this.$,
-					isArray	= Array.prototype.isArray,
-					empty	= true,
+				const	isArray	= Array.prototype.isArray,
+					node	= this.node,
+					$	= this.$;
+					
+				let	empty	= true,
 					flow	= null;
 					
 				if(++stackDepth>100)
@@ -776,23 +799,22 @@ const	dap=(Env=>
 			function(literal,token){
 			
 				if(!token)return literal;
+				
+				const	converts= token.converts,
+					parts	= token.parts;
 			
-				var	value	= token.value || null, // might had been set as async target
-					converts= token.converts,
-					parts	= token.parts,
+				let	value	= token.value || null, // might had been set as async target
 					p	= parts.length-1,
 					rvalue	= value==null && parts[p],
-					convert	= converts[p],
-					a;
+					convert	= converts[p];
 				
 				if(rvalue){ 
 				
-					var	feed	= rvalue.feed,
-						path	= rvalue.path,
-						flat	= null;
+					const	feed	= rvalue.feed,
+						path	= rvalue.path;
 						
 					if(path){
-						var	i	= path.length,
+						let	i	= path.length,
 							entry	= path[--i];
 						if(entry){
 							if(this.up){
@@ -810,7 +832,7 @@ const	dap=(Env=>
 					}
 					
 					if(feed){
-						var	values	= feed.values.slice(0),
+						const	values	= feed.values.slice(0),
 							tags	= feed.tags,
 							tokens	= feed.tokens,
 							proto	= value||literal;
@@ -861,7 +883,7 @@ const	dap=(Env=>
 						if(value==null)value="";
 				
 					if(p--){
-						var	path	= parts[p],
+						let	path	= parts[p],
 							i	= path.length,
 							entry	= path[i-1],
 							up	= entry&&this.up,
@@ -895,13 +917,14 @@ const	dap=(Env=>
 			checkUp:
 			function(snitch,todo){
 			
-				var	node	= this.node,
+				const	node	= this.node,
 					P	= node.P,
 					defs	= P.rules.d.defs,
-					up	= {},
-					parent	= node.parentNode,
-					route	= this.route,
-					rule	= route==true ? null : ( node.reacts && node.reacts[route] ) || P.rules[route] || P.rules.u;
+					parent	= node.parentNode;
+					
+				let	route	= this.route,
+					rule	= route==true ? null : ( node.reacts && node.reacts[route] ) || P.rules[route] || P.rules.u,
+					up	= {};
 					
 				if(rule)
 					route	=this.execBranch(todo||rule.todo||rule.engage().todo)||route;
@@ -927,20 +950,21 @@ const	dap=(Env=>
 			checkDown:
 			function (node,dn,snitch){
 			
-				var	P=node.P,
+				const	P=node.P,
 					d=P.rules.d,
 					a=P.rules.a;
 					
 				if(d||a){
 				
-					var	$	= node.$,
+					const	$	= node.$,
 						$0	= $[0],
 						defs	= !snitch&&d.defs,
 						refs	= d&&d.refs,
-						affs	= a&&a.refs,
-						rebuild	= false,
+						affs	= a&&a.refs;
+						
+					let	rebuild	= false,
 						repaint	= false,
-						sift;
+						sift	= null;
 					
 					for(let i in dn)
 						if($0[i]!=null){
@@ -950,14 +974,14 @@ const	dap=(Env=>
 						}
 					
 					if(rebuild)
-						update(node);
+						Rebuild(node);
 					
 					else	{
 						if(sift)
 							for(let nodes=node.childNodes,i=nodes.length,n;i--;)
 								if((n=nodes[i])!=snitch && n.P )this.checkDown(n,sift);
 						if(repaint)
-							new Branch($,node).exec(a.todo);
+							Append(node,$,a.todo);
 						
 						return  sift||{};
 					}
@@ -997,10 +1021,10 @@ const	dap=(Env=>
 				},
 			resolve	:function(value){
 					if(this.branch){
-						perf("wait: "+this.info,this.time);
+						Perf("wait: "+this.info,this.time);
 						this.target.value=value;
 						After.hold();
-						Env.perf("exec: "+this.info,Date.now(),
+						Perf("exec: "+this.info,Date.now(),
 							this.branch.up
 							?this.branch.checkUp(this.instead,this.todo)
 							:this.branch.exec(this.todo,this.place,this.instead)
@@ -1010,84 +1034,23 @@ const	dap=(Env=>
 					this.instead=null;
 				}
 		};
+
+
+		return	{ Branch, Postpone, Perf, After, React, 
 		
-		return	{
-		
+			Update,
+			Append,
+			Rebuild,
+			
 			d	:Print,
-			a	:function(node,rule)	{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).exec( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
-			u	:function(node,event)	{ new Branch(node.$,node,{},event).checkUp(); },
-			
-			Postpone, Branch, update
+			u	:Update,
+			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).exec( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
 		};
 
-	})(),
+	})();
 	
-	React	=(function(){
-		
-		function handle	(e){
-			e=Env.Event.normalize(e);
-			After.hold();
-			Env.perf(e.type,Date.now(),Execute.u(e.target,e.type));
-			After.run();				
-			return true;
-		}
-			
-		return	{
-			bind	:function(node,alias,value,hilite){//,capture
-			
-				const	event	= alias||Env.DEFAULT.EVENT,
-					donor	= value||node.P,
-					rule	= donor.ubind ? donor.ubind(event) : donor[event] || donor.u;
-					
-				(node.reacts||(node.reacts={}))[event]=rule;
-				hilite && Env.Style.attach(node,hilite);
-				Env.Event.attach(node,event,handle);
-			}
-		}
-	})(),
-
-	After	= (function(){
-		
-		function Job(handler,subject,before){
-			this.handler=handler;
-			this.subject=subject;
-		};
-
-		let	phase	= 0; // 0:hold; 1:running; 2:finished
 	
-		const
-		
-		queue	= [],
-			
-		put	=function(job,before){
-			if(before)queue.push(job);
-			else queue.unshift(job);
-			if(phase==2)run(); // afterdone
-		},
-
-		run	=function(){
-			if(phase==1)return;
-			phase=1; // being executed
-			for(let job; job=queue.pop();)
-				if(job.handler(job.subject))	// true -> suspend execution of the rest of the queue
-					return phase=0;		// buffering
-			return phase=2; // done
-		};
-		
-		return	{
-			hold	: function(){phase=0},
-			put	: function(handler,subject,before){ put( new Job(handler,subject),before||false); },
-			run	: run
-		};
-
-	})()
-	
-	return	{
-		Env,
-		Util,
-		
-		Execute,
-		After,
+	return	{ Env, Util, Execute,
 		
 		Async	:function(holder){
 				const f=holder.resolve;
@@ -1108,7 +1071,10 @@ const	dap=(Env=>
 				);
 			},
 			
-		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RUN(data)
+		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RUN(data),
+		
+		NS	: uri => new Compile.Namespace(uri)
+
 	}
 			
 })((function(){ // Environment
@@ -1156,8 +1122,6 @@ const	dap=(Env=>
 		return unHTML.firstChild;			
 	},	
 			
-	perf	= (info,since)=>console.log("PERF "+(Date.now()-since)+" ms : "+info),
-	
 	Native	=(str,ui)=>{
 		if(!str)return DEFAULT.ELEMENT;
 		const	space	= str.indexOf(" "),
@@ -1466,7 +1430,7 @@ const	dap=(Env=>
 
 	return	{
 		
-		doc, perf, DEFAULT, REUSE, 
+		doc, DEFAULT, REUSE, 
 	
 		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State,
 
@@ -1478,6 +1442,15 @@ const	dap=(Env=>
 				DEFAULT.EVENT,//'click',
 		
 		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
+		react	:(node,alias,value,handle,hilite)=>{//,capture
+				const	event	= alias||DEFAULT.EVENT,
+					donor	= value||node.P,
+					rule	= donor.ubind ? donor.ubind(event) : donor[event] || donor.u;
+				(node.reacts||(node.reacts={}))[event]=rule;
+				if(hilite)Style.attach(node,hilite);
+				Event.attach(node,event,handle);
+			},
+			
 		clone	:elem=>elem.cloneNode(false),
 		
 		
@@ -1492,8 +1465,6 @@ const	dap=(Env=>
 				const place = instead.parentNode;
 				place.replaceChild( proto.spawn([{'':State.read()}],place) || newStub("dap"), instead );
 			},
-			
-		NS	:(name)=>Compile.Namespace(name),
 			
 		Monads	:{
 			

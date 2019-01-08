@@ -4,23 +4,6 @@
 </head>
 <body>
 
-<script>
-'test'.d("! (`io heroes)uri:sample.upper")
-
-.DEF({
-
-	heroes:"heroes.json"
-
-})
-
-.USE({
-	sample	: "sample-ns.js",
-})
-
-.INLINE();
-
-</script>
-
 <pre id="sample-ns.js">
 dap.NS("sample.js")
 
@@ -38,6 +21,21 @@ dap.NS("sample.js")
 	linebreak: document.createElement('HR')
 })
 </pre>
+
+<script>
+'test'.d("! (`io heroes)uri:sample.upper")
+
+.DEF({
+	heroes:"heroes.json"
+})
+
+.USE({
+	sample	: "sample-ns.js",
+})
+
+.INLINE();
+
+</script>
 
 </body>
 </html>

@@ -11,5 +11,5 @@ dap.NS("sample.js")
 })
 
 .DEF({
-	linebreak: document.createElement('HR')
+	linebreak: "linebreak"
 })
