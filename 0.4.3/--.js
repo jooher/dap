@@ -1450,8 +1450,8 @@ const	dap=(Env=>
 			
 		clone	:elem=>elem.cloneNode(false),
 		
-		mute	:function(elem){Style.attach(elem,"MUTE"); return elem; },
-		dim	:function(elem){Style.attach(elem,"DIM"); return elem; },
+		mute	:function(elem)	{Style.attach(elem,"MUTE"); return elem; },
+		dim	:function(elem)	{Style.attach(elem,"DIM"); return elem; },
 		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
 		
 		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
@@ -1493,13 +1493,13 @@ const	dap=(Env=>
 			
 			operate	:{
 				title	:(text)			=>{ doc.title=text; },
-				log	:(value,alias)		=>{ log(alias+" : "+value); },
+				log	:(value,alias)		=>{ log(alias+": "+value); },
 				
-				"!!"	:(value,alias,node)	=>{
+				"!!"	:(value,alias,node)=>{
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);
 						else node.appendChild(newText(value));
 					},
-				"!?"	:(value,alias,node)	=>{ Style.mark(node,alias,!!value); },
+				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },
 			}
 		}
 	}		
