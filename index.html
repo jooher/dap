@@ -5,7 +5,11 @@
 	<link href="docs/styles.css" rel="stylesheet" type="text/css"/>	
 	<style>
 	header{text-align:center; font-size:1.2em}
-	#whydap{}
+	#whydap{display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 2em;}
+	#whydap>section{text-align:center}
+
+	h3{display:inline-block; padding: .4em 1em; background:#fd6}
+	</style>
 	</style>
 </head>
 <body>
@@ -22,10 +26,11 @@
 
 
 
-<article id="whydap">
-	<a name="why-dap"></a>
+<a name="why-dap"></a>
 
-	<h2>Why dap?</h2>
+<h2>Why dap?</h2>
+
+<article id="whydap" style=" ">
 
 	<section>
 		<h3>Clear, concise and observable</h3>
@@ -45,11 +50,10 @@
 		<p>Dap will not introduce any noticeable latency to your Web UI. The dap runtime script is tiny, dap-rules are parsed lazily, DOM manipulations are precise and deterministic, and only involve affected elements.</p>
 	</section>
 
-	<section>
-		
+	<section>		
 	<h3>Simple to start, easy to advance</h3>
 	<p>A whole lot of magic can be done with the few "stantard" dap operations. But when it's time to go beyond — you can easily expand dap with your own custom operations or use 3-rd party extensions.</p>
-</section>
+	</section>
 
 </article>
 
