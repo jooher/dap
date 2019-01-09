@@ -3,50 +3,69 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Dap.js</title>
 	<link href="docs/styles.css" rel="stylesheet" type="text/css"/>	
+	<style>
+	header{text-align:center; font-size:1.2em}
+	#whydap{}
+	</style>
 </head>
 <body>
 
-<div	style="text-align:center">
+<header>
 	<img src="dap-logo.png"/>
 	<h1>Dap.js: for massively interactive web-applications</h1>
-	<p>Dap (initially stood for "data access page") is a lightweight and powerful javascript framework for interactive data-driven web applications.</p>
-	<p>Unlike many other reactive frameworks that build reactivity in terms of Javascript, dap offers a higher level of abstraction — a declarative "superscript" language for elements interaction rules. These rules can be compact, efficient and human-readable at the same time. Dap is parsed, compiled and executed by a small runtime script (less than 8kiB gzipped), and does not require any code preparation.</p>
-</div>
+	<p>Lightweight and powerful javascript framework for interactive data-driven web applications.</p>
+	<p>Unlike many other frameworks built in Javascript terms, dap offers a higher level of abstraction — a declarative "superscript" for reactivity rules. These rules are dense, compact, and human-readable at the same time. Dap is parsed, compiled and executed by a small (less than 10kiB gzipped) runtime script, and does not require code transpilation.</p>
+</header>
 <pre>
 'H1.welcome'.d("! `Hello,world!") // Create an &lt;H1 class="welcome"&gt; element and print "Hello,world!" text into it
 </pre>
 
-<a name="why-dap"/>
-<h2>Why dap?</h2>
 
-<h3>Clear, concise and observable</h3>
-<p>Dap is designed to focus on data and logic, instead of syntactic decoration. Dap code tends to be times smaller than equivalent solutions in other reactive environments. Dap code is clean and observable, without sparse lines of curly brackets and boilerplate code.</p>
 
-<h3>Natively reactive</h3>
-<p>
-Reactivity is the base concept of dap. No need to manually track changes in your application's status, or even bother to bind update events — all dependencies are resolved naturally under the hood. Dap renders and updates all the dependent elements interactively, based on their dap-rules.
-</p>
+<article id="whydap">
+	<a name="why-dap"></a>
 
-<h3>Fast and lightweight</h3>
-<p>Dap will not introduce any noticeable latency to your Web UI. The dap support script weighs less than 20kiB, dap-rules are parsed lazily, DOM manipulations are precise and deterministic, and only involve affected elements.</p>
-	
-<h3>Simple to start, easy to advance</h3>
-<p>A whole lot of magic can be done with the few "stantard" dap operations. But when it's time to go beyond — you can easily expand dap with your own custom operations or use 3-rd party extensions.</p>
+	<h2>Why dap?</h2>
 
-	<h3></h3>
-	<p></p>
-<h2>Code example, explained</h2>
+	<section>
+		<h3>Clear, concise and observable</h3>
+		<p>Dap is focused on data and logic, instead of syntactic decoration. Dap code tends to be times smaller than equivalent solutions for other environments. It is clean and observable, without sparse lines of curly brackets and boilerplate code.</p>
+	</section>
+
+	<section>
+		<h3>Natively reactive</h3>
+		<p>
+		Reactivity is the base concept of dap. No need to manually track status changes, or even bother to bind update events — all dependencies are resolved naturally under the hood. Dap renders and updates all the dependent elements interactively, based on their dap-rules.
+		</p>
+	</section>
+
+	<section>
+
+		<h3>Fast and lightweight</h3>
+		<p>Dap will not introduce any noticeable latency to your Web UI. The dap runtime script is tiny, dap-rules are parsed lazily, DOM manipulations are precise and deterministic, and only involve affected elements.</p>
+	</section>
+
+	<section>
+		
+	<h3>Simple to start, easy to advance</h3>
+	<p>A whole lot of magic can be done with the few "stantard" dap operations. But when it's time to go beyond — you can easily expand dap with your own custom operations or use 3-rd party extensions.</p>
+</section>
+
+</article>
+
+<section>
+<h2>Dap code example, explained</h2>
 <p>The example below shows a very basic pattern of selecting an option from a list.</p>
 <pre>
 'favorite-fruit'.d("$choice=" // a &lt;DIV class="favorite-fruit"&gt; element, with $choice status variable defined in its scope 
 	,'B.selected'.d("! title ($choice not-yet)?") // a &lt;B class="selected"&gt; with textual content involving $choice value
 	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
-		,'LI'	.d("! .fruit") // each LI element shows fruit value for its data row, and
+		,'LI'	.d("! .fruit") // each LI element shows fruit value from its associated data row, and
 			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
 	,'nothing'.d("? $choice:!; ! nothing") // if $choice is not set, print a message to let us know
 )
-.DEF({ // strings and other constants are supposed to be defined here, not inside the rules
+.DICT({ // strings and other constants are supposed to be defined here, not inside the rules
 	title:"My favorite fruit is ", // textual messages gathered in one place are easier to maintain and localize if needed
 	nothing:"Nothing selected yet",
 	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
@@ -71,6 +90,7 @@ Templates are rendered into actual DOM elements, from parent node <em>down</em> 
 	<li>Expressions (like <code>($choice not-yet)?</code> above), you can tell them by brackets</li>
 </ul>
 <p>So far, quite simple, isn't it? To dive deeper, go further with <a href="docs/">Understanding dap</a>.</p>
+</section>
 
 <h3>Dap and other reactive frameworks</h3>
 <p>Unlike some other frameworks, dap does not imply any specific directory structure for your application. Simple web-applications can easily consist of a single, static HTML file, maybe accompanied with a CSS stylesheet or other usual stuff, plus any related data sources. For more complex projects, organization is up to the developer.</p>
