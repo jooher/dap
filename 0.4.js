@@ -106,11 +106,10 @@ const	dap=(Env=>
 		merge	: (tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;},//(Object.assign) ||
 		union	: (...src)=>src.reduce(Util.merge,{}),
 
+		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
 		
 		reach	: (path,start)=>path.reduce(o,v=>o&&o[v],start),
 	
-		stub	: (tgt,map)=>map.keys.reduce((tgt,k)=>tgt.split(k).join(map[k]),tgt),
-		
 		hash	: (values,tags)=>{
 			const hash={};
 			for(let a,i=values.length;i--;)
