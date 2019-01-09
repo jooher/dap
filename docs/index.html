@@ -7,14 +7,14 @@
 <body>
 
 <h1>Understanding dap</h1>
-<p>All you need to use dap in your document is a reference to dap rintime script: <code>&lt;script src="https://dap.js.org/0.4.3.js"&gt;&lt;/script&gt;</code>. You can start your dap experiments with an .html document like this:</p>
+<p>All you need to use dap in your document is a reference to dap rintime script: <code>&lt;script src="https://dap.js.org/0.4.js"&gt;&lt;/script&gt;</code>. You can start your dap experiments with an .html document like this:</p>
 <!--
 <pre><![CDATA[
 <!DOCTYPE html>
 <html>
  <head>
   <title>My dap playground</title>
-  <script src="http://jooher.github.io/dap/0.4.3.js"></script>
+  <script src="http://jooher.github.io/dap/0.4.js"></script>
   <style>.ui{cursor:pointer}</style>
  </head>
  <body>
@@ -34,7 +34,7 @@
 &lt;html&gt;
  &lt;head&gt;
   &lt;title&gt;My dap playground&lt;/title&gt;
-  <b>&lt;script src="https://dap.js.org/0.4.3.js"&gt;&lt;/script&gt;</b>
+  <b>&lt;script src="https://dap.js.org/0.4.js"&gt;&lt;/script&gt;</b>
  &lt;/head&gt;
  &lt;body&gt;
   &lt;h2&gt;Welcome to dap&lt;/h2&gt;
@@ -61,10 +61,10 @@
 <p>Every generated element in a dap document is bound to two local contexts: <em>status context</em> and <em>data context</em>. Element's dap rules are executed within these contexts. Constants defined in a dictionary are visible to all elements.</p>
 
 <h3>Literals and constants</h3>
-<p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DEF</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
+<p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DICT</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
 <pre>
 'I'.d("! good `literals_in_rules_are_not_good_for_long_texts")
-.DEF({ // this is the dictionary
+.DICT({ // this is the dictionary
 	good:"The right place for text and other constants is the dictionary, "
 })
 .INLINE() // inline this dap into the DOM
@@ -80,7 +80,7 @@
 	,'INPUT placeholder="or type in here"'.d("!! $value").ui("$value=#:value")
 	,'H3.display'.d("! $value") // d-rule displays the variable
 )
-.DEF({
+.DICT({
 	cheese: "Say cheese!"
 })
 .INLINE()
@@ -106,7 +106,7 @@
 	
 	,'H2.summary'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
 )
-.DEF({
+.DICT({
 	color:["red","orange","yellow","green"],
 	fruit:["apple","pear","banana"],
 	
@@ -120,7 +120,7 @@
 		choice: "Your choice is"
 	}
 })
-.EXT({
+.FUNC({
 	flatten	:{
 		sentence: values=>values.reverse().join(" ")
 	},
@@ -132,11 +132,11 @@
 .INLINE()
 </pre>
 <p>Here, all elements inside the <code>'colored-fruits'</code> share the same status context with <code>$color</code> and <code>$fruit</code> status variables defined in it. However, each <code>LI</code> element in the two lists has its own data context, containing one data entry, either <code>.color</code> or <code>.fruit</code></p>
-<p>Another interesting point of this example is the <code>.EXT</code> section and the d-rule of <code>'H2.summary'</code> element. Meet: flatteners and convertors...</p>
+<p>Another interesting point of this example is the <code>.FUNC</code> section (functionality) and the d-rule of <code>'H2.summary'</code> element. Meet: flatteners and convertors...</p>
 
 <h3>Flatteners and convertors</h3>
 <p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are similar to Javascript functions. In fact, they ARE ordinary Javascript functions — but with imposed uniform contracts:</p>
-<p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.EXT</code> section</p>
+<p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.FUNC</code> section</p>
 <p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into one single value. In the example above, the <code>()sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single string) is then fed to the convertors.</p>
 <p>Another flattener featuring in <code>'H2.summary'</code> d-rule is dap's standard <code>()!</code> flattener, that tests if ALL of its arguments are <i>truish</i>. Its counterpart, <code>()?</code> flattener, that you will see in the example below, tests if ANY of its arguments is truish.</p>
 
@@ -148,7 +148,7 @@
 	,'INPUT placeholder="Warehouse"'.ui("$warehouse=#:value")
 	,'summary'.d("? ($code $warehouse)?; ! hint (base@ $code $warehouse)uri")
 )
-.DEF({
+.DICT({
 	hint: "Data for these goods might have been located somewhere at\n",
 	base: "https://mygoods.com/getstocks.php?"
 })
