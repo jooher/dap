@@ -4,8 +4,7 @@
 
 <head>
 	<title>Tour of Heroes - dap example</title>
-	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
-	<script src="../--.js"></script>
+	<script src="https://dap.js.org/0.4.js"></script>
 	<link href="styles.css" rel="stylesheet" type="text/css"/>	
 	<link href="toh.css" rel="stylesheet" type="text/css"/>	
 </head>
@@ -68,7 +67,7 @@
 				const hs=$.heroes,i=hs.findIndex(h=>h.id==$.id);
 				return hs.slice(0,i).concat(hs.slice(i+1));
 			},
-			add		:$=>{
+			add	:$=>{
 				const id=$.heroes.reduce((i,h)=>h.id>i?h.id:i,0)+1;
 				return $.heroes.concat([{id:id,name:$.name}]);
 			}

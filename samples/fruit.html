@@ -1,6 +1,6 @@
 <head>
 	<title>Favorite fruit - dap sample</title>
-	<script src="../--.js"></script>
+	<script src="https://dap.js.org/0.4.js"></script>
 	<link href="styles.css" rel="stylesheet" type="text/css"/>
 </head>
 
@@ -13,7 +13,6 @@
 		,'LI'	.d("! .fruit") // each LI element shows fruit value for its data row, and
 			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
-	, document.createElement("HR"),21*2," - HTML And flat values mix-in"
 )	
 .DICT({ // strings and other constants are supposed to be defined here, not inside the rules
 	title:"My favorite fruit is ", // textual messages gathered in one place are easier to maintain and localize if needed

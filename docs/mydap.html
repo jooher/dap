@@ -2,19 +2,51 @@
 <html>
  <head>
   <title>My dap playground</title>
-  <script src="../0.4.3.js"></script>
   <style>.ui{cursor:pointer}</style>
  </head>
  <body>
   <h2>Welcome to dap</h2>
+  
+  <iframe id="ifr" src="sandbox.html"></iframe>
+  
+  <a onclick="cho()">Cho</a>
+  
+  <pre id="src">
+  'favorite-fruit'.d("$choice=" // a DIV class="favorite-fruit" element, with $choice status variable defined in its scope 
+	,'B.selected'.d("! title ($choice not-yet)?") // a <B class="selected"> with textual content involving $choice value
+	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
+		,'LI'	.d("! .fruit") // each LI element shows fruit value for its data row, and
+			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
+	)
+)	
+.DICT({ // strings and other constants are supposed to be defined here, not inside the rules
+	title:"My favorite fruit is ", // textual messages gathered in one place are easier to maintain and localize if needed
+	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
+	fruit:["apple","orange","tomato","banana"] // datasets data may be ordinary arrays containing any kind of data
+})
+.INLINE(); // render this dap into the current place of document
+
+  </pre>
+  
   <script>
 
+  function cho(){
+	let	f=document.getElementById("ifr"),
+		doc=f.contentWindow.document,
+		tgt=doc.getElementsByTagName("script")[0],
+		res=doc.createElement("script");//tgt.cloneNode(false); //
+		
+	res.text=document.getElementById("src").textContent;
+	tgt.parentNode.replaceChild(res,tgt);
+  }
+  
+  /*
 'dapify'.d("$code=`Hello"
 	,'PRE'.d("#.innerHTML=$code:dapify")
 	,'run'.d("sandbox($code)")
 )
 .DEF({
-	sandbox: 'IFRAME src="sandbox.html"'.d("")//.body=#:body body.innerHTML=.code")
+	sandbox: 'IFRAME'.d("")//.body=#:body body.innerHTML=.code")
 })
 .EXT({
 	convert:{
@@ -27,6 +59,7 @@
 	}
 })
 .INLINE()
+*/
   </script>
  </body>
 </html>
