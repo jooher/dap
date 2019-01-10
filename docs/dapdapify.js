@@ -23,7 +23,7 @@ const dapify=
 			if(doc)values.forEach(value=>{
 				const created=doc&&doc.createElement("script");
 				created.text=value;
-				doc.appendChild(created);
+				doc.body.appendChild(created);
 				//tgt.parentNode.replaceChild(res,tgt);
 			})
 		}
