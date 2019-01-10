@@ -171,11 +171,11 @@
 	,'summary'.d("? $id; ! (summary-text $id $name)here")
 )
 .DICT({
-	heroes:"heroes.json",
+	heroes:"/samples/heroes.json",
 	summary-text:"Hero id: {id}\n Hero name: {name}"
 })
 </pre>
-<p>Here, we get our data from a static file <a href="heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. By the <code>query</code> convertor, this file is requested asynchronously, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
+<p>Here, we get our data from a static file <a href="/samples/heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. By the <code>query</code> convertor, this file is requested asynchronously, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
 <p>If you click a hero's name in the list, status variables <code>$id</code> and <code>$name</code> are updated with the hero's respective data, and the summary message updates to reflect these changes.</p>
 
 
