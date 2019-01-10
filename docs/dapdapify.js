@@ -20,12 +20,14 @@ const dapify=
 		inject	:values	=>{
 			const	iframe=values.pop(),
 				doc=iframe.contentWindow.document;
-			if(doc)values.forEach(value=>{
-				const created=doc&&doc.createElement("script");
-				created.text=value;
-				doc.body.appendChild(created);
-				//tgt.parentNode.replaceChild(res,tgt);
-			})
+			if(doc){
+				const body=doc.createElement("body");
+				values.forEach(value=>{
+					const created=doc.createElement("script");
+					created.text=value;
+					body.appendChild(created);
+				});
+				doc.replaceChild(body,doc.body);
 		}
 	}
 	
