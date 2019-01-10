@@ -11,7 +11,7 @@ const dapify=
 .FUNC({
 	convert	:{
 		dapify	:code	=>code
-				.replace(/( \/\/.+?)\n/g,"<i>$1</i>\n")		//comments
+				.replace(/( \/\/.+?)$/gm,"<i>$1</i>")		//comments
 				.replace(/('.+?')/g,"<em>$1</em>") 		// elements
 				.replace(/(\$[^\s=.;@:"()]*)/g,"<b>$1</b>")	// $status variables
 	},
