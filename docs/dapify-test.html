@@ -1,13 +1,16 @@
-<head>
-	<title>Favorite fruit - dap sample</title>
-	<script src="https://dap.js.org/0.4.js"></script>
-	<link href="styles.css" rel="stylesheet" type="text/css"/>
-</head>
-
-<body>
-
-<script>
-'favorite-fruit'.d("$choice=" // a <DIV class="favorite-fruit"> element, with $choice status variable defined in its scope 
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>My dap playground</title>
+		<style>
+		.ui{cursor:pointer}
+		iframe{height:16em; width:100%; border:4px dashed orange;}
+		</style>
+		<script src="../0.4.js"></script>
+	</head>
+	<body>  
+		<pre>
+'favorite-fruit'.d("$choice=" // a DIV class="favorite-fruit" element, with $choice status variable defined in its scope 
 	,'B.selected'.d("! title ($choice not-yet)?") // a <B class="selected"> with textual content involving $choice value
 	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
 		,'LI'	.d("! .fruit") // each LI element shows fruit value for its data row, and
@@ -20,6 +23,8 @@
 	fruit:["apple","orange","tomato","banana"] // datasets data may be ordinary arrays containing any kind of data
 })
 .RENDER(); // render this dap into the current place of document
-</script>
+		</pre>
+
+		<script src="dapdapify.js"></script>
+	</body>
 </html>
-</body>
