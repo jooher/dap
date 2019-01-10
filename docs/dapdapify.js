@@ -28,9 +28,9 @@ const dapify=
 					body.appendChild(created);
 				});
 				doc.replaceChild(body,doc.body);
+			}
 		}
-	}
-	
+	}	
 });
 
 [...document.getElementsByTagName("pre")]
