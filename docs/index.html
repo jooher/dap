@@ -55,8 +55,8 @@
 	<li><em>d-rule</em> is executed on "down" phase, when the document is populated, from root <i>down</i> to child elements</li>
 	<li><em>a-rule</em> is accumulation rule, similar to d-rule, but appends changes to the existing element instead of building it anew</li>
 	<li><em>u-rule</em> is executed on "up" phase, when an event bubbles through the element <i>up</i> to the root</li>
-	<li><em>e-rule</em> is a variant of u-rule, that not only handles events, but generates them, too
-	<li><em>ui-rule</em> is a convenience variant of e-rule dealing with the element's default UI event
+	<li><em>e-rule</em> is a variant of u-rule, that not only handles events, but generates them, too</li>
+	<li><em>ui-rule</em> is a convenience variant of e-rule dealing with the element's default UI event</li>
 </ul>
 <p>Every generated element in a dap document is bound to two local contexts: <em>status context</em> and <em>data context</em>. Element's dap rules are executed within these contexts. Constants defined in a dictionary are visible to all elements.</p>
 
@@ -156,10 +156,35 @@
 </pre>
 <p>So, what new can we see here? A <code>#</code> special entry that evaluates to "this element" at run time, a standard <code>:value</code> converter that "converts" an element to its "value" (which is slightly different for various types of elements), and standard <code>()uri</code> flattener that "flattens" its arguments into a simple string using their values and names.</p>
 <p>Names of arguments are normally taken from their identifiers. For <code>$foo</code> variable, or <code>.foo</code> data entry, of <code>foo</code> constant, the name will be "foo". If argument is dot-routed, the name will be the tail part of its route: for <code>$customer.details.address</code> the name will be simply "address". The argument's default name can be altered with the <code>@</code> aliaser. For example, <code>$customer.details.address@ship-to</code> will be named "ship-to".</p>
-<p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But the can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email)?@login</code>.</p>
-<p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as  URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value it as is.</p>
+<p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But they can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email)?@login</code>.</p>
+<p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value it as is.</p>
+
+<h2>Working with external data</h2>
+<p>Now that we can construct parameterized URIs, and can work with datasets, we can do requests for external data. With dap it is very simple with a standard <code>query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
+<pre>
+'heroes'.d("$id= $name="
+	,'UL.heroes'.d("* heroes:query@" // query data from the URL, parse it and populate a dataset from it  
+		,'LI.hero'
+			.d("!! .name@ .id@title")
+			.ui("$id=.id $name=.name")
+	)
+	,'summary'.d("? $id; ! (summary-text $id $name)here")
+)
+.DICT({
+	heroes:"heroes.json",
+	summary-text:"Hero id: {id}\n Hero name: {name}"
+})
+</pre>
+<p>Here, we get our data from a static file <a href="heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. By the <code>query</code> convertor, this file is requested asynchronously, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
+<p>If you click a hero's name in the list, status variables <code>$id</code> and <code>$name</code> are updated with the hero's respective data, and the summary message updates to reflect these changes.</p>
+
+
 <h2>Okay, what's next?</h2>
 <p>By this point, you should be able to read dap rules and easily tell status variables from data entries, flatteners from converters, and guess the overall logic of a dap template.</p>
+
+
+
+
 <img src="we_need_to_go_deeper.jpg" alt="But we need to go deeper" title="But we need to go deeper"/>
 
 <p>Coming soon: writing a real-world dap application</p>
