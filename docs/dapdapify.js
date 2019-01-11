@@ -18,11 +18,11 @@ const dapify=
 	
 	flatten	:{
 		inject	:values	=>{
-			const	iframe=values.pop(),
-				doc=iframe.contentWindow.document;
-			return	doc && (doc.body.innerHTML=values.reduce(
-				(html,value)=>html.concat(["<script>",value,"</script>"]),[]
-			).join("\n"));
+			const	iframe	= values.pop(),
+				html	= values.reduce((html,value)=>html.concat(["<script>",value,"</script>"]),[]).join("\n"),
+				doc	= iframe.contentWindow.document;
+			if(doc)	
+				return	doc.body.innerHTML=html;
 		}
 	}	
 });
