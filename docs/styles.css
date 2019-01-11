@@ -10,7 +10,7 @@ code{background:aliceblue; padding:2px; white-space:nowrap; }
 .dapify>pre{margin:0}
 
 .dapify>.buttons{position:absolute; right:.5em; margin-top:-2em;}
-.dapify>.buttons>.welcome{color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
+.dapify>.buttons>.welcome{display:inline; color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
 .dapify>.run{border:2px solid lavender; display:block; width: 100%; box-sizing: border-box; padding:1em;}
    
 pre{text-align:left; padding:2em; background-color:aliceblue; border:1px solid lavender; font: normal 1.2em/1.5 monospace; overflow:auto; }
