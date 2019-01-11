@@ -17,12 +17,18 @@ const dapify=
 	},
 	
 	flatten	:{
-		inject	:values	=>{
+		injecth	:values	=>{
 			const	iframe	= values.pop(),
 				html	= values.reduce((html,value)=>html.concat(["<script>",value,"</script>"]),[]).join("\n"),
 				doc	= iframe.contentWindow.document;
 			if(doc)	
 				return	doc.body.innerHTML=html;
+		},
+		
+		inject	:values	=>{
+			const	iframe	= values.pop().contentWindow;
+			if(iframe)values.forEach(value=>iframe.eval(value));
+			return iframe;
 		}
 	}	
 });
