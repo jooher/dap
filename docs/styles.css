@@ -3,7 +3,13 @@ h3{margin-top:2em;}
 code{background:aliceblue; padding:2px; white-space:nowrap; }
 
 /* dapify styles */
-pre{text-align:left; padding:2em; background-color:aliceblue;border:1px solid lavender; font: normal 1.2em/1.5 monospace; overflow:auto; }
+.dapify	{margin:2em 0; position:relative}
+.dapify>pre{margin:0}
+
+.dapify>.buttons{position:absolute; /*top:0;*/ right:0}
+.dapify>iframe{border:2px solid lavender; display:block; width: 100%; box-sizing: border-box; padding:1em;}
+   
+pre{text-align:left; padding:2em; background-color:aliceblue; border:1px solid lavender; font: normal 1.2em/1.5 monospace; overflow:auto; }
 pre>i{color:cornflowerblue;}
 pre>b{color:mediumblue}
 pre>em{background:lavender; font-style:normal}

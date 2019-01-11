@@ -8,27 +8,6 @@
 
 <h1>Understanding dap</h1>
 <p>All you need to use dap in your document is a reference to dap runtime script: <code>&lt;script src="https://dap.js.org/0.4.js"&gt;&lt;/script&gt;</code>. You can start your dap experiments with an .html document like this:</p>
-<!--
-<pre><![CDATA[
-<!DOCTYPE html>
-<html>
- <head>
-  <title>My dap playground</title>
-  <script src="http://jooher.github.io/dap/0.4.js"></script>
-  <style>.ui{cursor:pointer}</style>
- </head>
- <body>
-  Welcome to dap
-  <script>
-  
-   // My dap code here
-   
-  </script>
- </body>
-</html>	
-]]>
-</pre>
--->
 <pre>
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -62,7 +41,7 @@
 
 <h3>Literals and constants</h3>
 <p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DICT</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
-<pre>
+<pre lang="dap">
 'I'.d("! good `literals_in_rules_are_not_good_for_long_texts")
 .DICT({ // this is the dictionary
 	good:"The right place for text and other constants is the dictionary, "
@@ -89,7 +68,7 @@
 
 <h3>Data context</h3>
 <p>Dap is all about data. Every element is bound to data context, usualy it is a data row in some dataset. Fields of a data row, or <em>data entries</em>, are immediately available within context of that data row, and can be read or modified. Data context can be shared among several elements, related to the same data row. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
-<pre>
+<pre lang="dap">
 'colored-fruits'.d("$color= $fruit="
 
 	,'H3'.d("! hint.color $color")
@@ -142,7 +121,7 @@
 
 <h3>Named arguments</h3>
 <p>Having argument names provided along with values gives some extra possibilities to the flatteners. For example, parameter strings (parameterized URLs being typical example) can be built easily.</p>
-<pre>
+<pre lang="dap">
 'stocks'.d("$code= $warehouse="
 	,'INPUT placeholder="Item code"'.ui("$code=#:value")
 	,'INPUT placeholder="Warehouse"'.ui("$warehouse=#:value")
@@ -161,7 +140,7 @@
 
 <h2>Working with external data</h2>
 <p>Now that we can construct parameterized URIs, and can work with datasets, we can do requests for external data. With dap it is very simple with a standard <code>query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
-<pre>
+<pre lang="dap">
 'heroes'.d("$id= $name="
 	,'UL.heroes'.d("* heroes:query@" // query data from the URL, parse it and populate a dataset from it  
 		,'LI.hero'
@@ -183,14 +162,13 @@
 <p>By this point, you should be able to read dap rules and easily tell status variables from data entries, flatteners from converters, and guess the overall logic of a dap template.</p>
 
 
-
-
 <img src="we_need_to_go_deeper.jpg" alt="But we need to go deeper" title="But we need to go deeper"/>
 
 <p>Coming soon: writing a real-world dap application</p>
 
 </body>
 
+<script src="../0.4.js"></script>
 <script src="dapify.js"></script>
 
 </html>

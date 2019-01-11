@@ -1446,7 +1446,6 @@ const	dap=(Env=>
 				if(!instead)instead = document.currentScript;//||document.script[document.script.length-1],//||Fail("can't inline");
 				const	place = instead ? instead.parentNode : document.body,
 					ready = proto.spawn([{'':data||State.read()}],place)||newStub("dap");
-				
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 			},
 			
