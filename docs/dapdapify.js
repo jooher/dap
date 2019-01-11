@@ -11,23 +11,18 @@ const dapify=
 .FUNC({
 	convert	:{
 		dapify	:code	=>code
-				.replace(/( \/\/.+?)$/gm,"<i>$1</i>")		//comments
-				.replace(/('.+?')/g,"<em>$1</em>") 		// elements
-				.replace(/(\$[^\s=.;@:"()]*)/g,"<b>$1</b>")	// $status variables
+				.replace(/( \/\/.+?)$/gm,"<i>$1</i>")		// comments
+				.replace(/('.+?')/g,"<em>$1</em>") 		// element signatures
+				.replace(/(\$[^\s=.;@:"()`]*)/g,"<b>$1</b>")	// $status variables
 	},
 	
-	flatten	:{
-		injecth	:values	=>{
-			const	iframe	= values.pop(),
-				html	= values.reduce((html,value)=>html.concat(["<script>",value,"</script>"]),[]).join("\n"),
-				doc	= iframe.contentWindow.document;
-			if(doc)	
-				return	doc.body.innerHTML=html;
-		},
-		
+	flatten	:{		
 		inject	:values	=>{
 			const	iframe	= values.pop().contentWindow;
-			if(iframe)values.forEach(value=>iframe.eval(value));
+			if(iframe){
+				iframe.document.body.innerHTML="";
+				values.forEach(value=>iframe.eval(value));
+			}
 			return iframe;
 		}
 	}	
