@@ -1443,9 +1443,11 @@ const	dap=(Env=>
 		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
 		
 		render	:function(proto,data,instead){
-				if(!instead)instead = document.currentScript||document.script[document.script.length-1]||Fail("can't inline");
-				const place = instead.parentNode;
-				place.replaceChild( proto.spawn([{'':data||State.read()}],place) || newStub("dap"), instead );
+				if(!instead)instead = document.currentScript;//||document.script[document.script.length-1],//||Fail("can't inline");
+				const	place = instead ? instead.parentNode : document.body,
+					ready = proto.spawn([{'':data||State.read()}],place)||newStub("dap");
+				
+				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 			},
 			
 		Func	:{
