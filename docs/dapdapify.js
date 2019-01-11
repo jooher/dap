@@ -20,9 +20,9 @@ const dapify=
 		inject	:values	=>{
 			const	iframe=values.pop(),
 				doc=iframe.contentWindow.document;
-			return	doc && doc.body.innerHTML=values.reduce(
+			return	doc && (doc.body.innerHTML=values.reduce(
 				(html,value)=>html.concat(["<script>",value,"</script>"]),[]
-			).join("\n");
+			).join("\n"));
 		}
 	}	
 });
