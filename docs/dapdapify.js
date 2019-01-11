@@ -21,8 +21,8 @@ const dapify=
 			const	iframe=values.pop(),
 				doc=iframe.contentWindow.document;
 			return	doc && doc.body.innerHTML=values.reduce(
-				(html,value)=>[html,"<script>",value,"</script>"].join("\n"),""
-			);
+				(html,value)=>html.concat(["<script>",value,"</script>"]),[]
+			).join("\n");
 		}
 	}	
 });
