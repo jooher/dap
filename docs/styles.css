@@ -12,7 +12,7 @@ code{background:aliceblue; padding:2px; white-space:nowrap; }
 
 .dapify>.buttons{position:absolute; right:.5em; margin-top:-2em;}
 .dapify>.buttons>.welcome{display:inline; color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
-.dapify>.run{padding:1em; box-shadow: 0 4px 8px rgba(0,40,50,.1)}
+.dapify>.run{padding:1em; box-shadow: 0 4px 12px rgba(0,40,50,.25); margin-top:1em; }
    
 pre{text-align:left; padding:2em; background-color:aliceblue; font: normal 1.2em/1.5 monospace; overflow:auto; }
 pre>i{color:cornflowerblue;}
