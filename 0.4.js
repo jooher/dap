@@ -316,7 +316,7 @@ const	dap=(Env=>
 				return this.rules[key]||this.rules.u;//||Fail("No rule for "+key);
 			},
 			
-			RENDER	:function(data,instead){Env.render(this,data,instead)}
+			RENDER	:function(data,place,instead){Env.render(this,data,place,instead)}
 			
 		};
 					
@@ -1442,10 +1442,12 @@ const	dap=(Env=>
 		
 		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
 		
-		render	:function(proto,data,instead){
-				if(!instead)instead = document.currentScript;//||document.script[document.script.length-1],//||Fail("can't inline");
-				const	place = instead ? instead.parentNode : document.body,
-					ready = proto.spawn([{'':data||State.read()}],place)||newStub("dap");
+		render	:function(proto,data,place,instead){
+				if(!place){
+					if(!instead)instead = document.currentScript;
+					place = instead ? instead.parentNode : document.body;
+				}
+				const	ready = proto.spawn([{'':data||State.read()}],place)||newStub("dap");
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 			},
 			

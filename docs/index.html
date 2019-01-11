@@ -46,14 +46,13 @@
 .DICT({ // this is the dictionary
 	good:"The right place for text and other constants is the dictionary, "
 })
-.RENDER() // inline this dap into the DOM
 </pre>
 <p>Exclamation sign <code>!</code> in the beginning of the rule is a "print" operator, it prints its arguments into the element. Arguments (or <em>tokens</em>) in dap rules are separated by whitespace. So the code above will somply create an <br/><code>&lt;I&gt;The right place for text and other constants is the dictionary, literals_in_rules_are_not_good_for_long_texts&lt;/I&gt;</code><br/>element and insert it instead of the dap code itself.</p>
 
 
 <h3>Status context</h3>
 <p>Status context entries, or <em>status variables</em> are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to the element's children. Status variables can be updated in u-rules. If status variable's value is changed, all elements that depend on it, will be updated. Status variables provide the main reactivity mechanism in dap.</p>
-<pre>
+<pre lang="dap">
 'main'.d("$value=`hello" // d-rule defines a status variable named $value
 	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rules update the variable `
 	,'INPUT placeholder="or type in here"'.d("!! $value").ui("$value=#:value")
@@ -62,7 +61,6 @@
 .DICT({
 	cheese: "Say cheese!"
 })
-.RENDER()
 </pre>
 
 
@@ -108,7 +106,6 @@
 		glitzy: str=>"*** "+str+" ***"
 	}
 })
-.RENDER()
 </pre>
 <p>Here, all elements inside the <code>'colored-fruits'</code> share the same status context with <code>$color</code> and <code>$fruit</code> status variables defined in it. However, each <code>LI</code> element in the two lists has its own data context, containing one data entry, either <code>.color</code> or <code>.fruit</code></p>
 <p>Another interesting point of this example is the <code>.FUNC</code> section (functionality) and the d-rule of <code>'H2.summary'</code> element. Meet: flatteners and convertors...</p>
@@ -131,7 +128,6 @@
 	hint: "Constructed URI: ",
 	base: "https://mygoods.com/getstocks.php?"
 })
-.RENDER()
 </pre>
 <p>So, what new can we see here? A <code>#</code> special entry that evaluates to "this element" at run time, a standard <code>:value</code> converter that "converts" an element to its "value" (which is slightly different for various types of elements), and standard <code>()uri</code> flattener that "flattens" its arguments into a simple string using their values and names.</p>
 <p>Names of arguments are normally taken from their identifiers. For <code>$foo</code> variable, or <code>.foo</code> data entry, of <code>foo</code> constant, the name will be "foo". If argument is dot-routed, the name will be the tail part of its route: for <code>$customer.details.address</code> the name will be simply "address". The argument's default name can be altered with the <code>@</code> aliaser. For example, <code>$customer.details.address@ship-to</code> will be named "ship-to".</p>
@@ -142,7 +138,7 @@
 <p>Now that we can construct parameterized URIs, and can work with datasets, we can do requests for external data. With dap it is very simple with a standard <code>query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
 <pre lang="dap">
 'heroes'.d("$id= $name="
-	,'UL.heroes'.d("* heroes:query@" // query data from the URL, parse it and populate a dataset from it  
+	,'UL.heroes'.d("* (heroes@)uri:query@" // query data from the URL, parse it and populate a dataset from it  
 		,'LI.hero'
 			.d("!! .name@ .id@title")
 			.ui("$id=.id $name=.name")
@@ -151,7 +147,7 @@
 )
 .DICT({
 	heroes:"/samples/heroes.json",
-	summary-text:"Hero id: {id}\n Hero name: {name}"
+	"summary-text":"Hero id: {id}\n Hero name: {name}"
 })
 </pre>
 <p>Here, we get our data from a static file <a href="/samples/heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. By the <code>query</code> convertor, this file is requested asynchronously, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>

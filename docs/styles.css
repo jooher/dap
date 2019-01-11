@@ -1,3 +1,6 @@
+.ui{cursor:pointer}
+.MUTE{display:none !important}
+
 body{max-width: 72em; margin:2em auto; padding:1em; font:normal 1em/1.6 Georgia,serif; }
 h3{margin-top:2em;}
 code{background:aliceblue; padding:2px; white-space:nowrap; }
@@ -6,8 +9,9 @@ code{background:aliceblue; padding:2px; white-space:nowrap; }
 .dapify	{margin:2em 0; position:relative}
 .dapify>pre{margin:0}
 
-.dapify>.buttons{position:absolute; /*top:0;*/ right:0}
-.dapify>iframe{border:2px solid lavender; display:block; width: 100%; box-sizing: border-box; padding:1em;}
+.dapify>.buttons{position:absolute; right:.5em; margin-top:-2em;}
+.dapify>.buttons>.welcome{color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
+.dapify>.run{border:2px solid lavender; display:block; width: 100%; box-sizing: border-box; padding:1em;}
    
 pre{text-align:left; padding:2em; background-color:aliceblue; border:1px solid lavender; font: normal 1.2em/1.5 monospace; overflow:auto; }
 pre>i{color:cornflowerblue;}

@@ -65,7 +65,7 @@
 <section>
 <h2>Dap code example, explained</h2>
 <p>The example below shows a very basic pattern of selecting an option from a list.</p>
-<pre>
+<pre lang="dap">
 'favorite-fruit'.d("$choice=" // a &lt;DIV class="favorite-fruit"&gt; element, with $choice status variable defined in its scope 
 	,'B.selected'.d("! title ($choice not-yet)?") // a &lt;B class="selected"&gt; with textual content involving $choice value
 	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
@@ -116,6 +116,7 @@ Templates are rendered into actual DOM elements, from parent node <em>down</em> 
 
 </body>
 
+<script src="0.4.js"></script>
 <script src="docs/dapify.js"></script>
 
 
