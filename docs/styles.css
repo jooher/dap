@@ -4,7 +4,11 @@
 
 body{max-width: 72em; margin:2em auto; padding:1em; font:normal 1em/1.6 Georgia,serif; }
 h3{margin-top:2em;}
+input,button{margin:.5em}
 code{background:aliceblue; padding:2px; white-space:nowrap; }
+
+.labelled {margin-top:1em; position:relative;}
+.labelled::before{content:attr(label); position:absolute; top:-2em; font-weight:bold; }
 
 /* dapify styles */
 .dapify	{margin:2em 0; position:relative}
@@ -18,3 +22,5 @@ pre{text-align:left; padding:2em; background-color:aliceblue; font: normal 1.2em
 pre>i{color:cornflowerblue;}
 pre>b{color:mediumblue}
 pre>em{background:lavender; font-style:normal}
+
+.colored-fruits>ul{display:inline-block; vertical-align:top; margin:2em 1em; width:8em;}

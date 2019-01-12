@@ -55,10 +55,10 @@
 <h3>Status variables</h3>
 <p>Status variables provide the main reactivity mechanism in dap. When a status variable gets changed, all elements that depend on it, are automatically updated. Status variables are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to all children of that element. Status variables can only be updated in u-rules.</p>
 <pre lang="dap">
-'cheese'.d("$value=`hello" // d-rule defines a status variable named $value
+'cheese'.d("$value=" // d-rule defines a status variable named $value
 	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rules update the variable `
 	,'INPUT placeholder="or type in here"'.d("!! $value").ui("$value=#:value")
-	,'H3.display'.d("! $value") // d-rule displays the variable
+	,'message'.d("! $value") // d-rule displays the variable
 )
 .DICT({
 	cheese: "Say cheese!"
@@ -70,28 +70,27 @@
 <p>Every generated element is bound to some data context, usualy it is a data row in some dataset. Data context can be shared among several elements, related to the same data row. Fields of a data row, or <em>data entries</em>, can be read and modified in both u- and d-rules. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
 <pre lang="dap">
 'colored-fruits'.d("$color= $fruit="
-	,'H6'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
 	,'UL.labelled'
-		.a("!! (hint.color $color)@label")
+		.a("!! (hint.fruit $fruit)concat@label")
 		.d("* color"
 			,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
 		)
 	,'UL.labelled'
-		.a("!! (hint.fruit $fruit)@label")
+		.a("!! (hint.color $color)concat@label")
 		.d("* fruit"
 			,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
 		)
 	,'BUTTON'.d("! hint.reset.color").ui("$color=")
 	,'BUTTON'.d("! hint.reset.fruit").ui("$fruit=")
-	
+	,'message'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
 )
 .DICT({
 	color:["red","orange","yellow","green"],
 	fruit:["apple","pear","banana"],
 	
 	hint:{ // constants in the dictionary can be grouped...
-		color: "selected color: ",
-		fruit: "selected fruit: ",
+		color: "Color: ",
+		fruit: "Fruit: ",
 		reset :{ // ...to arbitrary depth
 			color: "Reset color",
 			fruit: "Reset fruit"
@@ -110,13 +109,13 @@
 })
 </pre>
 <p>Here, all elements inside the <code>'colored-fruits'</code> share the same status context with <code>$color</code> and <code>$fruit</code> status variables defined in it. However, each <code>LI</code> element in the two lists has its own data context, containing one data entry, either <code>.color</code> or <code>.fruit</code></p>
-<p>Another interesting point of this example is the <code>.FUNC</code> section (functionality) and the d-rule of <code>'H2.summary'</code> element. Meet: flatteners and convertors...</p>
+<p>Another interesting point of this example is the <code>.FUNC</code> section (functionality) and the d-rule of <code>'message'</code> element. Meet: flatteners and convertors...</p>
 
 <h3>Flatteners and convertors</h3>
 <p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are similar to Javascript functions. In fact, they ARE ordinary Javascript functions — but with imposed uniform contracts:</p>
 <p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.FUNC</code> section</p>
 <p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into one single value. In the example above, the <code>()sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single string) is then fed to the convertors.</p>
-<p>Another flattener featuring in <code>'H2.summary'</code> d-rule is dap's standard <code>()!</code> flattener, that tests if ALL of its arguments are <i>truthy</i>. Its counterpart, <code>()?</code> flattener, that you will see in the example below, tests if ANY of its arguments is truthy.</p>
+<p>Another flattener featuring in <code>'message'</code> d-rule is dap's standard <code>()!</code> flattener, that tests if ALL of its arguments are <i>truthy</i>. Its counterpart, <code>()?</code> flattener, that you will see in the example below, tests if ANY of its arguments is truthy.</p>
 
 <h3>Named arguments</h3>
 <p>Having argument names provided along with values gives some extra possibilities to the flatteners. For example, parameter strings (parameterized URLs being typical example) can be built easily.</p>
@@ -124,7 +123,7 @@
 'stocks'.d("$code= $warehouse="
 	,'INPUT placeholder="Item code"'.ui("$code=#:value")
 	,'INPUT placeholder="Warehouse"'.ui("$warehouse=#:value")
-	,'summary'.d("? ($code $warehouse)?; ! hint (base@ $code $warehouse)uri")
+	,'message'.d("? ($code $warehouse)?; ! hint (base@ $code $warehouse)uri")
 )
 .DICT({
 	hint: "Constructed URI: ",
@@ -140,16 +139,16 @@
 <p>Now that we can construct parameterized URIs, and can work with datasets, we can do requests for external data. With dap it is very simple with a standard <code>query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
 <pre lang="dap" data-style="height:12em">
 'heroes'.d("$id= $name="
-	,'summary'.d("? $id; ! (summary-text $id $name)here")
 	,'UL.heroes'.d("* (heroes@)uri:query@" // query data from the URL, parse it and populate a dataset from it  
 		,'LI.hero'
 			.d("!! .name@ .id@title")
 			.ui("$id=.id $name=.name")
 	)
+	,'message'.d("? $id; ! (message $id $name)here")
 )
 .DICT({
 	heroes:"/samples/heroes.json",
-	"summary-text":"Hero id: {id}\n Hero name: {name}"
+	message:"Hero id: {id}\n Hero name: {name}"
 })
 </pre>
 <p>Here, we get our data from a static file <a href="/samples/heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. By the <code>query</code> convertor, this file is requested asynchronously, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
