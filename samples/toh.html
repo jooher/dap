@@ -10,22 +10,27 @@
 </head>
 
 <body>
+<p>This dap example is inspired by <a href="https://angular.io/tutorial/" target="_blank" rel="nofollow">Angular tutorial</a>. Press Ctrl+U to see the source code.</p>
 
 <script>
 'toh'.d("$message= $hero= $heroes=heroes"
 	,'H1'.d("! dict.apptitle")
-	,'lists'.d("? $hero:!; $page=`Dashboard"
-		,'tabs'.d("* dict.page"
-			,'tab'.d("! .page; !? (.page $page)eq@selected").ui("$page=.")
+	,'lists'.d("? $hero:!; $page=`Dashboard" // if hero is not set: define a $page status variable for switching between pages
+		,'tabs'.d("* dict.page" // take page list from dictionary, and for each row of that list, do:
+			,'tab'	.d("! .page; !? (.page $page)eq@selected") // create a DIV.tab element, print current .page, and mark the element selected if .page is equal to $page
+				.ui("$page=.") // on UI event (click) change $page variable's value to .page of current data row
 		)
-		,'page.dashboard'.d("?? $page@Dashboard"
-			,'H2'.d("! dict.dashboard")
-			,'heroes'.d("* $heroes:top5@"
-				,'hero-icon'.d("! .name").ui("$hero=$")
+		,'page.dashboard'.d("?? $page@Dashboard" // if $page is set to "Dashboard"
+			,'H2'.d("! dict.dashboard") // print dashboard caption from the dictionary
+			,'heroes'.d("* $heroes:top5@" // take top 5 heroes with :top5 converter, and for each of them do:
+				,'hero-icon'.d("! .name") // create an icon with a hero's name
+					.ui("$hero=$") // on UI event update $hero with the current rowset
 			)
-			,'search'.d("$match="
-				,'input.labelled contenteditable'.d("!! dict.search@label").e("keyup","$match=#:value")
-				,'list'.d("? ($heroes $match)!; * ($heroes $match):hero.search"
+			,'search'.d("$match=" // Search panel. Define $match variable
+				,'input.labelled contenteditable' // .labelled css class (in styles.css) is defined to show label attribute as contentBefore
+					.d("!! dict.search@label") // set this element's label attribute from dictionary
+					.e("keyup","$match=#:value") // on every keyup, update $match with value of the element node
+				,'list'.d("? ($heroes $match)!; * ($heroes $match):hero.search" // if both $heroes and $match are set, do: search
 					,'hero'.d("! .name").ui("$hero=$")
 				)
 			)
@@ -81,7 +86,7 @@
 		dashboard	:"Top heroes",
 		myheroes	:"My heroes",
 		details		:"Details for",
-		id			:"Hero ID",
+		id		:"Hero ID",
 		name		:"Hero name",
 		back		:"Go back",
 		save		:"Save changes",
