@@ -243,10 +243,12 @@ const	dap=(Env=>
 			//NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
 			
 			set	:function(key,stuff,react){
-					var p = this.tgt || new Proto(this.ns,this.utag).$$();
-					if(stuff[0].replace)	append(p.attrs,key,stuff.shift());
-					if(stuff)		append(p.stuff,key,stuff);
-					if(react)		p.react.push(key);
+					const p = this.tgt || new Proto(this.ns,this.utag).$$();
+					if(stuff.length){
+						if(stuff[0].replace)	append(p.attrs,key,stuff.shift());
+						if(stuff.length)	append(p.stuff,key,stuff);
+					}
+					if(react)p.react.push(key);
 					return p;
 				},
 				
@@ -1467,17 +1469,17 @@ const	dap=(Env=>
 			
 			flatten	:{
 				uri	: QueryString.build.ordered, // function(values,tags)	{ return Uri.encode( values,tags ); },
-				post	: (values,tags)	=> Request.post( values.pop(),values,tags ),
-				upload	: (values,tags)	=> Request.blob( values.pop(),values[0],tags[0] ),
+				post	:(values,tags)	=> Request.post( values.pop(),values,tags ),
+				upload	:(values,tags)	=> Request.blob( values.pop(),values[0],tags[0] ),
 				
 				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
-				
-				exec	: (path,values)=>{
+/*				
+				exec	:(path,values)=>{
 						let tgt=Util.reach(path.split("."),window);
 						if(tgt&&tgt.apply)return tgt.apply(null,values);
 					},
-					
+*/					
 				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop()),
 		
 				//"uri*"	: Env.Uri.full

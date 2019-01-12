@@ -21,11 +21,13 @@
   
    // My dap code here
    
+   .RENDER() // this method renders the dap template
+   
   &lt;/script&gt;
  &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<p>Save it on your Desktop (or anywhere else), then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working.</p>
+<p>Save it on your Desktop (or anywhere else), then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working. Or, you can play with the code right here, all code samples are editable. Results of each code sample are shown under.</p>
 
 
 <h2>Rules and contexts</h2>
@@ -42,7 +44,7 @@
 <h3>Literals and constants</h3>
 <p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DICT</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
 <pre lang="dap">
-'I'.d("! good `literals_in_rules_are_not_good_for_long_texts")
+'B'.d("! good `literals_in_rules_are_not_good_for_long_texts")
 .DICT({ // this is the dictionary
 	good:"The right place for text and other constants is the dictionary, "
 })
@@ -50,10 +52,10 @@
 <p>Exclamation sign <code>!</code> in the beginning of the rule is a "print" operator, it prints its arguments into the element. Arguments (or <em>tokens</em>) in dap rules are separated by whitespace.</p>
 
 
-<h3>Status context</h3>
-<p>Status context entries, or <em>status variables</em> are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to the element's children. Status variables can be updated in u-rules. If status variable's value is changed, all elements that depend on it, will be updated. Status variables provide the main reactivity mechanism in dap.</p>
+<h3>Status variables</h3>
+<p>Status variables provide the main reactivity mechanism in dap. When a status variable gets changed, all elements that depend on it, are automatically updated. Status variables are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to all children of that element. Status variables can only be updated in u-rules.</p>
 <pre lang="dap">
-'main'.d("$value=`hello" // d-rule defines a status variable named $value
+'cheese'.d("$value=`hello" // d-rule defines a status variable named $value
 	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rules update the variable `
 	,'INPUT placeholder="or type in here"'.d("!! $value").ui("$value=#:value")
 	,'H3.display'.d("! $value") // d-rule displays the variable
@@ -64,24 +66,24 @@
 </pre>
 
 
-<h3>Data context</h3>
-<p>Dap is all about data. Every element is bound to data context, usualy it is a data row in some dataset. Fields of a data row, or <em>data entries</em>, are immediately available within context of that data row, and can be read or modified. Data context can be shared among several elements, related to the same data row. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
+<h3>Data entries</h3>
+<p>Every generated element is bound to some data context, usualy it is a data row in some dataset. Data context can be shared among several elements, related to the same data row. Fields of a data row, or <em>data entries</em>, can be read and modified in both u- and d-rules. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
 <pre lang="dap">
 'colored-fruits'.d("$color= $fruit="
-
-	,'H3'.d("! hint.color $color")
-	,'UL.colors'.d("* color"
-		,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
-	)
-	,'reset'.d("! hint.reset.color").ui("$color=")
+	,'H6'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
+	,'UL.labelled'
+		.a("!! (hint.color $color)@label")
+		.d("* color"
+			,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
+		)
+	,'UL.labelled'
+		.a("!! (hint.fruit $fruit)@label")
+		.d("* fruit"
+			,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
+		)
+	,'BUTTON'.d("! hint.reset.color").ui("$color=")
+	,'BUTTON'.d("! hint.reset.fruit").ui("$fruit=")
 	
-	,'H3'.d("! hint.fruit $fruit")
-	,'UL.fruit'.d("* fruit"
-		,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
-	)
-	,'reset'.d("! hint.reset.fruit").ui("$fruit=")
-	
-	,'H2.summary'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
 )
 .DICT({
 	color:["red","orange","yellow","green"],
@@ -136,14 +138,14 @@
 
 <h2>Working with external data</h2>
 <p>Now that we can construct parameterized URIs, and can work with datasets, we can do requests for external data. With dap it is very simple with a standard <code>query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
-<pre lang="dap">
+<pre lang="dap" data-style="height:12em">
 'heroes'.d("$id= $name="
+	,'summary'.d("? $id; ! (summary-text $id $name)here")
 	,'UL.heroes'.d("* (heroes@)uri:query@" // query data from the URL, parse it and populate a dataset from it  
 		,'LI.hero'
 			.d("!! .name@ .id@title")
 			.ui("$id=.id $name=.name")
 	)
-	,'summary'.d("? $id; ! (summary-text $id $name)here")
 )
 .DICT({
 	heroes:"/samples/heroes.json",

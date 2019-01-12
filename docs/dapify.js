@@ -9,11 +9,16 @@ const dapify=
 		,'welcome'.d("? ($code .code)eq; ! welcome")
 		,'BUTTON'.d("? ($code $run)ne; ! `Execute").ui("$run=$code")
 		,'BUTTON'.d("? ($code .code)ne; ! `Reset").ui("$run=$code=.code")
+		//,'BUTTON'.d("! submit").ui(".form:submit")
 	)
-	,'run'.d("inline $run")
+	,'run'.d("!! .style; inline $run")
+	,'FORM action="https://dapmx.org/playground.php" target="_blank" method="post"'.d(".form=#"
+		,'INPUT type="hidden" name="code"'.d("#.value=$code")
+	)
 )
 .DICT({
-	welcome:"You're welcome to modify this code!"
+	welcome	:"You're welcome to modify this code!",
+	submit	:"Open in separate window"
 })
 .FUNC({
 	convert	:{
@@ -21,7 +26,12 @@ const dapify=
 				.replace(/</g,"&lt;").replace(/>/g,"&gt;")	// html
 				.replace(/( \/\/.+?)$/gm,"<i>$1</i>")		// comments
 				.replace(/('.+?')/g,"<em>$1</em>") 		// element signatures
-				.replace(/(\$[^\s=.;@:"()`]*)/g,"<b>$1</b>")	// $status variables
+				.replace(/(\$[^\s=.;@:"()`]*)/g,"<b>$1</b>"),	// $status variables
+				
+		submit	:form	=>form.submit()
+	},
+	
+	flatten	:{
 	},
 
 	operate	: {
@@ -39,4 +49,4 @@ const dapify=
 
 [...document.getElementsByTagName("pre")]
 	.filter	(pre=>pre.getAttribute("lang")=="dap")
-	.forEach(pre=>dapify.RENDER({code:pre.textContent},null,pre));
+	.forEach(pre=>dapify.RENDER({code:pre.textContent,style:pre.getAttribute("data-style")},null,pre));
