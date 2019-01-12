@@ -13,7 +13,7 @@
 <p>This dap example is inspired by <a href="https://angular.io/tutorial/" target="_blank" rel="nofollow">Angular tutorial</a>. Press Ctrl+U to see the source code.</p>
 
 <script>
-'toh'.d("$message= $hero= $heroes=heroes"
+'toh'.d("$message= $hero= $heroes=(heroes)uri:query"
 	,'H1'.d("! dict.apptitle")
 	,'lists'.d("? $hero:!; $page=`Dashboard" // if hero is not set: define a $page status variable for switching between pages
 		,'tabs'.d("* dict.page" // take page list from dictionary, and for each row of that list, do:
@@ -30,41 +30,43 @@
 				,'input.labelled contenteditable' // .labelled css class (in styles.css) is defined to show label attribute as contentBefore
 					.d("!! dict.search@label") // set this element's label attribute from dictionary
 					.e("keyup","$match=#:value") // on every keyup, update $match with value of the element node
-				,'list'.d("? ($heroes $match)!; * ($heroes $match):hero.search" // if both $heroes and $match are set, do: search
-					,'hero'.d("! .name").ui("$hero=$")
+				,'list'.d("? ($heroes $match)!; * ($heroes $match):hero.search" // if both $heroes and $match are set, do for each hero from search results
+					,'hero'.d("! .name").ui("$hero=$") // print hero's name. On UI event set $hero to this
 				)
 			)
 		)
-		,'page.myheroes'.d("?? $page@Heroes"
+		,'page.myheroes'.d("?? $page@Heroes" // if $page is set to Heroes
 			,'H2'.d("! dict.myheroes")
-			,'heroes'.d("* $heroes@"
+			,'heroes'.d("* $heroes@" // for all heroes, do:
 				,'hero-bar'.d(""
-					,'id'.d("! .id")
-					,'name'.d("! .name")
-					,'del'.d("!! `× dict.remove@title").ui("$heroes=($heroes .id):hero.remove; ?")
-				).ui("$hero=$")
+					,'id'.d("! .id") // print hero's id
+					,'name'.d("! .name") // and name
+					,'del'	.d("!! `× dict.remove@title") // print cross and put remove hint to title attribute
+						.ui("$heroes=($heroes .id):hero.remove; ?") // on UI event, remove this hero from $heroes dataset
+				).ui("$hero=$") // set $hero to this
 			)
-			,'addnew'.d("$name="
-				,'labelled contenteditable'.d("!! dict.addnew@label").e("keyup","$name=#:value")
-				,'BUTTON'.d("! dict.addnew").ui("$heroes=($heroes $name):hero.add $name=")
+			,'addnew'.d("$name=" // for new hero, declare $name status variable
+				,'labelled contenteditable'.d("!! dict.addnew@label").e("keyup","$name=#:value") // hero name input
+				,'BUTTON'.d("! dict.addnew") // HTML button with Add new hero hint
+					.ui("$heroes=($heroes $name):hero.add $name=") // on UI event, add hero to the $heroes dataset and clear name input
 			)
 		)
 	)
-	,'page.details'.d("? $hero; $name=$hero.name"
-		,'H2'.d("! (dict.details $name:upper)spaced")
-		,'id.labelled'.d("!! $hero.id@ dict.id@label")
-		,'name.labelled contenteditable'.d("!! $hero.name@ dict.name@label").e("keyup","$name=#:value")
-		,'done'.ui("$hero=").d(""
-			,'BUTTON.back'.d("! dict.back").ui("")
-			,'BUTTON.save'.d("? ($hero.name $name)ne; ! dict.save").ui("$hero.name=$name")
-		)
+	,'page.details'.d("? $hero; $name=$hero.name" // details page, shows if $hero is set
+		,'H2'.d("! (dict.details $name:upper)spaced") // uppercase hero's name and print the details caption
+		,'id.labelled'.d("!! $hero.id@ dict.id@label") // print id as text and add id label (shown by css)
+		,'name.labelled contenteditable'.d("!! $hero.name@ dict.name@label").e("keyup","$name=#:value") // hero name edit
+		,'done'.d(""
+			,'BUTTON.back'.d("! dict.back").ui("") // for back button, just do nothing
+			,'BUTTON.save'.d("? ($hero.name $name)ne; ! dict.save").ui("$hero.name=$name") // on save, update hero's name
+		).ui("$hero=") // for both buttons, clear $hero variable - done with details.
 	)
-	,'messages'.d("! $message")
 )
 .FUNC({
 	convert:{
 		upper	:str=>str.toUpperCase(),
 		top5	:arr=>arr.slice(0,5),
+		heroes	:"heroes.json",
 		
 		hero	:{
 			search	:$=>$.match&&$.heroes.filter(h=>h.name.toLowerCase().indexOf($.match.toLowerCase())>=0),
