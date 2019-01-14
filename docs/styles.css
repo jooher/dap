@@ -13,11 +13,14 @@ code{background:aliceblue; padding:2px; white-space:nowrap; }
 /* dapify styles */
 .dapify	{margin:2em 0; position:relative}
 .dapify>pre{margin:0}
-
-.dapify>.buttons{position:absolute; right:.5em; margin-top:-2em;}
-.dapify>.buttons>.welcome{display:inline; color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
 .dapify>.run{padding:1em; box-shadow: 0 4px 12px rgba(0,40,50,.25); margin-top:1em; }
-   
+
+.dapify>.buttons{position:absolute; right:4px; margin-top:-28px;}
+.dapify>.buttons>button{margin:0; width:32px; height:24px; }
+.dapify>.buttons>.welcome{display:inline; color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
+button.render:before{content:"►"}
+button.reset:before{content:"⌂"}
+ 
 pre{text-align:left; padding:2em; background-color:aliceblue; font: normal 1.2em/1.5 monospace; max-height:32em; overflow:auto; }
 pre>i{color:cornflowerblue;}
 pre>b{color:mediumblue}
