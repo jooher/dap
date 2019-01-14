@@ -108,8 +108,12 @@ const	dap=(Env=>
 
 		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
 		
-		reach	: (path,start)=>path.reduce(o,v=>o&&o[v],start),
-	
+		reach	: (entry,path)=>{//path.reduce(o,v=>o&&o[v],start),
+				let i=path.length; 
+				while(entry&&i--)entry=entry[path[i]];
+				return entry;
+			},
+			
 		hash	: (values,tags)=>{
 			const hash={};
 			for(let a,i=values.length;i--;)
@@ -165,11 +169,9 @@ const	dap=(Env=>
 					return this;
 				},
 				
-			reach	: function(path,domain){
-					if(domain)path=makePath(path);
-					let entry = this.lookup(path,domain);//||domain&&Fail( domain+" not found: "+path);
-					while( entry && path.length ) entry = entry[path.pop()];	
-					return entry;
+			reach	:function(route,domain){
+					const path=makePath(route);
+					return Util.reach(this.lookup(path,domain),path)||Fail( domain+" not found: "+route);
 				},
 
 			lookup	: function(path,domain,key){
@@ -549,7 +551,7 @@ const	dap=(Env=>
 										
 									default	:
 										if(!tag)tag=path[0];
-										literal	= context.ns.reach(path) || literal;
+										literal	= Util.reach(context.ns.lookup(path),path) || literal;
 										path	= null;	
 								}
 								
@@ -1279,8 +1281,9 @@ const	dap=(Env=>
 		
 		consume	=(request)=>{
 			//if(Math.floor(request.status/100)!=2)return;
-			const handle=MimeHandlers[request.getResponseHeader('content-type').split(";")[0]];
-			return handle ? handle(request) : request;
+			const	ctype=request.getResponseHeader('content-type'),
+				handle=ctype&&MimeHandlers[ctype.split(";")[0]];
+			return	handle ? handle(request) : request;
 		},
 	
 		query	=(req,postpone)=>{//url,body,headers,method,contentType,)

@@ -45,7 +45,7 @@ dapify	= dap &&
 					.RENDER(null,node);
 				}
 				catch(e){
-					alert("error: "+e.message);
+					alert(e.message);
 				}
 			}
 		}
