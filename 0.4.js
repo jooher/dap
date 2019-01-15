@@ -270,7 +270,7 @@ const	dap=(Env=>
 			prepare	:function(ns){
 			
 				if(!this.rules){
-					var	ns	= this.ns,
+					const	ns	= this.ns,
 						attrs	= this.attrs,
 						stuff	= this.stuff;
 
@@ -278,7 +278,7 @@ const	dap=(Env=>
 					for(let i in attrs)
 						this.rules[i] = new Rule(ns,attrs[i],stuff[i]);
 							
-					var d=this.rules.d||(this.rules.d = stuff.d ? new Rule(ns,null,stuff.d) : new Rule()); // DEFAULT.RULE?
+					const	d = this.rules.d||(this.rules.d = stuff.d ? new Rule(ns,null,stuff.d) : new Rule()); // DEFAULT.RULE?
 					
 					if(!this.react.length)
 						this.react=null;
@@ -287,7 +287,7 @@ const	dap=(Env=>
 						this.elem=Env.Native(this.utag,this.rules[""]&&"ui");
 					
 					if(!this.elem && d && (d.defs||d.uses))
-						Fail("Entry must be an element",this);
+						Fail("Entry must be an element");
 				}
 				return this.rules;
 			},
@@ -1037,7 +1037,6 @@ const	dap=(Env=>
 				}
 		};
 
-
 		return	{ Branch, Postpone, Perf, After, React, 
 		
 			Update,
@@ -1381,7 +1380,7 @@ const	dap=(Env=>
 			refresh=function(){
 				if(!historian)return;
 				if(decodeURI(href)!=decodeURI(href=window.location.href)){
-					var	proto=historian.P,
+					const	proto=historian.P,
 						instead=historian;
 					historian=null;
 					Env.inline(proto,instead);

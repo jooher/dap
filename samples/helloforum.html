@@ -53,6 +53,7 @@
 		grc: ()=>{
 			const	async	= dap.Async(),
 				sitekey	= '6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC';
+			if(!async)return;
 			grecaptcha.execute(sitekey,{action:'sendmessage'}).then(token=>async.resolve(token));
 			return "grecaptcha execute";
 		}
