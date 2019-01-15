@@ -13,7 +13,7 @@
 <p>This dap example is inspired by <a href="https://angular.io/tutorial/" target="_blank" rel="nofollow">Angular tutorial</a>. Press Ctrl+U to see the source code.</p>
 
 <script>
-'toh'.d("$message= $hero= $heroes=(heroes)uri:query"
+'toh'.d("$message= $hero= $heroes=(heroes@)uri:query"
 	,'H1'.d("! dict.apptitle")
 	,'lists'.d("? $hero:!; $page=`Dashboard" // if hero is not set: define a $page status variable for switching between pages
 		,'tabs'.d("* dict.page" // take page list from dictionary, and for each row of that list, do:
@@ -97,7 +97,9 @@
 		addnew		:"Add new hero"
 	},
 	
-	heroes	:[
+	heroes	: "heroes.json"
+/*	
+	[
 		{ id: 11, name: 'Mr. Nice' },
 		{ id: 12, name: 'Narco' },
 		{ id: 13, name: 'Bombasto' },
@@ -109,6 +111,7 @@
 		{ id: 19, name: 'Magma' },
 		{ id: 20, name: 'Tornado' }
 	]
+*/
 })
 .RENDER();
 			
