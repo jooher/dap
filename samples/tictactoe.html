@@ -16,10 +16,11 @@
 </head>
 
 <body>
+<p>This dap example is inspired by <a href="https://reactjs.org/tutorial/tutorial.html" target="_blank" rel="nofollow">React tutorial</a>. Press Ctrl+U to see the source code.</p>
 
 <script>
 
-var TicTacToe=(function(){
+var TicTacToe=(function(){ // all the game logic is encapsulated into this usual closure
 
 	var	lines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ]
 	
@@ -63,19 +64,23 @@ var TicTacToe=(function(){
 })();
 
 
+// dap only enteres the scene when it comes to ui
+
 'game'.d("$game=:gotoMove`0 $squares=:emptyBoard"
 	,'H1.winner'.d("? $game.winner; ! `Winner: $game.winner")
 	,'H1.turn'.d("?:! $game.winner; ! `Turn: .key=($game.turn:# @+`X @-`O)case")
 	,'board'.d(".n=`0; * $squares@key"
-		,'square'.d("! .key; ..n=.n:++=..n").ui("? (.key $game.winner)?:!; ! .key=..key; $game=(.n .key):addMove")
+		,'square'.d("! .key; ..n=.n:++=..n")
+			.ui("? (.key $game.winner)?:!; ! .key=..key; $game=(.n .key):addMove")
 	)
 	,'history'.d(".m=`0; * $game.history@"
-		,'BUTTON.move'.d("! `Move# ..m=.m:++=..m").ui("$game=.m:gotoMove $squares=$game.squares")
+		,'BUTTON.move'.d("! `Move# ..m=.m:++=..m")
+			.ui("$game=.m:gotoMove $squares=$game.squares")
 	)
 )
 
 .FUNC({
-	convert:TicTacToe
+	convert:TicTacToe // refer to the game closure to have access to its methods
 })
 
 .RENDER();
