@@ -14,7 +14,7 @@ dapify	= dap &&
 		,'PRE contenteditable'
 			.d("! .code; a!")
 			.a("#.innerHTML=$run:hilite")
-			.e("keyup","$edit=#.textContent $dirty=($edit $run)ne $own=($edit .code)ne")
+			.e("keyup","$edit=#.textContent")
 		,'buttons'.d(""
 			,'welcome'.d("? $own:!; ! welcome")
 			,'BUTTON.reset'	.d("? $own; !! reset@title").ui("$run= $run=$edit=.code")
@@ -25,7 +25,8 @@ dapify	= dap &&
 		,'FORM action="https://dapmx.org/playground.php" target="_blank" method="post"'.d(".form=#"
 			,'INPUT type="hidden" name="code"'.d("#.value=$edit")
 		)
-	)
+	).u("$dirty=($edit $run)ne $own=($edit .code)ne")
+	
 	.DICT({
 		welcome	:"You're welcome to modify this code!",
 		render	:"Run this code",
