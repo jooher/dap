@@ -137,7 +137,7 @@
 
 <h2>Working with external data</h2>
 <p>Now that we can construct parameterized URIs, and can work with datasets, we can do requests for external data. With dap it is very simple with a standard <code>query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
-<pre lang="dap" data-style="height:12em">
+<pre lang="dap" data-style="height:16em">
 'heroes'.d("$id= $name="
 	,'UL'.d("* (heroes@)uri:query@" // query data from the URL, parse it and populate a dataset from it  
 		,'LI.hero'
