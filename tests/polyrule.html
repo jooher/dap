@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Polyrule</title>
+		<style>
+		.ui{cursor:pointer}
+		iframe{height:16em; width:100%; border:4px dashed orange;}
+		</style>
+		<script src="../-.js"></script>
+	</head>
+	<body>  
+		<script>
+'favorite-fruit'.d("$choice="
+	,'U'.d("{* fruit; ! .fruit}; ! `here")
+/*	,'B.selected'.d("! title ($choice not-yet)?")
+	,'UL.options'.d("* fruit"
+		,'LI'	.d("! .fruit")
+			.ui("$choice=.fruit")
+	).d(''
+		,'LI'.d("! `listitem")
+	)
+*/
+).d("! `favfruit!!")	
+.DICT({
+	title:"My favorite fruit is ",
+	"not-yet":"what?",
+	fruit:["apple","orange","tomato","banana"]
+})
+.RENDER()
+		</script>
+
+	</body>
+</html>
