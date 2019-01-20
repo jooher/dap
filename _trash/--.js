@@ -745,7 +745,7 @@ const	dap=(Env=>
 							postpone.todo=[new Compile.Step(null,postpone.todo),todo[1]];
 							return;
 						}
-					}else										
+					}else{
 						flow	= null;
 							
 						const	feed	= step.feed,
@@ -784,6 +784,7 @@ const	dap=(Env=>
 								empty
 							);
 						}
+					}										
 				}
 				--stackDepth;
 				
