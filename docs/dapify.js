@@ -13,7 +13,7 @@ dapify	= dap &&
 	'dapify'.d("$edit=.code $run=.code $dirty= $own="
 		,'PRE contenteditable'
 			.d("! .code; a!")
-			.a("#.innerHTML=$run:hilite")
+			.a("log `a; #.innerHTML=$run:hilite")
 			.e("keyup","$edit=#.textContent")
 		,'buttons'.d(""
 			,'welcome'.d("? $own:!; ! welcome")

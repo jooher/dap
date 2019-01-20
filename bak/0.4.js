@@ -133,7 +133,6 @@ const	dap=(Env=>
 		append	=(obj,key,value)=>(obj[key]=obj[key]&&(value.charAt(0)===';')?obj[key]+value:value); /// ???
 		
 		
-		
 		function Namespace(uri){
 			
 			Env.console.log("New namespace: "+uri);
@@ -205,8 +204,8 @@ const	dap=(Env=>
 			
 			this.elem	= null;
 			this.rules	= null;
-			this.stuff	= {};
-			
+			this.stuff	= {d:null,a:null};
+			this.attrs	= {};
 			this.react	= [];
 			
 			this.tgt	= null;
@@ -219,26 +218,7 @@ const	dap=(Env=>
 				},
 				
 			$$	:function(){ return this.tgt=this },
-			/*
-			set	:function(key,stuff,react){
-					const p = this.tgt || new Proto(this.ns,this.utag).$$();
-					if(stuff.length){
-						if(stuff[0].replace)	append(p.attrs,key,stuff.shift());
-						if(stuff.length)	append(p.stuff,key,stuff);
-					}
-					if(react)p.react.push(key);
-					return p;
-				},
-			*/	
-			set	:function(key,stuff,react){
-					const	p = this.tgt || new Proto(this.ns,this.utag).$$();
-					if(stuff.length)
-						(p.stuff[key]||(p.stuff[key]=[])).push(stuff);
-					if(react)
-						p.react.push(key);
-					return p;
-				},
-				
+			
 			d	:function(...stuff)		{ return this.set("d",stuff) },
 			a	:function(...stuff)		{ return this.set("a",stuff) },
 			u	:function(...stuff)		{ return this.set("u",stuff) },
@@ -264,6 +244,16 @@ const	dap=(Env=>
 				
 			//NS	:function(uri)	{ return Namespace(uri) && this },//Uri.absolute()
 			
+			set	:function(key,stuff,react){
+					const p = this.tgt || new Proto(this.ns,this.utag).$$();
+					if(stuff.length){
+						if(stuff[0].replace)	append(p.attrs,key,stuff.shift());
+						if(stuff.length)	append(p.stuff,key,stuff);
+					}
+					if(react)p.react.push(key);
+					return p;
+				},
+				
 				
 			FOR	:function(stub){
 					this.utag=Util.stub(this.utag,stub);
@@ -281,13 +271,15 @@ const	dap=(Env=>
 			
 				if(!this.rules){
 					const	ns	= this.ns,
+						attrs	= this.attrs,
 						stuff	= this.stuff;
 
 					this.rules = {};				
-					for(let i in stuff)
-						this.rules[i] = new Rule(ns,stuff[i]);
+					for(let i in attrs)
+						this.rules[i] = new Rule(ns,attrs[i],stuff[i]);
 							
-					const	d = this.rules.d;//||(this.rules.d = stuff.d ? new Rule(ns,null,stuff.d) : new Rule()); //// DEFAULT.RULE?
+					const	d = this.rules.d||
+						(this.rules.d = stuff.d ? new Rule(ns,null,stuff.d) : new Rule()); // DEFAULT.RULE?
 					
 					if(!this.react.length)
 						this.react=null;
@@ -317,7 +309,7 @@ const	dap=(Env=>
 						Env.react(node,react[i],null,Execute.React);
 					}
 					
-				new Execute.Branch(node.$,node).runDown(d ? d.todo||d.engage().todo : null,place,instead);//  
+				new Execute.Branch(node.$,node).runDown(d.todo||d.engage().todo,place,instead);
 				
 				if(a)a.todo||a.engage();
 				
@@ -333,11 +325,11 @@ const	dap=(Env=>
 			
 		};
 					
-		function Context(ns,branchStack,uses,defs){
+		function Context(ns,branchStack){
 			this.ns	  = ns;
 			this.branchStack = branchStack;
-			this.uses = uses;
-			this.defs = defs;
+			this.defs = null;
+			this.uses = null;
 		}
 
 		function Step(feed,todo){
@@ -345,12 +337,11 @@ const	dap=(Env=>
 			this.todo	= todo;
 		}
 		
-		function Feed(values,tags,tokens,op,branch){
+		function Feed(values,tags,tokens,op){
 			this.values	= values;
 			this.tags	= tags;
 			this.tokens	= tokens;
 			this.op		= op;
-			this.branch	= branch;
 		}
 		Feed.prototype={
 			EMPTY	: new Feed([],[],[]),
@@ -366,10 +357,10 @@ const	dap=(Env=>
 			this.path	= path;
 		};
 				
-		function Rule(ns,branches,tail){
+		function Rule(ns,str,stuff){
 			this.ns		= ns;
-			this.branches	= branches;
-			this.tail	= tail;
+			this.rulestring	= str;
+			this.stuff	= stuff;
 			
 			this.todo	= null;
 			this.defs	= null;
@@ -397,7 +388,7 @@ const	dap=(Env=>
 						return branchStack;
 					},
 				
-				//INHRT	= ":: ",// /(?:;\s+)*\s*::\s*(?:;\s+)*/,
+				INHRT	= ":: ",// /(?:;\s+)*\s*::\s*(?:;\s+)*/,
 				STEPS	= /(?:;\s+)+/,
 				TOKENS	= /\s+/,
 				
@@ -428,18 +419,34 @@ const	dap=(Env=>
 				return path;
 			}			
 			
-			function makeBranch(context,n,epilog,todo){
-				
-				if(!context)
-					return epilog&&[epilog];
+			function makeBranch(context,n,epilog){
 
-				const	steps = context.branchStack[n].split(STEPS);
+				const	branchstr	= context.branchStack[n],
+					parts		= branchstr.split(INHRT),
+					stepsstr	= parts[0],
+					inherits	= parts[1],
+					steps		= stepsstr.split(STEPS);
+					
+				let	todo= null;
 
 				for(let i=steps.length; i--; )
 					steps[i]=makeStep(context,steps[i]);				
 				
 				if(epilog)
 					steps.push(epilog);
+
+				if(inherits){
+				
+					const	donor	= inherits.split("#"),
+						inherit	= context.ns.reach( donor[0] ) || Fail( "Can't find "+donor[0] ),
+						rule	= inherit.ubind && inherit.ubind(donor[1]||"d") || Fail( "Can't inherit from "+donor[0] );
+						
+					if(rule){
+						for(let i in rule.defs)(context.defs||(context.defs={}))[i]=true;
+						for(let i in rule.uses)(context.uses||(context.uses={}))[i]=true;
+						todo = rule.todo||rule.engage().todo;
+					}
+				}
 				
 				return List(steps,todo);
 			}
@@ -447,33 +454,26 @@ const	dap=(Env=>
 			function makeStep(context,str){
 			
 				if(/^<\d+>$/.test(str))
-					return {branch:makeBranch(context,str.substr(1,str.length-2))};
+					return new Step(null,makeBranch(context,str.substr(1,str.length-2),null));
 				
-				const	tokens	= str.split(TOKENS),
-					head	= !/[<$=]/.test(tokens[0]) && tokens.shift(),// operate:convert@alias
-					bare	= !tokens.length,
-					reuse	= bare&&REUSE.DUMMIES[head];
-					
-				if(reuse)
-					return reuse;
-					
-				let	a	= head;
+				const	tokens	= str.split(TOKENS);
+				let	a	= !/[<$=]/.test(tokens[0]) && tokens.shift();// operate:convert@alias
 				const	alias	= a&&(a=   a.split("@")).length>1 ? a[1] : null,
 					convert	= a&&(a=a[0].split(":")).length>1 ? makeConverts(context,a[1]) : null,
-					operate	= a&&(a=a[0]) ? context.ns.reach(a,FUNCS.OPERATE) : null,
-					feed	= bare ? new Feed(REUSE.DUMMY,alias?[alias]:REUSE.DUMMY,REUSE.DUMMY,operate) :
-						 makeTokens( context, tokens.reverse(), operate, (convert || alias!=null)?{alias,convert}:null );
-					
-				if(bare)REUSE.DUMMIES[head]=feed;
-				
-				return feed;
+					operate	= a&&(a=a[0]) ? context.ns.reach(a,FUNCS.OPERATE) : null;
+			
+				return new Step(
+ 					tokens.length
+						? makeTokens( context, tokens, operate, (convert || alias!=null)?{alias,convert}:null ) 
+						: new Feed( REUSE.DUMMY, REUSE.DUMMIES[alias]||(REUSE.DUMMIES[alias]=[alias]), REUSE.DUMMY, operate ) 
+				);
 			}
 			
 			function makeTokens(context,tokens,op,head){
 				
 				let	count	= tokens.length;
-				const	values	= new Array(count),
-					tags	= new Array(count);
+				const	tags	= new Array(count),
+					values	= new Array(count);
 				
 				while(count--){
 					
@@ -582,7 +582,7 @@ const	dap=(Env=>
 				
 				// TODO: test for constant feeds
 				
-				return new Feed(values,tags,tokens,op);
+				return new Feed( values.reverse(), tags.reverse(), tokens.reverse(), op );
 			}
 			
 			function makeArgsFeed(context,str){
@@ -590,9 +590,8 @@ const	dap=(Env=>
 				const	flatten	= a[1]	? context.ns.reach(a[1],FUNCS.FLATTEN) : Util.hash,
 					tokens	= a[0] && context.branchStack[a[0]].split(TOKENS);
 					
-				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : Feed.prototype.EMPTY;
+				return	tokens ? makeTokens( context, tokens, flatten ) : Feed.prototype.EMPTY;
 			}
-						
 			
 			const
 			
@@ -603,24 +602,16 @@ const	dap=(Env=>
 				EMPTY	: new Rule(),
 		
 				engage	: function(){
-					
-						const 	uses = {},
-							defs = {},
-							branches = this.branches;
-							
-						let todo=null;
-						
-						if(branches)for(let i=branches.length; i--;){
-							const	stuff=branches[i],
-								rulestring = stuff.length&&stuff[0].replace&&stuff.shift(),
-								epilog	= stuff.length && new Feed([stuff],REUSE.DUMMY,REUSE.DUMMY,Print),
-								branch	= makeBranch( rulestring && new Context(this.ns,Parse(rulestring),uses,defs), 0, epilog);
-							todo = todo ? [{branch},todo] : branch;
+						var	epilog	= this.stuff && new Step( new Feed([this.stuff],REUSE.DUMMY,REUSE.DUMMY,Print));//makeChildStep(this.ns,this.stuff);
+				
+						if(this.rulestring){
+							var context=new Context(this.ns,Parse(this.rulestring));
+							this.todo = makeBranch( context, 0, epilog );
+							this.uses = context.uses;
+							this.defs = context.defs;
 						}
-									
-						this.todo = todo;
-						this.uses = uses;
-						this.defs = defs;
+						else 	this.todo = epilog ? [epilog] : REUSE.DUMMY;
+						
 						return this;
 					},
 					
@@ -726,20 +717,21 @@ const	dap=(Env=>
 					Fail("Suspicious recursion depth: "+node.P.rules.d.rulestring);
 				
 				for(let step;todo&&(step=todo[0]);todo=(flow==null)&&todo[1]){
-					if(step.branch){
-						new Branch($,node,this.up).execBranch(step.branch); // node.$ ?
+					if(step.todo){
+						const branch = new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
 						if(postpone){
 							postpone.branch=this;
-							postpone.todo=[postpone.todo,todo[1]];
+							postpone.todo=[new Compile.Step(null,postpone.todo),todo[1]];
 							return;
 						}
-					}else{										
+					}else										
 						flow	= null;
 							
-						const	operate	= step.op,
-							tokens	= step.tokens,
-							values	= step.values,
-							tags	= step.tags;
+						const	feed	= step.feed,
+							operate	= feed.op,
+							tokens	= feed.tokens,
+							values	= feed.values,
+							tags	= feed.tags;
 
 						let	i	= tokens.length;
 							
@@ -753,7 +745,7 @@ const	dap=(Env=>
 							const value = this.execToken(values[i],tokens[i]);
 							if(postpone){
 								postpone.branch=this;
-								postpone.todo=[new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate,postpone.todo),todo[1]];//
+								postpone.todo=[new Compile.Step(new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate),postpone.todo),todo[1]];//
 								return;
 							}
 							if(operate)
@@ -772,7 +764,6 @@ const	dap=(Env=>
 								empty
 							);
 						}
-					}
 				}
 				--stackDepth;
 				
