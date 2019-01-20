@@ -205,7 +205,7 @@ const	dap=(Env=>
 			
 			this.elem	= null;
 			this.rules	= null;
-			this.stuff	= {d:null,a:null,u:null};
+			this.stuff	= {};
 			
 			this.react	= [];
 			
@@ -233,7 +233,7 @@ const	dap=(Env=>
 			set	:function(key,stuff,react){
 					const	p = this.tgt || new Proto(this.ns,this.utag).$$();
 					if(stuff.length)
-						p.stuff[key]=[stuff,p.stuff[key]]
+						(p.stuff[key]||(p.stuff[key]=[])).push(stuff);
 					if(react)
 						p.react.push(key);
 					return p;
@@ -281,13 +281,13 @@ const	dap=(Env=>
 			
 				if(!this.rules){
 					const	ns	= this.ns,
-						stuffs	= this.stuff;
+						stuff	= this.stuff;
 
 					this.rules = {};				
-					for(let i in stuffs)
-						this.rules[i] = new Rule(ns,stuffs[i]);
+					for(let i in stuff)
+						this.rules[i] = new Rule(ns,stuff[i]);
 							
-					const	d = this.rules.d||(this.rules.d = stuff.d ? new Rule(ns,null,stuff.d) : new Rule()); // DEFAULT.RULE?
+					const	d = this.rules.d; //||(this.rules.d = stuff.d ? new Rule(ns,null,stuff.d) : new Rule()); // DEFAULT.RULE?
 					
 					if(!this.react.length)
 						this.react=null;
@@ -345,11 +345,12 @@ const	dap=(Env=>
 			this.todo	= todo;
 		}
 		
-		function Feed(values,tags,tokens,op){
+		function Feed(values,tags,tokens,op,branch){
 			this.values	= values;
 			this.tags	= tags;
 			this.tokens	= tokens;
 			this.op		= op;
+			this.branch	= branch;
 		}
 		Feed.prototype={
 			EMPTY	: new Feed([],[],[]),
@@ -365,10 +366,9 @@ const	dap=(Env=>
 			this.path	= path;
 		};
 				
-		function Rule(ns,stuff,tail){
+		function Rule(ns,branches,tail){
 			this.ns		= ns;
-			//this.rulestring	= str;
-			this.stuff	= stuff;
+			this.branches	= branches;
 			this.tail	= tail;
 			
 			this.todo	= null;
@@ -429,6 +429,9 @@ const	dap=(Env=>
 			}			
 			
 			function makeBranch(context,n,epilog,todo){
+				
+				if(!context)
+					return epilog&&[epilog];
 
 				const	steps = context.branchStack[n].split(STEPS);
 
@@ -444,26 +447,23 @@ const	dap=(Env=>
 			function makeStep(context,str){
 			
 				if(/^<\d+>$/.test(str))
-					return new Step(null,makeBranch(context,str.substr(1,str.length-2),null));
+					return {branch:makeBranch(context,str.substr(1,str.length-2))};
 				
-				const	tokens	= str.split(TOKENS);
-				let	a	= !/[<$=]/.test(tokens[0]) && tokens.shift();// operate:convert@alias
+				const	parts	= str.split(TOKENS);
+				let	a	= !/[<$=]/.test(parts[0]) && parts.shift();// operate:convert@alias
 				const	alias	= a&&(a=   a.split("@")).length>1 ? a[1] : null,
 					convert	= a&&(a=a[0].split(":")).length>1 ? makeConverts(context,a[1]) : null,
-					operate	= a&&(a=a[0]) ? context.ns.reach(a,FUNCS.OPERATE) : null;
+					operate	= a&&(a=a[0]) ? context.ns.reach(a,FUNCS.OPERATE) : null,
+					tokens	= parts.length ? parts.reverse() : REUSE.DUMMIES[alias]||(REUSE.DUMMIES[alias]=[alias]);
 			
-				return new Step(
- 					tokens.length
-						? makeTokens( context, tokens, operate, (convert || alias!=null)?{alias,convert}:null ) 
-						: new Feed( REUSE.DUMMY, REUSE.DUMMIES[alias]||(REUSE.DUMMIES[alias]=[alias]), REUSE.DUMMY, operate ) 
-				);
+				return makeTokens( context, tokens, operate, (convert || alias!=null)?{alias,convert}:null ) 
 			}
 			
 			function makeTokens(context,tokens,op,head){
 				
 				let	count	= tokens.length;
-				const	tags	= new Array(count),
-					values	= new Array(count);
+				const	values	= count ? new Array(count) : REUSE.DUMMY,
+					tags	= count ? new Array(count) : REUSE.DUMMY;
 				
 				while(count--){
 					
@@ -572,7 +572,7 @@ const	dap=(Env=>
 				
 				// TODO: test for constant feeds
 				
-				return new Feed( values.reverse(), tags.reverse(), tokens.reverse(), op );
+				return new Feed( values, tags, tokens, op );
 			}
 			
 			function makeArgsFeed(context,str){
@@ -580,8 +580,9 @@ const	dap=(Env=>
 				const	flatten	= a[1]	? context.ns.reach(a[1],FUNCS.FLATTEN) : Util.hash,
 					tokens	= a[0] && context.branchStack[a[0]].split(TOKENS);
 					
-				return	tokens ? makeTokens( context, tokens, flatten ) : Feed.prototype.EMPTY;
+				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : Feed.prototype.EMPTY;
 			}
+						
 			
 			const
 			
@@ -594,22 +595,22 @@ const	dap=(Env=>
 				engage	: function(){
 					
 						const 	uses = {},
-							defs = {};
-						
-						let	todo = REUSE.DUMMY;//null;
-						
-						for(let stuff = this.stuff; stuff; stuff=stuff[1]){
-							const	branch=stuff[0],
-								rulestring = branch.length&&branch[0].replace&&branch.shift(),
-								epilog	= branch.length && new Step( new Feed([branch],REUSE.DUMMY,REUSE.DUMMY,Print));//makeChildStep(this.ns,this.stuff);
+							defs = {},
+							branches = this.branches;
 							
-							todo =
-								rulestring ? makeBranch( new Context(this.ns,Parse(rulestring),uses,defs), 0, epilog, todo )
-								: epilog ? [epilog,todo] : todo; //;
+						let todo=null;
+						
+						for(let i=branches.length; i--;){
+							const	stuff=branches[i],
+								rulestring = stuff.length&&stuff[0].replace&&stuff.shift(),
+								epilog	= stuff.length && new Feed([stuff],REUSE.DUMMY,REUSE.DUMMY,Print),
+								branch	= makeBranch( rulestring && new Context(this.ns,Parse(rulestring),uses,defs), 0, epilog);
+							todo = todo ? [{branch},todo] : branch;
 						}
+									
+						this.todo = todo;
 						this.uses = uses;
 						this.defs = defs;
-						this.todo = todo;
 						return this;
 					},
 					
@@ -715,21 +716,20 @@ const	dap=(Env=>
 					Fail("Suspicious recursion depth: "+node.P.rules.d.rulestring);
 				
 				for(let step;todo&&(step=todo[0]);todo=(flow==null)&&todo[1]){
-					if(step.todo){
-						const branch = new Branch($,node,this.up).execBranch(step.todo); // node.$ ?
+					if(step.branch){
+						new Branch($,node,this.up).execBranch(step.branch); // node.$ ?
 						if(postpone){
 							postpone.branch=this;
-							postpone.todo=[new Compile.Step(null,postpone.todo),todo[1]];
+							postpone.todo=[postpone.todo,todo[1]];
 							return;
 						}
-					}else										
+					}else{										
 						flow	= null;
 							
-						const	feed	= step.feed,
-							operate	= feed.op,
-							tokens	= feed.tokens,
-							values	= feed.values,
-							tags	= feed.tags;
+						const	operate	= step.op,
+							tokens	= step.tokens,
+							values	= step.values,
+							tags	= step.tags;
 
 						let	i	= tokens.length;
 							
@@ -743,7 +743,7 @@ const	dap=(Env=>
 							const value = this.execToken(values[i],tokens[i]);
 							if(postpone){
 								postpone.branch=this;
-								postpone.todo=[new Compile.Step(new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate),postpone.todo),todo[1]];//
+								postpone.todo=[new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate,postpone.todo),todo[1]];//
 								return;
 							}
 							if(operate)
@@ -762,6 +762,7 @@ const	dap=(Env=>
 								empty
 							);
 						}
+					}
 				}
 				--stackDepth;
 				

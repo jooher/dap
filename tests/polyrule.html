@@ -11,20 +11,27 @@
 	<body>  
 		<script>
 'favorite-fruit'.d("$choice="
-	,'U'.d("{* fruit; ! .fruit}; ! `here")
-/*	,'B.selected'.d("! title ($choice not-yet)?")
-	,'UL.options'.d("* fruit"
-		,'LI'	.d("! .fruit")
-			.ui("$choice=.fruit")
-	).d(''
-		,'LI'.d("! `listitem")
-	)
-*/
-).d("! `favfruit!!")	
+	,'o'.d("{* fruit; ! .fruit; ! `+}; ! `here")
+	,'B.selected'.d("! title ($choice not-yet)?")
+	,'UL.options'
+		.d("* fruit"
+			,'LI'	.d("! .fruit")
+				.ui("$choice=.fruit")
+		)
+		.d("* veg"
+			,'LI.side'.d("! .veg")
+		)
+		.d("! `done")
+		.d(""
+			,'LI.last'.d("! `last")
+		)
+/**/
+)
 .DICT({
 	title:"My favorite fruit is ",
 	"not-yet":"what?",
-	fruit:["apple","orange","tomato","banana"]
+	fruit:["apple","orange","tomato","banana"],
+	veg:["spinach","onion","cabbage"]
 })
 .RENDER()
 		</script>
