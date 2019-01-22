@@ -28,7 +28,7 @@
 				,'H3.head'.d("! .head").ui("$?=$?:!")
 				,'author'.d("! .author")
 				,'date'.d("! .date")
-				,'A.msg'.d("! .msg; !! (redir .msg)uri@href")
+				,'A.msg target="_blank"'.d("! .msg; !! (redir .msg)uri@href")
 				,'open'.d("? $?; ! Entry")
 			)
 		),

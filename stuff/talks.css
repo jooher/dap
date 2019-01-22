@@ -14,4 +14,6 @@
 
 .input{border:1px solid gray; padding:1em; margin:.5em 0;}
 .reply{margin-bottom:1em;}
+.reply>.action{color:gray; display:inline; border-bottom:1px dotted; }
+.reply>.action:hover{color:black}
 
