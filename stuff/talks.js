@@ -18,7 +18,7 @@
 						,'H3.head contenteditable'.d("!! dict.head@label").ui("$head=#:value")
 						,'body contenteditable'.d("!! dict.body@label").ui("$body=#:text")
 					).u("?")
-					,'button.send'.d("! dict.send").ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=:grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
+					,'BUTTON.send'.d("! dict.send").ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=:grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
 				).u("$?=")
 			).u("?")
 			,'ties'.d("$!!; ! Ties")
@@ -49,12 +49,14 @@
 
 .FUNC({
 	convert	:{
-		grc: ()=>{
+		grc	:()=>{
 			const	async	= dap.Async(),
 				sitekey	= '6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC';
 			if(!async)return;
 			grecaptcha.execute(sitekey,{action:'sendmessage'}).then(token=>async.resolve(token));
 			return "grecaptcha execute";
+		},
+		safehtml:html=>{
 		}
 	}
 })

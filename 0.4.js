@@ -1511,7 +1511,7 @@ const	dap=(Env=>
 				
 				"!!"	:(value,alias,node)=>{
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);
-						else node.appendChild(newText(value));
+						else node.innerHTML=value;//appendChild(newText(value));
 					},
 				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },
 			}
