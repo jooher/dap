@@ -1,0 +1,17 @@
+.talks{font-size:.8em; margin-top:6em; }
+
+.talks [contenteditable]{background:linen; margin:.25em 0; padding:.25em; white-space: pre-wrap; }
+.talks [contenteditable]:empty:before{content:attr(label);font-style:italic; color:gray;}
+
+.tie	{margin:2em 0; padding-left:1em; max-width:80em; min-width:40em; border-left:1px solid lightgray;}
+.tie>.msg, .tie>.date, .tie>.author {display:inline; margin-right:1em; font:italic .75em sans-serif;}
+.msg>.head, .tie>.head {font-weight:bold; font-style:italic; margin-right:2em; display:inline; }
+.msg>.body, .tie>.body {max-height:80em; overflow-y:auto; white-space:pre-wrap; }
+
+
+.button	{display: inline-block; border:1px solid lightgray; padding: .5em; }
+.button:hover{box-shadow:1px 1px 2px gray; color:black; }
+
+.input{border:1px solid gray; padding:1em; margin:.5em 0;}
+.reply{margin-bottom:1em;}
+

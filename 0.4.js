@@ -1160,23 +1160,23 @@ const	dap=(Env=>
 		
 		const
 		
-		params =/(?:^|&)([^&=]*)=?([^&]*)/g,
+		regx =/(?:^|&)([^&=]*)=?([^&]*)/g,
 		
 		parse	={
 			
 			pairs	:function(str,tgt){
 				if(!tgt)tgt=[];
-				str&&str.replace(params,($0,$1,$2)=>{tgt.push({name:$1,value:decodeURIComponent($2)})});
+				str&&str.replace(regx,($0,$1,$2)=>{tgt.push({name:$1,value:decodeURIComponent($2)})});
 				return tgt;
 			},
 			hash	:function(str,tgt){
 				if(!tgt)tgt={};
-				str&&str.replace( params,($0,$1,$2)=>{if($1)tgt[$1]=decodeURIComponent($2)});
+				str&&str.replace(regx,($0,$1,$2)=>{if($1)tgt[$1]=decodeURIComponent($2)});
 				return tgt;
 			},
 			feed	:function(str,tgt){
 				if(!tgt)tgt={values:[],tags:[]};
-				str&&str.replace(params,($0,$1,$2)=>{
+				str&&str.replace(regx,($0,$1,$2)=>{
 					tgt.values.push(decodeURIComponent($2));
 					tgt.tags.push($1);
 				})
@@ -1461,6 +1461,13 @@ const	dap=(Env=>
 					if(!instead)instead = document.currentScript;
 					place = instead ? instead.parentNode : document.body;
 				}
+				if(!data){
+					const	src = instead && instead.src || document.URL,
+						uri = src && Uri.parse(src),
+						par = uri.anchor;
+					if(par)
+						data=QueryString.parse.hash(par.replace(/^#!?/,''));
+				}
 				const	ready = proto.spawn([{'':data||State.read()}],place)||newStub("dap");
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 			},
@@ -1473,7 +1480,7 @@ const	dap=(Env=>
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
 				
 				copy	: item=>isArray(item)?item.slice(0):Object.assign({},item),
-				script	: url=>Util.merge(newElem("script"),{src:"url",async:true,onload:()=>{doc.body.appendChild(el)}}),
+				script	: url=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
 				
 				sync	: req=> Http.query(req,null),
 				query	: req=> Http.query(req,dap.Async())
