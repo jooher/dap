@@ -1,6 +1,6 @@
 .talks{font-size:.8em; margin-top:6em; }
 
-.talks [contenteditable]{background:linen; margin:.25em 0; padding:.25em; white-space: pre-wrap; }
+.talks [contenteditable]{background:linen; margin:.25em 0; padding:.25em; white-space: pre-wrap; text-decoration:none;}
 .talks [contenteditable]:empty:before{content:attr(label);font-style:italic; color:gray;}
 
 .tie	{margin:2em 0; padding-left:1em; max-width:80em; min-width:40em; border-left:1px solid lightgray;}

@@ -1481,6 +1481,7 @@ const	dap=(Env=>
 				
 				copy	: item=>isArray(item)?item.slice(0):Object.assign({},item),
 				script	: url=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
+				now	: elem=>document.body.appendChild(elem),
 				
 				sync	: req=> Http.query(req,null),
 				query	: req=> Http.query(req,dap.Async())
