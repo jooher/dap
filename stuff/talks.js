@@ -55,6 +55,7 @@
 		rich	:html=>html
 			.replace(/(http\S*:\/\/\S+)/gi, "<a href='$1' target='_blank'>$1</a>")
 			.replace(/\[(\S+?)\](.*?)\[\/\1\]/gi, "<span class='$1'>$2</span>"),
+			//yes, that's it.
 			
 		grc	:action=>dap.Async( grecaptcha.execute('6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',action), "grecaptcha execute")
 	}
