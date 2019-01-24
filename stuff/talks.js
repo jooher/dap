@@ -8,7 +8,7 @@
 	grecaptcha : 'https://www.google.com/recaptcha/api.js?render=6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',
 
 	Entry	:'msg'.d("$!!=; * (base@ `read.msg .msg)uri:query"
-			,'body'.d("! .body")
+			,'body'.d("!! .body:safe,rich@")
 			,'reply'.d("$?="
 				,'action'.d("? $?:!; ! dict.reply").ui("$?=$?:!")
 				,'input'.d("? $?; $author= $head= $body="
@@ -51,23 +51,12 @@
 
 .FUNC({
 	convert	:{
-/*		grc	:()=>{
-			const	async	= dap.Async(),
-				sitekey	= '6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC';
-			if(!async)return;
-			grecaptcha.execute(sitekey,{action:'sendmessage'}).then(token=>async.resolve(token));
-			return "grecaptcha execute";
-		},
-*/		safehtml:html=>{
-		},
-		grc	:action=>dap.Asynch(
-					grecaptcha.execute(
-						'6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',//sitekey
-						action
-					),"grecaptcha execute"
-				)
-
-
+		safe	:html=>html.replace(/<.+?>/,''),
+		rich	:html=>html
+			.replace(/(http\S*:\/\/\S+)/gi, "<a href='$1' target='_blank'>$1</a>")
+			.replace(/\[(\S+?)\](.*?)\[\/\1\]/gi, "<span class='$1'>$2</span>"),
+			
+		grc	:action=>dap.Async( grecaptcha.execute('6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',action), "grecaptcha execute")
 	}
 })
 

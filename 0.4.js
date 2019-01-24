@@ -1066,9 +1066,7 @@ const	dap=(Env=>
 	
 	return	{ Env, Util, Execute,
 			
-		Async	:resolve => new Execute.Postpone(resolve),
-		
-		Asynch	:(promise,info,handle) => {
+		Async	:(promise,info,handle) => {
 				const a=new Execute.Postpone(info,handle);
 				promise	.then(result=>a.resolve(result));
 					//.catch(e=>Env.console.warn(e));
