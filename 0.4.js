@@ -1068,7 +1068,12 @@ const	dap=(Env=>
 			
 		Async	:resolve => new Execute.Postpone(resolve),
 		
-		Asynch	:(promise,info,handle) => {const a=new Execute.Postpone(info,handle); promise.then(result=>a.resolve(result)); return a; },
+		Asynch	:(promise,info,handle) => {
+				const a=new Execute.Postpone(info,handle);
+				promise	.then(result=>a.resolve(result))
+					.catch(e=>Env.console.warn(e));
+				return a;
+			},
 		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
 				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=
