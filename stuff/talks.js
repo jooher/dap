@@ -6,19 +6,20 @@
 	base	:'https://dapmx.org/samples/helloforum/helloforum.php?',
 	redir	:'https://dapmx.org/samples/helloforum/?',
 	grecaptcha : 'https://www.google.com/recaptcha/api.js?render=6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',
+	sitekey	:'6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',
 
 	Entry	:'msg'.d("$!!=; * (base@ `read.msg .msg)uri:query"
 			,'body'.d("! .body")
 			,'reply'.d("$?="
 				,'action'.d("? $?:!; ! dict.reply").ui("$?=$?:!")
-				,'input'.d("? $?; $author= $head= $body=; "
+				,'input'.d("? $?; $author= $head= $body="
 					,'grecaptcha'.d("? .grecaptcha:!; ! .grecaptcha=grecaptcha:script")
 					,'message'.d(""
 						,'author contenteditable'.d("!! dict.author@label").ui("$author=#:value")
 						,'H3.head contenteditable'.d("!! dict.head@label").ui("$head=#:value")
 						,'body contenteditable'.d("!! dict.body@label").ui("$body=#:text")
 					).u("?")
-					,'BUTTON.send'.d("! dict.send").ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=:grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
+					,'BUTTON.send'.d("! dict.send").ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=sitekey:grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
 				).u("$?=")
 			).u("?")
 			,'ties'.d("$!!; ! Ties")
@@ -49,15 +50,21 @@
 
 .FUNC({
 	convert	:{
-		grc	:()=>{
+/*		grc	:()=>{
 			const	async	= dap.Async(),
 				sitekey	= '6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC';
 			if(!async)return;
 			grecaptcha.execute(sitekey,{action:'sendmessage'}).then(token=>async.resolve(token));
 			return "grecaptcha execute";
 		},
-		safehtml:html=>{
-		}
+*/		safehtml:html=>{
+		},
+		grc	:sitekey=>dap.Asynch(
+			grecaptcha.execute(sitekey,{action:'sendmessage'}),
+			"grecaptcha execute"
+		)
+
+
 	}
 })
 
