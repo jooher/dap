@@ -1070,8 +1070,8 @@ const	dap=(Env=>
 		
 		Asynch	:(promise,info,handle) => {
 				const a=new Execute.Postpone(info,handle);
-				promise	.then(result=>a.resolve(result))
-					.catch(e=>Env.console.warn(e));
+				promise	.then(result=>a.resolve(result));
+					//.catch(e=>Env.console.warn(e));
 				return a;
 			},
 		
