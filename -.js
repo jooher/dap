@@ -999,7 +999,7 @@ const	dap=(Env=>
 			}
 		};
 		
-		function Postpone(handle){
+		function Postpone(info,handle){
 			this.instead	= null;
 			this.place	= null;
 			this.target	= null;
@@ -1007,8 +1007,8 @@ const	dap=(Env=>
 			this.todo	= null;
 			this.token	= null;
 			this.time	= Date.now();
-			this.info	= null;
 			this.handle	= handle;
+			this.info	= info;
 			
 			if(postpone)
 				Env.console.warn("Orphan postpone: "+postpone.info);
@@ -1064,6 +1064,8 @@ const	dap=(Env=>
 	return	{ Env, Util, Execute,
 			
 		Async	:resolve => new Execute.Postpone(resolve),
+		
+		Asynch	:(promise,info,handle) => {const a=new Execute.Postpone(info,handle); promise.then(result=>a.resolve(result)); },
 		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
 				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=

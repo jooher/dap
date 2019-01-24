@@ -999,7 +999,7 @@ const	dap=(Env=>
 			}
 		};
 		
-		function Postpone(handle){
+		function Postpone(info,handle){
 			this.instead	= null;
 			this.place	= null;
 			this.target	= null;
@@ -1007,8 +1007,8 @@ const	dap=(Env=>
 			this.todo	= null;
 			this.token	= null;
 			this.time	= Date.now();
-			this.info	= null;
 			this.handle	= handle;
+			this.info	= info;
 			
 			if(postpone)
 				Env.console.warn("Orphan postpone: "+postpone.info);
@@ -1064,6 +1064,8 @@ const	dap=(Env=>
 	return	{ Env, Util, Execute,
 			
 		Async	:resolve => new Execute.Postpone(resolve),
+		
+		Asynch	:(promise,info,handle) => {const a=new Execute.Postpone(info,handle); promise.then(result=>a.resolve(result)); },
 		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
 				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=
@@ -1481,6 +1483,7 @@ const	dap=(Env=>
 				
 				copy	: item=>isArray(item)?item.slice(0):Object.assign({},item),
 				script	: url=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
+				now	: elem=>document.body.appendChild(elem),
 				
 				sync	: req=> Http.query(req,null),
 				query	: req=> Http.query(req,dap.Async())
@@ -1510,7 +1513,7 @@ const	dap=(Env=>
 				
 				"!!"	:(value,alias,node)=>{
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);
-						else node.appendChild(newText(value));
+						else node.innerHTML=value;//appendChild(newText(value));
 					},
 				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },
 			}
