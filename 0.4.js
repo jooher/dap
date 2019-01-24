@@ -827,7 +827,9 @@ const	dap=(Env=>
 							for(let i = tokens.length;i--;){
 								value=this.execToken(values[i],tokens[i]);
 								if(postpone){
-									postpone.token=new Compile.Token(
+									postpone.token=
+									postpone.target=
+									new Compile.Token(
 										recap(parts,p,new Compile.Rvalue(
 											values.length && new Compile.Feed(values,tags,recap(tokens,i,postpone.token),feed.op),		
 											path)
@@ -859,7 +861,6 @@ const	dap=(Env=>
 						for(let c=convert.length; c--; ){
 							value=convert[c](value);
 							if(postpone){
-								postpone.info	= value;
  								postpone.token	= postpone.target = 
 								new Compile.Token(
 									recap(parts,p,REUSE.STUB),

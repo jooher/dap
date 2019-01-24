@@ -6,7 +6,6 @@
 	base	:'https://dapmx.org/samples/helloforum/helloforum.php?',
 	redir	:'https://dapmx.org/samples/helloforum/?',
 	grecaptcha : 'https://www.google.com/recaptcha/api.js?render=6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',
-	sitekey	:'6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',
 
 	Entry	:'msg'.d("$!!=; * (base@ `read.msg .msg)uri:query"
 			,'body'.d("! .body")
@@ -19,7 +18,9 @@
 						,'H3.head contenteditable'.d("!! dict.head@label").ui("$head=#:value")
 						,'body contenteditable'.d("!! dict.body@label").ui("$body=#:text")
 					).u("?")
-					,'BUTTON.send'.d("! dict.send").ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=sitekey:grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
+					,'BUTTON.send'
+						.d("! dict.send")
+						.ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=(@action`sendmessage):grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
 				).u("$?=")
 			).u("?")
 			,'ties'.d("$!!; ! Ties")
@@ -59,10 +60,12 @@
 		},
 */		safehtml:html=>{
 		},
-		grc	:sitekey=>dap.Asynch(
-			grecaptcha.execute(sitekey,{action:'sendmessage'}),
-			"grecaptcha execute"
-		)
+		grc	:action=>dap.Asynch(
+					grecaptcha.execute(
+						6LddyYcUAA'AAAPjIc5NfDuqasxeEijxrFGGZbPoC',//sitekey
+						action
+					),"grecaptcha execute"
+				)
 
 
 	}
