@@ -1492,7 +1492,7 @@ const	dap=(Env=>
 				now	: elem=>document.body.appendChild(elem),
 				
 				sync	: req=> Http.query(req,null),
-				query	: req=> Http.query(req,dap.Async())
+				query	: req=> Http.query(req,new dap.Execute.Postpone())
 			},
 			
 			flatten	:{
