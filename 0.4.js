@@ -828,7 +828,7 @@ const	dap=(Env=>
 								value=this.execToken(values[i],tokens[i]);
 								if(postpone){
 									postpone.token=
-									postpone.target=
+									//postpone.target=
 									new Compile.Token(
 										recap(parts,p,new Compile.Rvalue(
 											values.length && new Compile.Feed(values,tags,recap(tokens,i,postpone.token),feed.op),		
@@ -860,8 +860,10 @@ const	dap=(Env=>
 					if(convert)
 						for(let c=convert.length; c--; ){
 							value=convert[c](value);
-							if(postpone){
- 								postpone.token	= postpone.target = 
+							if(postpone){//(value instanceof Postpone){
+								//this.postpone=value;
+								postpone.target= 
+ 								postpone.token=
 								new Compile.Token(
 									recap(parts,p,REUSE.STUB),
 									recap(converts,p,c>0 && convert.slice(0,c))
@@ -1066,7 +1068,7 @@ const	dap=(Env=>
 			
 		Async	:resolve => new Execute.Postpone(resolve),
 		
-		Asynch	:(promise,info,handle) => {const a=new Execute.Postpone(info,handle); promise.then(result=>a.resolve(result)); },
+		Asynch	:(promise,info,handle) => {const a=new Execute.Postpone(info,handle); promise.then(result=>a.resolve(result)); return a; },
 		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
 				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=

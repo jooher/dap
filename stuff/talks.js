@@ -62,7 +62,7 @@
 		},
 		grc	:action=>dap.Asynch(
 					grecaptcha.execute(
-						6LddyYcUAA'AAAPjIc5NfDuqasxeEijxrFGGZbPoC',//sitekey
+						'6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',//sitekey
 						action
 					),"grecaptcha execute"
 				)
