@@ -267,7 +267,8 @@ const	dap=(Env=>
 				
 			FOR	:function(stub){
 					this.utag=Util.stub(this.utag,stub);
-					for(let a in this.attrs)this.attrs[a]=Util.stub(this.attrs[a],stub);
+					for(let a in this.stuff)
+						this.stuff[a].forEach(stuff=>stuff[0]=Util.stub(stuff[0],stub));
 					return this;
 				},
 				
@@ -913,17 +914,24 @@ const	dap=(Env=>
 					empty	= branch && !node.childNodes.length;
 					
 				if(postpone){
-					if(instead)Env.dim(instead);
+					if(instead)
+						Env.dim(instead);
 					postpone.locate(place,instead);
 					postpone.ready();
-				}
-				else
+				}else{
 					if(empty===true)
 						Env.mute(node);
-				
-				if(place)//&&branch
-					instead ? place.replaceChild(node,instead) : place.appendChild(node);
+					
+					if(instead)
+						instead.parentNode==place
+						? place.replaceChild(node,instead)
+						: Env.console.log('orphaned instead');
 						
+					else if(place)
+						place.appendChild(node);
+					
+				}
+					
 				return empty;
 			},
 			
@@ -1020,8 +1028,8 @@ const	dap=(Env=>
 		};
 		Postpone.prototype = {
 			locate	:function(place,instead){
+					this.place=place;
 					if(this.instead=instead){
-						this.place=place;
 						if(instead.replacer)instead.replacer.dismiss();
 						instead.replacer=this;
 					}
@@ -1521,7 +1529,7 @@ const	dap=(Env=>
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);
 						else node.innerHTML=value;//appendChild(newText(value));
 					},
-				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },
+				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); }
 			}
 		}
 	}		
