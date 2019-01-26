@@ -626,7 +626,7 @@ const	dap=(Env=>
 					},
 					
 				spawn	: function($,node){
-						new Execute.Branch($,node).runDown(this.todo||this.engage().todo);
+						new Execute.Branch($,node).run(this.todo||this.engage().todo);
 					},
 					
 				ubind	: function(event){ return this }
@@ -690,7 +690,7 @@ const	dap=(Env=>
 
 		})(),
 		
-		Append	=(node,$,todo)	=>{ new Branch($,node).runDown(todo) },
+		Append	=(node,$,todo)	=>{ new Branch($,node).run(todo) },
 		Rebuild	=(node,$)	=>{ node.P.spawn($||node.$,node.parentNode,node) },				
 	
 		Update	=(node,event)	=>{ new Branch(node.$,node,{},event).checkUp() },		
@@ -769,7 +769,7 @@ const	dap=(Env=>
 								rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
 							empty = rows.reduce(
 								(empty,row)=>
-									new Branch(ctx(row,$,flow,updata),node,this.up).runDown(todo[1]) && empty,
+									new Branch(ctx(row,$,flow,updata),node,this.up).run(todo[1]) && empty,
 								empty
 							);
 						}
@@ -905,18 +905,16 @@ const	dap=(Env=>
 				}
 				return value;
 			},
+			
+			run:
+			function(todo){
+				const empty = todo && this.execBranch(todo) && !this.node.childNodes.length; // is empty?
+				return empty;
+			},
 
 			runDown:
 			function(todo,place,instead){
-				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
-				const	node	= this.node,
-					branch	= todo && this.execBranch(todo),
-					empty	= branch && !node.childNodes.length,
-					postponed = postpone&&postpone.locate(instead);
-				
-				Env.adopt(place,instead,node,empty,postponed);
-
-				return empty;
+				Env.adopt(place,instead,this.node,this.run(todo),postpone&&postpone.locate(instead||this.node));//
 			},
 			
 			
@@ -1042,7 +1040,7 @@ const	dap=(Env=>
 			
 			d	:Print,
 			u	:Update,
-			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).runDown( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
+			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).run( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
 		};
 
 	})();
@@ -1301,10 +1299,12 @@ const	dap=(Env=>
 				for(let i in req.headers)
 					request.setRequestHeader(i,req.headers[i]);
 			
-			if(postpone)
+			if(postpone){
+				postpone.info = req.url;
 				request.onreadystatechange=function (){
 					if(this.readyState==4)postpone.resolve(consume(this));
-				}				
+				}
+			}				
 			
 			try	{request.send(req.body||null);}
 			catch(e){console.warn(e.message);}
@@ -1446,7 +1446,7 @@ const	dap=(Env=>
 				
 				if(postponed){
 					instead	? Style.attach(instead,"STALE") :
-					place	? Style.attach(place.appendChild(elem),"PENDING") :
+					place	? Style.attach(place.appendChild(elem),"AWAIT") :
 					console.log('orphan postponed');
 				}else{
 					instead	? instead.parentNode.replaceChild(elem,instead) :
