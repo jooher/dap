@@ -912,9 +912,9 @@ const	dap=(Env=>
 				const	node	= this.node,
 					branch	= todo && this.execBranch(todo),
 					empty	= branch && !node.childNodes.length,
-					ready	= postpone?postpone.locate(instead):node;
+					postponed = postpone&&postpone.locate(instead);
 				
-				Env.merge(place,instead,empty,ready);
+				Env.adopt(place,instead,node,empty,postponed);
 
 				return empty;
 			},
@@ -1011,14 +1011,12 @@ const	dap=(Env=>
 		Postpone.prototype = {
 			locate	:function(instead){
 					if(this.instead=instead){
-						if(instead.replacer)instead.replacer.dismiss();
+						if(instead.replacer)instead.replacer.branch=null;
 						instead.replacer=this;
 					}
 					else console.warn("postpone locate?")
 					postpone=null;
-				},
-			dismiss	:function(){
-					this.branch=null;
+					return this;
 				},
 			resolve	:function(value){
 					if(this.branch){
@@ -1442,24 +1440,26 @@ const	dap=(Env=>
 				Event.attach(node,event,handle);
 			},
 			
+		adopt	:(place,instead,elem,empty,postponed)=>{
+			
+				if(!!empty)Style.attach(elem,"EMPTY");
+				
+				if(postponed){
+					instead	? Style.attach(instead,"STALE") :
+					place	? Style.attach(place.appendChild(elem),"PENDING") :
+					console.log('orphan postponed');
+				}else{
+					instead	? instead.parentNode.replaceChild(elem,instead) :
+					place	? place.appendChild(elem) :
+					console.log('orphan element '+elem);
+				}
+			},
+		
 		clone	:elem=>elem.cloneNode(false),
 		
 		error	:(elem,e)	=>{Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
 
-		merge	:(place,instead,node,empty){
-				if(node){
-					if(!!empty)
-						Style.attach(elem,"EMPTY");
-
-					instead	? instead.parentNode.replaceChild(node,instead) :
-					place	? place.appendChild(node) :
-					console.log('orphaned node '+node);
-				}
-				else
-					Style.attach(elem,"STALE")
-			}
-		
-		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
+		open	:(url,frame)	=>{if(frame)window.open(url,frame);else location.href=url; },
 		
 		render	:function(proto,data,place,instead){
 				if(!place){
