@@ -1,6 +1,8 @@
 .ui{cursor:pointer}
 .ui:hover{text-decoration:underline}
-.MUTE{display:none !important}
+
+.EMPTY{display:none !important}
+.STALE{opacity:0; transition:opacity 1s ease}
 
 body{max-width: 72em; margin:2em auto; padding:1em; font:normal 1em/1.6 Georgia,serif; }
 h3{margin-top:2em;}

@@ -1484,12 +1484,12 @@ const	dap=(Env=>
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
 				
-				copy	: item=>isArray(item)?item.slice(0):Object.assign({},item),
-				script	: url=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
-				now	: elem=>document.body.appendChild(elem),
+				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
+				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
+				now	: elem	=>document.body.appendChild(elem),
 				
-				sync	: req=> Http.query(req,null),
-				query	: req=> Http.query(req,new dap.Execute.Postpone())
+				sync	: req	=> Http.query(req,null),
+				query	: req	=> Http.query(req,new dap.Execute.Postpone())
 			},
 			
 			flatten	:{
@@ -1499,12 +1499,7 @@ const	dap=(Env=>
 				
 				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
-/*				
-				exec	:(path,values)=>{
-						let tgt=Util.reach(path.split("."),window);
-						if(tgt&&tgt.apply)return tgt.apply(null,values);
-					},
-*/					
+
 				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop()),
 		
 				//"uri*"	: Env.Uri.full
