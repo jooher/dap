@@ -267,7 +267,8 @@ const	dap=(Env=>
 				
 			FOR	:function(stub){
 					this.utag=Util.stub(this.utag,stub);
-					for(let a in this.attrs)this.attrs[a]=Util.stub(this.attrs[a],stub);
+					for(let a in this.stuff)
+						this.stuff[a].forEach(stuff=>stuff[0]=Util.stub(stuff[0],stub));
 					return this;
 				},
 				
@@ -827,7 +828,9 @@ const	dap=(Env=>
 							for(let i = tokens.length;i--;){
 								value=this.execToken(values[i],tokens[i]);
 								if(postpone){
-									postpone.token=new Compile.Token(
+									postpone.token=
+									//postpone.target=
+									new Compile.Token(
 										recap(parts,p,new Compile.Rvalue(
 											values.length && new Compile.Feed(values,tags,recap(tokens,i,postpone.token),feed.op),		
 											path)
@@ -858,9 +861,10 @@ const	dap=(Env=>
 					if(convert)
 						for(let c=convert.length; c--; ){
 							value=convert[c](value);
-							if(postpone){
-								postpone.info	= value;
- 								postpone.token	= postpone.target = 
+							if(postpone){//(value instanceof Postpone){
+								//this.postpone=value;
+								postpone.target= 
+ 								postpone.token=
 								new Compile.Token(
 									recap(parts,p,REUSE.STUB),
 									recap(converts,p,c>0 && convert.slice(0,c))
@@ -907,22 +911,14 @@ const	dap=(Env=>
 				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
 				const	node	= this.node,
 					branch	= todo && this.execBranch(todo),
-					empty	= branch && !node.childNodes.length;
-					
-				if(postpone){
-					if(instead)Env.dim(instead);
-					postpone.locate(place,instead);
-					postpone.ready();
-				}
-				else
-					if(empty===true)
-						Env.mute(node);
+					empty	= branch && !node.childNodes.length,
+					ready	= postpone?postpone.locate(instead):node;
 				
-				if(place)//&&branch
-					instead ? place.replaceChild(node,instead) : place.appendChild(node);
-						
+				Env.merge(place,instead,ready,empty);
+
 				return empty;
 			},
+			
 			
 			checkUp:
 			function(snitch,todo){
@@ -939,11 +935,8 @@ const	dap=(Env=>
 				if(rule)
 					route	=this.execBranch(todo||rule.todo||rule.engage().todo)||route;
 					
-				if(postpone){
-					postpone.instead=snitch;
-					postpone.ready();
-					return;
-				}
+				if(postpone)
+					return postpone.locate(snitch);
 					
 				for(let i in this.up)
 					if(!defs||!defs[i])
@@ -1016,20 +1009,13 @@ const	dap=(Env=>
 			postpone	= this;
 		};
 		Postpone.prototype = {
-			locate	:function(place,instead){
+			locate	:function(instead){
 					if(this.instead=instead){
-						this.place=place;
-						if(instead.replacer)instead.replacer.dismiss();
+						if(instead.replacer)instead.replacer.branch=null;
 						instead.replacer=this;
 					}
-					return this;
-				},
-			ready	:function(){
+					else console.warn("postpone locate?")
 					postpone=null;
-					return this;
-				},				
-			dismiss	:function(){
-					this.branch=null;
 				},
 			resolve	:function(value){
 					if(this.branch){
@@ -1063,9 +1049,12 @@ const	dap=(Env=>
 	
 	return	{ Env, Util, Execute,
 			
-		Async	:resolve => new Execute.Postpone(resolve),
-		
-		Asynch	:(promise,info,handle) => {const a=new Execute.Postpone(info,handle); promise.then(result=>a.resolve(result)); },
+		Async	:(promise,info,handle) => {
+				const a=new Execute.Postpone(info,handle);
+				promise	.then(result=>a.resolve(result));
+					//.catch(e=>Env.console.warn(e));
+				return a;
+			},
 		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
 				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=
@@ -1450,12 +1439,22 @@ const	dap=(Env=>
 				Event.attach(node,event,handle);
 			},
 			
+		merge	:(place,instead,node,empty)=>{
+				if(node){
+					if(!!empty)
+						Style.attach(elem,"EMPTY");
+					instead	? instead.parentNode.replaceChild(node,instead) :
+					place	? place.appendChild(node) :
+					console.log('orphaned node '+node);
+				}
+				else
+					Style.attach(elem,"STALE")
+			},
+		
 		clone	:elem=>elem.cloneNode(false),
 		
-		mute	:function(elem)	{Style.attach(elem,"MUTE"); return elem; },
-		dim	:function(elem)	{Style.attach(elem,"DIM"); return elem; },
-		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
-		
+		error	:(elem,e)	=>{Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
+
 		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
 		
 		render	:function(proto,data,place,instead){
@@ -1483,9 +1482,10 @@ const	dap=(Env=>
 				
 				copy	: item=>isArray(item)?item.slice(0):Object.assign({},item),
 				script	: url=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
+				now	: elem=>document.body.appendChild(elem),
 				
 				sync	: req=> Http.query(req,null),
-				query	: req=> Http.query(req,dap.Async())
+				query	: req=> Http.query(req,new dap.Execute.Postpone())
 			},
 			
 			flatten	:{
@@ -1512,9 +1512,9 @@ const	dap=(Env=>
 				
 				"!!"	:(value,alias,node)=>{
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);
-						else node.appendChild(newText(value));
+						else node.innerHTML=value;//appendChild(newText(value));
 					},
-				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },
+				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); }
 			}
 		}
 	}		

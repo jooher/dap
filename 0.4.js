@@ -911,29 +911,14 @@ const	dap=(Env=>
 				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
 				const	node	= this.node,
 					branch	= todo && this.execBranch(todo),
-					empty	= branch && !node.childNodes.length;
-					
-				if(postpone){
-					if(instead)
-						Env.dim(instead);
-					postpone.locate(place,instead);
-					postpone.ready();
-				}else{
-					if(empty===true)
-						Env.mute(node);
-					
-					if(instead)
-						instead.parentNode==place
-						? place.replaceChild(node,instead)
-						: Env.console.log('orphaned instead');
-						
-					else if(place)
-						place.appendChild(node);
-					
-				}
-					
+					empty	= branch && !node.childNodes.length,
+					ready	= postpone?postpone.locate(instead):node;
+				
+				Env.merge(place,instead,empty,ready);
+
 				return empty;
 			},
+			
 			
 			checkUp:
 			function(snitch,todo){
@@ -950,11 +935,8 @@ const	dap=(Env=>
 				if(rule)
 					route	=this.execBranch(todo||rule.todo||rule.engage().todo)||route;
 					
-				if(postpone){
-					postpone.instead=snitch;
-					postpone.ready();
-					return;
-				}
+				if(postpone)
+					return postpone.locate(snitch);
 					
 				for(let i in this.up)
 					if(!defs||!defs[i])
@@ -1027,18 +1009,14 @@ const	dap=(Env=>
 			postpone	= this;
 		};
 		Postpone.prototype = {
-			locate	:function(place,instead){
-					this.place=place;
+			locate	:function(instead){
 					if(this.instead=instead){
 						if(instead.replacer)instead.replacer.dismiss();
 						instead.replacer=this;
 					}
-					return this;
-				},
-			ready	:function(){
+					else console.warn("postpone locate?")
 					postpone=null;
-					return this;
-				},				
+				},
 			dismiss	:function(){
 					this.branch=null;
 				},
@@ -1466,9 +1444,20 @@ const	dap=(Env=>
 			
 		clone	:elem=>elem.cloneNode(false),
 		
-		mute	:function(elem)	{Style.attach(elem,"MUTE"); return elem; },
-		dim	:function(elem)	{Style.attach(elem,"DIM"); return elem; },
-		error	:function(elem,e){Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
+		error	:(elem,e)	=>{Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
+
+		merge	:(place,instead,node,empty){
+				if(node){
+					if(!!empty)
+						Style.attach(elem,"EMPTY");
+
+					instead	? instead.parentNode.replaceChild(node,instead) :
+					place	? place.appendChild(node) :
+					console.log('orphaned node '+node);
+				}
+				else
+					Style.attach(elem,"STALE")
+			}
 		
 		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
 		
