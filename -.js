@@ -626,7 +626,7 @@ const	dap=(Env=>
 					},
 					
 				spawn	: function($,node){
-						new Execute.Branch($,node).runDown(this.todo||this.engage().todo);
+						new Execute.Branch($,node).run(this.todo||this.engage().todo);
 					},
 					
 				ubind	: function(event){ return this }
@@ -690,7 +690,7 @@ const	dap=(Env=>
 
 		})(),
 		
-		Append	=(node,$,todo)	=>{ new Branch($,node).runDown(todo) },
+		Append	=(node,$,todo)	=>{ new Branch($,node).run(todo) },
 		Rebuild	=(node,$)	=>{ node.P.spawn($||node.$,node.parentNode,node) },				
 	
 		Update	=(node,event)	=>{ new Branch(node.$,node,{},event).checkUp() },		
@@ -769,7 +769,7 @@ const	dap=(Env=>
 								rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
 							empty = rows.reduce(
 								(empty,row)=>
-									new Branch(ctx(row,$,flow,updata),node,this.up).runDown(todo[1]) && empty,
+									new Branch(ctx(row,$,flow,updata),node,this.up).run(todo[1]) && empty,
 								empty
 							);
 						}
@@ -905,18 +905,16 @@ const	dap=(Env=>
 				}
 				return value;
 			},
+			
+			run:
+			function(todo){
+				const empty = todo && this.execBranch(todo) && !this.node.childNodes.length; // is empty?
+				return empty;
+			},
 
 			runDown:
 			function(todo,place,instead){
-				//Execute.async = !this.up;	// asynchronous stuff not allowed on u phase
-				const	node	= this.node,
-					branch	= todo && this.execBranch(todo),
-					empty	= branch && !node.childNodes.length,
-					ready	= postpone?postpone.locate(instead):node;
-				
-				Env.merge(place,instead,ready,empty);
-
-				return empty;
+				Env.adopt(place,instead,this.node,this.run(todo),postpone&&postpone.locate(instead||this.node));//
 			},
 			
 			
@@ -1016,6 +1014,7 @@ const	dap=(Env=>
 					}
 					else console.warn("postpone locate?")
 					postpone=null;
+					return this;
 				},
 			resolve	:function(value){
 					if(this.branch){
@@ -1041,7 +1040,7 @@ const	dap=(Env=>
 			
 			d	:Print,
 			u	:Update,
-			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).runDown( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
+			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a; if(rule) new Branch(node.$,node).run( rule.todo||rule.engage().todo ); else Fail("no a rule",node); },
 		};
 
 	})();
@@ -1300,10 +1299,12 @@ const	dap=(Env=>
 				for(let i in req.headers)
 					request.setRequestHeader(i,req.headers[i]);
 			
-			if(postpone)
+			if(postpone){
+				postpone.info = req.url;
 				request.onreadystatechange=function (){
 					if(this.readyState==4)postpone.resolve(consume(this));
-				}				
+				}
+			}				
 			
 			try	{request.send(req.body||null);}
 			catch(e){console.warn(e.message);}
@@ -1414,13 +1415,35 @@ const	dap=(Env=>
 			write	: toHashbang					
 		}
 			
-	})();
-
+	})(),
+	
+	Blend	={
+		
+		change	:(elem,instead)=>{
+			
+			const	place=instead.parentNode,
+				time=instead.getAttribute("fade");
+				
+			place.insertBefore(elem,instead);
+/*			if(time){
+				console.log("fade time: "+time);
+				instead.$=null;
+				setTimeout(()=>{
+					place.removeChild(instead);
+				},1000);
+			}
+			else
+*/				place.removeChild(instead);
+			//place.replaceChild(elem,instead)
+		}
+	}
+	
+	
 	return	{
 		
 		doc, DEFAULT, REUSE, 
 	
-		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State,
+		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State, Blend,
 
 		console	:window.console,
 		
@@ -1439,23 +1462,26 @@ const	dap=(Env=>
 				Event.attach(node,event,handle);
 			},
 			
-		merge	:(place,instead,node,empty)=>{
-				if(node){
-					if(!!empty)
-						Style.attach(elem,"EMPTY");
-					instead	? instead.parentNode.replaceChild(node,instead) :
-					place	? place.appendChild(node) :
-					console.log('orphaned node '+node);
+		adopt	:(place,instead,elem,empty,postponed)=>{
+			
+				if(!!empty)Style.attach(elem,"EMPTY");
+				
+				if(postponed){
+					instead	? Style.attach(instead,"STALE") :
+					place	? Style.attach(place.appendChild(elem),"AWAIT") :
+					console.log('orphan postponed');
+				}else{
+					instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
+					place	? place.appendChild(elem) :
+					console.log('orphan element '+elem);
 				}
-				else
-					Style.attach(elem,"STALE")
 			},
-		
+			
 		clone	:elem=>elem.cloneNode(false),
 		
 		error	:(elem,e)	=>{Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
 
-		open	:function(url,frame){if(frame)window.open(url,frame);else location.href=url; },
+		open	:(url,frame)	=>{if(frame)window.open(url,frame);else location.href=url; },
 		
 		render	:function(proto,data,place,instead){
 				if(!place){
@@ -1480,12 +1506,12 @@ const	dap=(Env=>
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
 				
-				copy	: item=>isArray(item)?item.slice(0):Object.assign({},item),
-				script	: url=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
-				now	: elem=>document.body.appendChild(elem),
+				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
+				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
+				now	: elem	=>document.body.appendChild(elem),
 				
-				sync	: req=> Http.query(req,null),
-				query	: req=> Http.query(req,new dap.Execute.Postpone())
+				sync	: req	=> Http.query(req,null),
+				query	: req	=> Http.query(req,new dap.Execute.Postpone())
 			},
 			
 			flatten	:{
@@ -1495,12 +1521,7 @@ const	dap=(Env=>
 				
 				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
-/*				
-				exec	:(path,values)=>{
-						let tgt=Util.reach(path.split("."),window);
-						if(tgt&&tgt.apply)return tgt.apply(null,values);
-					},
-*/					
+
 				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop()),
 		
 				//"uri*"	: Env.Uri.full
