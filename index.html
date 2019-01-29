@@ -14,7 +14,7 @@
 		<p>Lightweight and powerful javascript framework for interactive data-driven web applications.</p>
 		<p>Unlike some other frameworks relying on Javascript expressive means, dap offers a higher level of abstraction — a declarative "superscript" for reactivity rules. These rules are dense, compact, and human-readable at the same time. Dap templates are parsed, compiled and executed by a small (less than 10kiB gzipped) runtime script, and does not require code transpilation.</p>
 	</header>
-	<pre lang="dap">'B'.d("! `Hello,world!")</pre>
+	<pre class="dap">'B'.d("! `Hello,world!")</pre>
 
 
 	<a name="why-dap"></a>
@@ -54,7 +54,7 @@
 <section>
 <h2>Dap code example, explained</h2>
 <p>The example below shows a very basic pattern of selecting an option from a list.</p>
-<pre lang="dap">
+<pre class="dap">
 'favorite-fruit'.d("$choice=" // a &lt;DIV class="favorite-fruit"&gt; element, with $choice status variable defined in its scope 
 	,'B.selected'.d("! title ($choice not-yet)?") // a &lt;B class="selected"&gt; with textual content involving $choice value
 	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset

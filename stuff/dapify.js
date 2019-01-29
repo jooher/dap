@@ -58,5 +58,5 @@ dapify	= dap &&
 	);
 
 })(
-	[...document.getElementsByTagName("pre")].filter(pre=>pre.getAttribute("lang")=="dap")
+	[...document.getElementsByClass("dap")]//.filter(pre=>pre.getAttribute("lang")=="dap")
 );

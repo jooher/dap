@@ -43,7 +43,7 @@
 
 <h3>Literals and constants</h3>
 <p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DICT</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
-<pre lang="dap">
+<pre class="dap">
 'B'.d("! good `literals_in_rules_are_not_good_for_long_texts")
 .DICT({ // this is the dictionary
 	good:"The right place for text and other constants is the dictionary, "
@@ -54,7 +54,7 @@
 
 <h3>Status variables</h3>
 <p>Status variables provide the main reactivity mechanism in dap. When a status variable gets changed, all elements that depend on it, are automatically updated. Status variables are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to all children of that element. Status variables can only be updated in u-rules.</p>
-<pre lang="dap">
+<pre class="dap">
 'cheese'.d("$value=" // d-rule defines a status variable named $value
 	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rules update the variable `
 	,'INPUT placeholder="or type in here"'.d("!! $value").ui("$value=#:value")
@@ -68,7 +68,7 @@
 
 <h3>Data entries</h3>
 <p>Every generated element is bound to some data context, usualy it is a data row in some dataset. Data context can be shared among several elements, related to the same data row. Fields of a data row, or <em>data entries</em>, can be read and modified in both u- and d-rules. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
-<pre lang="dap">
+<pre class="dap">
 'colored-fruits'.d("$color= $fruit="
 	,'UL.labelled'
 		.a("!! (hint.fruit $fruit)concat@label")
@@ -119,7 +119,7 @@
 
 <h3>Named arguments</h3>
 <p>Having argument names provided along with values gives some extra possibilities to the flatteners. For example, parameter strings (parameterized URLs being typical example) can be built easily.</p>
-<pre lang="dap">
+<pre class="dap">
 'stocks'.d("$code= $warehouse="
 	,'INPUT placeholder="Item code"'.ui("$code=#:value")
 	,'INPUT placeholder="Warehouse"'.ui("$warehouse=#:value")
@@ -137,7 +137,7 @@
 
 <h2>Working with external data</h2>
 <p>Now that we can construct parameterized URIs, and can work with datasets, we can do requests for external data. With dap it is very simple with a standard <code>query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
-<pre lang="dap" data-style="height:16em">
+<pre class="dap" data-style="height:16em">
 'heroes'.d("$id= $name="
 	,'UL'.d("* (heroes@)uri:query@" // query data from the URL, parse it and populate a dataset from it  
 		,'LI.hero'
