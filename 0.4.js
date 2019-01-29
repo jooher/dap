@@ -19,8 +19,8 @@ const	dap=(Env=>
 		""	:()=>null,
 		"check"	:Check,
 	
-		"?"	:bool=>bool?true:false,	/// test
-		"!"	:bool=>bool?false:true,	/// test inverse
+		"?"	:bool=>!!bool,	/// test
+		"!"	:bool=>!bool,	/// test inverse
 		"#"	:bool=>bool?"+":"-",	/// test as +/-
 		
 		"+?"	:num=>parseFloat(num)>0,	/// test positive
@@ -34,6 +34,7 @@ const	dap=(Env=>
 		"~"	:num=>num?(num>0?"+":"-"):0,		/// sgn
 		
 		"++"	:num=>++num,
+		"--"	:num=>--num
 	},
 	
 	flatten	:{
@@ -646,7 +647,7 @@ const	dap=(Env=>
 		Perf	= (info,since)=>console.log("PERF "+(Date.now()-since)+" ms : "+info),
 	
 		ctx	=(data,$,rowset,updata)=>{
-			const datarow = data instanceof Object ? data : {"#":data}
+			const datarow = data instanceof Object ? data : {"~":data}
 			datarow['']=updata;
 			return [{'':datarow},$,rowset];
 		},			
@@ -914,7 +915,8 @@ const	dap=(Env=>
 
 			runDown:
 			function(todo,place,instead){
-				Env.adopt(place,instead,this.node,this.run(todo),postpone&&postpone.locate(instead||this.node));//
+				const elem=Env.adopt(place,instead,this.node,this.run(todo),postpone);//
+				if(postpone)postpone.locate(elem);
 			},
 			
 			
@@ -1363,14 +1365,15 @@ const	dap=(Env=>
 	
 	Style	= {
 	
-		attach	:(node,cls)=>{Style.mark(node,cls,true)},
-		detach	:(node,cls)=>{Style.mark(node,cls,false)},
+		attach	:(node,cls)=>Style.mark(node,cls,true),
+		detach	:(node,cls)=>Style.mark(node,cls,false),
 			
 		mark	:(node,cls,on)=>{
 				const	c	= " "+node.className+" ",
 					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
 				if(!on!=!found)
 					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
+				return node;
 			}
 	},
 	
@@ -1415,13 +1418,35 @@ const	dap=(Env=>
 			write	: toHashbang					
 		}
 			
-	})();
-
+	})(),
+	
+	Blend	={
+		
+		change	:(elem,instead)=>{
+			
+			const	place=instead.parentNode,
+				time=instead.getAttribute("fade");
+				
+			place.insertBefore(elem,instead);
+			if(time){
+				console.log("fade time: "+time);
+				instead.$=null;
+				setTimeout(()=>{
+					place.removeChild(instead);
+				},1000);
+			}
+			else
+/**/				place.removeChild(instead);
+			//place.replaceChild(elem,instead)
+		}
+	}
+	
+	
 	return	{
 		
 		doc, DEFAULT, REUSE, 
 	
-		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State,
+		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State, Blend,
 
 		console	:window.console,
 		
@@ -1446,15 +1471,15 @@ const	dap=(Env=>
 				
 				if(postponed){
 					instead	? Style.attach(instead,"STALE") :
-					place	? Style.attach(place.appendChild(elem),"AWAIT") :
+					place	? place.appendChild(Style.attach(instead=elem.cloneNode(true),"AWAIT")) :
 					console.log('orphan postponed');
-				}else{
-					instead	? instead.parentNode.replaceChild(elem,instead) :
-					place	? place.appendChild(elem) :
-					console.log('orphan element '+elem);
+					return instead;
 				}
+				instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
+				place	? place.appendChild(elem) :
+				console.log('orphan element '+elem);
 			},
-		
+			
 		clone	:elem=>elem.cloneNode(false),
 		
 		error	:(elem,e)	=>{Style.attach(elem,"ERROR");elem.setAttribute("title",e.message);console.error(e.message)/*throw e*/},
