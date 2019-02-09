@@ -925,7 +925,7 @@ const	dap=(Env=>
 			
 				const	node	= this.node,
 					P	= node.P,
-					defs	= P.rules.d.defs,
+					defs	= P.rules.d?.defs,
 					parent	= node.parentNode;
 					
 				let	route	= this.route,
