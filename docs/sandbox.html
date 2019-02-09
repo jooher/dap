@@ -7,7 +7,52 @@
  </head>
  <body>
   <script>
-	// dap code here
+  
+'carshop'.d("$carname= $carcode="
+
+	,'summary'.d("! ($carname label.hint)?")
+
+	,'car-picker'.d("$make= $year= $model= $engine="
+
+		,'SELECT.year'.d("!! dict.label.year@label; * year"
+			,'OPTION'.d("! .year")
+		).ui("$year=#:value")
+		
+		,'SELECT.make'.d("!! dict.label.make@label; * (makes@)uri:query@make"
+			,'OPTION'.d("! .make")
+		).ui("$make=#:value")
+		
+		,'SELECT.model'.d("? ($make $year)!; !! dict.label.year@label; * (base@ $make $year)uri:query@model"
+			,'OPTION'.d("! .model")
+		).ui("$model=#:value $carcode=")
+		
+		,'SELECT.engine'.d("? $model; * (base@ $make $year $model)uri:query"
+			,'OPTION'.d("!! .engine@ .carcode@value")
+		).ui("$carcode=#.value")
+
+	).u("$carname=( $year $make $model $engine )spaced")
+	
+	,'carcode'.d("! $carcode")
+		
+)
+
+.DICT({
+	year	: Array.from({length:20},(v,i)=>2019-i), // back to 20 years from year 2019
+	makes	: "/samples/carmakes.json", // car makes are collected in a static file
+	base	: "https://dapmx.org/stuff/rockauto.php?", // dynamic data is taken from Rockauto.com
+	
+	label	:{
+		hint	: "Select a car",
+		make	: "Car make",
+		year	: "Production year",
+		model	: "Model name",
+		engine	: "Engine"
+	}
+})
+
+.RENDER();
+
+
   </script>
  </body>
 </html>
