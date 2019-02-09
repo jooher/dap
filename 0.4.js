@@ -130,6 +130,7 @@ const	dap=(Env=>
 	Compile	= (function(){
 		
 		const
+		
 		makePath= str=>str.split(".").reverse(), //str&&
 		append	=(obj,key,value)=>(obj[key]=obj[key]&&(value.charAt(0)===';')?obj[key]+value:value); /// ???
 		
@@ -310,8 +311,8 @@ const	dap=(Env=>
 					node	= Env.clone(this.elem),
 					react	= this.react;
 					
-				node.P=this;
-				if(d)node.$=!d.defs ? $ : [{'':$[0]['']},$,$[2]];
+				node.P	=this;
+				node.$	= d&&d.defs ? [{'':$[0]['']},$,$[2]] : $;
 					
 				if(react)
 					for(let i=react.length; i-->0;){
@@ -354,9 +355,6 @@ const	dap=(Env=>
 			this.op		= op;
 			this.branch	= branch;
 		}
-		Feed.prototype={
-			EMPTY	: new Feed([],[],[]),
-		};
 		
 		function Token(parts,converts){
 			this.parts	= parts;
@@ -592,7 +590,7 @@ const	dap=(Env=>
 				const	flatten	= a[1]	? context.ns.reach(a[1],FUNCS.FLATTEN) : Util.hash,
 					tokens	= a[0] && context.branchStack[a[0]].split(TOKENS);
 					
-				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : Feed.prototype.EMPTY;
+				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : EMPTY.Feed;
 			}
 						
 			
@@ -635,6 +633,11 @@ const	dap=(Env=>
 			}
 		})();		
 				
+		const	EMPTY={
+			Feed	: new Feed([],[],[]),
+			Rule	: new Rule()
+		}
+
 		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue }
 		
 	})(),
@@ -925,11 +928,12 @@ const	dap=(Env=>
 			
 				const	node	= this.node,
 					P	= node.P,
-					defs	= P.rules.d?.defs,
+					d	= P.rules.d,
+					defs	= d&&d.defs,
 					parent	= node.parentNode;
 					
 				let	route	= this.route,
-					rule	= route==true ? null : ( node.reacts && node.reacts[route] ) || P.rules[route] || P.rules.u,
+					rule	= route==true ? null : ( node.reacts && node.reacts[this.route] ) || P.rules[route] || P.rules.u,
 					up	= {};
 					
 				if(rule)
