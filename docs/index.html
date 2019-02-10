@@ -198,10 +198,9 @@
 <p>The new thing in the example above is a <em>reusable template</em> <code>Hint()</code> which is used in the several SELECT elements to display initial hints.</p>
 
 <h3>Parameterized reusable templates</h3>
-<p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters.</p>
-<p>In dap, templates can be defined in DICT section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked template become their data context.</p>
+<p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in DICT section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked template become their data context.</p>
 <p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP 2.0 specs), built from a JSON file.</p>
-<pre class="dap" data-style="height:16em">
+<pre class="dap">
 'contents'.d("List( (`/samples/rfc7540contents.json)uri:query@items )")
 .DICT({
 	List	:'OL'.d("* .items@item; Item(.item@)"),
