@@ -191,20 +191,20 @@
 		engine	: "Engine",
 		carcode	: "Car code: "
 	},
-	Hint	: 'OPTION selected disabled'.d("! .label") // this is a parameterized template
+	Hint	: 'OPTION selected disabled'.d("! .label") // this is a reusable parameterized template
 })
 </pre>
 <p>Querying logic in this example is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediatel in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, that is essentially an adapter to www.rockauto.com database, accepting URI-encoded queries and returning results in JSON format.</p>
 <p>The new thing in the example above is a <em>reusable template</em> <code>Hint()</code> which is used in the several SELECT elements to display initial hints.</p>
 
 <h3>Parameterized reusable templates</h3>
-<p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in DICT section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked template become their data context.</p>
-<p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP 2.0 specs), built from a JSON file.</p>
+<p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in the <code>.DICT</code> section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked templates become their data context.</p>
+<p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP 2.0 specs), built from <a href="/samples/rfc7540contents.json" target="_blank">a JSON file</a>.</p>
 <pre class="dap">
-'contents'.d("List( (`/samples/rfc7540contents.json)uri:query@items )")
+'contents'.d("List( (`/samples/rfc7540contents.json)uri:query@items )") // root invokes List() for the top-level items
 .DICT({
-	List	:'OL'.d("* .items@item; Item(.item@)"),
-	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"),
+	List	:'OL'.d("* .items@item; Item(.item@)"), // List invokes Item() for each item in a rowset
+	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"), // Item invokes List() for its sub-items, if present
 	Href	:'A.page target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
 })
 </pre>
