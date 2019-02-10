@@ -151,31 +151,31 @@
 	message:"Hero id: {id}\n Hero name: {name}"
 })
 </pre>
-<p>Here, we get our data from a static file <a href="/samples/heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. By the <code>query</code> convertor, this file is requested asynchronously, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
+<p>Here, we get our data from a static file <a href="/samples/heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. With the <code>:query</code> convertor, this file is asynchronously requested, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
 <p>If you click a hero's name in the list, status variables <code>$id</code> and <code>$name</code> are updated with the hero's respective data, and the summary message updates to reflect these changes.</p>
 
 <h3>Making parameterized queries to external sources</h3>
-<p>Now that we can work with datasets, construct parameterized URIs, and query external data by URI, let's combine it all together, and build a car picker for a car parts shop.</p>
+<p>Now that we can work with datasets, construct parameterized URIs, and query external data, let's combine it all together, and build a car picker for a car parts shop.</p>
 <pre class="dap">
 'carshop'.d("$carname= $carcode="
 	,'car-picker'.d("$make= $year= $model= $engine="
 		,'SPAN'.d(""
-			,'SELECT.year'.d("Hint(label.year@label); * year"
+			,'SELECT.year'.d("Hint(label.year@label); * year" // years are taken immediately from DICT
 				,'OPTION'.d("! .year")
 			).ui("$year=#:value")
-			,'SELECT.make'.d("Hint(label.make@label); * (makes@)uri:query@make"
+			,'SELECT.make'.d("Hint(label.make@label); * (makes@)uri:query@make" // makes are taken from a static file
 				,'OPTION'.d("! .make")
 			).ui("$make=#:value")
-		).u("$model= $carcode=")
-		,'SELECT.model'.d("? ($make $year)!; Hint(label.model@label); * (base@ $make $year)uri:query@model"
+		).u("$model= $carcode=") // reset $model and $carcode, when make or year were changed 
+		,'SELECT.model'.d("? ($make $year)!; Hint(label.model@label); * (base@ $make $year)uri:query@model" // models are queried parametrically for given make and year
 			,'OPTION'.d("! .model")
 		).ui("$model=#:value")
-		,'SELECT.engine'.d("? $model; Hint(label.engine@label); * (base@ $make $year $model)uri:query"
-			,'OPTION'.d("!! .engine@ .carcode@value")
-		).ui("$carcode=#.value")
-	).u("$carname=( $carcode ( $year $make $model $engine )spaced )!")
+		,'SELECT.engine'.d("? $model; Hint(label.engine@label); * (base@ $make $year $model)uri:query" // carcodes are queried parametrically for given make, year and model
+			,'OPTION'.d("!! .engine@ .carcode@value") // .engine name used as option content, .carcode used as option value
+		).ui("$carcode=#:value")
+	).u("$carname=( $carcode ( $year $make $model $engine )spaced )!") // $carname will be empty until $carcode is set
 	
-	,'H3'.d("! ($carname label.hint)?")
+	,'H3'.d("! ($carname label.hint)?") // print $carname if set, otherwise a hint
 	,'carcode'.d("? $carcode; ! label.carcode $carcode")
 )
 .DICT({
@@ -191,13 +191,24 @@
 		engine	: "Engine",
 		carcode	: "Car code: "
 	},
-	Hint	: 'OPTION selected disabled'.d("! .label")
+	Hint	: 'OPTION selected disabled'.d("! .label") // this is a parameterized template
 })
 </pre>
+<p>Querying logic in this example is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediatel in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, that is essentially an adapter to www.rockauto.com database, accepting URI-encoded queries and returning results in JSON format.</p>
+<p>The new thing in the example above is a <em>reusable template</em> <code>Hint()</code> which is used in the several SELECT elements to display initial hints.</p>
 
-
-
-
+<h3>Parameterized reusable templates</h3>
+<p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters.</p>
+<p>In dap, templates can be defined in DICT section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked template become their data context.</p>
+<p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP 2.0 specs), built from a JSON file.</p>
+<pre class="dap">
+'contents'.d("List( (`/samples/rfc7540contents.json)uri:query@items )")
+.DICT({
+	List	:'OL'.d("* .items@item; Item(.item@)"),
+	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"),
+	Href	:'A target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
+})
+</pre>
 
 <h2>Okay, what's next?</h2>
 <p>By this point, you should be able to read dap rules and easily tell status variables from data entries, flatteners from converters, and guess the overall logic of a dap template.</p>

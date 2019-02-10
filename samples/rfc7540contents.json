@@ -1,26 +1,3 @@
-<!DOCTYPE html>
-<html>
- <head>
-  <title>Dap sandbox</title>
-  <script src="https://dap.js.org/0.4.js"></script>
-  <style>.ui{cursor:pointer}
-  
-ol { counter-reset: item }
-ol>li { display: block }
-ol>li:before { content: counters(item, ".") ". "; counter-increment: item; color:lightgray }
-  
-  </style>
- </head>
- <body>
-  <script>
-
-'contents'.d("List( contents@items )")
-.DICT({
-	List	:'OL'.d("* .items@item; Item(.item@)"),
-	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"),
-	Href	:'A target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href"),
-	contents:
-	
 [
 	{
 		"heading": "Introduction",
@@ -442,12 +419,4 @@ ol>li:before { content: counters(item, ".") ". "; counter-increment: item; color
 		"heading": "Authors' Addresses",
 		"page": "96"
 	}
-]	
-	
-})
-.RENDER();
-
-
-  </script>
- </body>
-</html>
+]

@@ -1,0 +1,43 @@
+<html>
+<body style="display:flex; flex-direction:column;">
+	<input id="scheme" value="heading page"/>
+	<textarea id="text" style="flex:auto" onchange="javascript:untab()"></textarea>
+	<div id="result" style="flex:auto; background:whitesmoke; overflow:auto; padding:1em; white-space:pre; font-family:monospace"/>
+</body>
+<script>
+
+function untab(){
+	let	scheme = document.getElementById("scheme").value.split(" "),
+		text=document.getElementById("text").value,
+		rows=[],
+		stack=[],
+		last={};
+
+	text.split("\n").forEach(line=>{
+		const	row	= line.split(";\t"),
+			head	= row.shift().split("\t"),
+			tabs	= head.length,
+			data	= {};
+			
+		row.unshift(head.pop());
+		row.forEach((v,i)=>data[scheme[i]]=v);
+		
+		if(tabs>stack.length){
+			stack.push(rows);
+			rows=last.rows=[];
+		}
+		
+		while(tabs<stack.length)
+			rows=stack.pop();
+			
+		rows.push(data);
+		last=data;
+	});
+	
+	document.getElementById("result").innerHTML=JSON.stringify(rows,null,"\t");
+}
+
+
+</script>
+</html>
+
