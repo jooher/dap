@@ -206,7 +206,7 @@
 .DICT({
 	List	:'OL'.d("* .items@item; Item(.item@)"),
 	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"),
-	Href	:'A target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
+	Href	:'A.page target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
 })
 </pre>
 

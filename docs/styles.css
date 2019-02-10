@@ -40,11 +40,13 @@ pre>em{background:lavender; font-style:normal}
 
 /* samples */
 .colored-fruits>ul{display:inline-block; vertical-align:top; margin:2em 1em; width:8em;}
+.contents{max-height:16em;}
+
 
 ol { counter-reset: item }
 ol>li { display: block }
 ol>li:before { content: counters(item, ".") ". "; counter-increment: item; color:lightgray }
   
-
+A.page{margin-left:2em}
 
 
