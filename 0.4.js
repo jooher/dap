@@ -1226,7 +1226,7 @@ const	dap=(Env=>
 		
 		},
 
-		merge	=(...strs)=> strs.reduce(parse.hash,{});
+		merge	=(...strs)=> strs.reduce((tgt,str)=>parse.hash(str,tgt),{});
 
 		return	{ parse, build, merge }		
 	})(),
@@ -1410,10 +1410,11 @@ const	dap=(Env=>
 				const	full	= window.location.href.split(/#!?/),
 					query	= full[0].split("?")[1],
 					state	= full[1];
-					
+/*					
 				if(query && query.indexOf("=")>0)
-					window.location.href=Uri.base+"#!"+QueryString.merge(query,state);//QueryString.build.ordered(rewrite.values,rewrite.tags);
-				else	
+					window.location.href=Uri.base+"#!"+QueryString.merge(query,state);
+				else
+*/					
 					return QueryString.parse.hash(state);
 			};
 			
