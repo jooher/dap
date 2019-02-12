@@ -211,7 +211,7 @@
 	untab	:"/stuff/untab.js"
 })
 </pre>
-<p>Here, the URL provides <a href="/samples/rfc7540contents.txt" target="_blank">data in a custom indented table format</a>, which is not JSON. Thus, the <code>:query</code> converter does not parse it automatically, but only performs a HTTP request and returns the response text "as is". To have it converted to a dataset, we use a <code>decode</code> converter from an external dap file, <a href="/stuff/untab.js">Tab.js</a>, that converts indented text to a dataset object. Of course, we could simply have used <a href="/samples/rfc7540contents.json" target="_blank">an equivalent JSON file</a> instead, and wouldn't need an extra convertor then... But I thought, it is a good chance to introduce you to <i>namespaces</i>.
+<p>Here, the URL provides <a href="/samples/rfc7540contents.txt" target="_blank">data in a custom indented table format</a>, which is not JSON. Thus, the <code>:query</code> converter does not parse it automatically, but only performs a HTTP request and returns the response text "as is". To have it converted to a dataset, we use a <code>decode</code> converter from an external dap file, <a href="/stuff/untab.js">untab.js</a>, that converts indented text to a dataset object. Of course, we could simply have used <a href="/samples/rfc7540contents.json" target="_blank">an equivalent JSON file</a> instead, and wouldn't need an extra convertor then... But I thought, it is a good chance to introduce you to <i>namespaces</i>.
 
 
 <h3>Namespaces</h3>

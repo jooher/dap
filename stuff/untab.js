@@ -7,11 +7,11 @@ dap
 		decode	:source=>{
 			const	stack	=[],
 				tab	=/;\t+/g,
-				lines	=source.split("\n"),
-				scheme	=lines.shift().split(tab);
+				lines	=source.split(/[\r\n]+/g),
+				scheme	=lines.shift().split(tab),
+				rowskey	=scheme.pop();
 				
 			let	rows=[],
-				stack=[],
 				last={};
 				
 			lines.forEach(line=>{
@@ -25,7 +25,7 @@ dap
 				
 				if(tabs>stack.length){
 					stack.push(rows);
-					rows=last.rows=[];
+					rows=last[rowskey]=[];//data.rows
 				}
 				
 				while(tabs<stack.length)
@@ -34,7 +34,6 @@ dap
 				rows.push(data);
 				last=data;
 			});
-			
 			return rows;
 		}		
 	}

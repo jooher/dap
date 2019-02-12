@@ -119,7 +119,8 @@ const	dap=(Env=>
 			const hash={};
 			for(let a,i=values.length;i--;)
 				if(a=tags[i])hash[a]=values[i];
-				else for(let j in a=values[i])hash[j]=a[j];
+				else if(a=values[i])
+					for(let j in a)hash[j]=a[j];
 			return hash;
 		}
 	
@@ -198,7 +199,14 @@ const	dap=(Env=>
 		
 		const		
 		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Func(Func);
-		require	= uri => namespaces[uri]||(namespaces[uri]=Function('return '+document.getElementById(uri).textContent)(dap)),
+		evaluate= js	=> Function('return '+js)(dap),
+		require	= uri	=> {
+			let	a = namespaces[uri];
+			return	a||(namespaces[uri]=
+				a=document.getElementById(uri) ? evaluate(a.textContent) :
+				Env.Http.query(uri,null) || Fail("Can't resolve namespace: "+uri)
+			)
+		},
 		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
 
 		function Proto(ns,utag){
@@ -656,7 +664,7 @@ const	dap=(Env=>
 		},			
 		trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] ),
 		
-		recap	=(arr,i,v)=>arr.slice(0,i).concat(v),
+		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;},
 			
 		After	=(function(){
 		
@@ -848,7 +856,8 @@ const	dap=(Env=>
 						value = feed.op(values,tags);
 						
 						if(proto){
-							value['']=this.$[0][''];
+							if(values.length)value['']=this.$[0][''];
+							else value=this.$[0];
 							Print(proto,null,this.node,[{'':value},this.$,this.$[2]]);
 						}							
 					}
@@ -857,7 +866,7 @@ const	dap=(Env=>
 				
 				if(value==null){
 					value = literal || "";
-					if(literal!=null)convert = null;// literal values are already pre-converted
+					if(literal!=null)converts = null;// literal values are already pre-converted
 				}
 				
 				while(p>=0){
@@ -904,7 +913,7 @@ const	dap=(Env=>
 							if(up&&entry)up[entry]=$[0][entry];
 						}
 
-						convert = converts[p];
+						convert = converts&&converts[p];
 					}
 				}
 				return value;

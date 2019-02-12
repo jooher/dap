@@ -1,4 +1,4 @@
-heading;	page
+heading;	page;	items
 Introduction;	4
 HTTP/2 Protocol Overview;	5
 	Document Organization;	6
