@@ -156,6 +156,7 @@
 
 <h3>Making parameterized queries to external sources</h3>
 <p>Now that we can work with datasets, construct parameterized URIs, and query external data, let's combine it all together, and build a car picker for a car parts shop.</p>
+<p>Querying logic in the example below is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediatel in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, that is essentially an adapter to www.rockauto.com database, accepting URI-encoded queries and returning results in JSON format.</p>
 <pre class="dap">
 'carshop'.d("$carname= $carcode="
 	,'car-picker'.d("$make= $year= $model= $engine="
@@ -194,24 +195,53 @@
 	Hint	: 'OPTION selected disabled'.d("! .label") // this is a reusable parameterized template
 })
 </pre>
-<p>Querying logic in this example is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediatel in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, that is essentially an adapter to www.rockauto.com database, accepting URI-encoded queries and returning results in JSON format.</p>
 <p>The new thing in the example above is a <em>reusable template</em> <code>Hint()</code> which is used in the several SELECT elements to display initial hints.</p>
 
 <h3>Parameterized reusable templates</h3>
 <p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in the <code>.DICT</code> section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked templates become their data context.</p>
 <p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP 2.0 specs), built from <a href="/samples/rfc7540contents.json" target="_blank">a JSON file</a>.</p>
 <pre class="dap">
-'contents'.d("List( (`/samples/rfc7540contents.json)uri:query@items )") // root invokes List() for the top-level items
+'contents'.d("List( (`/samples/rfc7540contents.txt)uri:query,untab.decode@items )") // root invokes List() for the top-level items
 .DICT({
 	List	:'OL'.d("* .items@item; Item(.item@)"), // List invokes Item() for each item in a rowset
 	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"), // Item invokes List() for its sub-items, if present
 	Href	:'A.page target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
 })
+.USES({
+	untab	:"/stuff/untab.js"
+})
+</pre>
+<p>Here, the URL provides <a href="/samples/rfc7540contents.txt" target="_blank">data in a custom indented table format</a>, which is not JSON. Thus, the <code>:query</code> converter does not parse it automatically, but only performs a HTTP request and returns the response text "as is". To have it converted to a dataset, we use a <code>decode</code> converter from an external dap file, <a href="Tab.js">Tab.js</a>, that converts indented text to a dataset object. Of course, we could simply have used <a href="/samples/rfc7540contents.json" target="_blank">an equivalent JSON file</a> instead, and wouldn't need an extra convertor then... But I thought, it is a good chance to introduce you to <i>namespaces</i>.
+
+
+<h3>Namespaces</h3>
+<p>Namespaces allow to reuse dictionaries and functionalities from other dap files. Somewhat similar to namespaces in Java or C#, or modules in Javascript, but simpler. To gain access to the dictionary and functionality of external dap file, you simply reference it in the <code>.USES</code> section.</p>
+<!--
+<pre>
+'reusable'.d("! welcome")
+.DICT({
+	welcome	: "Hello from Reusable.js\n",
+	
+})
+.FUNC({
+	convert	:{
+		underscored : text=>"_"+text+"_"
+	}
+})
 </pre>
 
-<h2>Okay, what's next?</h2>
-<p>By this point, you should be able to read dap rules and easily tell status variables from data entries, flatteners from converters, and guess the overall logic of a dap template.</p>
+<pre>
+'sample'.d("! welcome:re.underscored re.welcome")
+.DICT({
+	welcome	: "Hello from inside the Sample",
+})
+.USES({
+	re	:"Reusable.js"
+})
+</pre>
+-->
 
+<h3>Okay, what's next?</h3>
 
 <img src="we_need_to_go_deeper.jpg" alt="But we need to go deeper" title="But we need to go deeper"/>
 

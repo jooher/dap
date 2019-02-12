@@ -1,18 +1,21 @@
 dap
-.NS("untab.js")
+
+.NS("https://dap.js.org/stuff/untab.js")
+
 .FUNC({
 	convert	:{
 		decode	:source=>{
-			const	stack=[],
-				lines=source.split("\n"),
-				scheme=lines.shift().split(";\t");
+			const	stack	=[],
+				tab	=/;\t+/g,
+				lines	=source.split("\n"),
+				scheme	=lines.shift().split(tab);
 				
 			let	rows=[],
 				stack=[],
 				last={};
 				
 			lines.forEach(line=>{
-				const	row	= line.split(";\t"),
+				const	row	= line.split(tab),
 					head	= row.shift().split("\t"),
 					tabs	= head.length,
 					data	= {};
