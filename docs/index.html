@@ -203,7 +203,7 @@
 <pre class="dap">
 'contents'.d("List( (`/samples/rfc7540contents.txt)uri:query,untab.decode@items )") // root invokes List() for the top-level items
 .DICT({
-	List	:'OL'.d("* .items@item; Item(.item@)"), // List invokes Item() for each item in a rowset
+	List	:'OL'.d("* .items@; Item($)"), // List invokes Item() for each item in a rowset
 	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"), // Item invokes List() for its sub-items, if present
 	Href	:'A.page target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
 })

@@ -595,8 +595,8 @@ const	dap=(Env=>
 			
 			function makeArgsFeed(context,str){
 				let	a	= str.split(">");
-				const	flatten	= a[1]	? context.ns.reach(a[1],FUNCS.FLATTEN) : Util.hash,
-					tokens	= a[0] && context.branchStack[a[0]].split(TOKENS);
+				const	flatten	= a[1] && context.ns.reach(a[1],FUNCS.FLATTEN),// : Util.hash,
+					tokens	= a[0] && (a=context.branchStack[a[0]]) && a.split(TOKENS);
 					
 				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : EMPTY.Feed;
 			}
@@ -606,10 +606,7 @@ const	dap=(Env=>
 			
 			makeConverts=(context,str)=>str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
 			
-			return {
-				
-				EMPTY	: new Rule(),
-		
+			return {		
 				engage	: function(){
 					
 						const 	uses = {},
@@ -841,7 +838,6 @@ const	dap=(Env=>
 								value=this.execToken(values[i],tokens[i]);
 								if(postpone){
 									postpone.token=
-									//postpone.target=
 									new Compile.Token(
 										recap(parts,p,new Compile.Rvalue(
 											values.length && new Compile.Feed(values,tags,recap(tokens,i,postpone.token),feed.op),		
@@ -853,13 +849,15 @@ const	dap=(Env=>
 								values[i]=value;
 							}
 						
-						value = feed.op(values,tags);
+						value = (feed.op||Util.hash)(values,tags);
 						
-						if(proto){
-							if(values.length)value['']=this.$[0][''];
-							else value=this.$[0];
+						if(proto)
+							Print(proto,null,this.node,ctx(value,this.$,this.$[2],this.$[0]['']));
+		/*				{	
+							value['']=this.$[0][''];
 							Print(proto,null,this.node,[{'':value},this.$,this.$[2]]);
-						}							
+						}
+*/						
 					}
 					
 				}
