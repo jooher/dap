@@ -199,13 +199,15 @@
 
 <h3>Parameterized reusable templates</h3>
 <p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in the <code>.DICT</code> section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked templates become their data context.</p>
-<p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP 2.0 specs), built from <a href="/samples/rfc7540contents.json" target="_blank">a JSON file</a>.</p>
+<p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP/2 specs), built from an external file.</p>
 <pre class="dap">
-'contents'.d("List( (`/samples/rfc7540contents.txt)uri:query,untab.decode@items )") // root invokes List() for the top-level items
+'contents-sample'.d("List( (`/samples/rfc7540contents.txt)uri:query,untab.decode@items )") // root invokes List() for the top-level items
 .DICT({
-	List	:'OL'.d("* .items@; Item($)"), // List invokes Item() for each item in a rowset
-	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"), // Item invokes List() for its sub-items, if present
-	Href	:'A.page target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
+	List	:'UL.contents'.d("* .items@; Item($)"), // List invokes Item() for each row in a dataset
+	Item	:'LI'.d("Sref(.section); ! .heading; Pref(.page); ? .items; List(.items)"), // Item invokes List() for its sub-items, if present
+	Sref	:'A.section target=rfc'	.d("!! .section@ ( href `section- .section )concat@href"),
+	Pref	:'A.page target=rfc'	.d("!! .page@ ( href `page- .page )concat@href"),
+	href	:"https://tools.ietf.org/html/rfc7540#"
 })
 .USES({
 	untab	:"/stuff/untab.js"
@@ -240,10 +242,6 @@
 })
 </pre>
 -->
-
-<h3>Okay, what's next?</h3>
-
-<img src="we_need_to_go_deeper.jpg" alt="But we need to go deeper" title="But we need to go deeper"/>
 
 <p>Coming soon: writing a real-world dap application</p>
 

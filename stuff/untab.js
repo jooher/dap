@@ -9,7 +9,7 @@ dap
 				tab	=/;\t+/g,
 				lines	=source.split(/[\r\n]+/g),
 				scheme	=lines.shift().split(tab),
-				rowskey	=scheme.pop();
+				rowskey	=scheme[scheme.length-1];
 				
 			let	rows=[],
 				last={};
