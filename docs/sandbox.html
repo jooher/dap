@@ -15,9 +15,11 @@ ol>li:before { content: counters(item, ".") ". "; counter-increment: item; color
   <script>
 'contents'.d("List( (`/samples/rfc7540contents.txt)uri:query,untab.decode@items )") // root invokes List() for the top-level items
 .DICT({
-	List	:'OL'.d("* .items@; Item($)"), // List invokes Item() for each item in a rowset
-	Item	:'LI'.d("! .heading; Href( .page); ? .items; List(.items)"), // Item invokes List() for its sub-items, if present
-	Href	:'A.page target=rfc'.d("!! .page@ (`https://tools.ietf.org/html/rfc7540#page- .page)concat@href")
+	List	:'UL.contents'.d("* .items@; ! Item"), // List invokes Item() for each row in a dataset
+	Item	:'LI'.d("! Sref .heading Pref (.items List)!"), // Item invokes List() for its sub-items, if present
+	Sref	:'A.section target=rfc'	.d("!! .section@ ( href `section- .section )concat@href"),
+	Pref	:'A.page target=rfc'	.d("!! .page@ ( href `page- .page )concat@href"),
+	href	:"https://tools.ietf.org/html/rfc7540#"
 })
 .USES({
 	untab	:"/stuff/untab.js"

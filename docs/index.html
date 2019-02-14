@@ -198,13 +198,14 @@
 <p>The new thing in the example above is a <em>reusable template</em> <code>Hint()</code> which is used in the several SELECT elements to display initial hints.</p>
 
 <h3>Parameterized reusable templates</h3>
-<p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in the <code>.DICT</code> section, as any other data, and can be invoked from dap rules using brackets notation. Parameters provided to invoked templates become their data context.</p>
-<p>A multi-level list of recursive structure is another good use case for reusable templates. Here is a sample of table of contents (for RFC7540, HTTP/2 specs), built from an external file.</p>
+<p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in the <code>.DICT</code> section, as any other data. Templates can be either invoked using bracket notation, or inlined — "printed" as any other constant from the dictionary.</p>
+<p>If invoked with brackets, template parameters become its data context, descendant to the caller's data context. If inlined, template is executed in the caller's data context.</p>
+<p>A multi-level list of recursive structure is a good use case for reusable templates. Here is an example table of contents (for RFC7540, HTTP/2 specs), built from an external file.</p>
 <pre class="dap">
-'contents-sample'.d("List( (`/samples/rfc7540contents.txt)uri:query,untab.decode@items )") // root invokes List() for the top-level items
+'contents-sample'.d("List( (`/samples/rfc7540contents.txt)uri:query,untab.decode@items )") // root invokes List() for the top-level items as a parameter
 .DICT({
-	List	:'UL.contents'.d("* .items@; Item($)"), // List invokes Item() for each row in a dataset
-	Item	:'LI'.d("Sref(.section); ! .heading; Pref(.page); ? .items; List(.items)"), // Item invokes List() for its sub-items, if present
+	List	:'UL.contents'.d("* .items@; ! Item"), // List inlines Item for each row in a dataset
+	Item	:'LI'.d("! Sref .heading Pref (.items List)!"), // Item inlines hyperlink templates and List for sub-items, if present
 	Sref	:'A.section target=rfc'	.d("!! .section@ ( href `section- .section )concat@href"),
 	Pref	:'A.page target=rfc'	.d("!! .page@ ( href `page- .page )concat@href"),
 	href	:"https://tools.ietf.org/html/rfc7540#"
@@ -213,7 +214,7 @@
 	untab	:"/stuff/untab.js" // external namespace, that provides a decoder for the custom-formatted data
 })
 </pre>
-<p>Here, the URL provides <a href="/samples/rfc7540contents.txt" target="_blank">data in a custom indented table format</a>, which is not JSON. Thus, the <code>:query</code> converter does not parse it automatically, but only performs a HTTP request and returns the response text "as is". To have it converted to a dataset, we use a <code>decode</code> converter from an external dap file, <a href="/stuff/untab.js">untab.js</a>, that converts indented text to a dataset object. Of course, we could simply have used <a href="/samples/rfc7540contents.json" target="_blank">an equivalent JSON file</a> instead, and wouldn't need an extra decoder then... But I thought, it is a good chance to introduce you to <i>namespaces</i>.
+<p>Here, the URL provides <a href="/samples/rfc7540contents.txt" target="_blank">textual data</a> in a custom indented table format, which is not JSON. Thus, the <code>:query</code> converter does not parse it automatically, but only performs a HTTP request and returns the response text "as is". To have it converted to a dataset, we use a <code>decode</code> converter from an external dap file, <a href="/stuff/untab.js">untab.js</a>, that converts indented text to a dataset object. Of course, we could simply have used <a href="/samples/rfc7540contents.json" target="_blank">an equivalent JSON file</a> instead, and wouldn't need an extra decoder then... But I thought, it is a good chance to introduce you to <i>namespaces</i>.
 
 
 <h3>Namespaces</h3>

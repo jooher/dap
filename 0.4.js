@@ -41,12 +41,12 @@ const	dap=(Env=>
 	
 		""	:Util.hash,
 		"?"	:(values)=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
-		"!"	:(values)=>{ for(let i=values.length;i--;)if(!values[i])return false; return values[0]; },	/// all - succeeds if empty token found
+		"!"	:(values)=>{ for(let i=values.length;i--;)if(!values[i])return null; return values[0]; },	/// all - succeeds if empty token found
 		
-		eq	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return false;return true; },
-		ne	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return false; },
-		asc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return false;return true; },
-		dsc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a<(a=parseFloat(values[i])))return false;return true; },
+		eq	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return null;return true; },
+		ne	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return null; },
+		asc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return null;return a; },
+		dsc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a<(a=parseFloat(values[i])))return null;return a; },
 				
 		join	:(values)=>values.reverse().join(values.shift()),
 		concat	:(values)=>values.reverse().join(""),
@@ -96,11 +96,12 @@ const	dap=(Env=>
 	E	= "",
 
 	isArray = Array.prototype.isArray,
-	Print	= (value,alias,place,$)=> value!=null&&(
+	Print	= (value,alias,place,$)=> {
+		if(value!=null)
 			isArray(value)	? value.forEach(v=>Print(v,null,place,$)) :
 			value.spawn	? value.spawn($,place) :
 			Env.print(place,value,alias)			
-		),
+		},
 		
 	Util	={
 			
