@@ -64,6 +64,7 @@
 	cheese: "Say cheese!"
 })
 </pre>
+<p>Here, you might have noticed that <code>BUTTON</code> and <code>DIV.message</code> templates use <code>!</code> operator to output their content (<code>cheese</code> constant and <code>$value</code> status variable, respectively), while <code>INPUT</code> template uses <code>!!</code> operator. The difference between the two operators is that the latter, <code>!!</code>, sets element's own properties instead of generating child elements. Here, it sets the <code>INPUT</code> element's value attribute.</p>
 
 
 <h3>Data entries</h3>
@@ -156,7 +157,7 @@
 
 <h3>Making parameterized queries to external sources</h3>
 <p>Now that we can work with datasets, construct parameterized URIs, and query external data, let's combine it all together, and build a car picker for a car parts shop.</p>
-<p>Querying logic in the example below is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediatel in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, that is essentially an adapter to www.rockauto.com database, accepting URI-encoded queries and returning results in JSON format.</p>
+<p>Querying logic in the example below is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediately in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, that is essentially an adapter to <a target="_blank" rel="nofollow" href="https://www.rockauto.com">www.rockauto.com</a> database, accepting HTTP GET queries and returning results in JSON format.</p>
 <pre class="dap">
 'carshop'.d("$carname= $carcode="
 	,'car-picker'.d("$make= $year= $model= $engine="

@@ -1,4 +1,5 @@
 .ui{cursor:pointer}
+input.ui, .ui[contenteditable]{cursor:text}
 .ui:hover{text-decoration:underline}
 
 .EMPTY{display:none !important}
@@ -40,7 +41,7 @@ pre>em{background:lavender; font-style:normal}
 
 /* samples */
 .colored-fruits>ul{display:inline-block; vertical-align:top; margin:2em 1em; width:8em;}
-.contents-sample{max-height:16em; width:32em}
+.contents-sample{max-height:16em; }
 
 /* Multi-level OL numbering
 ol { counter-reset: item }
