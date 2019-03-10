@@ -25,7 +25,7 @@ dap
 				
 				if(tabs>stack.length){
 					stack.push(rows);
-					rows=last[rowskey]=[];//data.rows
+					rows=last[rowskey]=[];
 				}
 				
 				while(tabs<stack.length)

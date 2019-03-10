@@ -19,8 +19,8 @@ const	dap=(Env=>
 		""	:()=>null,
 		"check"	:Check,
 	
-		"?"	:bool=>bool?true:false,	/// test
-		"!"	:bool=>bool?false:true,	/// test inverse
+		"?"	:bool=>!!bool,	/// test
+		"!"	:bool=>!bool,	/// test inverse
 		"#"	:bool=>bool?"+":"-",	/// test as +/-
 		
 		"+?"	:num=>parseFloat(num)>0,	/// test positive
@@ -34,18 +34,19 @@ const	dap=(Env=>
 		"~"	:num=>num?(num>0?"+":"-"):0,		/// sgn
 		
 		"++"	:num=>++num,
+		"--"	:num=>--num
 	},
 	
 	flatten	:{
 	
 		""	:Util.hash,
 		"?"	:(values)=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
-		"!"	:(values)=>{ for(let i=values.length;i--;)if(!values[i])return false; return values[0]; },	/// all - succeeds if empty token found
+		"!"	:(values)=>{ for(let i=values.length;i--;)if(!values[i])return null; return values[0]; },	/// all - succeeds if empty token found
 		
-		eq	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return false;return true; },
-		ne	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return false; },
-		asc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return false;return true; },
-		dsc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a<(a=parseFloat(values[i])))return false;return true; },
+		eq	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return null;return true; },
+		ne	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return null; },
+		asc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return null;return a; },
+		dsc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a<(a=parseFloat(values[i])))return null;return a; },
 				
 		join	:(values)=>values.reverse().join(values.shift()),
 		concat	:(values)=>values.reverse().join(""),
@@ -95,11 +96,12 @@ const	dap=(Env=>
 	E	= "",
 
 	isArray = Array.prototype.isArray,
-	Print	= (value,alias,place,$)=> value!=null&&(
+	Print	= (value,alias,place,$)=> {
+		if(value!=null)
 			isArray(value)	? value.forEach(v=>Print(v,null,place,$)) :
 			value.spawn	? value.spawn($,place) :
 			Env.print(place,value,alias)			
-		),
+		},
 		
 	Util	={
 			
@@ -118,7 +120,8 @@ const	dap=(Env=>
 			const hash={};
 			for(let a,i=values.length;i--;)
 				if(a=tags[i])hash[a]=values[i];
-				else for(let j in a=values[i])hash[j]=a[j];
+				else if(a=values[i])
+					for(let j in a)hash[j]=a[j];
 			return hash;
 		}
 	
@@ -129,6 +132,7 @@ const	dap=(Env=>
 	Compile	= (function(){
 		
 		const
+		
 		makePath= str=>str.split(".").reverse(), //str&&
 		append	=(obj,key,value)=>(obj[key]=obj[key]&&(value.charAt(0)===';')?obj[key]+value:value); /// ???
 		
@@ -196,7 +200,14 @@ const	dap=(Env=>
 		
 		const		
 		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Func(Func);
-		require	= uri => namespaces[uri]||(namespaces[uri]=Function('return '+document.getElementById(uri).textContent)(dap)),
+		evaluate= js	=> Function('return '+js)(dap),
+		require	= uri	=> {
+			let	a = namespaces[uri];
+			return	a||(namespaces[uri]=
+				a=document.getElementById(uri) ? evaluate(a.textContent) :
+				Env.Http.query(uri,null) || Fail("Can't resolve namespace: "+uri)
+			)
+		},
 		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
 
 		function Proto(ns,utag){
@@ -296,8 +307,8 @@ const	dap=(Env=>
 					if(this.utag)
 						this.elem=Env.Native(this.utag,this.rules[""]&&"ui");
 					
-					if(!this.elem && d && (d.defs||d.uses))
-						Fail("Entry must be an element");
+					// if(!this.elem && d && (d.defs||d.uses))
+						// Fail("Entry must be an element");
 				}
 				return this.rules;
 			},
@@ -305,12 +316,12 @@ const	dap=(Env=>
 			spawn	:function($,place,instead){
 				const	rules	= this.rules||this.prepare(),
 					d	= rules.d,
-					a	= rules.a,
+					todo	= d ? d.todo||d.engage().todo : null,
 					node	= Env.clone(this.elem),
 					react	= this.react;
 					
-				node.P=this;
-				if(d)node.$=!d.defs ? $ : [{'':$[0]['']},$,$[2]];
+				node.P	= this;
+				node.$	= d&&d.defs ? [{'':$[0]['']},$,$[2]] : $;
 					
 				if(react)
 					for(let i=react.length; i-->0;){
@@ -318,9 +329,7 @@ const	dap=(Env=>
 						Env.react(node,react[i],null,Execute.React);
 					}
 					
-				new Execute.Branch(node.$,node).runDown(d ? d.todo||d.engage().todo : null,place,instead);//  
-				
-				if(a)a.todo||a.engage();
+				new Execute.Branch(node.$,node).runDown(todo,place,instead);//  
 				
 				return node;
 			},
@@ -353,9 +362,6 @@ const	dap=(Env=>
 			this.op		= op;
 			this.branch	= branch;
 		}
-		Feed.prototype={
-			EMPTY	: new Feed([],[],[]),
-		};
 		
 		function Token(parts,converts){
 			this.parts	= parts;
@@ -588,10 +594,10 @@ const	dap=(Env=>
 			
 			function makeArgsFeed(context,str){
 				let	a	= str.split(">");
-				const	flatten	= a[1]	? context.ns.reach(a[1],FUNCS.FLATTEN) : Util.hash,
-					tokens	= a[0] && context.branchStack[a[0]].split(TOKENS);
+				const	flatten	= a[1] && context.ns.reach(a[1],FUNCS.FLATTEN),// : Util.hash,
+					tokens	= a[0] && (a=context.branchStack[a[0]]) && a.split(TOKENS);
 					
-				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : Feed.prototype.EMPTY;
+				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : EMPTY.Feed;
 			}
 						
 			
@@ -599,10 +605,7 @@ const	dap=(Env=>
 			
 			makeConverts=(context,str)=>str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
 			
-			return {
-				
-				EMPTY	: new Rule(),
-		
+			return {		
 				engage	: function(){
 					
 						const 	uses = {},
@@ -634,6 +637,11 @@ const	dap=(Env=>
 			}
 		})();		
 				
+		const	EMPTY={
+			Feed	: new Feed([],[],[]),
+			Rule	: new Rule()
+		}
+
 		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue }
 		
 	})(),
@@ -646,13 +654,13 @@ const	dap=(Env=>
 		Perf	= (info,since)=>console.log("PERF "+(Date.now()-since)+" ms : "+info),
 	
 		ctx	=(data,$,rowset,updata)=>{
-			const datarow = data instanceof Object ? data : {"#":data}
+			const datarow = data instanceof Object ? data : {"~":data}
 			datarow['']=updata;
 			return [{'':datarow},$,rowset];
 		},			
 		trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] ),
 		
-		recap	=(arr,i,v)=>arr.slice(0,i).concat(v),
+		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;},
 			
 		After	=(function(){
 		
@@ -829,7 +837,6 @@ const	dap=(Env=>
 								value=this.execToken(values[i],tokens[i]);
 								if(postpone){
 									postpone.token=
-									//postpone.target=
 									new Compile.Token(
 										recap(parts,p,new Compile.Rvalue(
 											values.length && new Compile.Feed(values,tags,recap(tokens,i,postpone.token),feed.op),		
@@ -841,19 +848,22 @@ const	dap=(Env=>
 								values[i]=value;
 							}
 						
-						value = feed.op(values,tags);
+						value = (feed.op||Util.hash)(values,tags);
 						
-						if(proto){
+						if(proto)
+							Print(proto,null,this.node,ctx(value,this.$,this.$[2],this.$[0]['']));
+		/*				{	
 							value['']=this.$[0][''];
 							Print(proto,null,this.node,[{'':value},this.$,this.$[2]]);
-						}							
+						}
+*/						
 					}
 					
 				}
 				
 				if(value==null){
 					value = literal || "";
-					if(literal!=null)convert = null;// literal values are already pre-converted
+					if(literal!=null)converts = null;// literal values are already pre-converted
 				}
 				
 				while(p>=0){
@@ -900,7 +910,7 @@ const	dap=(Env=>
 							if(up&&entry)up[entry]=$[0][entry];
 						}
 
-						convert = converts[p];
+						convert = converts&&converts[p];
 					}
 				}
 				return value;
@@ -914,7 +924,8 @@ const	dap=(Env=>
 
 			runDown:
 			function(todo,place,instead){
-				Env.adopt(place,instead,this.node,this.run(todo),postpone&&postpone.locate(instead||this.node));//
+				const elem=Env.adopt(place,instead,this.node,this.run(todo),postpone);//
+				if(postpone)postpone.locate(elem);
 			},
 			
 			
@@ -923,11 +934,12 @@ const	dap=(Env=>
 			
 				const	node	= this.node,
 					P	= node.P,
-					defs	= P.rules.d.defs,
+					d	= P.rules.d,
+					defs	= d&&d.defs,
 					parent	= node.parentNode;
 					
 				let	route	= this.route,
-					rule	= route==true ? null : ( node.reacts && node.reacts[route] ) || P.rules[route] || P.rules.u,
+					rule	= route==true ? null : ( node.reacts && node.reacts[this.route] ) || P.rules[route] || P.rules.u,
 					up	= {};
 					
 				if(rule)
@@ -1056,8 +1068,8 @@ const	dap=(Env=>
 			},
 		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
-				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=
-					function(...x){return Compile.Proto.prototype.$(this)[a](...x)}
+				(rules||"d a u ui e r").split(" ").forEach(a=>typePrototype[a]=
+					function(...x){return new Compile.Proto(null,this)[a](...x)}
 				);
 			},
 			
@@ -1151,23 +1163,25 @@ const	dap=(Env=>
 		const
 		
 		regx =/(?:^|&)([^&=]*)=?([^&]*)/g,
+		encode = encodeURIComponent,
+		decode = decodeURIComponent,
 		
 		parse	={
 			
 			pairs	:function(str,tgt){
 				if(!tgt)tgt=[];
-				str&&str.replace(regx,($0,$1,$2)=>{tgt.push({name:$1,value:decodeURIComponent($2)})});
+				str&&str.replace(regx,($0,$1,$2)=>{tgt.push({name:$1,value:decode($2)})});
 				return tgt;
 			},
 			hash	:function(str,tgt){
 				if(!tgt)tgt={};
-				str&&str.replace(regx,($0,$1,$2)=>{if($1)tgt[$1]=decodeURIComponent($2)});
+				str&&str.replace(regx,($0,$1,$2)=>{if($1)tgt[$1]=decode($2)});
 				return tgt;
 			},
 			feed	:function(str,tgt){
 				if(!tgt)tgt={values:[],tags:[]};
 				str&&str.replace(regx,($0,$1,$2)=>{
-					tgt.values.push(decodeURIComponent($2));
+					tgt.values.push(decode($2));
 					tgt.tags.push($1);
 				})
 				return tgt;
@@ -1182,7 +1196,7 @@ const	dap=(Env=>
 					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;){
 						var	nv = tups[i].split('='),
 							key = nv[0]; //(remap&&remap[key])||
-						if(nv.length>1)target[key]=decodeURIComponent(nv[1]);
+						if(nv.length>1)target[key]=decode(nv[1]);
 						else target['!']=key;
 					}
 				return target;
@@ -1196,7 +1210,7 @@ const	dap=(Env=>
 					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;)
 						if(tups[i]){
 							const	nv = tups[i].split('='),
-								value = decodeURIComponent(nv.pop()),
+								value = decode(nv.pop()),
 								key = nv.length&&nv[0];
 							tgt.values.push(value);
 							tgt.tags.push(key);//(remap&&remap[key])||
@@ -1206,7 +1220,7 @@ const	dap=(Env=>
 
 			neutral	:(hash)=>{
 				const arg=[];
-				hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
+				hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encode(hash[k]))});
 				return arg.join('&').replace(/%20/g,'+');
 			},
 			
@@ -1214,14 +1228,14 @@ const	dap=(Env=>
 				let uri="";
 				for(let i=values.length,v,t;i--;)
 					if((v=values[i])||(v===0)||emptytoo)
-						uri+=(t=tags[i]) ? "&"+t+"="+ encodeURIComponent(v) : v;
+						uri+=(t=tags[i]) ? "&"+t+"="+ encode(v) : v;
 				return uri.replace(/%20/g,'+');
 			}
 		
 		},
 
-		merge	=(...strs)=> strs.reduce(parse.hash,{});
-
+		merge	=(...strs)=> strs.reduce((tgt,str)=>parse.hash(str,tgt),{});
+		
 		return	{ parse, build, merge }		
 	})(),
 
@@ -1363,14 +1377,15 @@ const	dap=(Env=>
 	
 	Style	= {
 	
-		attach	:(node,cls)=>{Style.mark(node,cls,true)},
-		detach	:(node,cls)=>{Style.mark(node,cls,false)},
+		attach	:(node,cls)=>Style.mark(node,cls,true),
+		detach	:(node,cls)=>Style.mark(node,cls,false),
 			
 		mark	:(node,cls,on)=>{
 				const	c	= " "+node.className+" ",
 					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
 				if(!on!=!found)
 					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
+				return node;
 			}
 	},
 	
@@ -1403,10 +1418,11 @@ const	dap=(Env=>
 				const	full	= window.location.href.split(/#!?/),
 					query	= full[0].split("?")[1],
 					state	= full[1];
-					
+/*					
 				if(query && query.indexOf("=")>0)
-					window.location.href=Uri.base+"#!"+QueryString.merge(query,state);//QueryString.build.ordered(rewrite.values,rewrite.tags);
-				else	
+					window.location.href=Uri.base+"#!"+QueryString.merge(query,state);
+				else
+*/					
 					return QueryString.parse.hash(state);
 			};
 			
@@ -1425,7 +1441,7 @@ const	dap=(Env=>
 				time=instead.getAttribute("fade");
 				
 			place.insertBefore(elem,instead);
-/*			if(time){
+			if(time){
 				console.log("fade time: "+time);
 				instead.$=null;
 				setTimeout(()=>{
@@ -1433,7 +1449,7 @@ const	dap=(Env=>
 				},1000);
 			}
 			else
-*/				place.removeChild(instead);
+/**/				place.removeChild(instead);
 			//place.replaceChild(elem,instead)
 		}
 	}
@@ -1468,13 +1484,13 @@ const	dap=(Env=>
 				
 				if(postponed){
 					instead	? Style.attach(instead,"STALE") :
-					place	? Style.attach(place.appendChild(elem),"AWAIT") :
+					place	? place.appendChild(Style.attach(instead=elem.cloneNode(true),"AWAIT")) :
 					console.log('orphan postponed');
-				}else{
-					instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
-					place	? place.appendChild(elem) :
-					console.log('orphan element '+elem);
+					return instead;
 				}
+				instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
+				place	? place.appendChild(elem) :
+				console.log('orphan element '+elem);
 			},
 			
 		clone	:elem=>elem.cloneNode(false),
@@ -1505,26 +1521,28 @@ const	dap=(Env=>
 				
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
-				
-				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
+
 				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
+				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
 				now	: elem	=>document.body.appendChild(elem),
 				
 				sync	: req	=> Http.query(req,null),
-				query	: req	=> Http.query(req,new dap.Execute.Postpone())
+				query	: req	=> Http.query(req,new dap.Execute.Postpone()),
+				
+				plused	: QueryString.plused 
+				
 			},
 			
 			flatten	:{
 				uri	: QueryString.build.ordered, // function(values,tags)	{ return Uri.encode( values,tags ); },
+				"uri+"	:(values,tags)	=> QueryString.build.ordered(values,tags).replace(/ /g,'+').replace(/%20/g,'+'),
 				post	:(values,tags)	=> Request.post( values.pop(),values,tags ),
 				upload	:(values,tags)	=> Request.blob( values.pop(),values[0],tags[0] ),
 				
 				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
 
-				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop()),
-		
-				//"uri*"	: Env.Uri.full
+				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
 			},
 			
 			operate	:{

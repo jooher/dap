@@ -307,8 +307,8 @@ const	dap=(Env=>
 					if(this.utag)
 						this.elem=Env.Native(this.utag,this.rules[""]&&"ui");
 					
-					if(!this.elem && d && (d.defs||d.uses))
-						Fail("Entry must be an element");
+					// if(!this.elem && d && (d.defs||d.uses))
+						// Fail("Entry must be an element");
 				}
 				return this.rules;
 			},
@@ -316,11 +316,11 @@ const	dap=(Env=>
 			spawn	:function($,place,instead){
 				const	rules	= this.rules||this.prepare(),
 					d	= rules.d,
-					a	= rules.a,
+					todo	= d ? d.todo||d.engage().todo : null,
 					node	= Env.clone(this.elem),
 					react	= this.react;
 					
-				node.P	=this;
+				node.P	= this;
 				node.$	= d&&d.defs ? [{'':$[0]['']},$,$[2]] : $;
 					
 				if(react)
@@ -329,9 +329,7 @@ const	dap=(Env=>
 						Env.react(node,react[i],null,Execute.React);
 					}
 					
-				new Execute.Branch(node.$,node).runDown(d ? d.todo||d.engage().todo : null,place,instead);//  
-				
-				if(a)a.todo||a.engage();
+				new Execute.Branch(node.$,node).runDown(todo,place,instead);//  
 				
 				return node;
 			},
@@ -1070,8 +1068,8 @@ const	dap=(Env=>
 			},
 		
 		Infect	:function(typePrototype,rules){//dap().Inject(String.prototype)
-				(rules||"d a u ui e r").split(" ").forEach((a)=>typePrototype[a]=
-					function(...x){return Compile.Proto.prototype.$(this)[a](...x)}
+				(rules||"d a u ui e r").split(" ").forEach(a=>typePrototype[a]=
+					function(...x){return new Compile.Proto(null,this)[a](...x)}
 				);
 			},
 			
@@ -1165,23 +1163,25 @@ const	dap=(Env=>
 		const
 		
 		regx =/(?:^|&)([^&=]*)=?([^&]*)/g,
+		encode = encodeURIComponent,
+		decode = decodeURIComponent,
 		
 		parse	={
 			
 			pairs	:function(str,tgt){
 				if(!tgt)tgt=[];
-				str&&str.replace(regx,($0,$1,$2)=>{tgt.push({name:$1,value:decodeURIComponent($2)})});
+				str&&str.replace(regx,($0,$1,$2)=>{tgt.push({name:$1,value:decode($2)})});
 				return tgt;
 			},
 			hash	:function(str,tgt){
 				if(!tgt)tgt={};
-				str&&str.replace(regx,($0,$1,$2)=>{if($1)tgt[$1]=decodeURIComponent($2)});
+				str&&str.replace(regx,($0,$1,$2)=>{if($1)tgt[$1]=decode($2)});
 				return tgt;
 			},
 			feed	:function(str,tgt){
 				if(!tgt)tgt={values:[],tags:[]};
 				str&&str.replace(regx,($0,$1,$2)=>{
-					tgt.values.push(decodeURIComponent($2));
+					tgt.values.push(decode($2));
 					tgt.tags.push($1);
 				})
 				return tgt;
@@ -1196,7 +1196,7 @@ const	dap=(Env=>
 					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;){
 						var	nv = tups[i].split('='),
 							key = nv[0]; //(remap&&remap[key])||
-						if(nv.length>1)target[key]=decodeURIComponent(nv[1]);
+						if(nv.length>1)target[key]=decode(nv[1]);
 						else target['!']=key;
 					}
 				return target;
@@ -1210,7 +1210,7 @@ const	dap=(Env=>
 					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i--;)
 						if(tups[i]){
 							const	nv = tups[i].split('='),
-								value = decodeURIComponent(nv.pop()),
+								value = decode(nv.pop()),
 								key = nv.length&&nv[0];
 							tgt.values.push(value);
 							tgt.tags.push(key);//(remap&&remap[key])||
@@ -1220,7 +1220,7 @@ const	dap=(Env=>
 
 			neutral	:(hash)=>{
 				const arg=[];
-				hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encodeURIComponent(hash[k]))});
+				hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encode(hash[k]))});
 				return arg.join('&').replace(/%20/g,'+');
 			},
 			
@@ -1228,14 +1228,14 @@ const	dap=(Env=>
 				let uri="";
 				for(let i=values.length,v,t;i--;)
 					if((v=values[i])||(v===0)||emptytoo)
-						uri+=(t=tags[i]) ? "&"+t+"="+ encodeURIComponent(v) : v;
+						uri+=(t=tags[i]) ? "&"+t+"="+ encode(v) : v;
 				return uri.replace(/%20/g,'+');
 			}
 		
 		},
 
 		merge	=(...strs)=> strs.reduce((tgt,str)=>parse.hash(str,tgt),{});
-
+		
 		return	{ parse, build, merge }		
 	})(),
 
@@ -1521,26 +1521,28 @@ const	dap=(Env=>
 				
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
-				
-				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
+
 				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
+				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
 				now	: elem	=>document.body.appendChild(elem),
 				
 				sync	: req	=> Http.query(req,null),
-				query	: req	=> Http.query(req,new dap.Execute.Postpone())
+				query	: req	=> Http.query(req,new dap.Execute.Postpone()),
+				
+				plused	: QueryString.plused 
+				
 			},
 			
 			flatten	:{
 				uri	: QueryString.build.ordered, // function(values,tags)	{ return Uri.encode( values,tags ); },
+				"uri+"	:(values,tags)	=> QueryString.build.ordered(values,tags).replace(/ /g,'+').replace(/%20/g,'+'),
 				post	:(values,tags)	=> Request.post( values.pop(),values,tags ),
 				upload	:(values,tags)	=> Request.blob( values.pop(),values[0],tags[0] ),
 				
 				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
 
-				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop()),
-		
-				//"uri*"	: Env.Uri.full
+				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
 			},
 			
 			operate	:{

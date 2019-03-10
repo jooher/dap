@@ -159,26 +159,25 @@
 <p>Now that we can work with datasets, construct parameterized URIs, and query external data, let's combine it all together, and build a car picker for a car parts shop.</p>
 <p>Querying logic in the example below is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediately in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, that is essentially an adapter to <a target="_blank" rel="nofollow" href="https://www.rockauto.com">www.rockauto.com</a> database, accepting HTTP GET queries and returning results in JSON format.</p>
 <pre class="dap">
-'carshop'.d("$carname= $carcode="
-	,'car-picker'.d("$make= $year= $model= $engine="
+'carshop'.d("$carname= $make= $year= $model= $engine="
+	,'car-picker'.d(""
 		,'SPAN'.d(""
-			,'SELECT.year'.d("Hint(label.year@label); * year" // years are taken immediately from DICT
-				,'OPTION'.d("! .year")
-			).ui("$year=#:value")
-			,'SELECT.make'.d("Hint(label.make@label); * (makes@)uri:query@make" // makes are taken from a static file
-				,'OPTION'.d("! .make")
-			).ui("$make=#:value")
-		).u("$model= $carcode=") // reset $model and $carcode, when make or year were changed 
-		,'SELECT.model'.d("? ($make $year)!; Hint(label.model@label); * (base@ $make $year)uri:query@model" // models are queried parametrically for given make and year
-			,'OPTION'.d("! .model")
-		).ui("$model=#:value")
-		,'SELECT.engine'.d("? $model; Hint(label.engine@label); * (base@ $make $year $model)uri:query" // carcodes are queried parametrically for given make, year and model
-			,'OPTION'.d("!! .engine@ .carcode@value") // .engine name used as option content, .carcode used as option value
-		).ui("$carcode=#:value")
-	).u("$carname=( $carcode ( $year $make $model $engine )spaced )!") // $carname will be empty until $carcode is set
-	
+			,'SELECT.year' // years are taken immediately from DICT
+				.d("Hint(label.year@label); * year; Option(.year@value)")
+				.ui("$year=#:value")
+			,'SELECT.make' // makes are taken from a static file
+				.d("Hint(label.make@label); * (makes@)uri:query@make; Option(.make@value)")
+				.ui("$make=#:value")
+		).u("$model= $engine=") // reset $model and $engine, when make or year were changed 
+		,'SELECT.model' // once both $make and $year are set, related models are queried
+			.d("? ($make $year)!; Hint(label.model@label); * (base@ $make $year)uri:query@model; Option(.model@value)")
+			.ui("$model=#:value $engine=")
+		,'SELECT.engine' //once $model is set, carcodes are queried parametrically for given $make, $year and $model
+			.d("? $model; Hint(label.engine@label); * (base@ $make $year $model)uri:query; Option(.engine@label (`, .engine .carcode)join@value)")
+			.ui("$engine=#:value ")
+	).u("$carname=( $engine ( $year $make $model $engine )spaced )!") // $carname will be empty until $engine is set
 	,'H3'.d("! ($carname label.hint)?") // print $carname if set, otherwise a hint
-	,'carcode'.d("? $carcode; ! label.carcode $carcode")
+	,'A target=_blank'.d("? $carname; !! label.redir@ (`https://www.rockauto.com/en/catalog/ (`, $make $year $model $engine)join)uri+@href")
 )
 .DICT({
 	year	: Array.from({length:20},(v,i)=>2019-i), // back to 20 years from year 2019
@@ -191,12 +190,14 @@
 		year	: "Production year",
 		model	: "Model name",
 		engine	: "Engine",
-		carcode	: "Car code: "
+		redir	: "Search parts for this car at Rockauto.com"
 	},
-	Hint	: 'OPTION selected disabled'.d("! .label") // this is a reusable parameterized template
+	// below are a couple of reusable parameterized templates
+	Hint	: 'OPTION selected disabled'.d("! .label"), // a placeholder hack for a SELECT
+	Option	: 'OPTION'.d("!! .value (.label .value)?") // set .value as attribute and display .label or .value 
 })
 </pre>
-<p>The new thing in the example above is a <em>reusable template</em> <code>Hint()</code> which is used in the several SELECT elements to display initial hints.</p>
+<p>The new things in the example above are the <em>reusable templates</em> <code>Hint(.label)</code> and <code>Option(.label .value)</code> which are used in the several SELECT elements to display initial hints and available options.</p>
 
 <h3>Parameterized reusable templates</h3>
 <p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in the <code>.DICT</code> section, as any other data. Templates can be either invoked using bracket notation, or inlined — "printed" as any other constant from the dictionary.</p>
