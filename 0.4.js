@@ -318,7 +318,10 @@ const	dap=(Env=>
 					d	= rules.d,
 					todo	= d ? d.todo||d.engage().todo : null,
 					node	= Env.clone(this.elem),
-					react	= this.react;
+					react	= this.react,
+					a	= rules.a;
+					
+				a&&(a.todo||a.engage());					
 					
 				node.P	= this;
 				node.$	= d&&d.defs ? [{'':$[0]['']},$,$[2]] : $;
