@@ -61,11 +61,12 @@
 		,'LI'	.d("! .fruit") // each LI element shows fruit value from its associated data row, and
 			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
-	,'nothing'.d("? $choice:!; ! nothing") // if $choice is not set, print a message to let us know
+	,'BUTTON'.d("? $choice; ! `Reset").ui("$choice=") // if $choice is set, show a reset button
+	,'nothing'.d("? $choice:!; ! nothing") // if $choice is not set, print a message
 )
-.DICT({ // strings and other constants are supposed to be defined here in dictionary, not inside the rules
+.DICT({ // strings and other constants are defined here in dictionary, not inside the rules
 	title:"My favorite fruit is ", // textual messages gathered in one place are easier to maintain and localize if needed
-	nothing:"Nothing selected yet",
+	nothing:"Nothing selected",
 	"not-yet":"what?", // hyphens and other symbols are okay for entry names, as long as they are quoted
 	fruit:["apple","orange","tomato","banana"] // datasets can be ordinary arrays containing any kind of data
 })
