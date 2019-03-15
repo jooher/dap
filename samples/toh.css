@@ -19,4 +19,5 @@ h1{font:bold 1.2em sans-serif; color: gray; }
 .hero-bar{display:flex; border-radius:4px; overflow:hidden; margin:.5em 0; background:lavender; }
 .hero-bar>.id{padding:.25em; background:slateblue; color:white;}
 .hero-bar>.name{padding:.25em; flex:auto; }
-.del{padding:.25em}
+
+.del{padding:.25em}s
