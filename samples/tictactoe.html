@@ -5,7 +5,7 @@
 <head>
 	<title>Tic Tac Toe - dap example</title>
 	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
-	<script src="https://dap.js.org/0.4.js"></script>
+	<script src="/0.4.js"></script>
 	<style>
 		body{font:normal 1em sans-serif}
 		.board,.history{ display:inline-block; width:10em; vertical-align:top; }
@@ -20,12 +20,18 @@
 
 <script>
 
+"use strict";
+
 var TicTacToe=(function(){ // all the game logic is encapsulated into this usual closure
 
-	var	lines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ]
-	
 	function emptyBoard(){return Array(9).fill(null)}
 
+	var	lines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ],
+		move=0,
+		squares=emptyBoard(),
+		history=[squares];
+		
+	
 	function addMove($){
 		history=history.slice(0,++move);
 		history.push(squares=squares.slice());
@@ -51,10 +57,6 @@ var TicTacToe=(function(){ // all the game logic is encapsulated into this usual
 		}
 	}
 
-	var	move=0,
-		squares=emptyBoard(),
-		history=[squares];
-		
 	return	{
 		emptyBoard,
 		gotoMove,
