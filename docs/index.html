@@ -29,7 +29,7 @@
 </pre>
 <p>Save it on your Desktop (or anywhere else), then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working. Or, you can play with the code right here, all code samples are editable. Results of each code sample are shown thereunder.</p>
 
-
+<a name="rules-and-contexts"/>
 <h2>Rules and contexts</h2>
 <p>Elements rendered into DOM are generated from <em>dap-templates</em>. Every template defines element's a <em>signature</em> and <em>rules</em> for generated element. Signature designates the element's generic properties: tag, css class, other attributes. Rules define the element's behavior on different phases of its life cycle:</p>
 <ul>
@@ -41,6 +41,7 @@
 </ul>
 <p>Every generated element in a dap document is bound to two local contexts: <em>status context</em> and <em>data context</em>. Element's dap rules are executed within these contexts. Constants defined in a dictionary are visible to all elements.</p>
 
+<a name="literals-and-constants"/>
 <h3>Literals and constants</h3>
 <p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DICT</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
 <pre class="dap">
@@ -51,7 +52,7 @@
 </pre>
 <p>Exclamation sign <code>!</code> in the beginning of the rule is a "print" operator, it prints its arguments into the element. Arguments (or <em>tokens</em>) in dap rules are separated by whitespace.</p>
 
-
+<a name="status-variables"/>
 <h3>Status variables</h3>
 <p>Status variables provide the main reactivity mechanism in dap. When a status variable gets changed, all elements that depend on it, are automatically updated. Status variables are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to all children of that element. Status variables can only be updated in u-rules.</p>
 <pre class="dap">
@@ -66,7 +67,7 @@
 </pre>
 <p>Here, you might have noticed that <code>BUTTON</code> and <code>DIV.message</code> templates use <code>!</code> operator to output their content (<code>cheese</code> constant and <code>$value</code> status variable, respectively), while <code>INPUT</code> template uses <code>!!</code> operator. The difference between the two operators is that the latter, <code>!!</code>, sets element's own properties instead of generating child elements. Here, it sets the <code>INPUT</code> element's value attribute.</p>
 
-
+<a name="data-entries"/>
 <h3>Data entries</h3>
 <p>Every generated element is bound to some data context, usualy it is a data row in some dataset. Data context can be shared among several elements, related to the same data row. Fields of a data row, or <em>data entries</em>, can be read and modified in both u- and d-rules. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
 <pre class="dap">
@@ -112,6 +113,7 @@
 <p>Here, all elements inside the <code>'colored-fruits'</code> share the same status context with <code>$color</code> and <code>$fruit</code> status variables defined in it. However, each <code>LI</code> element in the two lists has its own data context, containing one data entry, either <code>.color</code> or <code>.fruit</code></p>
 <p>Another interesting point of this example is the <code>.FUNC</code> section (functionality) and the d-rule of <code>'message'</code> element. Meet: flatteners and convertors...</p>
 
+<a name="flatteners-and-convertorss"/>
 <h3>Flatteners and convertors</h3>
 <p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are ordinary Javascript functions — but with imposed uniform contracts:</p>
 <p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.FUNC</code> section</p>
@@ -136,9 +138,10 @@
 <p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But they can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email)?@login</code>.</p>
 <p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value it as is.</p>
 
+<a name="working-with-external-data"/>
 <h2>Working with external data</h2>
 <p>Querying for external data is very simple with a standard <code>:query</code> converter that "converts" an URL into result of a HTTP request to that URL:</p>
-<pre class="dap" data-style="height:16em">
+<pre class="dap" data-style="height:20em">
 'heroes'.d("$id= $name="
 	,'UL'.d("* (heroes@)uri:query@" // query data from the URL, parse it and populate a dataset from it  
 		,'LI.hero'
@@ -155,6 +158,7 @@
 <p>Here, we get our data from a static file <a href="/samples/heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. With the <code>:query</code> convertor, this file is asynchronously requested, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
 <p>If you click a hero's name in the list, status variables <code>$id</code> and <code>$name</code> are updated with the hero's respective data, and the summary message updates to reflect these changes.</p>
 
+<a name="parameterized-queries"/>
 <h3>Making parameterized queries to external sources</h3>
 <p>Now that we can work with datasets, construct parameterized URIs, and query external data, let's combine it all together, and build a car picker for a car parts shop.</p>
 <p>Querying logic in the example below is straight-forward: first, user selects production year and maker from predefined lists (years array is generated immediately in the DICT, and makes are taken from an external JSON file); then, for these year and make, a model list is queried from an external data source. Then, for selected model, a list of engines and corresponding car-codes is queried. Here, we use https://dapmx.org/stuff/rockauto.php endpoint, which is essentially an adapter to <a target="_blank" rel="nofollow" href="https://www.rockauto.com">www.rockauto.com</a>'s database, accepting HTTP GET queries and returning results in JSON format.</p>
@@ -199,6 +203,7 @@
 </pre>
 <p>The new things in the example above are the <em>reusable templates</em> <code>Hint(.label)</code> and <code>Option(.label .value)</code> which are used in the several SELECT elements to display initial hints and available options.</p>
 
+<a name="reusable-templates"/>
 <h3>Parameterized reusable templates</h3>
 <p>Parameterized reusable templates to dap are essentially what functions are to Javascript. It is a means of code clarification by extracting repeated pieces of code into reusable entities, optionally with parameters. In dap, templates can be defined in the <code>.DICT</code> section, as any other data. Templates can be either invoked using bracket notation, or inlined — "printed" as any other constant from the dictionary.</p>
 <p>If invoked with brackets, template parameters become its data context, descendant to the caller's data context. If inlined, template is executed in the caller's data context.</p>
@@ -218,7 +223,7 @@
 </pre>
 <p>Here, the URL provides <a href="/samples/rfc7540contents.txt" target="_blank">textual data</a> in a custom indented table format, which is not JSON. Thus, the <code>:query</code> converter does not parse it automatically, but only performs a HTTP request and returns the response text "as is". To have it converted to a dataset, we use a <code>decode</code> converter from an external dap file, <a href="/stuff/untab.js">untab.js</a>, that converts indented text to a dataset object. Of course, we could simply have used <a href="/samples/rfc7540contents.json" target="_blank">an equivalent JSON file</a> instead, and wouldn't need an extra decoder then... But I thought, it is a good chance to introduce you to <i>namespaces</i>.
 
-
+<a name="namespaces"/>
 <h3>Namespaces</h3>
 <p>Namespaces allow to reuse dictionaries and functionalities from other dap files. Somewhat similar to namespaces in Java or C#, or modules in Javascript, but simpler. To gain access to the dictionary and functionality of external dap file, you simply reference it in the <code>.USES</code> section.</p>
 <!--
