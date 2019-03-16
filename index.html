@@ -12,9 +12,15 @@
 		<img src="logo/dap-logo.png"/><br/><a href="https://github.com/jooher/dap">https://github.com/jooher/dap</a>
 		<h1>Dap.js: for data-driven web applications</h1>
 		<p>Lightweight and powerful javascript framework for interactive data-driven web applications.</p>
-		<p>Unlike some other frameworks relying on Javascript expressive means, dap offers a higher level of abstraction — a declarative "superscript" for reactivity rules. These rules are dense, compact, and human-readable at the same time. Dap code is parsed, compiled and executed by a small (less than 9kiB gzipped) runtime script, and does not require code transpilation.</p>
+		<p>Unlike some other frameworks relying on Javascript expressive means, dap offers a higher level of abstraction — a declarative "superscript" language for <i>reactivity rules</i>. These rules are dense, compact, and human-readable at the same time. Dap code is parsed, compiled and executed by a small (less than 9kiB gzipped) client-side script, and does not require any transpilation.</p>
 	</header>
-	<pre class="dap">'DIV'.d("! `Hello,world!")</pre>
+	<pre class="dap">
+	'DIV.hello'.d("! greeting")
+	.DICT({
+		greeting:"Hello, world!"
+	})
+	</pre>
+	<p>... where <code>'DIV.hello'</code> designates an HTML element rendered as <code>&lt;DIV class="hello"&gt;</code> and <code>.d()</code> method specifies the generation rule for its content. The generation rule, literally "<i>print greeting</i>", consists of <code>!</code> — the "print" operator  — and a <code>greeting</code> constant, which is defined in the <code>.DICT</code> (dictionary) section.</p>
 
 
 	<a name="why-dap"></a>
@@ -110,10 +116,10 @@ Templates are rendered into actual DOM elements, from parent node <em>down</em> 
 <!--
 <script src="https://cdn.jsdelivr.net/gh/jooher/dap/0.4.min.js"></script>
 -->
-<script src="/stuff/dapify.js"></script>
+<script src="stuff/dapify.js"></script>
 
-<link href="/stuff/talks.css" rel="stylesheet" type="text/css"/>	
-<script src="/stuff/talks.js#msg=7"></script>
+<link href="stuff/talks.css" rel="stylesheet" type="text/css"/>	
+<script src="stuff/talks.js#msg=7"></script>
 
 </html>
 
