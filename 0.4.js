@@ -866,7 +866,7 @@ const	dap=(Env=>
 				
 				if(value==null){
 					value = literal || "";
-					if(literal!=null)converts = null;// literal values are already pre-converted
+					if(literal!=null)convert = null;// literal values are already pre-converted
 				}
 				
 				while(p>=0){
