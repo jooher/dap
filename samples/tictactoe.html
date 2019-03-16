@@ -20,38 +20,38 @@
 
 <script>
 
-var TicTacToe=(function(){ // all the game logic is encapsulated into this usual closure
+const	TicTacToe=(function(){ // all the game logic is encapsulated into this closure
 
-	var	lines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ]
+	const	lines = [ [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6] ],
 	
-	function emptyBoard(){return Array(9).fill(null)}
+		emptyBoard = ()=>Array(9).fill(null),
+		
+		haveWinner = ()=>{
+			for (var i = 0, t, a; i < lines.length; i++)
+				if (( t=lines[i]) && (a=squares[t[0]]) && a === squares[t[1]] && a === squares[t[2]])
+					return a;
+		},
+		
+		addMove = $=>{
+			history=history.slice(0,++move);
+			history.push(squares=squares.slice());
+			squares[$.n]=$.key;
+			return gotoMove(move);
+		},
+		
+		gotoMove = m=>{
+			move=m;
+			squares=history[m];
+			return	{
+				history,
+				move,
+				squares,
+				turn:move%2==0,
+				winner:haveWinner(),
+			}
+		};
 
-	function addMove($){
-		history=history.slice(0,++move);
-		history.push(squares=squares.slice());
-		squares[$.n]=$.key;
-		return gotoMove(move);
-	}
-	
-	function haveWinner(){
-		  for (var i = 0, t, a; i < lines.length; i++)
-			if (( t=lines[i]) && (a=squares[t[0]]) && a === squares[t[1]] && a === squares[t[2]])
-				return a;
-	}
-
-	function gotoMove(m){
-		move=m;
-		squares=history[m];
-		return	{
-			history,
-			squares,
-			move,
-			turn:move%2==0,
-			winner:haveWinner(),
-		}
-	}
-
-	var	move=0,
+	let	move=0,
 		squares=emptyBoard(),
 		history=[squares];
 		
