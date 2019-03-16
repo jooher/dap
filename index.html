@@ -63,7 +63,7 @@
 <pre class="dap">
 'favorite-fruit'.d("$choice=" // a &lt;DIV class="favorite-fruit"&gt; element, with $choice status variable defined in its scope 
 	,'B.selected'.d("! title ($choice not-yet)?") // a &lt;B class="selected"&gt; with textual content involving $choice value
-	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
+	,'UL.options'.d("* fruit" // The * operator repeats the rule for each row in the fruit dataset
 		,'LI'	.d("! .fruit") // each LI element shows fruit value from its associated data row, and
 			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
@@ -79,12 +79,12 @@
 </pre>
 <p>Dap code may seem a little bit unusual, but it is a pure Javascript, with slightly uncommon formatting to better reflex dap program structure. All you need to run dap in an .html document is a <code>&lt;script src="https://dap.js.org/0.4.js"&gt;&lt;/script&gt;</code> somewhere before actual dap code (usually, in the <code>head</code> section).<!--You are also welcome to play with the code right here, the code examples are editable.--></p>
 <p>From this example you can see DOM-element templates being denoted by single quoted strings (in a slightly shorter notation than used in HTML). Single quotes are just a matter of style, they help to tell templates from other strings and facilitate code highlighting.</p>
-Templates are rendered into actual DOM elements, from parent node <em>down</em> to child elements, according to their d-rules ("down"-phase rules) specified by <code>.d()</code> method. Some templates have u-rules for "up"-phase, when events bubble <em>up</em> through the node towards the root. In the example above, the <code>LI</code> element is given its u-rule by means of <code>.ui()</code> method, which also binds a default UI event (usually, click) listener.</p>
+Templates are rendered into actual DOM elements, from parent <em>down</em> to child elements, according to their d-rules ("down"-phase rules) specified by <code>.d()</code> method. Some templates have u-rules for "up"-phase, when events bubble <em>up</em> through the node towards the root. In the example above, the <code>LI</code> element is given its u-rule by means of <code>.ui()</code> method, which also binds a default UI event (usually, click) listener.</p>
 <p>Rules in the example are very simple. You can see the three most common dap operators here:</p>
 <ul>
-	<li><code>!</code> - "print" operator, that simply prints its arguments into resulting node</li>
+	<li><code>!</code> - "print" operator, that simply prints its arguments into resulting element</li>
 	<li><code>*</code> - "multiple", or "for each", repeats the rest of the rule for each row in a dataset</li>
-	<li><code>?</code> - "if" gate, that allows further rule execution only if its argument is truish</li>
+	<li><code>?</code> - "if" gate, that allows further rule execution only if its argument is truthy</li>
 </ul>
 <p>And you can see arguments of several kinds in the rules above:</p>
 <ul>
