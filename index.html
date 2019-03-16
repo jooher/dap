@@ -21,7 +21,9 @@
 	})
 	</pre>
 	<p>... where <code>'DIV.hello'</code> designates an HTML element rendered as <code>&lt;DIV class="hello"&gt;</code> and <code>.d()</code> method specifies the generation rule for its content. The generation rule, literally "<i>print greeting</i>", consists of <code>!</code> — the "print" operator  — and a <code>greeting</code> constant, which is defined in the <code>.DICT</code> (dictionary) section.</p>
-
+	<p class="why">Why not simply write <code>&lt;DIV class="hello"&gt;Hello, world!&lt;/DIV&gt;</code>, you may ask? Well, if you're writing not a static document, but an application (otherwise, you don't need dap), it is a common rule of thumb to avoid "hard-coded" strings or numbers in your programs. Instead, use constants and define them in a "dictionary". This way, your code will be cleaner and maintainance of your program easier. Not even to mention localization, when you need to translate all texts in your program to another language. And of course, dap rules can do much more than just printing constants!</p>
+<!--
+-->
 
 	<a name="why-dap"></a>
 

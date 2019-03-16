@@ -10,6 +10,8 @@ h3{margin-top:2em;}
 input,button{margin:.5em}
 code{background:aliceblue; padding:2px; white-space:nowrap; }
 
+.why {color:brown; padding:2em; border:2px dotted yellow; font-style:italic; background:lightyellow; }
+
 .labelled {margin-top:1em; position:relative;}
 .labelled::before{content:attr(label); position:absolute; top:-2em; font-weight:bold; }
 

@@ -157,6 +157,7 @@
 </pre>
 <p>Here, we get our data from a static file <a href="/samples/heroes.json">heroes.json</a> which contains some super-hero data in a JSON array. With the <code>:query</code> convertor, this file is asynchronously requested, parsed (based on its content-type header) and fed to <code>*</code> operator, that populates <code>&lt;LI class="hero"&gt;</code> elements for each row in that rowset.</p>
 <p>If you click a hero's name in the list, status variables <code>$id</code> and <code>$name</code> are updated with the hero's respective data, and the summary message updates to reflect these changes.</p>
+<p>The heroes list is taken from the <a href="/samples/toh.html">Tour of Heroes</a> example inspired by the Angular tutorial.</p>
 
 <a name="parameterized-queries"/>
 <h3>Making parameterized queries to external sources</h3>
