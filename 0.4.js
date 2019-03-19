@@ -205,7 +205,7 @@ const	dap=(Env=>
 			let	a = namespaces[uri];
 			return	a||(namespaces[uri]=
 				a=document.getElementById(uri) ? evaluate(a.textContent) :
-				Env.Http.query(uri,null) || Fail("Can't resolve namespace: "+uri)
+				Env.Http.query(uri) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
 			)
 		},
 		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
@@ -1309,7 +1309,7 @@ const	dap=(Env=>
 			const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
 				method	= req.method || ( req.body ? "POST" : "GET" );
 			
-			request.open( method,Uri.absolute(req.url),!!postpone );
+			request.open( method,req.url,!!postpone ); //Uri.absolute(req.url)
 			request.setRequestHeader("Content-Type",req.mime);
 			
 			if(req.headers)
