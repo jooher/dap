@@ -1374,8 +1374,8 @@ const	dap=(Env=>
 		},
 
 	Storage	={
-		put	:(data)=>{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
-		get	:(key)=>{try{JSON.parse(localStorage.getItem(key))}catch(e){return null};}
+		put	:data	=>{if(!localStorage)return; for(let key in data)localStorage.setItem(key,JSON.stringify(data[key]));},
+		get	:key	=>{try{return JSON.parse(localStorage.getItem(key))}catch(e){return null};}
 		},
 	
 	Style	= {
@@ -1452,8 +1452,7 @@ const	dap=(Env=>
 				},1000);
 			}
 			else
-/**/				place.removeChild(instead);
-			//place.replaceChild(elem,instead)
+				place.removeChild(instead);
 		}
 	}
 	
@@ -1551,6 +1550,8 @@ const	dap=(Env=>
 			operate	:{
 				title	:(text)		=>{ doc.title=text; },
 				log	:(value,alias)	=>{ log(alias+": "+value); },
+				
+				state	:State.write,
 				
 				"!!"	:(value,alias,node)=>{
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);

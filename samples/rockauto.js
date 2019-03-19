@@ -1,6 +1,36 @@
+const	Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
+	var	data	= null,
+		storage	= localStorage;
+		
+	return {
+	
+		sync	:function(entry){
+			try{
+				data=Json.decode(storage.getItem(item));
+				if(data.constructor!=Object)data=null;
+			}catch(e){};
+			
+			if(entry)(data||(data={}))[entry[key]]=entry;
+			
+			if(!data)return;
+
+			try{storage.setItem(item,Json.encode(data));}catch(e){};
+			
+			var arr=[];
+			for(var i in data)arr.push(data[i]);
+			return sort?arr.sort(sort):arr;
+		},
+		
+		find	:function(entry){return data&&data[entry[key]]},
+		
+		clear	:function(){storage.setItem(item,null); return null;}
+	}
+};
+
+
 'rockauto'
 .a("state ( $make $year $model $carcode $engine $parttype )uri")
-.d("$make=. $year=. $model=. $carcode=. $engine=. $parttype=. $parttypename=.; $carname=( .year .make .model .engine )space $cart=:cart.sync $cars=:cars.sync" //
+.d("$make=. $year=. $model=. $carcode=. $engine=. $parttype=. $parttypename=.; $carname=( .year .make .model .engine )spaced $cart=:cart.sync $cars=:cars.sync" //
 	,'caption'.d("! `Rockauto.com")
 	,'cart'.d("? $cart"
 		,'action.clear'.d("! dict.cart.clear").ui("? (dict.cart.confirmclear)confirm; $cart=:cart.clear")
@@ -9,9 +39,9 @@
 				,'TR.cartitem'.d("?! .qty@0"
 					,'TD'.d(""
 						,'carname'.d("? (.carcode ..carcode)ne; ! .carname; ..carcode=.carcode").ui("$carname=. $carcode=.")
-						,'partname'.d("! (.parttypename `/ .side `/ .note)space")//; !! @title
+						,'partname'.d("! (.parttypename `/ .side `/ .note)spaced")//; !! @title
 					)
-					,'TD'.d("! (.catalogname .partnumber)space")
+					,'TD'.d("! (.catalogname .partnumber)spaced")
 					,'TD.num'.d("! .price")
 					,'TD.num.qty'.d("! Qty")
 				)
@@ -144,8 +174,8 @@
 		time	:dummy	=>Date.now(),
 		tidy	:html	=>replaceMulti(html,htmljunk),
 		price	:num	=>cents(num),//   {return Math.round(parseFloat(value.substr(1))*1.5)-.01},
-		cars	:dap.Env.Storage.shared("cars","carcode"),
-		cart	:dap.Env.Storage.shared("cart","partkey",(a,b)=>(a.carcode-b.carcode||a.parttype-b.parttype||a.price-b.price||a.partkey-b.partkey)),
+		cars	:Shared("cars","carcode"),
+		cart	:Shared("cart","partkey",(a,b)=>(a.carcode-b.carcode||a.parttype-b.parttype||a.price-b.price||a.partkey-b.partkey)),
 		totals	:cart	=>{
 				if(!cart)return;
 				var pos=0, qty=0, amt=0, a,q,p;
