@@ -1,0 +1,135 @@
+﻿.MUTE		{display:none !important}
+
+.ui		{cursor:pointer; }
+.over		{color:steelblue; }
+.chosen		{text-decoration:underline; }
+.clip		{overflow:hidden; }
+
+.num		{text-align:right; }
+
+.button		{
+		border: 1px solid steelblue;
+		background:white;
+		margin-left:1em; 
+}
+
+.price, .action, .button
+		{display:inline-block; padding:8px; border-radius:4px; vertical-align:baseline; }
+
+body		{font:normal 10pt sans-serif; background:#ddd; }
+
+
+		
+table		{width:100%}
+
+label		{display:inline-block; margin:.5em 0; }
+label>select	{display:block; width:100%; font:normal 1.2em sans-serif; }
+
+.main		{background-color:white; width:80em; margin:1em auto; padding:1em; border:1px solid #bbb; position:relative; border-radius:8px; }
+
+h1.caption	{position:sticky; top:0; z-index:2; padding: 1em; font: bold 13pt serif;}
+
+.setcar		{display: flex; margin: 4em 1.5em; }
+
+.mycars		{flex:auto;}
+
+.findcar	{background: steelblue; width:24em; height:fit-content; padding:1em; border-radius:4px; }
+.findcar>label	{width:100%; color:white; }
+
+.year-make	{display:flex; color:white; }
+.year		{width:6em}
+.make		{flex:auto}
+
+.carname	{color:steelblue; }
+.carname.ui:hover{text-decoration:underline; }
+
+.addtomycars	{font:normal .4em sans-serif; vertical-align: text-bottom; }
+
+.addtomycars:hover{text-decoration: underline;}
+
+
+.cart, .orderbar{border:2px solid steelblue; background:floralwhite; padding:1em}
+
+.cart		{padding-bottom:4em; border-radius: 8px 8px 0 0; border-bottom:none; position:relative; z-index:3}
+.cart>.clear	{float:right; display:inline-block}
+
+.orderbar	{
+		position: sticky;
+		top: 0;
+		z-index:1;
+		border-radius: 0 0 8px 8px;
+		border-top:none;
+		margin-bottom: 2em;
+		text-align: right;
+}
+.orderbar>.totals	{display:inline-block; font:bold 1em sans-serif; }
+
+
+
+
+.part		{margin-top:1em; }
+
+li>.title	{font-size:1.25em}
+.selected.title	{font-weight:bold;}
+
+li.selected	{padding:.5em; box-shadow: 0 4px 6px rgba(0,0,0,.1); margin:.5em 0; border:2px solid lightgray; border-radius:4px; }
+li.selected>.title{font-weight:bold;}
+
+.tip		{margin:1em; border-bottom: 2px solid steelblue; }
+.tip h2		{font:bold 2em sans-serif; }
+.tip p		{font:italic .8em sans-serif; color:gray; }
+
+.offers		{padding:2em;}
+.offers>.info	{font-style:italic; color:steelblue; margin-bottom: 2em;}
+
+.offer		{padding:1em; margin:1em 0; color:#666; border-top:1px dashed lightgray; position:relative; }
+
+.catpn		{font:bold 1.4em sans-serif}
+.desc		{white-space:pre-wrap; margin:1em 0; }
+.price		{font:bold 1em sans-serif; }
+
+.offer .price	{display:inline-block; padding:8px; color:white; background:slategray; }
+.offer.over .price	{background:steelblue; color:white; }
+
+.actions	{display:inline-block; }
+.actions .ui	{text-decoration:underline; } /* {} */
+.actions .over	{background:steelblue; color:white; }
+
+.qty input	{width:3em; text-align:right; margin:0 .4em; }
+
+
+img.thumb	{max-height:140px;  position:absolute; right:0; }
+/*img.popup	{position:absolute; top:0; right:0; border:4px solid steelblue;}*/
+img.popup	{clip-path: inset(0 0 4% 0); max-width:100%;}
+
+.intro		{padding:4em 1em 4em 24em; }
+.hint		{position:absolute; margin:1em; width:120px; padding:1em; background:#ff8; border:1px solid #d80; border-radius:4px; }
+
+.cartitem>td	{vertical-align:bottom; border-bottom: 1px dotted lightsteelblue; }
+td>.carname	{margin:1.5em 0 .75em 0; font: bold 1.1em sans-serif; }
+
+
+.setcar>div:before	{
+	font: bold 1.2em sans-serif;
+	display: block;
+	margin-bottom: 1em;
+}
+
+.findcar>label:before{
+	font:normal 1em sans-serif;
+	color:white;
+	margin:0;
+}
+
+
+h1.caption:before	{content:"Rockauto.com"}
+
+.findcar:before		{content:"Car finder"; color:white; }
+
+label.year:before	{content:"Year"}
+label.make:before	{content:"Make"}
+label.model:before	{content:"Model"}
+label.engine:before	{content:"Engine"}
+
+.mycars:before		{content:"My cars"; color:steelblue; }
+.addtomycars:before	{content:"Add to My Cars"; }
