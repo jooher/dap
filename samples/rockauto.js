@@ -119,7 +119,7 @@ const	Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 	,'intro'.d("?:! ($carcode $parttype)!; ! dict.intro")
 )
 .DICT({
-	base	:"//dapmx.org/apps/rockauto/transfer.php?", //
+	base	:"//dapmx.org/stuff/rockauto.php?", //
 	pics	:"http://rockauto.com/",
 	makes	: {
 			label	:"Car make",
