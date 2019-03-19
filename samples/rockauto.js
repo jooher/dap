@@ -1,7 +1,7 @@
 'rockauto'
 .a("state ( $make $year $model $carcode $engine $parttype )uri")
 .d("$make=. $year=. $model=. $carcode=. $engine=. $parttype=. $parttypename=.; $carname=( .year .make .model .engine )space $cart=:cart.sync $cars=:cars.sync" //
-	,'H1.caption'
+	,'caption'.d("! `Rockauto.com")
 	,'cart'.d("? $cart"
 		,'action.clear'.d("! dict.cart.clear").ui("? (dict.cart.confirmclear)confirm; $cart=:cart.clear")
 		,'TABLE'.d(""
@@ -88,7 +88,7 @@
 	)
 	,'intro'.d("?:! ($carcode $parttype)!; ! dict.intro")
 )
-.DATA({
+.DICT({
 	base	:"/apps/rockauto/transfer.php?", //
 	pics	:"http://rockauto.com/",
 	makes	: {
@@ -97,7 +97,7 @@
 			//"/samples/carmakes.json",
 		},
 	years	: {
-			label	:"",
+			label	:"Production year",
 			options	:Array.from({length:20},(v,i)=>2019-i)
 		},
 	dict	:{
@@ -118,25 +118,25 @@
 		hint	: "Select a car, please",
 		please	: "Please select",
 		make	: "Car make",
-		year	: "Production year",
+		year	: "",
 		model	: "Model name",
 		engine	: "Engine",
 		carcode	: "Car code: "
 	},
 */		
 		
-	Empty	:'OPTION selected disabled'.d("!! @selected`selected @value; ! dict.select"),
-	Option	:'OPTION'.d("! (.label .value)?; !! .value ((.value .selected)eq `selected)!@selected"),
+	//Empty	:'OPTION selected disabled'.d("!! @selected`selected @value; ! dict.select"),
+	//Option	:'OPTION'.d("! (.label .value)?; !! .value"),
 	//State	:'service'.d("( $carcode $make $year $model $engine $type $ptype )urlstate"),
 	Qty	:'qty'.d(""
 			,'INPUT.qty type=number'.d("#.value=.qty").ui(".qty=#:value")
 			,'drop'.ui(".qty=`0")
-		).u("$cart=$:cart.sync")
+		).u("$cart=$:cart.sync"),
 		
 		
-	Options	: dap.rule("Hint(.label); * .options@value; Option( .value $year@selected )"),
-	Hint	: 'OPTION selected disabled'.d("! .label")
-	Option	: 'OPTION'.d("!! (.label .value)? .value")
+	Options	: 'OPTGROUP'.d("Hint(.label); * .options@value; Option( .value $year@selected )"),
+	Hint	: 'OPTION selected disabled'.d("! .label"),
+	Option	: 'OPTION'.d("!! (.label .value)? .value ((.value .selected)eq `selected)!@selected")
 
 })
 .FUNC({
@@ -156,4 +156,4 @@
 			}
 	}
 })
-)
+.RENDER();
