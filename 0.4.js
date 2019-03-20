@@ -52,7 +52,7 @@ const	dap=(Env=>
 		concat	:(values)=>values.reverse().join(""),
 		spaced	:(values)=>values.reverse().join(" ").replace(/\s\s+/g," ").trim(),
 		
-		"case"	: (values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; },
+		"case"	:(values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; }
 	},
 	
 	operate	:{
@@ -1401,13 +1401,14 @@ const	dap=(Env=>
 				if(!historian)return;
 				if(decodeURI(href)!=decodeURI(href=window.location.href)){
 					const	proto=historian.P,
-						instead=historian;
+						instead=historian,
+						data=fromUri();
 					historian=null;
-					Env.inline(proto,instead);
+					Env.render(proto,data,null,instead);
 				}
 			};
 			
-			window.addEventListener("hashchange", refresh, false);
+			//window.addEventListener("hashchange", refresh, false);
 			
 		function toHashbang(value,tag,node){
 			if(!historian)historian=node;
