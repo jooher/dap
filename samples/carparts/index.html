@@ -86,7 +86,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 				,'SELECT.make'.ui("$make=#:value").d("Options( make.label make.options $make@selected)")
 			).u("$carcode= $carname= $model=")
 
-			,'SELECT.model'.ui("$model=#:value $carcode= $carname=")
+			,'SELECT.model'.ui("$model=#:value $carcode= $carname= $engine=")
 			.d("? ($year $make)!; ? .models:??=( base@ $make $year )uri:query (error.no-models)alert; "
 			  +"Options( model@label .models@options $model@selected)")
 			
