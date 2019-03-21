@@ -175,7 +175,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 		
 		
 	Hint	: 'OPTION selected disabled'.d("! .label"),
-	Options	: 'OPTGROUP'.d("{? .selected:!; ! Hint}; { * .options@value; Option( .value ..selected ) }; { ? (.options:?? `1)eq; u! @change }"),//(.selected:!)!
+	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; { * .options@value; Option( .value ..selected ) }; { ? (.options:?? `1)eq; u! @change }"),//(.selected:!)!
 	Option	: 'OPTION'.d("!! (.label .value)? .value (.value .selected)eq@selected")
 
 })
