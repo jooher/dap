@@ -1524,7 +1524,7 @@ const	dap=(Env=>
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 			},
 			
-		delay	:f=>setTimeout(f,0),
+		delay	:f=>setTimeout(f,20),
 			
 		Func	:{
 			

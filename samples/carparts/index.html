@@ -198,7 +198,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 		comma	:str => str?str.split(","):null
 	},
 	flatten	:{
-		"find"	:(values,tags)=>{
+		find	:(values,tags)=>{
 				var rows=values.pop();
 				for(var i=values.length; i--; ){
 					var key=tags[i],match=values[i];
