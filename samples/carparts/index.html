@@ -175,7 +175,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 		
 		
 	Hint	: 'OPTION selected disabled'.d("! .label"),
-	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; { * .options@value; Option( .value ..selected ) }; { ? (.options:?? `1)eq; u! @change }"),//(.selected:!)!
+	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; { * .options@value; Option( .value ..selected ) }; { ? (.options:?? `1)eq; u? @change }"),
 	Option	: 'OPTION'.d("!! (.label .value)? .value (.value .selected)eq@selected")
 
 })
@@ -183,7 +183,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 	convert	:{
 		time	:dummy	=>Date.now(),
 		tidy	:html	=>replaceMulti(html,htmljunk),
-		price	:num	=>num.substr(1), // cents(num),//   {return Math.round(parseFloat(value)*1.5)-.01},
+		price	:num	=>cents(num.substr(1)),
 		engines	:array	=>array.map(m=>m.engine),
 		cars	:Shared("cars","carcode"),
 		cart	:Shared("cart","partkey",(a,b)=>(a.carcode-b.carcode||a.parttype-b.parttype||a.price-b.price||a.partkey-b.partkey)),
