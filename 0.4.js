@@ -75,8 +75,8 @@ const	dap=(Env=>
 		"d!"	:(value,alias,node)=>	{ Execute.update(value||node); },
 		"a!"	:(value,alias,node)=> 	{ Execute.a(value||node); },
 		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
-		"a?"	:(value,alias,node)=>	{ Execute.After.put(Execute.a,value||node); },
-		"u?"	:(value,alias,node)=>	{ Execute.After.put(Execute.u,value||node); },//{ Execute.u(value||node); }, //
+		"a"	:(value,alias,node)=>	{ Execute.After.put(Execute.a,value||node); },
+		"u"	:(value,alias,node)=>	{ Env.delay(()=>Execute.u(value||node,alias)) }, //{ Execute.After.put(Execute.u,); },//{ Execute.u(value||node); }, //
 		
 		"*"	:(value,alias)=>	value && (alias?value.map(v=>Box(v,alias)):value), //!value ? false : !alias ? value : Dataset.mapGrid( alias.split(","), value ),
 		"?"	:(value,alias)=>	!!value,
@@ -1523,6 +1523,8 @@ const	dap=(Env=>
 				const	ready = proto.spawn([{'':data||State.read()}],place)||newStub("dap");
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 			},
+			
+		delay	:f=>setTimeout(f,0),
 			
 		Func	:{
 			
