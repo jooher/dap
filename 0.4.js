@@ -52,7 +52,7 @@ const	dap=(Env=>
 		concat	:(values)=>values.reverse().join(""),
 		spaced	:(values)=>values.reverse().join(" ").replace(/\s\s+/g," ").trim(),
 		
-		"case"	:(values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; }
+		"case"	: (values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; },
 	},
 	
 	operate	:{
@@ -1165,20 +1165,24 @@ const	dap=(Env=>
 		
 		const
 		
-		regx =/(?:^|&)([^&=]*)=?([^&]*)/g,
+		regx =/(?:&|^)([^&=]+)=([^&]*)/g,
 		encode = encodeURIComponent,
-		decode = decodeURIComponent,
+		decode = c=>decodeURIComponent(c.replace(/\+/g,' ')),
 		
 		parse	={
 			
 			pairs	:function(str,tgt){
 				if(!tgt)tgt=[];
-				str&&str.replace(regx,($0,$1,$2)=>{tgt.push({name:$1,value:decode($2)})});
+				str&&str.replace(regx,($0,$1,$2)=>{
+					tgt.push({name:$1,value:decode($2)})
+				});
 				return tgt;
 			},
 			hash	:function(str,tgt){
 				if(!tgt)tgt={};
-				str&&str.replace(regx,($0,$1,$2)=>{if($1)tgt[$1]=decode($2)});
+				str&&str.replace(regx,($0,$1,$2)=>{
+					if($1)tgt[$1]=decode($2)
+				});
 				return tgt;
 			},
 			feed	:function(str,tgt){
@@ -1443,6 +1447,8 @@ const	dap=(Env=>
 			
 			const	place=instead.parentNode,
 				time=instead.getAttribute("fade");
+				
+			if(!place)return;
 				
 			place.insertBefore(elem,instead);
 			if(time){
