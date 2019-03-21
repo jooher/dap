@@ -17,6 +17,8 @@
 
 <script src="https://dap.js.org/0.4.js">
 
+</script><script>
+
 const	
 cents	= num => Math.round(num*100)/100,
 
@@ -175,7 +177,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 		
 		
 	Hint	: 'OPTION selected disabled'.d("! .label"),
-	Options	: 'OPTGROUP'.d(".choice=.options:??,--; ! (.choice:+? .selected:! Hint)!; { * .options@value; Option( .value ..selected ) }; {? .choice:0?; u @change}"),
+	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; * .options@value; Option( .value ..selected )"), //; {? .choice=.options:??,--; .choice:+? .choice:0?; u @change}
 	Option	: 'OPTION'.d("!! (.label .value)? .value (.value .selected)eq@selected")
 
 })
@@ -209,7 +211,10 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 			}
 	},
 	operate	:{
-		home	:value => {window.scroll({top:0, behavior:"smooth"})}
+		home	:value => {window.scroll({top:0, behavior:"smooth"})},
+		choice	:(options,alias,optgroup)=>{
+			if(options.length==1)
+				alert("Only choice: "+options[0]);}
 	}
 })
 .RENDER();
