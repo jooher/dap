@@ -28,12 +28,13 @@ table		{width:100%}
 
 .mycars,.findcar {margin:2em 0}
 
-.mycars>.carname{display:inline-block; padding:.25em .5em; margin:4px; border:1px solid; border-radius:4px; background:aliceblue; }
-
-.findcar>select, .year-make>select, .year-make {display:inline-block;margin:2px;padding: .25em;}
-
 .carname	{color:steelblue; }
 .carname.ui:hover{text-decoration:underline; }
+
+.mycars>.carname{display:inline-block; padding:.25em .5em; margin:2px 4px 2px 0; border:1px solid; border-radius:4px; background:aliceblue; }
+
+.year-make	{display:inline-block}
+.findcar>select, .year-make>select  {display:inline-block;margin-right:2px;padding:.25em;}
 
 .addtomycars	{font:normal .4em sans-serif; vertical-align: text-bottom; }
 
@@ -54,7 +55,7 @@ table		{width:100%}
 		margin-bottom: 2em;
 		text-align: right;
 }
-.orderbar>.totals	{display:inline-block; font:bold 1em sans-serif; }
+.orderbar>.totals	{display:inline-block; font-weight:bold; }
 
 
 
