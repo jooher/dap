@@ -1573,3 +1573,7 @@ const	dap=(Env=>
 );
 
 dap.Infect(String.prototype);
+
+(inline=>{
+	if(inline)eval(inline)
+})(document.currentScript.text);
