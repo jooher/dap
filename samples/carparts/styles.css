@@ -42,7 +42,7 @@ table		{width:100%}
 
 .cart, .orderbar{border:2px solid steelblue; background:floralwhite; padding:1em}
 
-.cart		{padding-bottom:4em;border-radius: 0 8px 0 0;border-bottom:none;position:relative;z-index:3;}
+.cart		{padding-bottom:4em;border-bottom:none;position:relative;z-index:3;}
 .cart>.clear	{float:right; display:inline-block}
 
 .orderbar	{
