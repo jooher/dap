@@ -982,7 +982,7 @@ const	dap=(Env=>
 						repaint	= false,
 						sift	= null;
 					
-					for(let i in dn){//if(i in $0)
+					for(let i in dn){
 						if(!defs||!defs[i])(sift||(sift={}))[i]=$0[i]=dn[i];
 						if(uses&&uses[i])rebuild=true;
 						if(affs&&affs[i])repaint=true;
