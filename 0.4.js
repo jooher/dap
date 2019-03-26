@@ -982,20 +982,18 @@ const	dap=(Env=>
 						repaint	= false,
 						sift	= null;
 					
-					for(let i in dn)
-						if($0[i]!=null){
-							if(!defs||!defs[i])(sift||(sift={}))[i]=$0[i]=dn[i];
-							if(uses&&uses[i])rebuild=true;
-							if(affs&&affs[i])repaint=true;
-						}
+					for(let i in dn){//if(i in $0)
+						if(!defs||!defs[i])(sift||(sift={}))[i]=$0[i]=dn[i];
+						if(uses&&uses[i])rebuild=true;
+						if(affs&&affs[i])repaint=true;
+					}
 					
 					if(rebuild)
 						Rebuild(node);
 					
 					else	{
 						if(sift)
-							for(let nodes=node.childNodes,i=nodes.length,n;i--;)
-								if((n=nodes[i])!=snitch && n.P )this.checkDown(n,sift);
+							[...node.children].forEach(n=>n!=snitch&&n.P&&this.checkDown(n,sift));
 						if(repaint)
 							Append(node,$,a.todo);
 						
@@ -1065,8 +1063,7 @@ const	dap=(Env=>
 			
 		Async	:(promise,info,handle) => {
 				const a=new Execute.Postpone(info,handle);
-				promise	.then(result=>a.resolve(result));
-					//.catch(e=>Env.console.warn(e));
+				promise.then(result=>a.resolve(result));
 				return a;
 			},
 		

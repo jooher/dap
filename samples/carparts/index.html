@@ -22,35 +22,103 @@
 const	
 cents	= num => Math.round(num*100)/100,
 
-Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
-	var	data	= null,
-		storage	= localStorage,
-		Json	= dap.Env.Json;
+datarow = el=>{
+	r=Object.assign({},el.$[0]['']);
+	delete r[""];
+	return r;
+},
+
+Shared	=(item,key,sort)=>{ // //keeps the data coherent among several tabs
+
+	const	storage	= localStorage,
+		Json	= dap.Env.Json,
+		
+		take	= ()=> data=Json.decode(storage.getItem(item)):[],
+		
+		save	= d=>{
+				try{storage.setItem(item,Json.encode(d));}
+				catch(e){console.warn("can't save: "+e.message)}
+				return data=d;
+			}
+		
+	let	data	= null;
 		
 	return {
-	
-		sync	:function(entry){
-			try{
-				const v=storage.getItem(item);
-				data=v?Json.decode(v):null;
-			}catch(e){};
-			
+		anew	:newdata=>save(newdata)&&data,
+		find	:entry=>data&&data[entry[key]],
+		sync	:entry=>{
+		
 			if(entry)(data||(data={}))[entry[key]]=entry;
 			
 			if(!data)return;
-
-			try{storage.setItem(item,Json.encode(data));}catch(e){};
 			
-			var arr=[];
-			for(var i in data)arr.push(data[i]);
-			return sort?arr.sort(sort):arr;
-		},
-		
-		find	:function(entry){return data&&data[entry[key]]},
-		
-		clear	:function(){storage.setItem(item,null); return null;}
+			save(data);
+			
+			if(sort){
+				var arr=[];
+				for(var i in data)arr.push(data[i]);
+				return arr.sort(sort):arr;
+			}
+		}
 	}
-};
+},
+
+Drag =(()=>{
+
+	let
+	dragged	= null;
+
+
+	const
+	
+	listen	= (el,ev,h)=>el.addEventListener(ev,h),
+	
+	types	={
+	
+		reorder	:{
+		
+			dragstart: e=>{
+				dragged = e.target;
+				dragged.style.opacity=.5;
+			},
+		
+			dragenter: e=>{
+				const entered=e.target;
+				if(entered.parentNode!=dragged.parentNode)
+					return;
+				if(dragged!=entered)
+					entered.parentNode.insertBefore(dragged,entered);
+				e.stopPropagation();
+			},
+			
+			dragover: e=>{
+				if(dragged.parentNode == e.target.parentNode)
+					e.preventDefault();
+			},
+			
+			dragend: e=>{
+				dragged.style.opacity=1;
+				dap.Execute.u(dragged.parentNode,'reorder');
+			}
+		}
+	
+	};
+	
+	
+	return	(value,alias,node)=>{
+		const	evs=types[alias];
+		node.draggable=true;
+		if(evs){
+			for(let e in evs)
+				listen(node,e,evs[e]);
+		}
+		else
+			console.error("unknown drag type: "+alias);
+	}
+
+})()
+
+;
 
 
 
@@ -59,7 +127,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 .d("$make=. $year=. $model=. $carcode=. $engine=. $parttype=. $parttypename=.; $carname=( .year .make .model .engine )spaced $cart=:cart.sync $cars=:cars.sync"
 	,'caption'.d("! caption").ui("home")
 	,'cart'.d("? $cart"
-		,'action.clear'.d("! dict.cart.clear").ui("? (dict.cart.confirmclear)confirm; $cart=:cart.clear")
+		,'action.clear'.d("! dict.cart.clear").ui("? (dict.cart.confirmclear)confirm; $cart=:cart.anew")
 		,'TABLE'.d(""
 			,'TBODY'.d(".carcode=; *@ $cart"
 				,'TR.cartitem'.d("?! .qty@0"
@@ -80,8 +148,10 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 	)
 	,'setcar'.d(""
 		,'mycars'.d("! dict.mycars; *@ $cars"
-			,'carname'.d("! .carname").ui("$carname=. $carcode=. $year=. $make=. $model=. $engine=.")
-		)
+			,'carname'
+			.d("! .carname; drag@reorder")
+			.ui("$carname=. $carcode=. $year=. $make=. $model=. $engine=.")
+		).e("reorder","$cars=#:dataset,cars.anew")
 		,'findcar'.d(""
 			,'year-make'.d(""			
 				,'SELECT.year'.ui("$year=#:value").d("Options( year.label year.options $year@selected)")
@@ -177,7 +247,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 		
 		
 	Hint	: 'OPTION selected disabled'.d("! .label"),
-	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; * .options@value; Option( .value ..selected )"), //; {? .choice=.options:??,--; .choice:+? .choice:0?; u @change}
+	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; * .options@value; Option( .value ..selected )"), 
 	Option	: 'OPTION'.d("!! (.label .value)? .value (.value .selected)eq@selected")
 
 })
@@ -197,7 +267,13 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 						pos++, qty+=q, amt+=q*p;
 				return {pos:pos,qty:qty,amt:cents(amt)};
 			},
-		comma	:str => str?str.split(","):null
+		comma	:str => str?str.split(","):null,
+		dataset	:elem=> {
+			const	ch=[...elem.children],
+				rows = ch.map(datarow);
+			return rows;
+		}
+		
 	},
 	flatten	:{
 		find	:(values,tags)=>{
@@ -212,12 +288,12 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 	},
 	operate	:{
 		home	:value => {window.scroll({top:0, behavior:"smooth"})},
-		choice	:(options,alias,optgroup)=>{
-			if(options.length==1)
-				alert("Only choice: "+options[0]);}
+		drag	:Drag
 	}
 })
 .RENDER();
+
+
 
 </script>
 </body>
