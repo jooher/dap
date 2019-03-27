@@ -74,7 +74,7 @@ const	dap=(Env=>
 		
 		"d!"	:(value,alias,node)=>	{ Execute.update(value||node); },
 		"a!"	:(value,alias,node)=> 	{ Execute.a(value||node); },
-		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
+		"u!"	:(value,alias,node)=>	{ Execute.u(value||node,alias); },
 		"a?"	:(value,alias,node)=>	{ Execute.After.put(Execute.a,value||node); },
 		"u?"	:(value,alias,node)=>	{ Execute.After.put(Execute.u,value||node); },//{ Execute.u(value||node); }, //
 		
