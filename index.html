@@ -12,10 +12,18 @@
 		<img src="logo/dap-logo.png"/><br/><a href="https://github.com/jooher/dap">https://github.com/jooher/dap</a>
 		<h1>Dap.js: for data-driven web applications</h1>
 		<p>Lightweight and powerful javascript framework for interactive data-driven web applications.</p>
-		<p>Unlike some other frameworks relying on Javascript expressive means, dap offers a higher level of abstraction — a declarative "superscript" for reactivity rules. These rules are dense, compact, and human-readable at the same time. Dap code is parsed, compiled and executed by a small (less than 9kiB gzipped) runtime script, and does not require code transpilation.</p>
+		<p>Unlike some other frameworks relying on Javascript expressive means, dap offers a higher level of abstraction — a declarative "superscript" language for <i>reactivity rules</i>. These rules are dense, compact, and human-readable at the same time. Dap code is parsed, compiled and executed by a small (less than 9kiB gzipped) client-side script, and does not require any transpilation.</p>
 	</header>
-	<pre class="dap">'DIV'.d("! `Hello,world!")</pre>
-
+	<pre class="dap">
+	'DIV.hello'.d("! greeting")
+	.DICT({
+		greeting:"Hello, world!"
+	})
+	</pre>
+	<p>... where <code>'DIV.hello'</code> designates an HTML element rendered as <code>&lt;DIV class="hello"&gt;</code> and <code>.d()</code> method specifies the generation rule for its content. The generation rule, literally "<i>print greeting</i>", consists of <code>!</code> — the "print" operator  — and a <code>greeting</code> constant, which is defined in the <code>.DICT</code> (dictionary) section.</p>
+	<p class="why">Why not simply write <code>&lt;DIV class="hello"&gt;Hello, world!&lt;/DIV&gt;</code>, you may ask? Well, if you're writing not a static document, but an application (otherwise, you don't need dap), it is a common rule of thumb to avoid "hard-coded" strings or numbers in your programs. Instead, use constants and define them in a "dictionary". This way, your code will be cleaner and maintainance of your program easier. Not even to mention localization, when you need to translate all texts in your program to another language. And of course, dap rules can do much more than just printing constants!</p>
+<!--
+-->
 
 	<a name="why-dap"></a>
 
@@ -57,7 +65,7 @@
 <pre class="dap">
 'favorite-fruit'.d("$choice=" // a &lt;DIV class="favorite-fruit"&gt; element, with $choice status variable defined in its scope 
 	,'B.selected'.d("! title ($choice not-yet)?") // a &lt;B class="selected"&gt; with textual content involving $choice value
-	,'UL.options'.d("* fruit" // this UL element repeats its content for each row in the fruit dataset
+	,'UL.options'.d("* fruit" // The * operator repeats the rule for each row in the fruit dataset
 		,'LI'	.d("! .fruit") // each LI element shows fruit value from its associated data row, and
 			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
@@ -73,12 +81,12 @@
 </pre>
 <p>Dap code may seem a little bit unusual, but it is a pure Javascript, with slightly uncommon formatting to better reflex dap program structure. All you need to run dap in an .html document is a <code>&lt;script src="https://dap.js.org/0.4.js"&gt;&lt;/script&gt;</code> somewhere before actual dap code (usually, in the <code>head</code> section).<!--You are also welcome to play with the code right here, the code examples are editable.--></p>
 <p>From this example you can see DOM-element templates being denoted by single quoted strings (in a slightly shorter notation than used in HTML). Single quotes are just a matter of style, they help to tell templates from other strings and facilitate code highlighting.</p>
-Templates are rendered into actual DOM elements, from parent node <em>down</em> to child elements, according to their d-rules ("down"-phase rules) specified by <code>.d()</code> method. Some templates have u-rules for "up"-phase, when events bubble <em>up</em> through the node towards the root. In the example above, the <code>LI</code> element is given its u-rule by means of <code>.ui()</code> method, which also binds a default UI event (usually, click) listener.</p>
+Templates are rendered into actual DOM elements, from parent <em>down</em> to child elements, according to their d-rules ("down"-phase rules) specified by <code>.d()</code> method. Some templates have u-rules for "up"-phase, when events bubble <em>up</em> through the node towards the root. In the example above, the <code>LI</code> element is given its u-rule by means of <code>.ui()</code> method, which also binds a default UI event (usually, click) listener.</p>
 <p>Rules in the example are very simple. You can see the three most common dap operators here:</p>
 <ul>
-	<li><code>!</code> - "print" operator, that simply prints its arguments into resulting node</li>
+	<li><code>!</code> - "print" operator, that simply prints its arguments into resulting element</li>
 	<li><code>*</code> - "multiple", or "for each", repeats the rest of the rule for each row in a dataset</li>
-	<li><code>?</code> - "if" gate, that allows further rule execution only if its argument is truish</li>
+	<li><code>?</code> - "if" gate, that allows further rule execution only if its argument is truthy</li>
 </ul>
 <p>And you can see arguments of several kinds in the rules above:</p>
 <ul>
@@ -110,10 +118,10 @@ Templates are rendered into actual DOM elements, from parent node <em>down</em> 
 <!--
 <script src="https://cdn.jsdelivr.net/gh/jooher/dap/0.4.min.js"></script>
 -->
-<script src="/stuff/dapify.js"></script>
+<script src="stuff/dapify.js"></script>
 
-<link href="/stuff/talks.css" rel="stylesheet" type="text/css"/>	
-<script src="/stuff/talks.js#msg=7"></script>
+<link href="stuff/talks.css" rel="stylesheet" type="text/css"/>	
+<script src="stuff/talks.js#msg=7"></script>
 
 </html>
 

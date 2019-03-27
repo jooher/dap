@@ -1,0 +1,132 @@
+.EMPTY		{display:none !important}
+
+.ui		{cursor:pointer; }
+.over		{color:steelblue; }
+.chosen		{text-decoration:underline; }
+.clip		{overflow:hidden; }
+
+.num		{text-align:right; }
+
+.button		{
+		border: 1px solid steelblue;
+		background:white;
+		margin-left:1em; 
+}
+
+.price, .action, .button
+		{display:inline-block; padding:8px; border-radius:4px; vertical-align:baseline; }
+
+body		{font-family:sans-serif; background:#eee; }
+
+
+		
+table		{width:100%}
+
+.rockauto	{background-color:white; max-width:80em; margin:1em auto; padding:1em; border:1px solid #bbb; position:relative; border-radius:8px; }
+
+.caption	{position:sticky;top:0;z-index:2;display: inline-block;padding: 0.2em .5em;color: white;font: bold 1.5em sans-serif;text-shadow: 0 2px 4px darkslategrey;background: steelblue;}
+
+.mycars,.findcar {margin:2em 0}
+
+.carname	{color:steelblue; }
+.carname.ui:hover{text-decoration:underline; }
+
+.mycars>.carname{display:inline-block; padding:.25em .5em; margin:2px 4px 2px 0; border:1px solid; border-radius:4px; background:aliceblue; }
+
+.year-make	{display:inline-block}
+.findcar>select, .year-make>select  {display:inline-block;margin-right:2px;padding:.25em;}
+
+.addtomycars	{font:normal .4em sans-serif; vertical-align: text-bottom; }
+
+.addtomycars:hover{text-decoration: underline;}
+
+
+.cart, .orderbar{border:2px solid steelblue; background:floralwhite; padding:1em}
+
+.cart		{padding-bottom:4em;border-bottom:none;position:relative;z-index:3;}
+.cart>.clear	{float:right; display:inline-block}
+
+.orderbar	{
+		position: sticky;
+		top: 0;
+		z-index:1;
+		border-radius: 0 0 8px 8px;
+		border-top:none;
+		margin-bottom: 2em;
+		text-align: right;
+}
+.orderbar>.totals	{display:inline-block; font-weight:bold; }
+
+
+
+
+.part		{margin-top:1em; color:steelblue; }
+
+.selected.title	{font-weight:bold;}
+
+/*
+li.selected	{padding:.5em; box-shadow: 0 4px 6px rgba(0,0,0,.1); margin:.5em 0; border:2px solid lightgray; border-radius:4px; }
+*/
+li		{line-height:1.25}
+li:hover>.title	{text-decoration:underline}
+li.selected>.title{font: bold 1.2em/2 sans-serif; text-decoration:underline}
+
+.tip		{margin:1em; border-bottom: 2px solid steelblue; }
+.tip h2		{font:bold 2em sans-serif; }
+.tip p		{font:italic .8em sans-serif; color:gray; }
+
+/*
+.offers		{padding:2em;}
+.offers>.info	{font-style:italic; color:steelblue; margin-bottom: 2em;}
+*/
+
+.offer		{padding:1em 0; margin-bottom:2em; color:#666; border-bottom:1px dashed lightgray; position:relative; }
+
+.parttitle	{font: bold 1.1em sans-serif;margin:.5em 0;}
+.side		{font:italic .9em sans-serif; display:inline; margin:1em; }
+
+.moreinfo>a	{display:block; text-align:right; color:gray; }
+.desc		{white-space:pre-wrap; margin:1em 0; }
+.price		{font:bold 1em sans-serif; }
+
+.alter		{font-size:.8em; color:gray; margin:1em 0}
+.ptno		{display:inline-block; padding:.2em; border:1px solid lightgray; margin: 1px; background:whitesmoke; }
+.ptno:hover	{color:black}
+
+.offer .price	{display:inline-block;padding:8px;color:white;background: green;}
+.offer.over .price	{background:steelblue; color:white; }
+
+.addtocart:hover{text-decoration:underline;}
+
+.actions	{display:inline-block; }
+.actions .ui	{text-decoration:underline; } /* {} */
+.actions .over	{background:steelblue; color:white; }
+
+.incart>.qty	{display:inline-block}
+
+.qty input	{width:3em; text-align:right; margin:0 .4em; }
+
+
+img.thumb	{max-height:140px;  position:absolute; right:0; }
+/*img.popup	{position:absolute; top:0; right:0; border:4px solid steelblue;}*/
+img.popup	{clip-path: inset(0 0 4% 0); max-width:100%;}
+
+.intro		{padding:4em 1em 4em 24em; }
+.hint		{position:absolute; margin:1em; width:120px; padding:1em; background:#ff8; border:1px solid #d80; border-radius:4px; }
+
+.cartitem>td	{vertical-align:bottom; border-bottom: 1px dotted lightsteelblue; }
+td>.carname	{margin:1.5em 0 .75em 0; font: bold 1.1em sans-serif; }
+
+
+.mycars:before, .findcar:before	{font-weight: bold;display: inline-block;width: 6em;padding: .25em 0;border-bottom: 1px solid steelblue;}
+
+
+
+h1.caption:before	{content:"Rockauto.com"}
+
+.price:before		{content:"$ "}
+
+.findcar:before		{content:"Car finder"}
+.mycars:before		{content: "My cars";}
+.addtomycars:before	{content:"Add to My Cars"; }
+
