@@ -1,4 +1,5 @@
 body{background:whitesmoke;}
+.EMPTY{display:none}
 
 .toh{background:white; max-width:24em; margin:1em auto; padding:1em; font:normal 1em sans-serif; border-radius:1em; }
 h1{font:bold 1.2em sans-serif; color: gray; }
