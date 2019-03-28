@@ -1,0 +1,36 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Geek tricks</title>
+	<link href="/docs/styles.css" rel="stylesheet" type="text/css"/>	
+</head>
+<body>
+
+<h1>Geek stuff</h1>
+<p>Here, I will collect some non-obvious dap nuances, that may surprise you (likely, in a good way).</p>
+
+<h2>Dot notation for array elements</h2>
+<p>In dap, array elements are accessed using dot notation instead of square bracket notation.</p>
+<pre class="dap">
+'B'.d("! arr.1")
+.DICT({
+	arr:["zero","one","two"]
+})
+</pre>
+<p class="why">As you probably know, JavaScript makes no real difference between "arrays" and "objects", and you can write <code>foo.bar</code> or <code>foo["bar"]</code> interchangeably. However, in Javascript you can write <code>foo["1"]</code> instead of <code>foo[1]</code>, but not <code>foo.1</code>. This is a purely synactic restriction that denies this short and neat syntax in Javascript. But not in dap.</p>
+
+
+</body>
+
+<!--
+<script src="https://cdn.jsdelivr.net/gh/jooher/dap/0.4.min.js"></script>
+-->
+<script src="../0.4.js"></script>
+<script src="../stuff/dapify.js"></script>
+
+<link href="/stuff/talks.css" rel="stylesheet" type="text/css"/>	
+<script src="/stuff/talks.js#msg=7"></script>
+
+</html>
+
+
