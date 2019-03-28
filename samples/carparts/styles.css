@@ -22,7 +22,7 @@ body		{font-family:sans-serif; background:#eee; }
 		
 table		{width:100%}
 
-.rockauto	{background-color:white; max-width:80em; margin:1em auto; padding:1em; border:1px solid #bbb; position:relative; border-radius:8px; }
+.rockauto	{background-color:white; min-height:40em; max-width:80em; margin:1em auto; padding:1em; border:1px solid #bbb; position:relative; border-radius:8px; }
 
 .caption	{position:sticky;top:0;z-index:2;display: inline-block;padding: 0.2em .5em;color: white;font: bold 1.5em sans-serif;text-shadow: 0 2px 4px darkslategrey;background: steelblue;}
 

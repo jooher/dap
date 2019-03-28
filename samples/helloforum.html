@@ -1,69 +1,12 @@
 <!DOCTYPE html>
 
 <html>
-
 <head>
-	<title>Hello Forum</title>
+	<title>Talks</title>
 	<script src="https://dap.js.org/0.4.js"></script>
 	<link rel="stylesheet" href="helloforum.css"/>
 </head>
-
 <body>
-<script>
-'helloforum'.d("! (.msg:# Entry@+ Ties@-)case")
-
-.DICT({
-	base	:'https://dapmx.org/samples/helloforum/helloforum.php?',
-
-	Entry	:'msg'.d("$!!=; * (base@ `read.msg .msg)uri:query"
-			,'body'.d("! .body")
-			,'reply'.d("$?="
-				,'action'.d("? $?:!").ui("$?=$?:!")
-				,'input'.d("? $?; $author= $head= $body="
-					,'message'.d(""
-						,'author contenteditable'.ui("$author=#:value")
-						,'head contenteditable'.ui("$head=#:value")
-						,'body contenteditable'.ui("$body=#:text")
-					).u("?")
-					,'button.submit'.ui("? ($author $head $body)! (dict.incomplete)alert; ? .g-recaptcha-response=:grc (dict.badcaptcha)alert; ? $!!=( (base@ `write.msg .msg@tie)uri $author $head $body .g-recaptcha-response)post:query (dict.error)alert")
-				).u("$?=")
-			).u("?")
-			,'ties'.d("$!!; ! Ties")
-		),
-		
-	Ties	:'ties'.d("* (base@ `read.ties .msg)uri:query"
-			,'tie'.d("$?="
-				,'A.msg'.d("! .msg; !! (`? .msg)uri@href")
-				,'date'.d("! .date")
-				,'author'.d("! .author")
-				,'head'.d("! .head").ui("$?=$?:!")
-				,'open'.d("? $?; ! Entry")
-			)
-		),
-		
-	dict	:{
-		incomplete: "Please, fill in all fields:\nyour name, message head and message body",
-		badcaptcha: "Google reCAPTCHA thinks you're bot, sorry",
-		error	: "Server communication error"
-		}
-})
-
-.FUNC({
-	convert	:{
-		grc: ()=>{
-			const	async	= dap.Async(),
-				sitekey	= '6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC';
-			if(!async)return;
-			grecaptcha.execute(sitekey,{action:'sendmessage'}).then(token=>async.resolve(token));
-			return "grecaptcha execute";
-		}
-	}
-})
-
-.RENDER();
-
-</script>
+<script src="/stuff/talks.js"></script>
 </body>
-
-<script src='https://www.google.com/recaptcha/api.js?render=6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC'></script>
 </html>
