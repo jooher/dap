@@ -4,7 +4,7 @@
 
 .DICT({
 	base	:'https://dapmx.org/samples/helloforum/helloforum.php?',
-	redir	:'https://dapmx.org/samples/helloforum/?',
+	redir	:'/samples/helloforum.html?',
 	grecaptcha : 'https://www.google.com/recaptcha/api.js?render=6LddyYcUAAAAAPjIc5NfDuqasxeEijxrFGGZbPoC',
 
 	Entry	:'msg'.d("$!!=; * (base@ `read.msg .msg)uri:query"
@@ -31,7 +31,7 @@
 				,'H3.head'.d("! .head").ui("$?=$?:!")
 				,'author'.d("! .author")
 				,'date'.d("! .date")
-				,'A.msg target="_blank"'.d("! .msg; !! (redir@ .msg)uri@href")
+				,'A.msg target="_blank"'.d("!! .msg@ (redir@ .msg)uri@href")
 				,'open'.d("? $?; ! Entry")
 			)
 		),
