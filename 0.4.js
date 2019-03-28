@@ -39,20 +39,21 @@ const	dap=(Env=>
 	
 	flatten	:{
 	
-		""	:Util.hash,
-		"?"	:(values)=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
-		"!"	:(values)=>{ for(let i=values.length;i--;)if(!values[i])return null; return values[0]; },	/// all - succeeds if empty token found
+		""	: Util.hash,
+		"?"	: values=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
+		"!"	: values=>{ for(let i=values.length;i--;)if(!values[i])return null; return values[0]; },	/// all - succeeds if empty token found
 		
-		eq	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return null;return true; },
-		ne	:(values)=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return null; },
-		asc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return null;return a; },
-		dsc	:(values)=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a<(a=parseFloat(values[i])))return null;return a; },
+		eq	: values=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return null;return true; },
+		ne	: values=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return null; },
+		asc	: values=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return null;return a; },
+		dsc	: values=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a<(a=parseFloat(values[i])))return null;return a; },
 				
-		join	:(values)=>values.reverse().join(values.shift()),
-		concat	:(values)=>values.reverse().join(""),
-		spaced	:(values)=>values.reverse().join(" ").replace(/\s\s+/g," ").trim(),
+		join	: values=>values.reverse().join(values.shift()),
+		concat	: values=>values.reverse().join(""),
+		spaced	: values=>values.reverse().join(" ").replace(/\s\s+/g," ").trim(),
 		
 		"case"	: (values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; },
+		"merge"	: (values,tags)=>{ const a=values.pop();for(let i=values.length,t;i--;)if(t=tags[i])a[t]=values[i];else Object.assign(a,values[i]);return a;}
 	},
 	
 	operate	:{
@@ -66,9 +67,6 @@ const	dap=(Env=>
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		
-		"%"	:(value,alias,node,$)=>	{ const d=$[0]['']; if(alias)d[alias]=value; else for(let i in value)d[i]=value[i]; },
-		"%%"	:(value,alias,node,$)=>	{ const d=$[0][''],f=alias.split(','); for(let i=f.length;i--;)d[f[i]]=value[i]; },	// example: %% str:split.colon@a,b,c
-
 		"u"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React); },
 		"ui"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React,"ui"); },
 		
