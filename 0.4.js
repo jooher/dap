@@ -66,6 +66,7 @@ const	dap=(Env=>
 		"!"	:Print,
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
+		"%"	:(value,alias,node)=>	{ node.$[0][''][alias]=value; },
 		
 		"u"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React); },
 		"ui"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React,"ui"); },

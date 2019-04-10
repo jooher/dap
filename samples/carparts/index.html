@@ -262,16 +262,16 @@ Drag =(()=>{
 				order	:"Submit order",
 				clear	:"Clear cart",
 				confirmclear:"Are you sure to remove all items from the cart?"
-			}			
+			}
 		},
 		
 	Qty	:'qty'.d("$qty=."
 			,'incart'.d("? $qty"
-				,'INPUT.qty type=number'.d("#.value=.qty").ui("$qty=#:value")
-				,'drop'.ui("$qty=")
+				,'INPUT.qty type=number'.d("#.value=.qty").ui(".qty=#:value")
+				,'drop'.ui("$qty=.qty=")
 			)
-			,'addtocart'.d("? $qty:!; ! dict.addtocart").ui("$qty=`1")
-		).u("$cart=($cart ($ $carname $carcode ..parttypename $qty)merge@add )db; ?"),		
+			,'addtocart'.d("? $qty:!; ! dict.addtocart").ui("% $carname $carcode ..parttypename $qty=`1")
+		).u("$cart=($cart $@add )db; ?"),		
 		
 	Hint	: 'OPTION selected disabled'.d("! .label"),
 	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; * .options@value; Option( .value ..selected )"), 
