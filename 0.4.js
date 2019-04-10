@@ -73,7 +73,8 @@ const	dap=(Env=>
 		"d!"	:(value,alias,node)=>	{ Execute.update(value||node); },
 		"a!"	:(value,alias,node)=> 	{ Execute.a(value||node); },
 		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
-		"a"	:(value,alias,node)=>	{ Execute.After.put(Execute.a,value||node); },
+		"d"	:(value,alias,node)=>	{ Execute.Rebuild(value||node) },
+		"a"	:(value,alias,node)=>	{ Env.delay(()=>Execute.a(alue||node,alias)) },
 		"u"	:(value,alias,node)=>	{ Env.delay(()=>Execute.u(value||node,alias)) }, //{ Execute.After.put(Execute.u,); },//{ Execute.u(value||node); }, //
 		
 		"*"	:(value,alias)=>	value && (alias?value.map(v=>Box(v,alias)):value), //!value ? false : !alias ? value : Dataset.mapGrid( alias.split(","), value ),
@@ -1527,6 +1528,9 @@ const	dap=(Env=>
 				
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
+				data	:elem=>[...elem.children].map(ch=>ch.$[0]['']),
+		
+
 
 				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
 				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),

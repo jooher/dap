@@ -15,81 +15,179 @@
 	<span>If you're looking for car parts, see <a href="http://rockauto.com" rel="nofollow">Rockauto own website</a>.</span>
 </div>
 
-<script src="https://dap.js.org/0.4.js" _src="0.4.js">
+<script _src="https://dap.js.org/0.4.js" src="0.4.js">
 
-</script>
-<script>
+</script><script>
 
 const	
 cents	= num => Math.round(num*100)/100,
 
-Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
-	var	data	= null,
-		storage	= localStorage,
-		Json	= dap.Env.Json;
-		
-	return {
-	
-		sync	:function(entry){
-			try{
-				const v=storage.getItem(item);
-				data=v?Json.decode(v):null;
-			}catch(e){};
-			
-			if(entry)(data||(data={}))[entry[key]]=entry;
-			
-			if(!data)return;
 
-			try{storage.setItem(item,Json.encode(data));}catch(e){};
+Persist	=((storage,box,unbox)=>{ // keeps the data coherent among several tabs
+
+	function P(name,pkey,keep,delay){//,autosync
+		
+		let	order,
+			index,
+			stamp=-1,
+			stampname=name+"_stamp";
 			
-			var arr=[];
-			for(var i in data)arr.push(data[i]);
-			return sort?arr.sort(sort):arr;
-		},
+		const	ixrow	= (ix,r)=>(ix[r[pkey]]=r)&&ix,
+			ixset	= (ix,s)=>s.reduce(ixrow,ix),		
+			
+			data	= ()=>order,
+			find	= match=>(index?index[match]:order.find(r=>r[pkey]==match))||false,
+			
+			update	= ()=>	{
+					++stamp;
+					if(!delay)sync();
+				},
+				
+			anew	= d=>{
+					order=d&&d.reduce?d:[];
+					if(pkey)index=order?ixset({},order):{};
+					update();
+				},
+				
+			add	= r=>{
+					if( !index || index[r[pkey]]!=r){
+						order.push(r);
+						if(index)ixrow(index,r);
+					}
+					update();
+				},
+				
+			sync	= i=>{
+				const saved=parseInt(storage.getItem(stampname))||0;
+				if(saved<stamp){ //save
+					if(index)order=order.filter(r=>index[r[pkey]]==r);
+					if(keep)order=order.filter(keep);
+					storage.setItem(name,box(order));
+					storage.setItem(stampname,stamp);
+				}
+				if(saved>stamp){ //load
+					anew(unbox(storage.getItem(name)));
+					stamp=saved;
+				}
+			};
+			
+		update();
 		
-		find	:function(entry){return data&&data[entry[key]]},
-		
-		clear	:function(){storage.setItem(item,null); return null;}
+		return	{data,find,anew,add,update,sync}
 	}
-};
+	
+	const	wrap	= p=>({p,data:p.data()});
+	
+	return	{
+		convert	:{
+			db	:o=>wrap(P(o.name,o.pkey,o.keep))
+		},
+		flatten	:{
+			db	:(values,tags)=>{
+				const p=values.pop().p;
+				for(let i=values.length,a;i--;)
+					if((a=p[tags[i]](values[i]))!=null)
+						return a||null;
+				return wrap(p);
+			}
+		}
+	}
+})(localStorage,dap.Env.Json.encode,dap.Env.Json.decode),
+			
+Drag =(()=>{
+
+	let
+	dragged	= null;
 
 
+	const
+	
+	listen	= (el,ev,h)=>el.addEventListener(ev,h),
+	
+	types	={
+	
+		reorder	:{
+		
+			dragstart: e=>{
+				dragged = e.target;
+				dragged.style.opacity=.5;
+			},
+		
+			dragenter: e=>{
+				const entered=e.target;
+				if(entered.parentNode!=dragged.parentNode)
+					return;
+				if(dragged!=entered)
+					entered.parentNode.insertBefore(dragged,entered);
+				e.stopPropagation();
+			},
+			
+			dragover: e=>{
+				if(dragged.parentNode == e.target.parentNode)
+					e.preventDefault();
+			},
+			
+			dragend: e=>{
+				dragged.style.opacity=1;
+				dap.Execute.u(dragged.parentNode,'reorder');
+			}
+		}
+	
+	};
+	
+	
+	return	(value,alias,node)=>{
+		const	evs=types[alias];
+		node.draggable=true;
+		if(evs){
+			for(let e in evs)
+				listen(node,e,evs[e]);
+		}
+		else
+			console.error("unknown drag type: "+alias);
+	}
+
+})()
+;
 
 'rockauto'
 .a("state ( $make $year $model $engine $carcode $parttype )uri")
-.d("$make=. $year=. $model=. $carcode=. $engine=. $parttype=. $parttypename=.; $carname=( .year .make .model .engine )spaced $cart=:cart.sync $cars=:cars.sync"
+.d("$make=. $year=. $model=. $carcode=. $engine=. $parttype=. $parttypename=.; $carname=( .year .make .model .engine )spaced $cars=cars:db $cart=cart:db"
 	,'caption'.d("! caption").ui("home")
-	,'cart'.d("? $cart"
-		,'action.clear'.d("! dict.cart.clear").ui("? (dict.cart.confirmclear)confirm; $cart=:cart.clear")
-		,'TABLE'.d(""
-			,'TBODY'.d(".carcode=; *@ $cart"
-				,'TR.cartitem'.d("?! .qty@0"
-					,'TD'.d(""
-						,'carname'.d("? (.carcode ..carcode)ne; ! .carname; ..carcode=.carcode").ui("$carname=. $carcode=.")
-						,'partname'.d("! (.parttypename `/ .side `/ .note)spaced")//; !! @title
+	,'order'.d("? $cart.data:??"
+		,'cart'.d(""
+			,'action.clear'.d("! dict.cart.clear").ui("? (dict.cart.confirmclear)confirm; $cart=($cart @anew)db")
+			,'TABLE'.d(""
+				,'TBODY'.d(".carcode=; *@ $cart.data:bycar"
+					,'TR.cartitem'.d("?! .qty@0"
+						,'TD'.d(""
+							,'carname'.d("? (.carcode ..carcode)ne; ! .carname; ..carcode=.carcode")
+							.ui("$carname=. $carcode=.")
+							,'partname'.d("! (.parttypename `/ .side `/ .note)spaced")
+						)
+						,'TD'.d("! (.catalogname .partnumber)spaced")
+						,'TD.num'.d("! .price")
+						,'TD.num.qty'.d("! Qty")
 					)
-					,'TD'.d("! (.catalogname .partnumber)spaced")
-					,'TD.num'.d("! .price")
-					,'TD.num.qty'.d("! Qty")
 				)
 			)
 		)
-	)
-	,'orderbar'.d("? $totals=$cart:totals"
-		,'totals'.d("! (dict.cart.totals $totals.pos $totals.qty $totals.amt)here")
-		,'button.order'.d("! dict.cart.order").ui("")
+		,'orderbar'.d("*@ $cart.data:totals"
+			,'totals'.d("! (dict.cart.totals .pos .qty .amt)here")
+			,'button.order'.d("! dict.cart.order").ui("")
+		)
 	)
 	,'setcar'.d(""
-		,'mycars'.d("! dict.mycars; *@ $cars"
-			,'carname'.d("! .carname").ui("$carname=. $carcode=. $year=. $make=. $model=. $engine=.")
-		)
+		,'mycars'.d("! dict.mycars; *@ $cars.data"
+			,'carname'.d("! .carname; drag@reorder").ui("$carname=. $carcode=. $year=. $make=. $model=. $engine=.")
+		).e("reorder","$cars=($cars #:data@anew)db")
 		,'findcar'.d(""
 			,'year-make'.d(""			
 				,'SELECT.year'.ui("$year=#:value").d("Options( year.label year.options $year@selected)")
 				,'SELECT.make'.ui("$make=#:value").d("Options( make.label make.options $make@selected)")
 			).u("$carcode= $carname= $model=")
 
-			,'SELECT.model'.ui("$model=#:value $carcode= $carname=")
+			,'SELECT.model'.ui("$model=#:value $carcode= $carname= $engine=")
 			.d("? ($year $make)!; ? .models:??=( base@ $make $year )uri:query (error.no-models)alert; "
 			  +"Options( model@label .models@options $model@selected)")
 			
@@ -99,8 +197,8 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 		).u("?")
 	)
 	,'H1.carname'.d("? $carcode; ! $carname"
-		,'button.addtomycars'.d("$cars; ? ($carcode):cars.find,!")
-		.ui("$cars=($carname $carcode $year $make $model $engine):cars.sync")
+		,'button.addtomycars'.d("? ($cars $carcode@find)db:!; $cars")
+		.ui("$cars=($cars ($carname $carcode $year $make $model $engine)@add )db")
 	)
 	,'part'.d("? $carcode; $group=."
 		,'UL'.d("*@groupname (base@ $carcode)uri:query"
@@ -110,7 +208,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 					,'LI'.a("!? $?@selected").d("$?="
 						,'title'.d("! .parttypename; !! .parttypeinfo@title").ui("$?=$?:!")
 						,'offers'.d("? $?; * (base@ $carcode .parttype)uri:query"
-							,'offer'.u("?").a("!? $?@hilit").d("$?= "//
+							,'offer'.u("?").a("!? $?@hilit").d("$?="
 								,'short'.d(""
 									,'IMG.thumb'.d("? .pics=.pics:Json.decode; ? .pics.Thumb; !! (pics .pics.Thumb)concat@src" )
 									,'parttitle'.d("! (.catalogname .partnumber)spaced"
@@ -126,11 +224,7 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 									,'A target=_blank'.d("!! dict.moreinfo@ (rainfo@ .partkey@pk)uri@href")
 								)
 								,'price'.d("! .price=.price:price")//:rightprice,
-								,'action'.d("$cart $picked=$:cart.find"
-									,'incart'.d("*@ $picked; ! dict.incart; ! Qty")
-									,'addtocart'.d("?:! $picked; ! dict.addtocart")
-									.ui("$cart=($ $carname $carcode ..parttypename @qty`1 ):cart.sync")
-								).u("?")
+								,'action'.d("$=( ($cart .partkey@find)db $)?; ! Qty")
 							)
 						)
 					)
@@ -164,32 +258,40 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 			addtocart	:"Add to cart",
 			incart		:"In cart",
 			cart	:{
-				totals	:"Selected {qty} items, USD {amt} total",
+				totals	:"{qty} items, USD {amt} total",
 				order	:"Submit order",
 				clear	:"Clear cart",
 				confirmclear:"Are you sure to remove all items from the cart?"
 			}			
 		},
-
-	Qty	:'qty'.d(""
-			,'INPUT.qty type=number'.d("#.value=.qty").ui(".qty=#:value")
-			,'drop'.ui(".qty=`0")
-		).u("$cart=$:cart.sync"),
 		
+	Qty	:'qty'.d("$qty=."
+			,'incart'.d("? $qty"
+				,'INPUT.qty type=number'.d("#.value=.qty").ui("$qty=#:value")
+				,'drop'.ui("$qty=")
+			)
+			,'addtocart'.d("? $qty:!; ! dict.addtocart").ui("$qty=`1")
+		).u("$cart=($cart ($ $carname $carcode ..parttypename $qty)merge@add )db; ?"),		
 		
 	Hint	: 'OPTION selected disabled'.d("! .label"),
-	Options	: 'OPTGROUP'.d("{? .selected:!; ! Hint}; { * .options@value; Option( .value ..selected ) }; { ? (.options:?? `1)eq; u! @change }"),//(.selected:!)!
-	Option	: 'OPTION'.d("!! (.label .value)? .value (.value .selected)eq@selected")
+	Options	: 'OPTGROUP'.d("! (.selected:! Hint)!; * .options@value; Option( .value ..selected )"), 
+	Option	: 'OPTION'.d("!! (.label .value)? .value (.value .selected)eq@selected"),
+	
+// db	
+	cars	:{name:"cars",pkey:"carcode",keep:r=>!!r.carcode},
+	cart	:{name:"cart",pkey:"partkey",keep:r=>r.qty}
+
 
 })
 .FUNC({
 	convert	:{
 		time	:dummy	=>Date.now(),
 		tidy	:html	=>replaceMulti(html,htmljunk),
-		price	:num	=>num.substr(1), // cents(num),//   {return Math.round(parseFloat(value)*1.5)-.01},
+		price	:num	=>cents(num.substr(1)),
 		engines	:array	=>array.map(m=>m.engine),
-		cars	:Shared("cars","carcode"),
-		cart	:Shared("cart","partkey",(a,b)=>(a.carcode-b.carcode||a.parttype-b.parttype||a.price-b.price||a.partkey-b.partkey)),
+		
+		
+		bycar	:parts=>parts.sort((a,b)=>a.carcode-b.carcode||a.parttype-b.parttype||a.price-b.price||a.partkey-b.partkey),
 		totals	:cart	=>{
 				if(!cart)return;
 				var pos=0, qty=0, amt=0, a,q,p;
@@ -199,9 +301,10 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 				return {pos:pos,qty:qty,amt:cents(amt)};
 			},
 		comma	:str => str?str.split(","):null
+		
 	},
 	flatten	:{
-		"find"	:(values,tags)=>{
+		find	:(values,tags)=>{
 				var rows=values.pop();
 				for(var i=values.length; i--; ){
 					var key=tags[i],match=values[i];
@@ -212,10 +315,16 @@ Shared	=(item,key,sort)=>{ // keeps the data coherent among several tabs
 			}
 	},
 	operate	:{
-		home	:value => {window.scroll({top:0, behavior:"smooth"})}
+		home	:value => {window.scroll({top:0, behavior:"smooth"})},
+		drag	:Drag
 	}
 })
+
+.FUNC(Persist)
+
 .RENDER();
+
+
 
 </script>
 </body>
