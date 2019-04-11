@@ -27,17 +27,17 @@
  &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<p>Save it on your Desktop (or anywhere else), then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working. Or, you can play with the code right here, all code samples are editable. Results of each code sample are shown thereunder.</p>
+<p>Save it on your Desktop (or anywhere else), then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working. Or, you can play with the code right here — all code samples are editable. Results of each code sample are shown thereunder.</p>
 
 <h2>Templates. Dap program structure.</h2>
 <p>Dap program is essentially a tree of templates for generating actual elements into DOM. The tree defines the logical structure of your application, while templates define generation and interaction rules for each element in that structure. Every template consists of an <em>element signature</em> and one or more <em>rules</em> for generated element.</p>
 
 <h3>Signatures</h3>
-<p>Signature designates generic properties of generated element: tag, css class, id, other attributes.</p>
-<p>The simplest and the most common case is when signature consists of a single lower case word. Such signatures designate a default element, which is DIV, assigned a CSS class. For example: <code>'sidebar'</code> will render into DOM as <code>&lt;DIV class="sidebar"&gt'</code> element. Multiple classes can be combined using a dot, as in CSS: <code>'message.critical'</code> will be <code>&lt;DIV class="message critical"&gt;</code>.</p>
-<p>When a specific element is needed, its tag name is specified in upper case: <code>'SECTION.text.small'</code> will render into DOM as <code>&lt;SECTION class="text small"&gt;</code>.</p>
-<p>Element id can be specified: <code>'IMG.cropped#Portrait'</code> will be <code>&lt;IMG class="cropped" id="Portrait"&gt;</code>.</p>
-<p>Other static attributes can also be specified in the signature just as in HTML:<code>'FORM#pay method=post action="http://mysite.com/pay.php" target=_blank'</code> or <code>'OPTION disabled selected'</code> are both valid signatures and will render as expected.</p>
+<p>Signature designates generic properties for generated elements. For HTML elements, these properties are: tag, css class, id, other HTML attributes.</p>
+<p>The simplest and the most common signature consists of a single lower-case word. Such signatures designate a default element, which is DIV, assigned a CSS class. For example: <code>'sidebar'</code> will render into DOM as <code>&lt;DIV class="sidebar"&gt'</code> element. Multiple classes can be combined using a dot, in a CSS-like manner: <code>'message.critical'</code> will render <code>&lt;DIV class="message critical"&gt;</code>.</p>
+<p>When a specific element is needed, its tag name is specified in upper case: <code>'SECTION.text.small'</code> will render <code>&lt;SECTION class="text small"&gt;</code>.</p>
+<p>Element id can be specified with a <code>#</code> (also, a CSS-like manner): <code>'IMG.cropped#Portrait'</code> will render <code>&lt;IMG class="cropped" id="Portrait"&gt;</code>.</p>
+<p>Any other desired attributes can also be specified in the signature, just as in HTML. Examples of valid signatures are: <code>'A href=about.html'</code>, <code>'description contenteditable'</code>, <code>'OPTION disabled selected value="Please select"'</code>, <code>'FORM#pay method=post target=_blank action="http://mysite.com/pay.php"'</code>, etc.</p>
 
 
 <a name="rules-and-contexts"/>
@@ -56,7 +56,7 @@
 <h3>Literals and constants</h3>
 <p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DICT</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
 <pre class="dap">
-'B'.d("! good `literals_in_rules_are_not_good_for_long_texts")
+'B'.d("! good `literals_in_rules_are_not_good_for_long_texts") // simply a &lt;B&gt; element, which usually renders in bold font
 .DICT({ // this is the dictionary
 	good:"The right place for text and other constants is the dictionary, "
 })
@@ -66,12 +66,12 @@
 <h2>Execution of dap program</h2>
 
 <h3>Contexts</h3>
-<p>Every generated element is bound to two local contexts: <em>status context</em> and <em>data context</em>. Element's dap rules are executed within these contexts. Constants defined in a dictionary are visible to all elements.</p>
+<p>Every generated element is bound to two independent local contexts: <em>status context</em> and <em>data context</em>. Element's dap rules are executed within these two contexts. Constants defined in a dictionary are visible globally within a dap program.</p>
 
 
 <a name="status-variables"/>
-<h3>Status variables</h3>
-<p>Status variables provide the main reactivity mechanism in dap. When a status variable gets changed, all elements that depend on it, are automatically updated. Status variables are prefixed with a <code>$</code>. Defined in element's status context, a variable is visible to all children of that element. Status variables can only be updated in u-rules.</p>
+<h3>Status context and status variables</h3>
+<p>Status variables provide the main reactivity mechanism in dap. Status variables are defined in d-rules and can be modified in u-rules in response to some events. When a status variable is modified, all elements that depend on it, are automatically updated. Defined in element's status context, a variable is visible to that element and to all its descendants. In other words, an element's status context covers variables defined in its own d-rule and in d-rules of its ancestors. In dap rules, status variables are prefixed with <code>$</code>.</p>
 <pre class="dap">
 'cheese'.d("$value=" // d-rule defines a status variable named $value
 	,'BUTTON'.d("! cheese").ui("$value=`cheeeeese!") // u-rules update the variable `
@@ -82,51 +82,59 @@
 	cheese: "Say cheese!"
 })
 </pre>
-<p>Here, you might have noticed that <code>BUTTON</code> and <code>DIV.message</code> templates use <code>!</code> operator to output their content (<code>cheese</code> constant and <code>$value</code> status variable, respectively), while <code>INPUT</code> template uses <code>!!</code> operator. The difference between the two operators is that the latter, <code>!!</code>, sets element's own properties instead of generating child elements. Here, it sets the <code>INPUT</code> element's value attribute.</p>
+<p class="why">Here, you might have noticed that <code>BUTTON</code> and <code>DIV.message</code> templates use <code>!</code> operator to output their content (<code>cheese</code> constant and <code>$value</code> status variable, respectively), while <code>INPUT</code> template uses <code>!!</code> operator. The difference between the two operators is that the latter, <code>!!</code>, sets element's own properties instead of generating child elements. Here, it sets the <code>INPUT</code> element's value attribute.</p>
 
 <a name="data-entries"/>
 <h3>Data entries</h3>
-<p>Every generated element is bound to some data context, usualy it is a data row in some dataset. Data context can be shared among several elements, related to the same data row. Fields of a data row, or <em>data entries</em>, can be read and modified in both u- and d-rules. Data entries are not traced for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot). Data context scope is independent from status context scope.</p>
+<p>Every generated element is bound to some data context, usualy it is a data row in some dataset. Element's data context is independent from its status context and can be shared among several relevant elements, that belong to the same data row. Fields of a data row, or <em>data entries</em>, can be read and modified in both u- and d-rules. Data entries are not tracked for changes and do not cause updates to other elements. In rules, data entries are prefixed with a <code>.</code> (dot).</p>
 <pre class="dap">
-'colored-fruits'.d("$color= $fruit="
+'colored-fruits'.d("$color= $fruit=" // $color and $fruit variables are common to all descendants hereof
 	,'UL.labelled'
-		.a("!! (hint.fruit $fruit)concat@label")
-		.d("* color"
-			,'LI'.d("! (.color $fruit)sentence").ui("$color=.color")
+		.a("!! (hint.fruit $fruit.name)concat@label") // this UL's label attribute displays selected $fruit
+		.d("* color" // for each data row in color dataset (which is defined in the .DICT section)
+			,'LI'	.d("! (.color $fruit.name)sentence") // print current .color datum combined with common $fruit status
+				.ui("$color=.color") // on user event, update $color status with current .color
 		)
 	,'UL.labelled'
-		.a("!! (hint.color $color)concat@label")
-		.d("* fruit"
-			,'LI'.d("! ($color .fruit)sentence").ui("$fruit=.fruit")
+		.a("!! (hint.color $color)concat@label") // this list's label shows selected color
+		.d("*@ fruit" // for each data row in fruit dataset, preserving field names
+			,'LI'	.d("!! ($color .name)sentence .desc@title") // add text and set title attribute
+				.ui("$fruit=$") // on user event, $fruit is assigned the entire current datarow
 		)
-	,'BUTTON'.d("! hint.reset.color").ui("$color=")
+	,'BUTTON'.d("! hint.reset.color").ui("$color=") // this is how a "nothing" looks like in dap
 	,'BUTTON'.d("! hint.reset.fruit").ui("$fruit=")
-	,'message'.d("? ($color $fruit)!; ! (hint.choice $color $fruit)sentence:uppercase,glitzy")
+	,'message'.d("? ($color $fruit)!; ! (hint.choice $color $fruit.name $fruit.desc:brackets)sentence:uppercase,glitzy")
 )
 .DICT({
-	color:["red","orange","yellow","green"],
-	fruit:["apple","pear","banana"],
+	color	:["red","orange","yellow","green"], // datasets can be simple arrays of strings
+	fruit	:[ // or can be arrays of anything else
+			{name:"apple", desc:"juicy fruit, usually round, contains iron"},
+			{name:"pear", desc:"sweet fruit in shape of a... well... pear"},
+			{name:"banana", desc:"long, bow-shaped fruit with soft thick skin"}
+		],
 	
-	hint:{ // constants in the dictionary can be grouped...
-		color: "Color: ",
-		fruit: "Fruit: ",
-		reset :{ // ...to arbitrary depth
+	hint	:{ // constants in the dictionary can be grouped...
+		color	:"Color: ", 
+		fruit	:"Fruit: ",
+		reset	:{ // ...to arbitrary depth
 			color: "Reset color",
 			fruit: "Reset fruit"
 		},
-		choice: "Your choice is"
+		choice	:"Your choice is"
 	}
 })
 .FUNC({
-	flatten	:{
-		sentence: values=>values.reverse().join(" ")
+	flatten	:{ // combine several values into one single value
+		sentence: values=>values.reverse().join(" ") // flatteners see arguments in reverse order
 	},
-	convert	:{
-		uppercase: str=>str.toUpperCase(),
-		glitzy: str=>"*** "+str+" ***"
+	convert	:{ // convert one single value into another single value
+		uppercase: str=>str.toUpperCase(), // capitalize the string...
+		brackets : str=>"("+str+")", // ...add brackets...
+		glitzy: str=>"*** "+str+" ***" // ...and surround it with stars! wow!
 	}
 })
 </pre>
+<p class="why">How comes that a <code>label</code> attribute's value is rendered above the <code>UL.labelled</code> elements? Well, this is a simple CSS-trick (see the rules for <code>.labelled</code> class in <a href="styles.css" target="_blank">styles.css</a>), that legally allows to make dap code even more concise and well-structured by reducing the count of required template elements.</p>
 <p>Here, all elements inside the <code>'colored-fruits'</code> share the same status context with <code>$color</code> and <code>$fruit</code> status variables defined in it. However, each <code>LI</code> element in the two lists has its own data context, containing one data entry, either <code>.color</code> or <code>.fruit</code></p>
 <p>Another interesting point of this example is the <code>.FUNC</code> section (functionality) and the d-rule of <code>'message'</code> element. Meet: flatteners and convertors...</p>
 
@@ -150,7 +158,7 @@
 	base: "https://mygoods.com/getstocks.php?"
 })
 </pre>
-<p>So, what new can we see here? A <code>#</code> special entry that evaluates to "this element" at run time, a standard <code>:value</code> converter that "converts" an element to its "value" (which is slightly different for various types of elements), and standard <code>()uri</code> flattener that "flattens" its arguments into a simple string using their values and names.</p>
+<p>So, what new can we see here? A <code>#</code> special entry that evaluates to "this element" at run time, a standard <code>:value</code> converter that "converts" an element to its "value" (which is slightly different for various types of elements), and standard <code>()uri</code> flattener that "flattens" its arguments into a single urlencoded query string using their values and names.</p>
 <p>Names of arguments are normally taken from their identifiers. For <code>$foo</code> variable, or <code>.foo</code> data entry, of <code>foo</code> constant, the name will be "foo". If argument is dot-routed, the name will be the tail part of its route: for <code>$customer.details.address</code> the name will be simply "address". The argument's default name can be altered with the <code>@</code> aliaser. For example, <code>$customer.details.address@ship-to</code> will be named "ship-to".</p>
 <p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But they can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email)?@login</code>.</p>
 <p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value it as is.</p>
@@ -220,7 +228,7 @@
 })
 </pre>
 <p>The new things in the example above are the <em>reusable templates</em> <code>Hint(.label)</code> and <code>Option(.label .value)</code> which are used in the several SELECT elements to display initial hints and available options.</p>
-<p>See a complete car parts shop demo <a href="/samples/carparts/">here</a>. Whole thing is roughly 200 lines of code, 3.5 kiB gzipped.</p>
+<p>See a complete car parts shop demo <a href="/samples/carparts/">here</a>. The whole thing is roughly 200 lines of code, 3.5 kiB gzipped.</p>
 
 <a name="reusable-templates"/>
 <h3>Parameterized reusable templates</h3>
