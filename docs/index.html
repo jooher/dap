@@ -29,16 +29,21 @@
 </pre>
 <p>Save it on your Desktop (or anywhere else), then open in a web browser. Now you can simply copy-and-paste examples into this file, and refresh browser to see the examples working. Or, you can play with the code right here — all code samples are editable. Results of each code sample are shown thereunder.</p>
 
-<h2>Templates. Dap program structure.</h2>
+<h2>Templates</h2>
 <p>Dap program is essentially a tree of templates for generating actual elements into DOM. The tree defines the logical structure of your application, while templates define generation and interaction rules for each element in that structure. Every template consists of an <em>element signature</em> and one or more <em>rules</em> for generated element.</p>
 
+<pre class="dap">
+'BUTTON.allcaps title="click me!"' // element signature specifying tag, css class and attribute
+	.d("! `Curious") // d-rule, element generation rule that builds element's content
+	.ui("(`Clicked!)alert") // u-rule, event reaction rule
+</pre>
+
 <h3>Signatures</h3>
-<p>Signature designates generic properties for generated elements. For HTML elements, these properties are: tag, css class, id, other HTML attributes.</p>
-<p>The simplest and the most common signature consists of a single lower-case word. Such signatures designate a default element, which is DIV, assigned a CSS class. For example: <code>'sidebar'</code> will render into DOM as <code>&lt;DIV class="sidebar"&gt'</code> element. Multiple classes can be combined using a dot, in a CSS-like manner: <code>'message.critical'</code> will render <code>&lt;DIV class="message critical"&gt;</code>.</p>
+<p>Signatures designate generic properties for their generated elements. For HTML elements, these properties are: tag, css class, id, other HTML attributes.</p>
+<p>The simplest and the most common signature consists of a single lower-case word. Such signatures designate a default element, which is DIV, assigned a CSS class. For example: <code>'sidebar'</code> will render into DOM as <code>&lt;DIV class="sidebar"&gt;</code> element. Multiple classes can be combined using a dot, in a CSS-like manner: <code>'message.critical'</code> will render <code>&lt;DIV class="message critical"&gt;</code>.</p>
 <p>When a specific element is needed, its tag name is specified in upper case: <code>'SECTION.text.small'</code> will render <code>&lt;SECTION class="text small"&gt;</code>.</p>
 <p>Element id can be specified with a <code>#</code> (also, a CSS-like manner): <code>'IMG.cropped#Portrait'</code> will render <code>&lt;IMG class="cropped" id="Portrait"&gt;</code>.</p>
 <p>Any other desired attributes can also be specified in the signature, just as in HTML. Examples of valid signatures are: <code>'A href=about.html'</code>, <code>'description contenteditable'</code>, <code>'OPTION disabled selected value="Please select"'</code>, <code>'FORM#pay method=post target=_blank action="http://mysite.com/pay.php"'</code>, etc.</p>
-
 
 <a name="rules-and-contexts"/>
 <h3>Rules</h3>
@@ -52,6 +57,22 @@
 </ul>
 <p>Rules are assigned to a template using a "method" notation: d-rule is assigned by <code>.d()</code> method, a-rule by <code>.a()</code> method, etc.</p>
 
+<h2>Dap rule syntax</h2>
+<p>Dap rule syntax is simple, but very different from familiar C-like syntaxes. It has been developed to be easily parsable, concise and human-readable.</p>
+<p>Dap rule is basically a sequence of steps, each step being an operator followed by arguments. Whitespaces separate arguments from the operator and from each other. Steps are separated by <code>; </code>a semicolon folowed by whitespace.</p>
+<pre class="dap">
+'A'.d("! `Homepage; !! @target`_blank @href`http://dap.js.org/") // &lt;A target="_blank" href="http://dap.js.org/"&gt;Homepage&lt;/A&gt;
+</pre>
+<p>Here, the <code>&lt;A&gt;</code> element's generation rule consists of two steps:</p>
+<ol>
+	<li>A <code>!</code> (print) operator with a string literal <code>Homepage</code> as its only argument,</li>
+	<li>A <code>!!</code> (set attribute) operator with two named arguments, for <code>href</code> and <code>target</code> attributes.</li>
+</ol>
+<p>Identifiers (names for operators, variables and all other lexical elements) may consist of any combination of any characters except whitespace, brackets and reserved symbols <code>.,;:$@=</code>. All other characters are allowed. For example, <code>!</code> and <code>??</code> are valid identifiers in dap.</p>
+<p class="why">Why use exclamation signs instead of good'ole <code>print</code>-like keywords? Well, dap "core" operators (as well as flatterners and convertors, dicussed later) tend to be expressed by symbols, not verbal English words. First of all, it is shorter — just one or two characters. Second, it is well distinct from verbal identifiers for data or other, more specific, stuff. And, obviously, it is language-neutral: you can pronounce it however you like, and it will look equally neat with lexems of any language you choose for your dap program: English, Russian, Chinese, whatever.</p>
+<p>Arguments are fed to the operator one by one, and operator consumes them sequentially. In the example above, the <code>!!</code> operator is first executed with <code>@href`http://dap.js.org/</code> argument (named "href", valued "http://dap.js.org/"), and then with <code>@target`_blank</code> argument.</p>
+<p>Operators may change the rule execution flow. For example, <code>?</code> operator terminates execution of the rule, if none of its aguments is truthy; while <code>*</code> executes the rest of the rule multiple times.</p>
+
 <a name="literals-and-constants"/>
 <h3>Literals and constants</h3>
 <p>Literal values in dap rules are prefixed with a <code>`</code> (backtick) which can be found on your keyboard somewhere around Esc key. Literal values are not very welcome in dap rules and are usually used for numbers or other short codes. They cannot contain spaces, because spaces are delimeters between tokens within a rule. Textual content, as well as constant values of any other kind should be defined in the <code>.DICT</code> section (the dictionary) and referred to as constants, <code>good</code> in the example below. Keeping all constants grouped in one place helps make the code cleaner and maintainance easier. Dap is rather encouraging to that coding style.</p>
@@ -62,6 +83,8 @@
 })
 </pre>
 <p>Exclamation sign <code>!</code> in the beginning of the rule is a "print" operator, it prints its arguments into the element. Arguments (or <em>tokens</em>) in dap rules are separated by whitespace.</p>
+
+
 
 <h2>Execution of dap program</h2>
 

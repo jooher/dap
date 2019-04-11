@@ -43,6 +43,7 @@ pre>em{background:lavender; font-style:normal}
 
 
 /* samples */
+.allcaps{text-transform:uppercase}
 .colored-fruits>ul{display:inline-block; vertical-align:top; margin:2em 1em; width:8em;}
 .contents-sample{max-height:16em; }
 
