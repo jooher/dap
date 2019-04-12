@@ -14,7 +14,7 @@ dapify	= dap &&
 		,'PRE contenteditable'
 			.d("! .code; a!")
 			.a("log `a; #.innerHTML=$run:hilite")
-			.e("keyup","$edit=#.textContent")
+			.e("keyup","$edit=#.innerText")
 		,'buttons'.d(""
 			,'welcome'.d("? $own:!; ! welcome")
 			,'BUTTON.reset'	.d("? $own; !! reset@title").ui("$run= $run=$edit=.code")
