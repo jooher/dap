@@ -53,7 +53,7 @@ const	dap=(Env=>
 		spaced	: values=>values.reverse().join(" ").replace(/\s\s+/g," ").trim(),
 		
 		"case"	: (values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; },
-		"pull"	: (values)=>{const pool==values.pop();for(let i=values.length,v; i--;)if(v=values[i])return v;},
+		"pull"	: (values)=>{const a=values.pop();for(let i=values.length,v; i--;)if(v=a[values[i]])return v;},
 		"merge"	: (values,tags)=>{ const a=values.pop();for(let i=values.length,t;i--;)if(t=tags[i])a[t]=values[i];else Object.assign(a,values[i]);return a;}
 	},
 	
