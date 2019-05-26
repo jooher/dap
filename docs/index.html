@@ -59,6 +59,8 @@
 
 <h2>Dap rule syntax</h2>
 <p>Dap rule syntax is simple, but very different from familiar C-like syntaxes. It has been developed to be easily parsable, concise and human-readable.</p>
+<!-- p class="why">Why not simply write rules in Javascript? </p-->
+<h3>Rule steps</h3>
 <p>Dap rule is basically a sequence of steps, each step being an operator followed by arguments. Whitespaces separate arguments from the operator and from each other. Steps are separated by <code>; </code>a semicolon folowed by whitespace.</p>
 <pre class="dap">
 'A'.d("! `Homepage; !! @target`_blank @href`http://dap.js.org/") // &lt;A target="_blank" href="http://dap.js.org/"&gt;Homepage&lt;/A&gt;
@@ -72,6 +74,8 @@
 <p class="why">Why use exclamation signs instead of good'ole <code>print</code>-like keywords? Well, dap "core" operators (as well as flatterners and convertors, dicussed later) tend to be expressed by symbols, not verbal English words. First of all, it is shorter — just one or two characters. Second, it is well distinct from verbal identifiers for data or other, more specific, stuff. And, obviously, it is language-neutral: you can pronounce it however you like, and it will look equally neat with lexems of any language you choose for your dap program: English, Russian, Chinese, whatever.</p>
 <p>Arguments are fed to the operator one by one, and operator consumes them sequentially. In the example above, the <code>!!</code> operator is first executed with <code>@href`http://dap.js.org/</code> argument (named "href", valued "http://dap.js.org/"), and then with <code>@target`_blank</code> argument.</p>
 <p>Operators may change the rule execution flow. For example, <code>?</code> operator terminates execution of the rule, if none of its aguments is truthy; while <code>*</code> executes the rest of the rule multiple times.</p>
+
+
 
 <a name="literals-and-constants"/>
 <h3>Literals and constants</h3>
