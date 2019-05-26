@@ -1552,7 +1552,7 @@ const	dap=(Env=>
 				
 				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
-				prompt	:(values)	=>{ for(let i=values.length,a;i--;)if(a=prompt(values[i])return a;},
+				prompt	:(values)	=>{ for(let i=values.length,a;i--;)if(a=prompt(values[i]))return a;},
 
 				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
 			},
