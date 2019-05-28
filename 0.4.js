@@ -1475,7 +1475,7 @@ const	dap=(Env=>
 				node.isContentEditable	?'blur':
 				DEFAULT.EVENT,//'click',
 		
-		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P.cloneNode(true) : newText(P));},
+		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P : newText(P));}, //P.cloneNode(true)
 		react	:(node,alias,value,handle,hilite)=>{//,capture
 				const	event	= alias||DEFAULT.EVENT,
 					donor	= value||node.P,
