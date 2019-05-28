@@ -1537,6 +1537,7 @@ const	dap=(Env=>
 				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
 				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
 				now	: elem	=>document.body.appendChild(elem),
+				focus	: elem	=>setTimeout(()=>elem.focus(),5),
 				
 				sync	: req	=> Http.query(req,null),
 				query	: req	=> Http.query(req,new dap.Execute.Postpone()),
