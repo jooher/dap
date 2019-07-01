@@ -1580,5 +1580,5 @@ const	dap=(Env=>
 dap.Infect(String.prototype);
 
 (inline=>{
-	if(inline)eval(inline)
+	if(inline)eval(inline.replace(/\s\s+/g,' '))
 })(document.currentScript.text);

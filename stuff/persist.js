@@ -68,4 +68,4 @@ const Persist=((storage,box,unbox)=>{ // keeps the data coherent among several t
 			}
 		}
 	}
-})(localStorage,dap.Env.Json.encode,dap.Env.Json.decode),
+})(localStorage,dap.Env.Json.encode,dap.Env.Json.decode)
