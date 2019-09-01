@@ -39,15 +39,15 @@
 </pre>
 
 <h3>Signatures</h3>
-<p>Signatures designate generic properties for their generated elements. For HTML elements, these properties are: tag, css class, id, other HTML attributes.</p>
+<p>Signatures designate generic properties for generated elements. In HTML, these generic properties are: tag name, css class, id and all other HTML attributes.</p>
 <p>The simplest and the most common signature consists of a single lower-case word. Such signatures designate a default element, which is DIV, assigned a CSS class. For example: <code>'sidebar'</code> will render into DOM as <code>&lt;DIV class="sidebar"&gt;</code> element. Multiple classes can be combined using a dot, in a CSS-like manner: <code>'message.critical'</code> will render <code>&lt;DIV class="message critical"&gt;</code>.</p>
 <p>When a specific element is needed, its tag name is specified in upper case: <code>'SECTION.text.small'</code> will render <code>&lt;SECTION class="text small"&gt;</code>.</p>
-<p>Element id can be specified with a <code>#</code> (also, a CSS-like manner): <code>'IMG.cropped#Portrait'</code> will render <code>&lt;IMG class="cropped" id="Portrait"&gt;</code>.</p>
+<p>Element id can be specified with a <code>#</code> (also, in a CSS-like manner): <code>'IMG.cropped#Portrait'</code> will render <code>&lt;IMG class="cropped" id="Portrait"&gt;</code>.</p>
 <p>Any other desired attributes can also be specified in the signature, just as in HTML. Examples of valid signatures are: <code>'A href=about.html'</code>, <code>'description contenteditable'</code>, <code>'OPTION disabled selected value="Please select"'</code>, <code>'FORM#pay method=post target=_blank action="http://mysite.com/pay.php"'</code>, etc.</p>
 
 <a name="rules-and-contexts"/>
 <h3>Rules</h3>
-<p>Generation and interaction rules define the element's behavior on different phases of its life cycle:</p>
+<p>Rules are the most essential part of dap. Generation and interaction rules define the element's behavior on different phases of its life cycle:</p>
 <ul>
 	<li><em>d-rule</em> is executed on "down" phase, when the document is populated, from root <i>down</i> to child elements</li>
 	<li><em>a-rule</em> is accumulation rule, similar to d-rule, but appends changes to the existing element instead of building it anew</li>
@@ -71,7 +71,7 @@
 	<li>A <code>!!</code> (set attribute) operator with two named arguments, for <code>href</code> and <code>target</code> attributes.</li>
 </ol>
 <p>Identifiers (names for operators, variables and all other lexical elements) may consist of any combination of any characters except whitespace, brackets and reserved symbols <code>.,;:$@=</code>. All other characters are allowed. For example, <code>!</code> and <code>??</code> are valid identifiers in dap.</p>
-<p class="why">Why use exclamation signs instead of good'ole <code>print</code>-like keywords? Well, dap "core" operators (as well as flatterners and convertors, dicussed later) tend to be expressed by symbols, not verbal English words. First of all, it is shorter — just one or two characters. Second, it is well distinct from verbal identifiers for data or other, more specific, stuff. And, obviously, it is language-neutral: you can pronounce it however you like, and it will look equally neat with lexems of any language you choose for your dap program: English, Russian, Chinese, whatever.</p>
+<p class="why">Why use exclamation signs instead of good'ole <code>print</code>-like keywords? Well, dap "core" operators (as well as flatterners and convertors, discussed later) tend to be expressed by symbols, not verbal English words. First of all, it is shorter — just one or two characters. Secondly, it is well distinct from verbal identifiers for data or other, more specific, stuff. And, obviously, it is language-neutral: you can pronounce it however you like, and it will look equally well with lexems of any natural language you choose for identifiers in your dap program: English, Russian, Chinese, whatever.</p>
 <p>Arguments are fed to the operator one by one, and operator consumes them sequentially. In the example above, the <code>!!</code> operator is first executed with <code>@href`http://dap.js.org/</code> argument (named "href", valued "http://dap.js.org/"), and then with <code>@target`_blank</code> argument.</p>
 <p>Operators may change the rule execution flow. For example, <code>?</code> operator terminates execution of the rule, if none of its aguments is truthy; while <code>*</code> executes the rest of the rule multiple times.</p>
 
@@ -109,6 +109,7 @@
 	cheese: "Say cheese!"
 })
 </pre>
+<p>In this example, the <code>$value</code> variable is defined for the <code>DIV class='cheese'</code> element and is thus accessible to all its descendants. The <code>BUTTON</code> and <code>INPUT</code> elements can modify <code>$value</code> according to their <i>ui-rules</i>, executed on their default ui events (<code>click</code> for BUTTON, <code>change</code> for INPUT): BUTTON sets it to "cheeeeese!", INPUT sets it to the the user input. On the other hand, the <code>INPUT</code> and the <code>DIV class='message'</code> elements refer to <code>$value</code> in their <i>d-rules</i>, that is: they are generated using this variable's value, they depend on it, and thus they will re-build every time <code>$value</code> is updated.</p>
 <p class="why">Here, you might have noticed that <code>BUTTON</code> and <code>DIV.message</code> templates use <code>!</code> operator to output their content (<code>cheese</code> constant and <code>$value</code> status variable, respectively), while <code>INPUT</code> template uses <code>!!</code> operator. The difference between the two operators is that the latter, <code>!!</code>, sets element's own properties instead of generating child elements. Here, it sets the <code>INPUT</code> element's value attribute.</p>
 
 <a name="data-entries"/>
@@ -133,8 +134,8 @@
 	,'message'.d("? ($color $fruit)!; ! (hint.choice $color $fruit.name $fruit.desc:brackets)sentence:uppercase,glitzy")
 )
 .DICT({
-	color	:["red","orange","yellow","green"], // datasets can be simple arrays of strings
-	fruit	:[ // or can be arrays of anything else
+	color	:["red","orange","yellow","green"], // datasets can be simple arrays of strings...
+	fruit	:[ // ...or can be arrays of anything else
 			{name:"apple", desc:"juicy fruit, usually round, contains iron"},
 			{name:"pear", desc:"sweet fruit in shape of a... well... pear"},
 			{name:"banana", desc:"long, bow-shaped fruit with soft thick skin"}
@@ -169,7 +170,7 @@
 <h3>Flatteners and convertors</h3>
 <p>For data transformations, dap provides mechanism of <em>flatteners</em> and <em>covertors</em>. These are ordinary Javascript functions — but with imposed uniform contracts:</p>
 <p>Convertors are <code>value=>value</code> functions, that is, they take a single value and return a single value. This contract allows to chain several convertors to be sequentially applied to a value, like <code>value:converter1,converter2,converterN</code> which is equiuvalent to <code>converterN(converter2(converter1(value)))</code> in Javascript notation. In the example above, the conversion chain <code>:uppercase,glitzy</code> first converts the input to upper case, then wraps it into the glitzy asterisks, as specified in the <code>.FUNC</code> section</p>
-<p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into a single value. In the example above, the <code>()sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single string) is then fed to the convertors.</p>
+<p>Flatteners are <code>([values],[names])=>value</code> functions, or <code>[values]=>value</code> if names are not used. These functions allow to "flatten" arbitrary number or arguments into a single value. In the example above, the <code>()sentence</code> flattener builds up a sentence from several wordings, by simply stitching them with a space character between. This sentence (a single string value) is then fed to the convertors.</p>
 <p>Another flattener featuring in <code>'message'</code> d-rule is dap's standard <code>()!</code> flattener, that tests if ALL of its arguments are <i>truthy</i>. Its counterpart, <code>()?</code> flattener, that you will see in the example below, tests if ANY of its arguments is truthy.</p>
 
 <h3>Named arguments</h3>
@@ -186,9 +187,9 @@
 })
 </pre>
 <p>So, what new can we see here? A <code>#</code> special entry that evaluates to "this element" at run time, a standard <code>:value</code> converter that "converts" an element to its "value" (which is slightly different for various types of elements), and standard <code>()uri</code> flattener that "flattens" its arguments into a single urlencoded query string using their values and names.</p>
-<p>Names of arguments are normally taken from their identifiers. For <code>$foo</code> variable, or <code>.foo</code> data entry, of <code>foo</code> constant, the name will be "foo". If argument is dot-routed, the name will be the tail part of its route: for <code>$customer.details.address</code> the name will be simply "address". The argument's default name can be altered with the <code>@</code> aliaser. For example, <code>$customer.details.address@ship-to</code> will be named "ship-to".</p>
-<p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But they can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email)?@login</code>.</p>
-<p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value it as is.</p>
+<p>Names of arguments are normally taken from their identifiers. For <code>$foo</code> variable, or <code>.foo</code> data entry, or <code>foo</code> constant, the name will be "foo". If argument is dot-routed, the name will be the tail part of its route: for <code>$customer.details.address</code> the name will be simply "address". The argument's default name can be altered with the <code>@</code> aliaser. For example, <code>$customer.details.address@ship-to</code> will be named "ship-to".</p>
+<p>Arguments can have empty names. By default, literals and flattened results have empty names, as they're not referred to by any indetifier. But they can be named explicitly, too: <code>@city`Moscow</code>, or <code>(.user.nickname .user.email .user.phone-number)?@login</code>.</p>
+<p>On the other hand, arguments named by default can be made "nameless", applying an empty aliaser to it. In the example above, <code>$code</code> and <code>$warehous</code> arguments of <code>()uri</code> flattener are named, and <code>()uri</code> treats them as URI parameters, that have to appear in the resulting URI string formatted as "&amp;name=value", while <code>base@</code> argument is nameless, so <code>()uri</code> does not treat it as  URI parameter, but inserts its value as it is.</p>
 
 <a name="working-with-external-data"/>
 <h2>Working with external data</h2>
