@@ -27,7 +27,11 @@ const	dap=(Env=>
 		"-?"	:num=>parseFloat(num)<0,	/// test negative
 		"0?"	:num=>parseFloat(num)===0,	/// test zero
 		"!0"	:num=>parseFloat(num)||"",	/// non-zero only
-		"??"	:arr=>arr&&arr.length,
+		
+		"!!"	:arr=>!isArray(arr),			/// not an array
+		"!?"	:arr=>!isArray(arr)&&arr!=null,	/// anything but an array
+		"?!"	:arr=>isArray(arr)&&!arr.length,	/// empty array
+		"??"	:arr=>isArray(arr)&&arr.length,	/// non-empty array
 		
 		"+"	:num=>Math.abs(parseFloat(num)||0),	/// abs
 		"-"	:num=>-(parseFloat(num)||0),		/// neg
@@ -42,7 +46,9 @@ const	dap=(Env=>
 		""	: Util.hash,
 		"?"	: values=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
 		"!"	: values=>{ for(let i=values.length;i--;)if(!values[i])return null; return values[0]; },	/// all - succeeds if empty token found
+		"?!"	: values=>values.pop() ? values[1] : values[0], // if-then-else
 		
+		"~"	: values=>{ const a=values[values.length-1]; let i=0;while(a!=values[++i]);return values[i-1]},		
 		eq	: values=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return null;return true; },
 		ne	: values=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return null; },
 		asc	: values=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return null;return a; },
@@ -67,7 +73,7 @@ const	dap=(Env=>
 		"!"	:Print,
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
-		"%"	:(value,alias,node)=>	{ node.$[0][''][alias]=value; },
+		"%"	:(value,alias,node)=>	{ const $=node.$[0]['']; if(alias)$[alias]=value; else for(k in value)$[k]=value[k]},
 		
 		"u"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React); },
 		"ui"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React,"ui"); },
@@ -76,8 +82,8 @@ const	dap=(Env=>
 		"a!"	:(value,alias,node)=> 	{ Execute.a(value||node); },
 		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
 		"d"	:(value,alias,node)=>	{ Execute.Rebuild(value||node) },
-		"a"	:(value,alias,node)=>	{ Env.delay(()=>Execute.a(alue||node,alias)) },
-		"u"	:(value,alias,node)=>	{ Env.delay(()=>Execute.u(value||node,alias)) }, //{ Execute.After.put(Execute.u,); },//{ Execute.u(value||node); }, //
+		"a"	:(value,alias,node)=>	{ Env.delay(_=>Execute.a(value||node,alias)) },
+		"u"	:(value,alias,node)=>	{ Env.delay(_=>Execute.u(value||node,alias)) }, //{ Execute.After.put(Execute.u,); },//{ Execute.u(value||node); }, //
 		
 		"*"	:(value,alias)=>	value && (alias?value.map(v=>Box(v,alias)):value), //!value ? false : !alias ? value : Dataset.mapGrid( alias.split(","), value ),
 		"?"	:(value,alias)=>	!!value,
@@ -122,7 +128,8 @@ const	dap=(Env=>
 			for(let a,i=values.length;i--;)
 				if(a=tags[i])hash[a]=values[i];
 				else if(a=values[i])
-					for(let j in a)hash[j]=a[j];
+					for(let j in a)
+						if(j)hash[j]=a[j];
 			return hash;
 		}
 	
@@ -231,17 +238,7 @@ const	dap=(Env=>
 				},
 				
 			$$	:function(){ return this.tgt=this },
-			/*
-			set	:function(key,stuff,react){
-					const p = this.tgt || new Proto(this.ns,this.utag).$$();
-					if(stuff.length){
-						if(stuff[0].replace)	append(p.attrs,key,stuff.shift());
-						if(stuff.length)	append(p.stuff,key,stuff);
-					}
-					if(react)p.react.push(key);
-					return p;
-				},
-			*/	
+
 			set	:function(key,stuff,react){
 					const	p = this.tgt || new Proto(this.ns,this.utag).$$();
 					if(stuff.length)
@@ -306,7 +303,7 @@ const	dap=(Env=>
 						this.react=null;
 					
 					if(this.utag)
-						this.elem=Env.Native(this.utag,this.rules[""]&&"ui");
+						this.elem=Env.Native(this.utag,!!this.rules[""]);
 					
 					// if(!this.elem && d && (d.defs||d.uses))
 						// Fail("Entry must be an element");
@@ -329,7 +326,7 @@ const	dap=(Env=>
 					
 				if(react)
 					for(let i=react.length; i-->0;){
-						if(!react[i])rules[react[i]=Env.uievent(node)]=rules[""];
+						if(!react[i])rules[react[i]=node.getAttribute("ui")]=rules[""];
 						Env.react(node,react[i],null,Execute.React);
 					}
 					
@@ -595,19 +592,22 @@ const	dap=(Env=>
 				
 				return new Feed(values,tags,tokens,op);
 			}
-			
-			function makeArgsFeed(context,str){
-				let	a	= str.split(">");
-				const	flatten	= a[1] && context.ns.reach(a[1],FUNCS.FLATTEN),// : Util.hash,
-					tokens	= a[0] && (a=context.branchStack[a[0]]) && a.split(TOKENS);
-					
-				return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : EMPTY.Feed;
-			}
 						
-			
 			const
-			
-			makeConverts=(context,str)=>str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
+			makeArgsFeed = (context,str)=>{
+					let	a	= str.split(">");
+					const	flatten	= a[1] && ( a[1].charAt(0)=="."
+							? makeAccessor(makePath(a[1].substr(1)))
+							: context.ns.reach(a[1],FUNCS.FLATTEN)
+						),// : Util.hash,
+						tokens	= a[0] && (a=context.branchStack[a[0]]) && a.split(TOKENS);
+						
+					return	tokens ? makeTokens( context, tokens.reverse(), flatten ) : EMPTY.Feed;
+				},			
+			makeAccessor = path => values=>
+				Util.reach(values,path)
+			,
+			makeConverts =(context,str)=>str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
 			
 			return {		
 				engage	: function(){
@@ -743,7 +743,7 @@ const	dap=(Env=>
 						new Branch($,node,this.up).execBranch(step.branch); // node.$ ?
 						if(postpone){
 							postpone.branch=this;
-							postpone.todo=[postpone.todo,todo[1]];
+							postpone.todo=[{branch:postpone.todo},todo[1]];
 							return;
 						}
 					}else{										
@@ -754,7 +754,7 @@ const	dap=(Env=>
 							values	= step.values,
 							tags	= step.tags;
 
-						let	i	= tokens.length;
+						let	i	= tokens ? tokens.length : 0;
 							
 						while(i-- && !flow){
 							// null		- keep on
@@ -803,7 +803,7 @@ const	dap=(Env=>
 				let	converts= token.converts,
 					parts	= token.parts;
 			
-				let	value	= token.value || null, // might had been set as async target
+				let	value	= token.value, // || null, // might had been set as async target
 					p	= parts.length-1,
 					rvalue	= value==null && parts[p],
 					convert	= converts[p];
@@ -856,11 +856,6 @@ const	dap=(Env=>
 						
 						if(proto)
 							Print(proto,null,this.node,ctx(value,this.$,this.$[2],this.$[0]['']));
-		/*				{	
-							value['']=this.$[0][''];
-							Print(proto,null,this.node,[{'':value},this.$,this.$[2]]);
-						}
-*/						
 					}
 					
 				}
@@ -975,7 +970,7 @@ const	dap=(Env=>
 				
 					const	$	= node.$,
 						$0	= $[0],
-						defs	= !snitch&&d.defs,
+						defs	= !snitch&&d&&d.defs,
 						uses	= d&&d.uses,
 						affs	= a&&a.uses;
 						
@@ -1037,7 +1032,7 @@ const	dap=(Env=>
 						After.hold();
 						Perf("work: "+this.info,Date.now(),
 							this.branch.up
-							?this.branch.checkUp(this.instead,this.todo)
+							?this.branch.checkUp(this.instead,this.todo) /// [0] hack
 							:this.branch.runDown(this.todo,this.place,this.instead)
 						);
 						After.run();
@@ -1134,7 +1129,7 @@ const	dap=(Env=>
 			tag	= (type.length&&type[0]==type[0].toUpperCase()) ? type.shift().toLowerCase() : DEFAULT.TAG,
 			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
 		
-		if(ui)type.push(ui);
+		if(ui)elem.setAttribute("ui",Event.ui(elem));//type.push(ui);
 		if(type.length)elem.className = type.join(" ").toLowerCase();
 		if(id)elem.id=id;
 		return elem;
@@ -1147,16 +1142,25 @@ const	dap=(Env=>
 		
 		const
 		
-		stop	= window.Event		? (e)=>{ e.stopPropagation(); e.preventDefault(); return e; }
-						: ( )=>{ const e=window.event; e.cancelBubble=true; e.returnValue=false; return e; },
-						
-		attach	= doc.addEventListener	? (node,event,handler,capture)=>{node.addEventListener(event,handler,capture||false)}:
-			  doc.attachEvent	? (node,event,handler)=>{node.attachEvent("on"+event,handler,false)}
+		stop	= window.Event 
+			? (e)=>{ e.stopPropagation(); e.preventDefault(); return e; }
+			: ( )=>{ const e=window.event; e.cancelBubble=true; e.returnValue=false; return e; }
+				
+		return	{
+			attach	: doc.addEventListener	? (node,event,handler,capture)=>{node.addEventListener(event,handler,capture||false)}:
+					  doc.attachEvent	? (node,event,handler)=>{node.attachEvent("on"+event,handler,false)}
 						: console.warn("Can't listen to events"),//(node,event,handler)=>{node["on"+event]=handler},
 						
-		normalize = e=>{ stop(e); return {type:e.type, target:e.currentTarget||e.srcElement} }
-				
-		return	{ attach, normalize }
+			normalize 	: e=>{ stop(e); return {type:e.type, target:e.currentTarget||e.srcElement} },
+		
+		
+			ui	:(elems => node=>elems[node.nodeName.toLowerCase()] || ( node.isContentEditable ? 'blur' : DEFAULT.EVENT ) //'click',
+				)({
+					input		:'change',
+					select	:'change',
+					textarea	:'change'
+				})
+		}
 	})(),
 	
 	QueryString = (function(){
@@ -1298,7 +1302,7 @@ const	dap=(Env=>
 		},
 		
 		consume	=(request)=>{
-			//if(Math.floor(request.status/100)!=2)return;
+			if(Math.floor(request.status/100)!=2)return;
 			const	ctype=request.getResponseHeader('content-type'),
 				handle=ctype&&MimeHandlers[ctype.split(";")[0]];
 			return	handle ? handle(request) : request;
@@ -1470,10 +1474,6 @@ const	dap=(Env=>
 
 		console	:window.console,
 		
-		uievent	:node=>	node.nodeName.toLowerCase()=='input'	?'change':
-				node.nodeName.toLowerCase()=='select'	?'change':
-				node.isContentEditable	?'blur':
-				DEFAULT.EVENT,//'click',
 		
 		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P : newText(P));}, //P.cloneNode(true)
 		react	:(node,alias,value,handle,hilite)=>{//,capture
@@ -1569,7 +1569,10 @@ const	dap=(Env=>
 						if(alias)value?node.setAttribute(alias,value):node.removeAttribute(alias);
 						else node.innerHTML=value;//appendChild(newText(value));
 					},
-				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); }
+					
+				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },
+				
+				"!class":(value,alias,node)=>{ value && node.classList.add(value); }
 			}
 		}
 	}		
@@ -1579,6 +1582,4 @@ const	dap=(Env=>
 
 dap.Infect(String.prototype);
 
-(inline=>{
-	if(inline)eval(inline.replace(/\s\s+/g,' '))
-})(document.currentScript.text);
+(inline=>inline&&eval(inline.replace(/\/\/.*$/gm,' ').replace(/\s\s+/g,' ')))(document.currentScript.text);
