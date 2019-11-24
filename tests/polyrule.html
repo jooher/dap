@@ -6,10 +6,11 @@
 		.ui{cursor:pointer}
 		iframe{height:16em; width:100%; border:4px dashed orange;}
 		</style>
-		<script src="../-.js"></script>
+		<script src="../0.4.js"></script>
 	</head>
 	<body>  
 		<script>
+/*
 'favorite-fruit'.d("$choice="
 	,'o'.d("{* fruit; ! .fruit; ! `+}; ! `here")
 	,'B.selected'.d("! title ($choice not-yet)?")
@@ -25,7 +26,7 @@
 		.d(""
 			,'LI.last'.d("! `last")
 		)
-/**/
+
 )
 .DICT({
 	title:"My favorite fruit is ",
@@ -33,6 +34,11 @@
 	fruit:["apple","orange","tomato","banana"],
 	veg:["spinach","onion","cabbage"]
 })
+*/
+
+
+'H2'.d("! `Click").ui("? :alert`click")
+
 .RENDER()
 		</script>
 

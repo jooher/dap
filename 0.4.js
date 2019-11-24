@@ -567,9 +567,18 @@ const	dap=(Env=>
 							if(!tag)tag=path[0];
 						}
 
-						if( literal!=null && !feed && convert )
-							for(let i=convert.length;i--;)
-								literal=convert[i](literal);
+						if( literal!=null && !feed && convert ){
+							while(convert.length){
+								const	c=convert.pop(),
+									prep=c(literal);
+								if(prep!==undefined)
+									literal=prep;
+								else { // it was run-time converter
+									convert.push(c);
+									break;
+								}
+							}
+						}
 						
 						parts.push(new Rvalue(feed,path));
 						converts.push(convert);
@@ -862,14 +871,14 @@ const	dap=(Env=>
 				
 				if(value==null){
 					value = literal || "";
-					if(literal!=null)convert = null;// literal values are already pre-converted
+					//if(literal!=null)convert = null;// literal values are already pre-converted
 				}
 				
 				while(p>=0){
 				
 					if(convert)
 						for(let c=convert.length; c--; ){
-							value=convert[c](value);
+							value=convert[c](value,true);
 							if(postpone){//(value instanceof Postpone){
 								//this.postpone=value;
 								postpone.target= 
@@ -1530,20 +1539,20 @@ const	dap=(Env=>
 				
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
-				data	:elem=>[...elem.children].map(ch=>ch.$[0]['']),
+				data	: elem=>[...elem.children].map(ch=>ch.$[0]['']),
 		
-
-
 				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
 				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
 				now	: elem	=>document.body.appendChild(elem),
 				focus	: elem	=>setTimeout(()=>elem.focus(),5),
 				
 				sync	: req	=> Http.query(req,null),
-				query	: req	=> Http.query(req,new dap.Execute.Postpone()),
+				plused	: QueryString.plused,
 				
-				plused	: QueryString.plused 
-				
+				//run-time converters
+				query	: (req,r) => r&& Http.query(req,new dap.Execute.Postpone()),
+				alert : (msg,r) => r&& alert(msg)
+
 			},
 			
 			flatten	:{
@@ -1552,7 +1561,9 @@ const	dap=(Env=>
 				post	:(values,tags)	=> Request.post( values.pop(),values,tags ),
 				upload	:(values,tags)	=> Request.blob( values.pop(),values[0],tags[0] ),
 				
-				alert	:(values)	=>{ for(let i=values.length;i--;)alert(values[i]); },
+				alert	:(values)	=>values.reverse().forEach(alert),
+				
+				
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
 				prompt	:(values)	=>{ for(let i=values.length,a;i--;)if(a=prompt(values[i]))return a;},
 
