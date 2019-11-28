@@ -23,13 +23,6 @@ h2{margin-top:4em}
 #whydap>section{text-align:center}
 #whydap>section>h3{display:inline-block; padding: .4em 1em; background:#fd6}
 
- 
-pre{text-align:left; padding:2em; background-color:aliceblue; font: normal 1.2em/1.5 monospace; overflow:auto; }
-pre>i{color:cornflowerblue; opacity:.2; transition:opacity .5s}
-pre:hover>i{opacity:1}
-pre>b{color:mediumblue}
-pre>em{background:lavender; font-style:normal}
-
 
 /* samples */
 .allcaps{text-transform:uppercase}
