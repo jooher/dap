@@ -1,6 +1,6 @@
 .EMPTY		{display:none !important}
 
-.ui		{cursor:pointer; }
+[ui]		{cursor:pointer; }
 .over		{color:steelblue; }
 .chosen		{text-decoration:underline; }
 .clip		{overflow:hidden; }
