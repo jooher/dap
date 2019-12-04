@@ -1318,7 +1318,7 @@ const	dap=(Env=>
 					request.setRequestHeader(i,req.headers[i]);
 			
 			return request;
-		},
+		};
 		
 		return (req,synch)=>synch?makeXHR(req,synch).send(req.body||null):
 		
@@ -1327,10 +1327,10 @@ const	dap=(Env=>
 				
 				request.onreadystatechange = ()=> 
 					(request.readyState == 4) &&
-					(request.status>=200 && request.status < 300)
+					(request.status>=200 && request.status < 300
 						? resolve(request)
-						: reject(request);
-				
+						: reject(request)
+					);
 				try	{request.send(req.body||null);}
 				catch(e){console.warn(e.message);}
 			});
@@ -1350,7 +1350,7 @@ const	dap=(Env=>
 		
 		handle= request=>{
 			const	ctype=request&&request.getResponseHeader('content-type'),
-				h=ctype&&MimeHandlers[ctype.split(";")[0]];
+				h=ctype&&types[ctype.split(";")[0]];
 			return h ? h(request) : request;
 		};
 		
