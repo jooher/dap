@@ -1320,20 +1320,27 @@ const	dap=(Env=>
 			return request;
 		};
 		
-		return (req,synch)=>synch?makeXHR(req,synch).send(req.body||null):
-		
-			new Promise((resolve,reject)=>{
-				const request=makeXHR(req);
-				
-				request.onreadystatechange = ()=> 
-					(request.readyState == 4) &&
-					(request.status>=200 && request.status < 300
-						? resolve(request)
-						: reject(request)
-					);
-				try	{request.send(req.body||null);}
-				catch(e){console.warn(e.message);}
-			});
+		return (req,synch)=>{
+			const request=makeXHR(req,synch);
+			
+			try	{request.send(req.body||null);}
+			catch(e){console.warn(e.message);}
+			
+			if(synch){
+				return request;
+			}else{
+				return new Promise((resolve,reject)=>{
+						
+						request.onreadystatechange = ()=> 
+							(request.readyState == 4) &&
+							(request.status>=200 && request.status < 300
+								? resolve(request)
+								: reject(request)
+							);
+					});
+			}
+			
+		}
 	
 	})(),
 	
