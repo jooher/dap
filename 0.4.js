@@ -213,7 +213,7 @@ const	dap=(Env=>
 			let	a = namespaces[uri];
 			return	a||(namespaces[uri]=
 				a=document.getElementById(uri) ? evaluate(a.textContent) :
-				Env.Http(uri) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
+				Env.Mime.handle(Env.Http(uri,true)) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
 			)
 		},
 		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
@@ -1301,6 +1301,7 @@ const	dap=(Env=>
 	
 	Http	= (function(){
 
+		const
 
 		makeXHR = (req,synch)=>{
 			if(typeof req === "string") req={url:req};//url,body,headers,method,contentType,)
@@ -1317,20 +1318,22 @@ const	dap=(Env=>
 					request.setRequestHeader(i,req.headers[i]);
 			
 			return request;
-		};
+		},
 		
-		return req=>new Promise((resolve,reject)=>{
-			const request=makeXHR(req);
-			
-			request.onreadystatechange = ()=> 
-				(request.readyState == 4) &&
-				(request.status>=200 && request.status < 300)
-					? resolve(request)
-					: reject(request);
-			
-			try	{request.send(req.body||null);}
-			catch(e){console.warn(e.message);}
-		});
+		return (req,synch)=>synch?makeXHR(req,synch).send(req.body||null):
+		
+			new Promise((resolve,reject)=>{
+				const request=makeXHR(req);
+				
+				request.onreadystatechange = ()=> 
+					(request.readyState == 4) &&
+					(request.status>=200 && request.status < 300)
+						? resolve(request)
+						: reject(request);
+				
+				try	{request.send(req.body||null);}
+				catch(e){console.warn(e.message);}
+			});
 	
 	})(),
 	
@@ -1346,7 +1349,7 @@ const	dap=(Env=>
 		},
 		
 		handle= request=>{
-			const	ctype=request.getResponseHeader('content-type'),
+			const	ctype=request&&request.getResponseHeader('content-type'),
 				h=ctype&&MimeHandlers[ctype.split(";")[0]];
 			return h ? h(request) : request;
 		};
