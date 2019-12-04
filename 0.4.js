@@ -1301,52 +1301,60 @@ const	dap=(Env=>
 	
 	Http	= (function(){
 
-		const
-		
-		MimeHandlers={
-			"text/plain"		: request => request.responseText,
-			"application/json"	: request => Json.decode(request.responseText),//,request.getResponseHeader("X-Columns")//Dataset.unpack();
-			"application/javascript": request => eval(request.responseText),
-			"application/xml"	: request => request.responseXML.documentElement
-		},
-		
-		consume	=(request)=>{
-			if(Math.floor(request.status/100)!=2)return;
-			const	ctype=request.getResponseHeader('content-type'),
-				handle=ctype&&MimeHandlers[ctype.split(";")[0]];
-			return	handle ? handle(request) : request;
-		},
-	
-		query	=(req,postpone)=>{//url,body,headers,method,contentType,)
-		
-			if(typeof req === "string") req={url:req};
+
+		makeXHR = (req,synch)=>{
+			if(typeof req === "string") req={url:req};//url,body,headers,method,contentType,)
+
 		
 			const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
 				method	= req.method || ( req.body ? "POST" : "GET" );
 			
-			request.open( method,req.url,!!postpone ); //Uri.absolute(req.url)
+			request.open( method,req.url,!synch ); //Uri.absolute(req.url)
 			request.setRequestHeader("Content-Type",req.mime);
 			
 			if(req.headers)
 				for(let i in req.headers)
 					request.setRequestHeader(i,req.headers[i]);
 			
-			if(postpone){
-				postpone.info = req.url;
-				request.onreadystatechange=function (){
-					if(this.readyState==4)postpone.resolve(consume(this));
-				}
-			}				
+			return request;
+		};
+		
+		return req=>new Promise((resolve,reject)=>{
+			const request=makeXHR(req);
+			
+			request.onreadystatechange = ()=> 
+				(request.readyState == 4) &&
+				(request.status>=200 && request.status < 300)
+					? resolve(request)
+					: reject(request);
 			
 			try	{request.send(req.body||null);}
 			catch(e){console.warn(e.message);}
-			
-			return postpone ? req.url : consume(request);
-		};
-				
-		return { MimeHandlers, query }
+		});
+	
 	})(),
 	
+	Mime	= (function(){
+		
+		const
+		
+		types	={
+			"text/plain"		: request => request.responseText,
+			"application/json"	: request => Json.decode(request.responseText),
+			"application/javascript": request => eval(request.responseText),
+			"application/xml"	: request => request.responseXML.documentElement
+		},
+		
+		handle= request=>{
+			const	ctype=request.getResponseHeader('content-type'),
+				h=ctype&&MimeHandlers[ctype.split(";")[0]];
+			return h ? h(request) : request;
+		};
+		
+		return {types,handle}
+		
+	})(),
+
 	Request	= (function(){
 
 		function Post(url){
@@ -1479,7 +1487,7 @@ const	dap=(Env=>
 		
 		doc, DEFAULT, REUSE, 
 	
-		Native, Event, Style, Http, Uri, QueryString, Json, Storage, State, Blend,
+		Native, Event, Style, Http, Uri, Mime, QueryString, Json, Storage, State, Blend,
 
 		console	:window.console,
 		
@@ -1550,7 +1558,8 @@ const	dap=(Env=>
 				plused	: QueryString.plused,
 				
 				//run-time converters
-				query	: (req,r) => r&& Http.query(req,new dap.Execute.Postpone()),
+				http	: (req,r) => r&& dap.Async(Http(req),req.url||req),
+				query	: (req,r) => r&& dap.Async(Http(req),req.url||req,Mime.handle),
 				alert : (msg,r) => r&& alert(msg)
 
 			},
