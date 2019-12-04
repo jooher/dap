@@ -213,7 +213,7 @@ const	dap=(Env=>
 			let	a = namespaces[uri];
 			return	a||(namespaces[uri]=
 				a=document.getElementById(uri) ? evaluate(a.textContent) :
-				Env.Http.query(uri) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
+				Env.Http(uri) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
 			)
 		},
 		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
