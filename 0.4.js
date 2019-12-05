@@ -103,6 +103,7 @@ const	dap=(Env=>
 	E	= "",
 
 	isArray = Array.prototype.isArray,
+	
 	Print	= (value,alias,place,$)=> {
 		if(value!=null)
 			isArray(value)	? value.forEach(v=>Print(v,null,place,$)) :
@@ -195,7 +196,7 @@ const	dap=(Env=>
 				const	scope	= domain ? this.func[domain] : this.dict,
 					xtrn	= this.uses[key],
 					entry	= xtrn
-						? require(xtrn).lookup(path.length&&path,domain)
+						? (path.length?require(xtrn).lookup(path,domain):require(xtrn))
 						: scope&&scope[key] || this.inherit&&this.inherit.lookup(path,domain,key);
 				
 //				if(entry instanceof Ns)
@@ -213,7 +214,7 @@ const	dap=(Env=>
 			let	a = namespaces[uri];
 			return	a||(namespaces[uri]=
 				a=document.getElementById(uri) ? evaluate(a.textContent) :
-				Env.Mime.handle(Env.Http(uri,true)) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
+				Env.require(uri,true) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
 			)
 		},
 		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
@@ -1078,7 +1079,7 @@ const	dap=(Env=>
 				);
 			},
 			
-		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RUN(data),
+		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RENDER(data),
 		
 		NS	: uri => new Compile.Namespace(uri)
 
@@ -1303,43 +1304,42 @@ const	dap=(Env=>
 
 		const
 
-		makeXHR = (req,synch)=>{
+		makeXHR = (req,sync)=>{
 			if(typeof req === "string") req={url:req};//url,body,headers,method,contentType,)
 
 		
 			const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
 				method	= req.method || ( req.body ? "POST" : "GET" );
 			
-			request.open( method,req.url,!synch ); //Uri.absolute(req.url)
+			request.open( method,req.url,!sync ); //Uri.absolute(req.url)
 			request.setRequestHeader("Content-Type",req.mime);
 			
 			if(req.headers)
 				for(let i in req.headers)
 					request.setRequestHeader(i,req.headers[i]);
 			
-			return request;
-		};
-		
-		return (req,synch)=>{
-			const request=makeXHR(req,synch);
-			
 			try	{request.send(req.body||null);}
 			catch(e){console.warn(e.message);}
 			
-			if(synch){
-				return request;
-			}else{
-				return new Promise((resolve,reject)=>{
-						
-						request.onreadystatechange = ()=> 
-							(request.readyState == 4) &&
-							(request.status>=200 && request.status < 300
-								? resolve(request)
-								: reject(request)
-							);
-					});
-			}
+			return request;
+		};
+		
+		return {
 			
+			request: makeXHR,
+			
+			execAsync: (req,sync)=>{
+				const request=makeXHR(req,sync);
+				return sync?request:
+				new Promise((resolve,reject)=>{
+					request.onreadystatechange = ()=> 
+						(request.readyState == 4) &&
+						(request.status>=200 && request.status < 300
+							? resolve(request)
+							: reject(request)
+						);
+				})
+			}
 		}
 	
 	})(),
@@ -1358,14 +1358,14 @@ const	dap=(Env=>
 		handle= request=>{
 			const	ctype=request&&request.getResponseHeader('content-type'),
 				h=ctype&&types[ctype.split(";")[0]];
-			return h ? h(request) : request;
+			return h ? h(request) : request.responseText;
 		};
 		
 		return {types,handle}
 		
 	})(),
 
-	Request	= (function(){
+	Request= (function(){
 
 		function Post(url){
 			this.url=url;
@@ -1490,8 +1490,7 @@ const	dap=(Env=>
 			else
 				place.removeChild(instead);
 		}
-	}
-	
+	};
 	
 	return	{
 		
@@ -1500,7 +1499,6 @@ const	dap=(Env=>
 		Native, Event, Style, Http, Uri, Mime, QueryString, Json, Storage, State, Blend,
 
 		console	:window.console,
-		
 		
 		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P : newText(P));}, //P.cloneNode(true)
 		react	:(node,alias,value,handle,hilite)=>{//,capture
@@ -1533,6 +1531,10 @@ const	dap=(Env=>
 
 		open	:(url,frame)	=>{if(frame)window.open(url,frame);else location.href=url; },
 		
+		require: (url,sync)=>sync
+			? Mime.handle(Http.request(url,sync))
+			: Http.execAsync(url).then(Mime.handle),
+				
 		render	:function(proto,data,place,instead){
 				if(!place){
 					if(!instead)instead = document.currentScript;
@@ -1564,13 +1566,12 @@ const	dap=(Env=>
 				now	: elem	=>document.body.appendChild(elem),
 				focus	: elem	=>setTimeout(()=>elem.focus(),5),
 				
-				sync	: req	=> Http.query(req,null),
 				plused	: QueryString.plused,
 				
 				//run-time converters
-				http	: (req,r) => r&& dap.Async(Http(req),req.url||req),
-				query	: (req,r) => r&& dap.Async(Http(req),req.url||req,Mime.handle),
-				alert : (msg,r) => r&& alert(msg)
+				alert : (msg,r) => r&& alert(msg),
+				request:(req,r) => r&& dap.Async(Http.execAsync(req),req.url||req),
+				query	: (req,r) => r&& dap.Async(Http.execAsync(req).then(Mime.handle),req.url||req),
 
 			},
 			
