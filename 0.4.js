@@ -1134,9 +1134,9 @@ const	dap=(Env=>
 		const	space	= str.indexOf(" "),
 			extra	= space<0 ? null : str.substr(space),
 			head	= (extra ? str.substr(0,space) : str).split('#'),
-			type	= (head.shift()).split("."),
-			id	= head.length&&head[0],
-			tag	= (type.length&&type[0]==type[0].toUpperCase()) ? type.shift().toLowerCase() : DEFAULT.TAG,
+			id	= head&&head[1],
+			type	= head[0]&&head[0].split("."),
+			tag	= (type&&type.length&&type[0]==type[0].toUpperCase()) ? type.shift().toLowerCase() : DEFAULT.TAG,
 			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
 		
 		if(ui)elem.setAttribute("ui",Event.ui(elem));//type.push(ui);
@@ -1312,7 +1312,7 @@ const	dap=(Env=>
 				method	= req.method || ( req.body ? "POST" : "GET" );
 			
 			request.open( method,req.url,!sync ); //Uri.absolute(req.url)
-			request.setRequestHeader("Content-Type",req.mime);
+			//request.setRequestHeader("Content-Type",req.mime);
 			
 			if(req.headers)
 				for(let i in req.headers)
@@ -1567,6 +1567,7 @@ const	dap=(Env=>
 				focus	: elem	=>setTimeout(()=>elem.focus(),5),
 				
 				plused	: QueryString.plused,
+				json		: Json,
 				
 				//run-time converters
 				alert : (msg,r) => r&& alert(msg),
