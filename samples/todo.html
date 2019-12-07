@@ -51,20 +51,21 @@ const	active = todo=>!todo.completed,
 			.u("? $patch; (@method`PATCH .url headers $patch:json.encode@body):query $editing= $patch=")
 		)
 	)
-	,'#footer'.d("$patch"
-		,'#todo-count'.d("! $left=$todos:left items-left")
-		,'UL#filters'.d("* filter@"
-			,'LI'.d("! .title").ui("$filter=.test")
+	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"
+		,'#todo-count'.d("! $left.length items-left")
+		,'UL#filters'.d("* filters@"
+			,'LI'.d("! .title").ui("$filter=.")
 		)
-		,'#clear-completed'.d("! clear-completed $todos:done").ui("$todos=$todos:clean")
+		,'#clear-completed'
+			.d("! clear-completed $done.length")
+			.ui("$todos=$left") // * $done@ { ((@method`DELETE .url):query) }
 	)
 )
 .FUNC({
 	convert:{
-		done	: todos=>todos.filter(completed).length,
-		left	: todos=>todos.filter(active).length,
-		clean	: todos=>todos.filter(active),
-		toggle: (state=>todos=>(state=!state)||true&&todos.forEach(todo=>{todo.completed=state}).slice(0))()
+		done	: todos=>todos.filter(completed),
+		left	: todos=>todos.filter(active),
+		toggle: (state=>todos=>((state=!state)||true)&&todos.map(todo=>{todo.completed=state; return todo;}))(false)
 	},
 	flatten:{
 		filter: values=>values.reduce((a,f)=>f?a.filter(f):a,values.pop()),
@@ -73,17 +74,14 @@ const	active = todo=>!todo.completed,
 	}
 })
 .DICT({
-
 	root	:"https://todo-backend-express.herokuapp.com/",
-	headers: {"Content-type":"application/json"},
-	
-	
-	filter: [
+	headers: {"Content-type":"application/json"},	
+	//filter: ["All","Active","Completed"],
+	filters:[
 		{title:"All"},
-		{title:"Active", test: active },
-		{title:"Completed", test: completed }
+		{title:"Active",filter:active},
+		{title:"Completed",filter:completed}
 	],
-	
 	"items-left": " items left",
 	"clear-completed":"Clear completed items: "
 })

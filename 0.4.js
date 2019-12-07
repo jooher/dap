@@ -459,7 +459,7 @@ const	dap=(Env=>
 					return {branch:makeBranch(context,str.substr(1,str.length-2))};
 				
 				const	tokens	= str.split(TOKENS),
-					head	= !/[<$=]/.test(tokens[0]) && tokens.shift(),// operate:convert@alias
+					head	= !/[<$=`]/.test(tokens[0]) && tokens.shift(),// operate:convert@alias
 					bare	= !tokens.length,
 					reuse	= bare&&REUSE.DUMMIES[head];
 					
@@ -756,14 +756,14 @@ const	dap=(Env=>
 							postpone.todo=[{branch:postpone.todo},todo[1]];
 							return;
 						}
-					}else{										
+					}else{									
 						flow	= null;
 							
 						const	operate	= step.op,
 							tokens	= step.tokens,
 							values	= step.values,
 							tags	= step.tags;
-
+							
 						let	i	= tokens ? tokens.length : 0;
 							
 						while(i-- && !flow){
@@ -775,11 +775,16 @@ const	dap=(Env=>
 							// object	- subscope
 							const value = this.execToken(values[i],tokens[i]);
 							if(postpone){
-								postpone.branch=this;
-								postpone.todo=[new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate,postpone.todo),todo[1]];//
-								return;
+								postpone.ignorable = !operate&&postpone.ignorable;
+								if(!postpone.ignorable){
+									postpone.branch=this;
+									postpone.todo=[new Compile.Feed(values,tags,recap(tokens,i,postpone.token),operate,postpone.todo),todo[1]];//
+									return;
+								}
+								else postpone.untie();
+								  
 							}
-							if(operate)
+							else if(operate)
 								flow = operate(value,tags[i],node,$);
 						}
 						
@@ -817,7 +822,7 @@ const	dap=(Env=>
 					p	= parts.length-1,
 					rvalue	= value==null && parts[p],
 					convert	= converts[p];
-				
+									
 				if(rvalue){ 
 				
 					const	feed	= rvalue.feed,
@@ -850,6 +855,7 @@ const	dap=(Env=>
 							for(let i = tokens.length;i--;){
 								value=this.execToken(values[i],tokens[i]);
 								if(postpone){
+									postpone.ignorable = !i && postpone.ignorable;
 									postpone.token=
 									new Compile.Token(
 										recap(parts,p,new Compile.Rvalue(
@@ -882,6 +888,7 @@ const	dap=(Env=>
 							value=convert[c](value,true);
 							if(postpone){//(value instanceof Postpone){
 								//this.postpone=value;
+								postpone.ignorable = !p;
 								postpone.target= 
  								postpone.token=
 								new Compile.Token(
@@ -1010,12 +1017,13 @@ const	dap=(Env=>
 		};
 		
 		function Postpone(info,handle){
-			this.instead	= null;
+			this.instead= null;
 			this.place	= null;
 			this.target	= null;
 			this.branch	= null;
 			this.todo	= null;
 			this.token	= null;
+			this.ignorable=true;
 			this.time	= Date.now();
 			this.handle	= handle;
 			this.info	= info;
@@ -1026,6 +1034,9 @@ const	dap=(Env=>
 			postpone	= this;
 		};
 		Postpone.prototype = {
+			untie	:function(){
+					postpone=null;
+				},
 			locate	:function(instead){
 					if(this.instead=instead){
 						if(instead.replacer)instead.replacer.branch=null;
@@ -1336,7 +1347,7 @@ const	dap=(Env=>
 						(request.readyState == 4) &&
 						(request.status>=200 && request.status < 300
 							? resolve(request)
-							: reject(request)
+							: (reject&&reject(request))
 						);
 				})
 			}
