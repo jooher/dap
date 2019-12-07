@@ -45,11 +45,11 @@ const	active = todo=>!todo.completed,
 					.e("blur","$editing=")
 					
 				,'BUTTON.destroy'
-					.ui("(@method`DELETE .url):query; $todos=($todos $)remove")
+					.ui("(@method`DELETE .url:https):query; $todos=($todos $)remove")
 				
 			)
 			.a("!? $editing $completed")
-			.u("? $patch; (@method`PATCH .url headers $patch:json.encode@body):query $editing= $patch=")
+			.u("? $patch; (@method`PATCH .url:https headers $patch:json.encode@body):query $editing= $patch=")
 		)
 	)
 	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"
@@ -66,7 +66,8 @@ const	active = todo=>!todo.completed,
 	convert:{
 		done	: todos=>todos.filter(completed),
 		left	: todos=>todos.filter(active),
-		toggle: (state=>todos=>((state=!state)||true)&&todos.map(todo=>{todo.completed=state; return todo;}))(false)
+		toggle: (state=>todos=>((state=!state)||true)&&todos.map(todo=>{todo.completed=state; return todo;}))(false),
+		https	: url=>url.replace(/^http:/,'https:')
 	},
 	flatten:{
 		filter: values=>values.reduce((a,f)=>f?a.filter(f):a,values.pop()),
