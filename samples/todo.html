@@ -59,7 +59,7 @@ const	active = todo=>!todo.completed,
 		)
 		,'#clear-completed'
 			.d("! clear-completed $done.length")
-			.ui("$todos=$left") // * $done@ { ((@method`DELETE .url):query) }
+			.ui("$todos=$left; { * $done@; ((@method`DELETE .url):query) }") // 
 	)
 )
 .FUNC({
@@ -78,7 +78,6 @@ const	active = todo=>!todo.completed,
 .DICT({
 	root	:"https://todo-backend-express.herokuapp.com/",
 	headers: {"Content-type":"application/json"},	
-	//filter: ["All","Active","Completed"],
 	filters:[
 		{title:"All"},
 		{title:"Active",filter:active},
