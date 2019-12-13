@@ -24,7 +24,7 @@ const	active = todo=>!todo.completed,
 	,'#header'.d(""
 		,'H1'.d("! `todos")
 		,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
-			.ui(".title=#:value $todos=($todos (.title) )append (@method`POST root@url headers (.title):json.encode@body):query #.value=")
+			.ui(".title=#:value $todos=($todos (.title) )append #.value=")
 	)
 	,'#main'.d(""
 		,'#toggle-all type=checkbox'.ui("$todos=$todos:toggle")
@@ -50,6 +50,7 @@ const	active = todo=>!todo.completed,
 			)
 			.a("!? $editing $completed")
 			.u("? $patch; % (@method`PATCH .url:https headers $patch:json.encode@body):query; $editing= $patch=")
+			.d("? .url:!; % (@method`POST root@url headers (.title):json.encode@body):query")
 		)
 	)
 	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"
