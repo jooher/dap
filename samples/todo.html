@@ -49,7 +49,7 @@ const	active = todo=>!todo.completed,
 				
 			)
 			.a("!? $editing $completed")
-			.u("? $patch; (@method`PATCH .url:https headers $patch:json.encode@body):query $editing= $patch=")
+			.u("? $patch; % (@method`PATCH .url:https headers $patch:json.encode@body):query; $editing= $patch=")
 		)
 	)
 	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"
@@ -59,7 +59,7 @@ const	active = todo=>!todo.completed,
 		)
 		,'#clear-completed'
 			.d("! clear-completed $done.length")
-			.ui("$todos=$left; { * $done@; ((@method`DELETE .url):query) }") // 
+			.ui("$todos=$left; { * $done@; ((@method`DELETE .url:https):query) }") // 
 	)
 )
 .FUNC({
