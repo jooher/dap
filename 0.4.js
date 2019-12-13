@@ -73,7 +73,7 @@ const	dap=(Env=>
 		"!"	:Print,
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
-		"%"	:(value,alias,node)=>	{ const $=node.$[0]['']; if(alias)$[alias]=value; else for(k in value)$[k]=value[k]},
+		"%"	:(value,alias,node)=>	{ const $=node.$[0]['']; if(alias)$[alias]=value; else for(let k in value)$[k]=value[k]},
 		
 		"u"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React); },
 		"ui"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React,"ui"); },

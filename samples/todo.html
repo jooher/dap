@@ -29,7 +29,7 @@ const	active = todo=>!todo.completed,
 	,'#main'.d(""
 		,'#toggle-all type=checkbox'.ui("$todos=$todos:toggle")
 		,'UL#todo-list'.d("* ($todos $filter)filter"
-			,'LI'.d("$editing= $completed=.; {? .url:!; % (@method`POST root@url headers (.title):json.encode@body):query}; a!"
+			,'LI'.d("$editing= $completed=.; a!"
 			
 				,'INPUT.toggle type=checkbox'
 					.d("#.checked=$completed")
@@ -50,6 +50,7 @@ const	active = todo=>!todo.completed,
 			)
 			.a("!? $editing $completed")
 			.u("? $patch; % (@method`PATCH .url:https headers $patch:json.encode@body):query; $editing= $patch=")
+			.d("? .url:!; % (@method`POST root@url headers (.title):json.encode@body):query")
 		)
 	)
 	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"
