@@ -6,7 +6,6 @@
 	<script src="/0.4.js" _src="https://dap.js.org/0.4.js"></script>
 	<link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
 	<style>
-		.EMPTY{display:none !important}
 		[ui]{cursor:pointer}
 		#filters>li {margin:.2em}
 		#filters>li:hover{text-decoration:underline}
@@ -35,7 +34,7 @@ const	active = todo=>!todo.completed,
 					.d("#.checked=$completed")
 					.ui("$patch=(.completed=$completed=$completed:!)")
 					
-				,'LABEL'
+				,'LABEL.view'
 					.d("? $editing:!; ! .title")
 					.e("dblclick","$editing=:!; ?")
 					
@@ -50,7 +49,7 @@ const	active = todo=>!todo.completed,
 			)
 			.a("!? $editing $completed")
 			.u("? $patch; % (@method`PATCH .url:https headers $patch:json.encode@body):query; $editing= $patch=")
-			.d("? .url:!; % (@method`POST root@url headers (.title):json.encode@body):query")
+			.d("? .url:!; % (@method`POST root@url headers $:json.encode@body):query")
 		)
 	)
 	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"

@@ -220,14 +220,14 @@ const	dap=(Env=>
 		rootns	= new Namespace(Env.Uri.base).FUNC(Env.Func);//Uri.absolute()
 
 		function Proto(ns,utag){
-			this.ns		= ns||rootns;
+			this.ns	= ns||rootns;
 			this.utag	= utag;
+			this.stuff	= {};
+			this.reacts	= [];
 			
 			this.elem	= null;
 			this.rules	= null;
-			this.stuff	= {};
-			
-			this.react	= [];
+			this.events = null;
 			
 			this.tgt	= null;
 		}
@@ -245,7 +245,7 @@ const	dap=(Env=>
 					if(stuff.length)
 						(p.stuff[key]||(p.stuff[key]=[])).push(stuff);
 					if(react)
-						p.react.push(key);
+						p.reacts.push(key);
 					return p;
 				},
 				
@@ -253,7 +253,7 @@ const	dap=(Env=>
 			a	:function(...stuff)		{ return this.set("a",stuff) },
 			u	:function(...stuff)		{ return this.set("u",stuff) },
 			ui	:function(...stuff)		{ return this.set("",stuff,true) },//
-			e	:function(event,...stuff)	{ return this.set(event,stuff,true) },
+			e	:function(events,...stuff)	{ return this.set(events,stuff,true) },
 			
 			r	:function(rule)			{ return new Rule(this.ns,rule) },
 			
@@ -298,16 +298,17 @@ const	dap=(Env=>
 					for(let i in stuff)
 						this.rules[i] = new Rule(ns,stuff[i]);
 							
-					const	d = this.rules.d;//||(this.rules.d = stuff.d ? new Rule(ns,null,stuff.d) : new Rule()); //// DEFAULT.RULE?
-					
-					if(!this.react.length)
-						this.react=null;
-					
 					if(this.utag)
-						this.elem=Env.Native(this.utag,!!this.rules[""]);
+						this.elem=Env.Native(this.utag,!!this.rules[""]);					
 					
-					// if(!this.elem && d && (d.defs||d.uses))
-						// Fail("Entry must be an element");
+					if(this.reacts.length)
+						this.events=this.reacts.reduce((a,k)=>{
+							const	rule	= this.rules[k]||rules[""],
+								react	= k||this.elem.getAttribute("ui");
+							react.split(" ").forEach(e=>{this.rules[e]=rule});
+							return a+" "+react;
+						},
+						"").split(" ");					
 				}
 				return this.rules;
 			},
@@ -317,7 +318,6 @@ const	dap=(Env=>
 					d	= rules.d,
 					todo	= d ? d.todo||d.engage().todo : null,
 					node	= Env.clone(this.elem),
-					react	= this.react,
 					a	= rules.a;
 					
 				a&&(a.todo||a.engage());					
@@ -325,11 +325,8 @@ const	dap=(Env=>
 				node.P	= this;
 				node.$	= d&&d.defs ? [{'':$[0]['']},$,$[2]] : $;
 					
-				if(react)
-					for(let i=react.length; i-->0;){
-						if(!react[i])rules[react[i]=node.getAttribute("ui")]=rules[""];
-						Env.react(node,react[i],null,Execute.React);
-					}
+				if(this.events)
+					this.events.forEach(e=>{Env.Event.attach(node,e,Execute.React);})
 					
 				new Execute.Branch(node.$,node).runDown(todo,place,instead);//  
 				
@@ -955,7 +952,7 @@ const	dap=(Env=>
 					parent	= node.parentNode;
 					
 				let	route	= this.route,
-					rule	= route==true ? null : ( node.reacts && node.reacts[this.route] ) || P.rules[route] || P.rules.u,
+					rule	= route==true ? null : /*( node.events && node.events[route] ) || */ P.rules[route] || P.rules.u,
 					up	= {};
 					
 				if(rule)
@@ -1177,8 +1174,8 @@ const	dap=(Env=>
 		
 			ui	:(elems => node=>elems[node.nodeName.toLowerCase()] || ( node.isContentEditable ? 'blur' : DEFAULT.EVENT ) //'click',
 				)({
-					input		:'change',
 					select	:'change',
+					input		:'change', // blur
 					textarea	:'change'
 				})
 		}
@@ -1512,14 +1509,6 @@ const	dap=(Env=>
 		console	:window.console,
 		
 		print	:(place,P,alias)=>{place.appendChild(P.$ ? P : P.nodeType ? P : newText(P));}, //P.cloneNode(true)
-		react	:(node,alias,value,handle,hilite)=>{//,capture
-				const	event	= alias||DEFAULT.EVENT,
-					donor	= value||node.P,
-					rule	= donor.ubind ? donor.ubind(event) : donor[event] || donor.u;
-				(node.reacts||(node.reacts={}))[event]=rule;
-				if(hilite)Style.attach(node,hilite);
-				Event.attach(node,event,handle);
-			},
 			
 		adopt	:(place,instead,elem,empty,postponed)=>{
 			

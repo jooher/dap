@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Todo -- dap sample</title>
+	<link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
+	<script src="https://dap.js.org/0.4.js"></script>
+</head>
+
+<body>
+<script>
+'#todoapp'.d(""
+	,'#header'.d(""
+		,'H1'.d("")
+		,'INPUT#new-todo placeholder="What needs to be done?" autofocus'.d("")
+	)
+	,'#main'.d(""
+		,'#toggle-all type=checkbox'.d("")
+		,'UL#todo-list'.d("*@ todos:query" // Оператор * повторяет правило для всех элементов массива
+			,'LI'.d(""
+				,'INPUT.toggle type=checkbox'.d("#.checked=.completed") // # обозначает "этот элемент"
+				,'LABEL'.d("! .title") // Оператор ! просто добавляет текст в элемент
+				,'BUTTON.destroy'.d("")
+			)
+		)
+	)
+	,'#footer'.d(""
+		,'#todo-count'.d("")
+		,'UL#filters'.d(""
+			,'LI'.d("")
+		)
+		,'#clear-completed'.d("")
+	)
+)
+.DICT({
+	todos	: "https://todo-backend-express.herokuapp.com/"
+})
+.RENDER()
+</script>
+</body>
+
+</html>
