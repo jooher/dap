@@ -19,7 +19,7 @@ const	active = todo=>!todo.completed,
 	completed = todo=>!!todo.completed;
 	
 	
-'#todoapp'.d("$todos=root:query $filter= $patch="
+'#todoapp'.d("$todos= $filter= $patch="
 	,'#header'.d(""
 		,'H1'.d("! `todos")
 		,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
@@ -44,12 +44,12 @@ const	active = todo=>!todo.completed,
 					.e("blur","$editing=")
 					
 				,'BUTTON.destroy'
-					.ui("(@method`DELETE .url:https):query; $todos=($todos $)remove")
+					.ui("(@method`DELETE .url:dehttp):query; $todos=($todos $)remove")
 				
 			)
 			.a("!? $editing $completed")
-			.u("? $patch; % (@method`PATCH .url:https headers $patch:json.encode@body):query; $editing= $patch=")
-			.d("? .url:!; % (@method`POST root@url headers $:json.encode@body):query")
+			.u("? $patch; % (@method`PATCH .url:dehttp headers $patch@):query; $editing= $patch=")
+			.d("? .url:!; % (@method`POST todos@url headers $):query")
 		)
 	)
 	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"
@@ -59,24 +59,26 @@ const	active = todo=>!todo.completed,
 		)
 		,'#clear-completed'
 			.d("! clear-completed $done.length")
-			.ui("$todos=$left; { * $done@; ((@method`DELETE .url:https):query) }") // 
+			.ui("$todos=$left; { * $done@; ((@method`DELETE .url:dehttp):query) }") // 
 	)
+	,'loader'.u("$todos=todos:query").d("u")
 )
+
 .FUNC({
 	convert:{
-		done	: todos=>todos.filter(completed),
-		left	: todos=>todos.filter(active),
+		done	: todos=>todos&&todos.filter(completed),
+		left	: todos=>todos&&todos.filter(active),
 		toggle: (state=>todos=>((state=!state)||true)&&todos.map(todo=>{todo.completed=state; return todo;}))(false),
-		https	: url=>url.replace(/^http:/,'https:')
+		dehttp: url=>url.replace(/^https?:/,'')
 	},
 	flatten:{
-		filter: values=>values.reduce((a,f)=>f?a.filter(f):a,values.pop()),
-		remove: values=>values.reduce((a,del)=>a.filter(r=>r!=del),values.pop()),
-		append: values=>values.reduce((a,add)=>a.concat(add),values.pop())
+		filter: values=>values.reduce((a,f)=>f?a&&a.filter(f):a,values.pop()),
+		remove: values=>values.reduce((a,del)=>a&&a.filter(r=>r!=del),values.pop()),
+		append: values=>values.reduce((a,add)=>a?a.concat(add):[add],values.pop())
 	}
 })
 .DICT({
-	root	:"https://todo-backend-express.herokuapp.com/",
+	todos	:"//todo-backend-express.herokuapp.com/",
 	headers: {"Content-type":"application/json"},	
 	filters:[
 		{title:"All"},
