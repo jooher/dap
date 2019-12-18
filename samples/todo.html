@@ -49,7 +49,7 @@ const	active = todo=>!todo.completed,
 			)
 			.a("!? $editing $completed")
 			.u("? $patch; % (@method`PATCH .url:dehttp headers $patch@):query; $editing= $patch=")
-			.d("? .url:!; % (@method`POST todos@url headers $):query")
+			.d("? .url:!; % (@method`POST todos@url headers (.title)):query")
 		)
 	)
 	,'#footer'.d("$patch $left=$todos:left $done=$todos:done"

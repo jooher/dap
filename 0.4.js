@@ -78,7 +78,7 @@ const	dap=(Env=>
 		"u"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React); },
 		"ui"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React,"ui"); },
 		
-		"d!"	:(value,alias,node)=>	{ Execute.update(value||node); },
+		//"d!"	:(value,alias,node)=>	{ Execute.update(value||node); },
 		"a!"	:(value,alias,node)=> 	{ Execute.a(value||node); },
 		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
 		"d"	:(value,alias,node)=>	{ Execute.Rebuild(value||node) },
@@ -127,7 +127,8 @@ const	dap=(Env=>
 		hash	: (values,tags)=>{
 			const hash={};
 			for(let a,i=values.length;i--;)
-				if(a=tags[i])hash[a]=values[i];
+				if((a=tags[i])!='%')
+					hash[a]=values[i];
 				else if(a=values[i])
 					for(let j in a)
 						if(j)hash[j]=a[j];
@@ -710,9 +711,10 @@ const	dap=(Env=>
 		})(),
 		
 		Append	=(node,$,todo)	=>{ new Branch($,node).run(todo) },
+		
 		Rebuild	=(node,$)	=>{ node.P.spawn($||node.$,node.parentNode,node) },				
 	
-		Update	=(node,event)	=>{ new Branch(node.$,node,{},event).checkUp() },		
+		Update	=(node,event)	=>{ new Branch(node.$,node,{},event).checkUp(node) },		
 		React	= e=>{
 			e=Env.Event.normalize(e);
 			After.hold();
@@ -1313,14 +1315,14 @@ const	dap=(Env=>
 		const
 
 		makeXHR = (req,sync)=>{
+			
 			if(typeof req === "string") req={url:req};//url,body,headers,method,contentType,)
-
+			else if(req[""])req.body=Mime.prepareContent(req,req[""]);
 		
 			const	request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
 				method	= req.method || ( req.body ? "POST" : "GET" );
 			
 			request.open( method,req.url,!sync ); //Uri.absolute(req.url)
-			//request.setRequestHeader("Content-Type",req.mime);
 			
 			if(req.headers)
 				for(let i in req.headers)
@@ -1356,20 +1358,30 @@ const	dap=(Env=>
 		
 		const
 		
-		types	={
+		decode	={
 			"text/plain"		: request => request.responseText,
 			"application/json"	: request => Json.decode(request.responseText),
 			"application/javascript": request => eval(request.responseText),
-			"application/xml"	: request => request.responseXML.documentElement
+			"application/xml"		: request => request.responseXML.documentElement
 		},
 		
-		handle= request=>{
-			const	ctype=request&&request.getResponseHeader('content-type'),
-				h=ctype&&types[ctype.split(";")[0]];
-			return h ? h(request) : request.responseText;
+		encode	={
+			"application/json"	: content=>Json.encode(content)		
+		},
+		
+		prepareContent= (req,content) =>{
+			const	ctype	= req&&req.headers['Content-type'],
+				h	= ctype&&encode[ctype.split(";")[0]];
+			return h ? h(content) : null;
+		},
+		
+		parseResponse= req=>{
+			const	ctype=req&&req.getResponseHeader('Content-type'),
+				h=ctype&&decode[ctype.split(";")[0]];
+			return h ? h(req) : req.responseText;
 		};
 		
-		return {types,handle}
+		return {encode,decode,parseResponse,prepareContent}
 		
 	})(),
 
@@ -1532,8 +1544,8 @@ const	dap=(Env=>
 		open	:(url,frame)	=>{if(frame)window.open(url,frame);else location.href=url; },
 		
 		require: (url,sync)=>sync
-			? Mime.handle(Http.request(url,sync))
-			: Http.execAsync(url).then(Mime.handle),
+			? Mime.parseResponse(Http.request(url,sync))
+			: Http.execAsync(url).then(Mime.parseResponse),
 				
 		render	:function(proto,data,place,instead){
 				if(!place){
@@ -1572,7 +1584,7 @@ const	dap=(Env=>
 				//run-time converters
 				alert : (msg,r) => r&& alert(msg),
 				request:(req,r) => r&& dap.Async(Http.execAsync(req),req.url||req),
-				query	: (req,r) => r&& dap.Async(Http.execAsync(req).then(Mime.handle),req.url||req),
+				query	: (req,r) => r&& dap.Async(Http.execAsync(req).then(Mime.parseResponse),req.url||req),
 
 			},
 			
