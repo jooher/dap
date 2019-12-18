@@ -209,18 +209,19 @@ todos:query
 
 <source lang="javascript">
 		,'UL#todo-list'.d("*@ todos:query"
-			,'LI'.d("$completed=.completed"
 			// Переменная состояния, инициализируем из одноименного поля .completed
+			,'LI'.d("$completed=.completed"
 				,'INPUT.toggle type=checkbox'
-					.d("#.checked=.completed")
 					// Начальное состояние галочки берем из данных
-					.ui("$completed=#.checked")
+					.d("#.checked=.completed")
 					// при нажатии обновляем переменную состояния $completed
+					.ui("$completed=#.checked")
 				,'LABEL'.d("! .title")
 				,'BUTTON.destroy'.d("")
-			).a("!? $completed")
+			)
 			// включаем или выключаем css-класс completed
 			// в зависимости от значения $completed
+			.a("!? $completed")
 		)
 </source>
 
@@ -238,24 +239,35 @@ todos:query
 <a href="http://dap.js.org/samples/tutorial/5-2.html">Смотрим</a>. Окей. С состоянием <code>$completed</code> разобрались. Завершенные дела стилизуются корректно и при начальной загрузке, и при последующих ручных переключениях.
 
 <h2>6. Редактирование названий дел</h2>
-Вернемся к оригиналу. При двойном клике по названию дела включается режим редактирования, в котором это название можно поменять. Там это реализовано так, что шаблон режима просмотра "view" (с галкой, названием и кнопкой удаления) целиком прячется, а показывается элемент <code>INPUT class="edit"</code>. Мы сделаем чуть иначе - прятать будем только элемент <code>LABEL</code>, т. к. остальные два элемента нам при редактировании не мешают. Просто допишем класс <code>view</code> элементу <code>LABEL</code>
+Вернемся к <a href="https://www.todobackend.com/client/index.html?https://todo-backend-express.herokuapp.com/">оригиналу</a>. При двойном клике по названию дела включается режим редактирования, в котором это название можно поменять. Там это реализовано так, что шаблон режима просмотра "view" (с галкой, названием и кнопкой удаления) целиком прячется, а показывается элемент <code>INPUT class="edit"</code>. Мы сделаем чуть иначе - прятать будем только элемент <code>LABEL</code>, т. к. остальные два элемента нам при редактировании не мешают. Просто допишем класс <code>view</code> элементу <code>LABEL</code>
 
 Для состояния "редактирование" определим в элементе <code>LI</code> переменную <code>$editing</code>. Изначально оно (состояние) сброшено, включается по <code>dblclick</code> на элементе <code>LABEL</code>, а выключается при расфокусе элемента <code>INPUT.edit</code>. Так и запишем:
 
 <source lang="javascript">
-			,'LI'.d("$completed=.completed $editing=; a!" // Теперь у нас здесь две переменные состояния
+			// Теперь у нас две переменные состояния
+			,'LI'.d("$completed=.completed $editing=; a!"
 				,'INPUT.toggle type=checkbox'
 					.d("#.checked=.completed")
 					.ui("$completed=#.checked")
 				,'LABEL.view'
-					.d("? $editing:!; ! .title") // Если $editing сброшена, то показываем этот элемент
-					.e("dblclick","$editing=`yes") // По dblclick установить $editing в непустое состояние
+					// Если $editing сброшена, то
+					// показываем этот элемент
+					.d("? $editing:!; ! .title")
+					// По dblclick установить $editing
+					// в непустое состояние
+					.e("dblclick","$editing=`yes")
 				,'INPUT.edit'
-					.d("? $editing; !! .title@value") // Этот элемент показываем если $editing не пустое
-					.ui(".title=#.value") // обновляем .title по событию change (ui событие по умолчанию для INPUT)
-					.e("blur","$editing=") // сбрасываем $editing по событию blur
+					// Показываем если $editing не пустое
+					.d("? $editing; !! .title@value")
+					// обновляем .title по событию change
+					// (ui событие по умолчанию для INPUT)
+					.ui(".title=#.value")
+					// сбрасываем $editing по событию blur
+					.e("blur","$editing=")
 				,'BUTTON.destroy'.d("")
-			).a("!? $completed $editing") // отражаем состояния $completed и $editing в css-классе элемента 'LI'
+			// отображаем состояния $completed и $editing
+			// в css-классе элемента 'LI'
+			).a("!? $completed $editing")
 </source>
 
 Теперь мы <a href="http://dap.js.org/samples/tutorial/6.html">можем</a> редактировать названия дел.
@@ -283,8 +295,9 @@ todos:query
 					.ui(".title=#.value; (@method`PATCH .url:dehttp (@Content-type`application/json)@headers (.title):json.encode@body):query")
 ...
 .FUNC({
-	convert:{ // конверторы - это функции с одним входом и одним выходом
-		dehhtp: url=>url.replace(/^https?\:/,'') // удаляем протокол из URL
+	convert:{
+	// конверторы - это функции с одним входом и одним выходом
+		dehhtp: url=>url.replace(/^https?\:/,'')// удаляем протокол из URL
 	}
 })
 </source>
@@ -318,25 +331,25 @@ todos:query
 А можно вынести этот PATCH-запрос "за скобки": 
 
 <source lang="javascript">
-			,'LI'.d("$completed=.completed $editing= $patch=; a!"
 			// Переменная $patch - посылка для сервера
+			,'LI'.d("$completed=.completed $editing= $patch=; a!"
 				,'INPUT.toggle type=checkbox'
 					.d("#.checked=.completed")
-					.ui("$patch=($completed=#.checked)")
 					// кладем в $patch измененный completed
+					.ui("$patch=($completed=#.checked)")
 				,'LABEL.view'
 					.d("? $editing:!; ! .title")
 					.e("dblclick","$editing=`yes")
 				,'INPUT.edit'
 					.d("? $editing; !! .title@value")
-					.ui("$patch=(.title=#.value)")
 					// кладем в $patch измененный title
+					.ui("$patch=(.title=#.value)")
 					.e("blur","$editing=")
 				,'BUTTON.destroy'.d("")
 			)
 			.a("!? $completed $editing")
-			.u("? $patch; (@method`PATCH .url:dehttp headers $patch@):query $patch=")
 			// если $patch не пустой, отправляем его серверу, потом сбрасываем
+			.u("? $patch; (@method`PATCH .url:dehttp headers $patch@):query $patch=")
 </source>
 			
 Тут дело вот в чем. Правила реакции относятся к группе "up-правил", которые исполняются "снизу вверх" - от потомка к родителю, до самого корня (эта последовательность может быть прервана при необходимости). Это чем-то похоже на "всплывающие" события в DOM. Поэтому какие-то фрагменты реакции, общие для нескольких потомков, можно поручить их общему предку.

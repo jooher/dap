@@ -1,17 +1,19 @@
 
 8. Добавление и удаление "дел"
 
+Итак,
+
 Для удаления "дела" из списка есть кнопка BUTTON.destroy. Удаление заключается в отправке серверу DELETE-запроса и собственно удаление с глаз долой соответствующего элемента LI со всем содержимым. С отправкой DELETE-запроса все понятно:
 
-				,'BUTTON.destroy'.ui("(@method`DELETE .url:dehttp):query")
-				
+        ,'BUTTON.destroy'.ui("(@method`DELETE .url:dehttp):query")
+        
 А вот с удалением элемента возможны варианты. Можно было бы схитрить и просто ввести еще одну переменную состояния, скажем, $deleted:
 
-			,'LI'.d("$completed=.completed $editing= $patch= $deleted=; a!" // Переменная $deleted как признак "удаленности"
-				//...
-				,'BUTTON.destroy'.d("(@method`DELETE .url:dehttp):query $deleted=`yes") // включил $deleted - вроде как бы удалил
-			)
-			.a("!? $completed $editing $deleted") // а в CSS прописать .deleted{display:none}
+      ,'LI'.d("$completed=.completed $editing= $patch= $deleted=; a!" // Переменная $deleted как признак "удаленности"
+        //...
+        ,'BUTTON.destroy'.d("(@method`DELETE .url:dehttp):query $deleted=`yes") // включили $deleted - вроде как бы удалили
+      )
+      .a("!? $completed $editing $deleted") // а в CSS прописать .deleted{display:none}
 
 И это бы как бы работало. Но это было бы читерством. Да и дальше по курсу у нас идут фильтры и счетчики активных и завершенных "дел" (то, что находится в #footer). Поэтому, лучше будем сразу по-честному удалять объект из списка "дел". То есть нам нужна возможность модифицировать этот список. Таким образом, сам список тоже становится переменной состояния.
 

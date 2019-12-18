@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<title>Todo -- dap sample</title>
 	<link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
-	<script src="https://dap.js.org/0.4.js"></script>
+	<script src="/0.4.js" _src="https://dap.js.org/0.4.js"></script>
 </head>
 
 <body>
@@ -17,13 +17,21 @@
 	,'#main'.d(""
 		,'#toggle-all type=checkbox'.d("")
 		,'UL#todo-list'.d("*@ todos:query"
-			,'LI'.d("$completed=.completed; a!" // Сразу же после инициализации переменной $completed используем ее в a-правиле
+			,'LI'.d("$completed=.completed $editing=; a!"
 				,'INPUT.toggle type=checkbox'
 					.d("#.checked=.completed")
 					.ui("$completed=#.checked")
-				,'LABEL'.d("! .title")
+				,'LABEL.view'
+					.d("? $editing:!; ! .title")
+					.e("dblclick","$editing=`yes")
+					
+				,'INPUT.edit'
+					.d("? $editing; !! .title@value")
+					.ui(".title=#.value; (@method`PATCH .url (@Content-type`application/json)@headers (.title):json.encode@body):query") // Уведомляем сервер
+					.e("blur","$editing=") 
+					
 				,'BUTTON.destroy'.d("")
-			).a("!? $completed")
+			).a("!? $completed $editing")
 		)
 	)
 	,'#footer'.d(""
@@ -35,7 +43,7 @@
 	)
 )
 .DICT({
-	todos	: "https://todo-backend-express.herokuapp.com/"
+	todos	: "//todo-backend-express.herokuapp.com/"
 })
 .RENDER()
 </script>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Todo -- dap sample</title>
+	<link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
+	<script src="/0.4.js" _src="https://dap.js.org/0.4.js"></script>
+</head>
+
+<body>
+<script>
+'#todoapp'.d(""
+	,'#header'.d(""
+		,'H1'.d("")
+		,'INPUT#new-todo placeholder="What needs to be done?" autofocus'.d("")
+	)
+	,'#main'.d(""
+		,'#toggle-all type=checkbox'.d("")
+		,'UL#todo-list'.d("*@ todos:query"
+			,'LI'.d("$completed=.completed $editing=; a!" // Теперь у нас здесь две переменные состояния
+				,'INPUT.toggle type=checkbox'
+					.d("#.checked=.completed")
+					.ui("$completed=#.checked")
+				,'LABEL.view'
+					.d("? $editing:!; ! .title") // Если $editing сброшена, то показываем этот элемент
+					.e("dblclick","$editing=`yes") // По dblclick установить $editing в непустое состояние
+					
+				'INPUT.edit'
+					.d("? $editing; !! .title@value") // Этот элемент показываем если $editing не пустое
+					.ui(".title=#.value") // обновляем .title по событию change (ui событие по умолчанию для INPUT)
+					.e("blur","$editing=") // сбрасываем $editing по событию blur
+					
+				,'BUTTON.destroy'.d("")
+			).a("!? $completed $editing") // отражаем состояния $completed и $editing в css-классе элемента 'LI'
+		)
+	)
+	,'#footer'.d(""
+		,'#todo-count'.d("")
+		,'UL#filters'.d(""
+			,'LI'.d("")
+		)
+		,'#clear-completed'.d("")
+	)
+)
+.DICT({
+	todos	: "https://todo-backend-express.herokuapp.com/"
+})
+.RENDER()
+</script>
+</body>
+
+</html>
