@@ -1,0 +1,15 @@
+pre{text-align:left; padding:2em; background-color:aliceblue; font: normal 1.2em/1.5 monospace; overflow:auto; }
+pre>i{color:cornflowerblue; opacity:.2; transition:opacity .5s}
+pre:hover>i{opacity:1}
+pre>b{color:mediumblue}
+pre>em{background:lavender; font-style:normal}
+
+.dapify	{margin:2em 0; position:relative}
+.dapify>pre{margin:0}
+.dapify>.run{padding:1em; box-shadow: 0 4px 12px rgba(0,40,50,.25); margin-top:1em; overflow:auto}
+
+.dapify>.buttons{position:absolute; right:4px; margin-top:-28px;}
+.dapify>.buttons>button{margin:0; width:32px; height:24px; }
+.dapify>.buttons>.welcome{display:inline; color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
+button.render:before{content:"►"}
+button.reset:before{content:"⌂"}

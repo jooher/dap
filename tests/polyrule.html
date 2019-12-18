@@ -6,33 +6,12 @@
 		.ui{cursor:pointer}
 		iframe{height:16em; width:100%; border:4px dashed orange;}
 		</style>
-		<script src="../-.js"></script>
+		<script src="../0.4.js"></script>
 	</head>
 	<body>  
 		<script>
-'favorite-fruit'.d("$choice="
-	,'o'.d("{* fruit; ! .fruit; ! `+}; ! `here")
-	,'B.selected'.d("! title ($choice not-yet)?")
-	,'UL.options'
-		.d("* fruit"
-			,'LI'	.d("! .fruit")
-				.ui("$choice=.fruit")
-		)
-		.d("* veg"
-			,'LI.side'.d("! .veg")
-		)
-		.d("! `done")
-		.d(""
-			,'LI.last'.d("! `last")
-		)
-/**/
-)
-.DICT({
-	title:"My favorite fruit is ",
-	"not-yet":"what?",
-	fruit:["apple","orange","tomato","banana"],
-	veg:["spinach","onion","cabbage"]
-})
+'BUTTON'.d("! `Click").ui(":query`https://mighty-sands-8773.herokuapp.com/; ! `.")
+
 .RENDER()
 		</script>
 

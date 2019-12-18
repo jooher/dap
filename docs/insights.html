@@ -1,0 +1,42 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Dap insights</title>
+	<link href="/docs/styles.css" rel="stylesheet" type="text/css"/>	
+</head>
+<body>
+
+<h1>Dap insights</h1>
+<p>Here, I will share some non-obvious dap insights, that may be surprising (likely, in a good way).</p>
+
+<h2>Not simply "If-gate"</h2>
+<p>The <code>?</code> operator that can be called "if-gate" for simplicity, offers some interesting possibilities. When several tokens are given, they are in fact executed sequentially until truthy result (or out of tokens). This allows to execute some conditional operation right there, in the <code>?</code>-step. For example: <code>? $data $data=source:query (dict.error.no-data)alert; </code> step will first check if <code>$data</code> is set, if not set (and only if not set!) it will try to query it from the <code>source</code>, and if the query fails and <code>$data</code> is still not set — alert the <code>dict.error.no-data</code> message and terminate the rule execution. If the <code>$data</code> is set (initially or after query), rule execution will continue.</p> 
+
+<h2>Asynchronous converters</h2>
+<p>Consider expression <code>$a:c1,c2,c3</code> where converters are applied in a chain. The naive interpretation of this expression in javascript terms would be <code>c3(c2(c1($a)))</code> which is okay in many cases. However, what if converters are asynchronous? Surprisingly, a semantically better javascript's equivalent for this simple dap construct is expressed in terms of Promises: <code>$a.then(c1).then(c2).then(c3)</code>.</p>
+
+<h2>Dot notation for array elements</h2>
+<p>In dap, array elements are accessed using dot notation instead of square bracket notation.</p>
+<pre class="dap">
+'B'.d("! arr.1")
+.DICT({
+	arr:["zero","one","two"]
+})
+</pre>
+<p class="why">As you probably know, JavaScript makes no real difference between "arrays" and "objects", and you can write <code>foo.bar</code> or <code>foo["bar"]</code> interchangeably. However, in Javascript you can write <code>foo["1"]</code> instead of <code>foo[1]</code>, but not <code>foo.1</code>. This is a purely synactic restriction that denies this short and neat syntax in Javascript. But not in dap.</p>
+
+
+</body>
+
+<!--
+<script src="https://cdn.jsdelivr.net/gh/jooher/dap/0.4.min.js"></script>
+-->
+<script src="../0.4.js"></script>
+<script src="../stuff/dapify.js"></script>
+
+<link href="/stuff/talks.css" rel="stylesheet" type="text/css"/>	
+<script src="/stuff/talks.js#msg=7"></script>
+
+</html>
+
+

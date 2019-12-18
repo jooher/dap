@@ -13,43 +13,24 @@ ol>li:before { content: counters(item, ".") ". "; counter-increment: item; color
  </head>
  <body>
   <script>
-'carshop'.d("$carname= $make= $year= $model= $engine="
-	,'car-picker'.d(""
-		,'SPAN'.d(""
-			,'SELECT.year' // years are taken immediately from DICT
-				.d("Hint(label.year@label); * year; Option(.year@value)")
-				.ui("$year=#:value")
-			,'SELECT.make' // makes are taken from a static file
-				.d("Hint(label.make@label); * (makes@)uri:query@make; Option(.make@value)")
-				.ui("$make=#:value")
-		).u("$model= $engine=") // reset $model and $engine, when make or year were changed 
-		,'SELECT.model' // once both $make and $year are set, related models are queried
-			.d("? ($make $year)!; Hint(label.model@label); * (base@ $make $year)uri:query@model; Option(.model@value)")
-			.ui("$model=#:value $engine=")
-		,'SELECT.engine' //once $model is set, carcodes are queried parametrically for given $make, $year and $model
-			.d("? $model; Hint(label.engine@label); * (base@ $make $year $model)uri:query; Option(.engine@label (`, .engine .carcode)join@value)")
-			.ui("$engine=#:value ")
-	).u("$carname=( $engine ( $year $make $model $engine )spaced )!") // $carname will be empty until $engine is set
-	,'H3'.d("! ($carname label.hint)?") // print $carname if set, otherwise a hint
-	,'A target=_blank'.d("? $carname; !! label.redir@ (`https://www.rockauto.com/en/catalog/ (`, $make $year $model $engine)join)uri+@href")
+'heroes'.d("$user=" // изначально $user не выбран
+
+	,'UL.users'.d("* :query`https://jsonplaceholder.typicode.com/users" // для каждого пользвателя из списка
+		,'LI'	.d("! .name") // вывести содержимое поля .name
+			.ui("$user=$") // при нажатии выбрать этого пользователя
+	)
+	
+	,'user'.d("*@ $user" // для выбранного $user
+		,'H2'.d("! .id `: .name") // вывести его .id и .name,
+		,'A'.d("!! .email@ (`mailto: .email)concat@href") // дать активную ссылку на .email,
+		
+		,'posts'.d("* (`https://jsonplaceholder.typicode.com/posts? .id@userId )uri:query" // и показать его посты
+			,'H3'.d("! .title")
+			,'p'.d("! .body")
+		)
+	)
 )
-.DICT({
-	year	: Array.from({length:20},(v,i)=>2019-i), // back to 20 years from year 2019
-	makes	: "/samples/carmakes.json", // car makes are collected in a static file
-	base	: "https://dapmx.org/stuff/rockauto.php?", // dynamic data is taken from Rockauto.com
-	label	:{
-		hint	: "Select a car, please",
-		please	: "Please select",
-		make	: "Car make",
-		year	: "Production year",
-		model	: "Model name",
-		engine	: "Engine",
-		redir	: "Search parts for this car at Rockauto.com"
-	},
-	// below are a couple of reusable parameterized templates
-	Hint	: 'OPTION selected disabled'.d("! .label"), // a placeholder hack for a SELECT
-	Option	: 'OPTION'.d("!! .value (.label .value)?") // set .value as attribute and display .label or .value 
-}).RENDER();
+.RENDER();
 
 
   </script>
