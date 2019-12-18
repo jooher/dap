@@ -96,10 +96,9 @@ const	dap=(Env=>
 	O	= [],
 	E	= "",
 
-	isArray = Array.prototype.isArray,
 	Print	= (value,alias,place,$)=> {
 		if(value!=null)
-			isArray(value)	? value.forEach(v=>Print(v,null,place,$)) :
+			Array.isArray(value)	? value.forEach(v=>Print(v,null,place,$)) :
 			value.spawn	? value.spawn($,place) :
 			Env.print(place,value,alias)			
 		},
@@ -728,7 +727,7 @@ const	dap=(Env=>
 			execBranch: //returns true if empty
 			function(todo){
 				
-				const	isArray	= Array.prototype.isArray,
+				const	isArray	= Array.isArray,
 					node	= this.node,
 					$	= this.$;
 					
@@ -1083,11 +1082,10 @@ const	dap=(Env=>
 })((function(){ // Environment
 
 	if(!String.prototype.trim)	String.prototype.trim	= function()		{return this.replace(/^\s+/g,"").replace(/\s+$/g,""); };
-	if(!Array.prototype.isArray)	Array.prototype.isArray	= function(arr)		{return Object.prototype.toString.call(arr) === "[object Array]"; };
 	if(!Array.prototype.indexOf)	Array.prototype.indexOf = function(x,from)	{for(let i=from||0,len=this.length;i<len;i++)if(this[i]==x)return i; return -1; };		
+	if(!Array.isArray) Array.isArray = arr=> Object.prototype.toString.call(arr) === "[object Array]";
 	
 	const	doc	= window.document,
-		isArray	= Array.prototype.isArray,
 		
 		DEFAULT	= {
 			TAG	: "div",
@@ -1127,7 +1125,7 @@ const	dap=(Env=>
 	Native	=(str,ui)=>{
 		if(!str)return DEFAULT.ELEMENT;
 		const	space	= str.indexOf(" "),
-			extra	= space<0 ? null : str.substr(space),
+			extra	= ~space ? str.substr(space) : null,
 			head	= (extra ? str.substr(0,space) : str).split('#'),
 			type	= (head.shift()).split("."),
 			id	= head.length&&head[0],
@@ -1387,7 +1385,7 @@ const	dap=(Env=>
 			
 		mark	:(node,cls,on)=>{
 				const	c	= " "+node.className+" ",
-					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
+					found	= ~c.indexOf(" "+cls+" "); //styled(c,cls);
 				if(!on!=!found)
 					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
 				return node;
@@ -1425,7 +1423,7 @@ const	dap=(Env=>
 					query	= full[0].split("?")[1],
 					state	= full[1];
 /*					
-				if(query && query.indexOf("=")>0)
+				if(query && ~query.indexOf("="))
 					window.location.href=Uri.base+"#!"+QueryString.merge(query,state);
 				else
 */					
@@ -1535,7 +1533,7 @@ const	dap=(Env=>
 
 
 				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
-				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
+				copy	: item	=>Array.isArray(item)?item.slice(0):Object.assign({},item),
 				now	: elem	=>document.body.appendChild(elem),
 				focus	: elem	=>setTimeout(()=>elem.focus(),5),
 				
