@@ -102,7 +102,7 @@ const	dap=(Env=>
 	O	= [],
 	E	= "",
 
-	isArray = Array.prototype.isArray,
+	isArray = Array.isArray,
 	
 	Print	= (value,alias,place,$)=> {
 		if(value!=null)
@@ -699,7 +699,7 @@ const	dap=(Env=>
 			execBranch: //returns true if empty
 			function(todo){
 				
-				const	isArray	= Array.prototype.isArray,
+				const	isArray	= Array.isArray,
 					node	= this.node,
 					$	= this.$;
 					
@@ -1062,11 +1062,11 @@ const	dap=(Env=>
 })((function(){ // Environment
 
 	if(!String.prototype.trim)	String.prototype.trim	= function()		{return this.replace(/^\s+/g,"").replace(/\s+$/g,""); };
-	if(!Array.prototype.isArray)	Array.prototype.isArray	= function(arr)		{return Object.prototype.toString.call(arr) === "[object Array]"; };
 	if(!Array.prototype.indexOf)	Array.prototype.indexOf = function(x,from)	{for(let i=from||0,len=this.length;i<len;i++)if(this[i]==x)return i; return -1; };		
+	if(!Array.isArray) Array.isArray = arr => Object.prototype.toString.call(arr) === "[object Array]";
 	
 	const	doc	= window.document,
-		isArray	= Array.prototype.isArray,
+		isArray	= Array.isArray,
 		
 		DEFAULT	= {
 			TAG	: "div",
