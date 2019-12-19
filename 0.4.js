@@ -906,8 +906,8 @@ const	dap=(Env=>
 			},
 
 			runDown:
-			function(todo,place,instead,postponed){
-				const elem=Env.adopt(place,instead,this.node,this.run(todo),postponed);//
+			function(todo,place,instead){
+				const elem=Env.adopt(place,instead,this.node,this.run(todo),this.postpone);//
 				if(this.postpone)this.postpone.locate(elem);
 			},
 			
@@ -1011,6 +1011,8 @@ const	dap=(Env=>
 						if(instead.replacer)instead.replacer.branch=null;
 						instead.replacer=this;
 					}
+					if(this.branch)
+						this.branch.postpone=null;
 					return this;
 				},
 				
@@ -1018,11 +1020,10 @@ const	dap=(Env=>
 					if(this.branch){
 						Perf("wait: ",this.time);
 						this.target.value=value;
-						this.branch.postpone=null;
 						Perf("work: "+this.info,Date.now(),
 							this.branch.up
 							? this.branch.checkUp(this.instead,this.todo) /// [0] hack
-							: this.branch.runDown(this.todo,this.place,this.instead,true)
+							: this.branch.runDown(this.todo,this.place,this.instead)
 						);
 					}
 					this.instead=null;
