@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Todo -- dap sample</title>
+  <link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
+  <script src="/0.4.js" _src="https://dap.js.org/0.4.js"></script>
+</head>
+
+<body>
+<script>
+'#todoapp'.d("$todos=todos:query"
+  ,'#header'.d(""
+    ,'H1'.d("")
+    ,'INPUT#new-todo placeholder="What needs to be done?" autofocus'.d("")
+  )
+  ,'#main'.d(""
+    ,'#toggle-all type=checkbox'.d("")
+    
+    ,'UL#todo-list'.d("*@ $todos"
+    
+      ,'LI'.d("$completed=.completed $editing= $patch=; a!"
+	
+        ,'INPUT.toggle type=checkbox'
+          .d("#.checked=.completed")
+          .ui("$patch=($completed=#.checked)")
+	    
+        ,'LABEL.view'
+          .d("? $editing:!; ! .title")
+          .e("dblclick","$editing=`yes")
+	    
+        ,'INPUT.edit'
+          .d("? $editing; !! .title@value")
+          .ui("$patch=(.title=#.value)")
+          .e("blur","$editing=")
+	    
+        ,'BUTTON.destroy'.d("(@method`DELETE .url:dehttp):query")
+      )
+      .a("!? $completed $editing")
+      .u("? $patch; (@method`PATCH .url:dehttp headers $patch@):query $patch=") 
+    )
+    
+  )
+  ,'#footer'.d(""
+    ,'#todo-count'.d("")
+    ,'UL#filters'.d(""
+      ,'LI'.d("")
+    )
+    ,'#clear-completed'.d("")
+  )
+)
+.DICT({
+  todos  : "//todo-backend-express.herokuapp.com/",
+  headers: {"Content-type":"application/json"}
+})
+.FUNC({
+  convert:{
+    dehttp: url=>url.replace(/^https?\:/,'')
+  }
+})
+.RENDER()
+</script>
+</body>
+
+</html>
