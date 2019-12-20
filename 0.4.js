@@ -709,6 +709,8 @@ const	dap=(Env=>
 				if(++stackDepth>100)
 					Fail("Suspicious recursion depth: "+node.P.rules.d.rulestring);
 				
+				this.postpone=null;
+				
 				for(let step;todo&&(step=todo[0]);todo=(flow==null)&&todo[1]){
 					if(step.branch){
 						new Branch($,node,this.up).execBranch(step.branch); // node.$ ?
@@ -901,14 +903,15 @@ const	dap=(Env=>
 			
 			run:
 			function(todo){
-				const empty = todo && this.execBranch(todo) && !this.node.childNodes.length; // is empty?
-				return empty;
+				const isEmpty = todo && this.execBranch(todo) && !this.node.childNodes.length; // is empty?
+				return isEmpty;
 			},
 
 			runDown:
 			function(todo,place,instead){
-				const elem=Env.adopt(place,instead,this.node,this.run(todo),this.postpone);//
-				if(this.postpone)this.postpone.locate(elem);
+				const postpone = this.postpone,
+					elem = Env.adopt(place,instead,this.node,this.run(todo),postpone);//
+				if(postpone)postpone.locate(elem);
 			},
 			
 			
