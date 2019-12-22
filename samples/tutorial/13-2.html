@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Todo -- dap sample</title>
+  <link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
+  <script src="/0.4.js" _src="https://dap.js.org/0.4.js"></script>
+</head>
+
+<body>
+<script>
+const
+  active = todos => todos && todos.filter( todo => !todo.completed ),
+  completed = todos => todos && todos.filter( todo => !!todo.completed );
+  
+
+'#todoapp'.d("$todos= $recount="
+  ,'#header'.d(""
+    ,'H1'.d("")
+    ,'INPUT#new-todo placeholder="What needs to be done?" autofocus' // добавить новое дело
+      .ui("$todos=($todos (#.value@title)@tgt):insert #.value=") // 
+  )
+  ,'#main'.d(""
+    
+    ,'INPUT#toggle-all type=checkbox'
+      .ui("*@ $todos=($todos (#.checked@completed)@src):assign; (@method`PATCH .url headers (.completed)):query")
+    
+    ,'UL#todo-list'.d("*@ ($todos $filter):filter"
+    
+      ,'LI'.d("$completed=.completed $editing= $patch=; a!"
+	
+        ,'INPUT.toggle type=checkbox'
+          .d("#.checked=.completed")
+          .ui("$patch=(.completed=$completed=#.checked) $recount=()")
+	    
+        ,'LABEL.view'
+          .d("? $editing:!; ! .title")
+          .e("dblclick","$editing=`yes")
+	    
+        ,'INPUT.edit'
+          .d("? $editing; !! .title@value")
+          .ui("$patch=(.title=#.value)")
+          .e("blur","$editing=")
+	    
+        ,'BUTTON.destroy'
+	    .ui("$todos=($todos $@tgt):remove (@method`DELETE .url:dehttp):query")
+      )
+      .a("!? $completed $editing; ? .url:!; % (@method`POST todos@url headers $):query")
+      .u("? $patch; (@method`PATCH .url:dehttp headers $patch@):query $patch=")
+    )
+  )
+  ,'#footer'.d("$recount $active=($todos @filter`Active):filter $completed=($todos @filter`Completed):filter"
+    ,'#todo-count'.d("! (active $active.length)here")
+    ,'UL#filters'.d("* filter"
+      ,'LI'
+	  .d("! .filter")
+	  .ui("$filter=.") // такая запись эквивалентна "$filter=.filter"
+    )
+    ,'#clear-completed'.d("! (completed $completed.length)here")
+  )
+  ,'loader'.d("u").u("$todos=todos:query")
+)
+.DICT({
+  todos  : "//todo-backend-express.herokuapp.com/",
+  headers: {"Content-type":"application/json"},
+  active: "{length} items left",
+  completed: "Clear completed items ({length})"
+  filter:["All","Active","Completed"]
+
+})
+.FUNC({
+  convert:{
+    dehttp: url => url.replace(/^https?\:/,''),
+    remove: x => x.todos.filter( todo => todo!=x.tgt ), // удалить объект из массива
+    insert: x => x.todos.concat( [x.tgt] ), // добавить объект в массив
+    
+    filter: x =>{
+	const
+	  a = x.todos,
+	  f = x.filter && filters[x.filter];
+	return a&&f ? a.filter(f) : a
+    }
+  }
+})
+.RENDER()
+</script>
+</body>
+
+</html>
