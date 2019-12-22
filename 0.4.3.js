@@ -1042,7 +1042,7 @@ const	dap=(Env=>
 				}
 		};
 
-		return	{ Branch, Postpone, Perf, React, inject,
+		return	{ Branch, Postpone, Perf, React, 
 		
 			Update,
 			Append,
@@ -1329,15 +1329,17 @@ const	dap=(Env=>
 		
 		const
 		
+		encode	={
+			"text/plain"		: str=>str,
+			"application/json"	: content=>Json.encode(content)		
+			"application/x-www-form-urlencoded" : obj => QueryString.build.ordered(obj)
+		},
+		
 		decode	={
 			"text/plain"		: request => request.responseText,
 			"application/json"	: request => Json.decode(request.responseText),
 			"application/javascript": request => eval(request.responseText),
 			"application/xml"		: request => request.responseXML.documentElement
-		},
-		
-		encode	={
-			"application/json"	: content=>Json.encode(content)		
 		},
 		
 		prepareContent= (req,content) =>{
@@ -1355,43 +1357,7 @@ const	dap=(Env=>
 		return {encode,decode,parseResponse,prepareContent}
 		
 	})(),
-
-	Request= (function(){
-
-		function Post(url){
-			this.url=url;
-			this.body=null;
-			this.mime=null;
-		};
-		
-		Post.prototype={
-			addForm	: function(values,tags){
-					var body="";
-					for(let i=values.length,v,t;i--;)
-						if(v=values[i])
-							body += (t=tags[i])
-							? "&"+t+"="+ encodeURIComponent( typeof v=="object" ? Json.encode(v) : v ) 
-							: Json.encode(v);
-					this.body=body;
-					v=body.charAt(0);
-					this.mime= v=='<'?"text/xml" : v=='&'?"application/x-www-form-urlencoded" : "text/plain";
-					return this;
-				},
-				
-			addBlob	: function(value,tag){
-					this.body=value;
-					this.mime=tag||"blob";
-					return this;
-				}
-		}
-		
-		return	{
-			post	:(url,values,tags)=>	new Post(url).addForm(values,tags),
-			blob	:(url,value,tag)=>	new Post(url).addBlob(value,tag)
-		}
-		
-	})(),
-
+	
 	Json	={
 		encode	:value	=>{let r=0; return value&&JSON.stringify(value,(k,v)=>(k||!r++)?v:undefined)},
 		decode	:value	=>value&&JSON.parse(value)
@@ -1461,12 +1427,14 @@ const	dap=(Env=>
 			
 	})(),
 */	
-	State = (state=>{
+	State = {
+		let	currentState=null;
+		
 		const
 		check = node => {
-			if(location.hash==state)return;
-			state=location.hash;
-			node.dispatchEvent(new window.Event("state"));
+			if(location.hash==currentState)return;
+			currentState=location.hash;
+			node.dispatchEvent(new Event("state"));
 		};
 		
 		return {
@@ -1474,10 +1442,10 @@ const	dap=(Env=>
 					check(node);
 					window.addEventListener("hashchange",e=>{check(node)})
 				},
-			set	: str => location.hash=state=str,
-			get	: _=>state
+			set	: state => location.hash=currentState=state,
+			get	: _=>currentState
 		}
-	})(null),
+	},
 
 
 	Blend	={
@@ -1548,7 +1516,7 @@ const	dap=(Env=>
 				State.bind(ready);
 			},
 			
-		delay	:f=>setTimeout(f,200),
+		delay	:f=>setTimeout(f,100),
 			
 		Func	:{
 			
@@ -1561,32 +1529,29 @@ const	dap=(Env=>
 				script	: url	=>dap.Util.merge(newElem("script"),{src:url,async:true,onload:()=>{doc.body.appendChild(el)}}),
 				copy	: item	=>isArray(item)?item.slice(0):Object.assign({},item),
 				now	: elem	=>document.body.appendChild(elem),
-				focus	: elem	=>setTimeout(()=>elem.focus(),5),
+				focus	: elem	=>delay(_=>elem.focus()),
 				
 				plused	: QueryString.plused,
 				json		: Json,
 				
 				//run-time converters
 				alert : (msg,r) => r&& alert(msg),
-				request:(req,r) => r&& Http.execAsync(req),
-				query	: (req,r) => r&& Http.execAsync(req).then(Mime.parseResponse),
+				prompt: (msg,r) => r&& prompt(msg),
+				confirm:(msg,r) => r&& confirm(msg),
 				
-				state : (_,r) => r && State.get()
+				request:(req,r) => r&& Http.execAsync(req),
+				query	: (req,r) => r&& Http.execAsync(req).then(Mime.parseResponse).catch(err=>{if(req.error)req.error[req.url]=req}),
+				
+				state : (_,r) => r && location.hash
+
 			},
 			
 			flatten	:{
-				uri	: QueryString.build.ordered,
-				
-				alert	:(values)	=>values.reverse().forEach(alert),
-				
-				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
-				prompt	:(values)	=>{ for(let i=values.length,a;i--;)if(a=prompt(values[i]))return a;},
-
+				uri	: QueryString.build.ordered, // function(values,tags)	{ return Uri.encode( values,tags ); },
 				format	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
 			},
 			
 			operate	:{
-				title	:(text)		=>{ doc.title=text; },
 				log	:(value,alias)	=>{ log(alias+": "+value); },
 				
 				"!!"	:(value,alias,node)=>{
@@ -1596,11 +1561,7 @@ const	dap=(Env=>
 					
 				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },
 				
-				"!class":(value,alias,node)=>{ value && node.classList.add(value); },
-				
-				watchstate: (value,alias,node)=>State.bind(node),
-				state : str=>State.set(str)
-				
+				"!class":(value,alias,node)=>{ value && node.classList.add(value); }
 			}
 		}
 	}		
