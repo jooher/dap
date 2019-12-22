@@ -38,7 +38,7 @@
         ,'BUTTON.destroy'
 	    .ui("$todos=($todos $@tgt):remove (@method`DELETE .url:dehttp):query")
       )
-      .a("!? $completed $editing; ? .url:!; % (@method`POST todos@url headers $):query")
+      .a("!? $completed $editing; ? .url:!; & (@method`POST todos@url headers $):query")
       .u("? $patch; (@method`PATCH .url:dehttp headers $patch@):query $patch=")
     )
   )

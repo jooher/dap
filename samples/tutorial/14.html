@@ -9,24 +9,32 @@
 
 <body>
 <script>
-'#todoapp'.d("$todos="
+
+const
+  todoFilters = {
+    "All": null,
+    "Active": todo => !todo.completed, 
+    "Completed": todo => !!todo.completed
+  };
+
+'#todoapp'.d("$todos= $filter= $recount="
   ,'#header'.d(""
     ,'H1'.d("")
     ,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
-      .ui("$todos=($todos (#.value@title)@tgt):insert #.value=")
+      .ui("$todos=($todos (#.value@title)@tgt):insert #.value=") 
   )
   ,'#main'.d(""
   
-    ,'INPUT#toggle-all type=checkbox' // установить или сбросить галку сразу всем делам
+    ,'INPUT#toggle-all type=checkbox'
       .ui("*@ $todos=($todos (#.checked@completed)@src):assign; (@method`PATCH .url headers (.completed)):query")
-    
-    ,'UL#todo-list'.d("*@ $todos"
+        
+    ,'UL#todo-list'.d("* ($todos $filter):filter"
     
       ,'LI'.d("$completed=.completed $editing= $patch=; a!"
 	
         ,'INPUT.toggle type=checkbox'
           .d("#.checked=.completed")
-          .ui("$patch=($completed=#.checked)")
+          .ui("$patch=(.completed=$completed=#.checked) $recount=()")
 	    
         ,'LABEL.view'
           .d("? $editing:!; ! .title")
@@ -44,25 +52,40 @@
       .u("? $patch; (@method`PATCH .url:dehttp headers $patch@):query $patch=")
     )
   )
-  ,'#footer'.d(""
-    ,'#todo-count'.d("")
-    ,'UL#filters'.d(""
-      ,'LI'.d("")
+  ,'#footer'.d("$active=($todos @filter`Active):filter $completed=($todos @filter`Completed):filter $recount"
+    ,'#todo-count'.d("! (active $active.length)format")
+    ,'UL#filters'.d("* filter"
+      ,'LI'
+	  .d("! .filter")
+	  .ui("$filter=.")
     )
-    ,'#clear-completed'.d("")
+    ,'#clear-completed'
+      .d("! (completed $completed.length)format")
+      .ui("$todos=$active; *@ $completed; (@method`DELETE .url:dehttp):query") // оставляем активные, удаляем звершенные
   )
   ,'loader'.d("u").u("$todos=todos:query")
 )
 .DICT({
   todos  : "//todo-backend-express.herokuapp.com/",
-  headers: {"Content-type":"application/json"}
+  headers: {"Content-type":"application/json"},
+  filter: Object.keys(todoFilters),
+  active: "{length} items left",
+  completed: "Clear completed items ({length})"
 })
 .FUNC({
   convert:{
     dehttp: url => url.replace(/^https?\:/,''),
-    remove: x => x.todos.filter( todo => todo!=x.tgt ), // удалить объект из массива
-    insert: x => x.todos.concat( [x.tgt] ), // добавить объект в массив
-    assign: x => x.todos && x.todos.map(todo => Object.assign(todo,x.src))
+    remove: x => x.todos.filter( todo => todo!=x.tgt ),
+    insert: x => x.todos.concat( [x.tgt] ),
+    assign: x => x.todos && x.todos.map(todo => Object.assign(todo,x.src)),
+    
+    filter: x =>{
+	const
+	  a = x.todos,
+	  f = x.filter && todoFilters[x.filter];
+	return a&&f ? a.filter(f) : a;
+    }
+    
   }
 })
 .RENDER()

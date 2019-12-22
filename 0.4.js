@@ -73,7 +73,8 @@ const	dap=(Env=>
 		"!"	:Print,
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
-		"%"	:(value,alias,node)=>	{ const $=node.$[0]['']; if(alias)$[alias]=value; else for(let k in value)$[k]=value[k]},
+		"%"	:(value,alias,node)=>	{ Execute.inject(value,alias,node); }, // DEPRECATED
+		"&"	:(value,alias,node)=>	{ Execute.inject(value,alias,node); },
 		
 		"u"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React); },
 		"ui"	:(value,alias,node)=>	{ Env.react(node,alias,value,Execute.React,"ui"); },
@@ -113,7 +114,7 @@ const	dap=(Env=>
 		
 	Util	={
 			
-		merge	: (tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;},//(Object.assign) ||
+		merge	: Object.assign || ((tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;}) ,//() ||
 		union	: (...src)=>src.reduce(Util.merge,{}),
 
 		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
@@ -669,7 +670,14 @@ const	dap=(Env=>
 			const datarow = data instanceof Object ? data : {"~":data}
 			datarow['']=updata;
 			return [{'':datarow},$,rowset];
-		},			
+		},
+
+		inject	=(value,alias,node)=>{
+			const $=node.$[0][''];
+			if(alias) $[alias]=value;
+			else Object.assign($,value);
+		},
+		
 		trace	=($,entry)=>$ && ( $[0][entry]==null ? $[0][entry]=trace($[1],entry) : $[0][entry] ),
 		
 		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;},
@@ -1568,7 +1576,7 @@ const	dap=(Env=>
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
 				prompt	:(values)	=>{ for(let i=values.length,a;i--;)if(a=prompt(values[i]))return a;},
 
-				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
+				format	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
 			},
 			
 			operate	:{
