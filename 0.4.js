@@ -1474,8 +1474,8 @@ const	dap=(Env=>
 					check(node);
 					window.addEventListener("hashchange",e=>{check(node)})
 				},
-			set	: str => location.hash=state=str,
-			get	: _=>state
+			set	: str => location.hash=state="#"+str,
+			get	: _=>state.substr(1)
 		}
 	})(null),
 
@@ -1545,7 +1545,6 @@ const	dap=(Env=>
 				}
 				const	ready = proto.spawn([{'':data}],place)||newStub("dap"); //||State.read()
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);	
-				State.bind(ready);
 			},
 			
 		delay	:f=>setTimeout(f,200),
