@@ -18,7 +18,7 @@
   ,'#main'.d(""
   
     ,'INPUT#toggle-all type=checkbox' // установить или сбросить галку сразу всем делам
-      .ui("*@ $todos=($todos (#.checked@completed)@src):assign; (@method`PATCH .url headers (.completed)):query")
+      .ui("*@ $todos=($todos (#.checked@completed)@src):assign; (@method`PATCH .url:dehttp headers (.completed)):query")
     
     ,'UL#todo-list'.d("*@ $todos"
     
