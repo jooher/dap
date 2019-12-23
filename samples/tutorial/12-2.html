@@ -9,7 +9,15 @@
 
 <body>
 <script>
-'#todoapp'.d("$todos= $filter=" // добавляем переменную $filter
+
+const
+  todoFilters = {
+    "All": null,
+    "Active": todo => !todo.completed, 
+    "Completed": todo => !!todo.completed
+  };
+
+'#todoapp'.d("$todos= $filter= $recount=" // объявляем $recount в общей области видимости
   ,'#header'.d(""
     ,'H1'.d("")
     ,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
@@ -26,7 +34,7 @@
 	
         ,'INPUT.toggle type=checkbox'
           .d("#.checked=.completed")
-          .ui("$patch=(.completed=$completed=#.checked) $recount=()")
+          .ui("$patch=(.completed=$completed=#.checked) $recount=()") // присваиваем $recount новый пустой объект
 	    
         ,'LABEL.view'
           .d("? $editing:!; ! .title")
@@ -44,23 +52,23 @@
       .u("? $patch; (@method`PATCH .url:dehttp headers $patch@):query $patch=")
     )
   )
-  ,'#footer'.d("log $recount $active=$todos:filter.active $completed=$todos:filter.completed"
-    ,'#todo-count'.d("! (active $active.length)here")
-    ,'UL#filters'.d("* filter" // константу filter с названиями фильтров берем из .DICT
+  ,'#footer'.d("$active=($todos @filter`Active):filter $completed=($todos @filter`Completed):filter $recount" // упоминаем $recount
+    ,'#todo-count'.d("! (active $active.length)format")
+    ,'UL#filters'.d("* filter"
       ,'LI'
 	  .d("! .filter")
-	  .ui("$filter=.") // такая запись эквивалентна "$filter=.filter"
+	  .ui("$filter=.")
     )
-    ,'#clear-completed'.d("! (completed $completed.length)here")
+    ,'#clear-completed'.d("! (completed $completed.length)format")
   )
   ,'loader'.d("u").u("$todos=todos:query")
 )
 .DICT({
   todos  : "//todo-backend-express.herokuapp.com/",
   headers: {"Content-type":"application/json"},
+  filter: Object.keys(todoFilters),
   active: "{length} items left",
-  completed: "Clear completed items ({length})",
-  filter: Object.keys(todoFilters) // ["All","Active","Completed"]
+  completed: "Clear completed items ({length})"
 })
 .FUNC({
   convert:{
@@ -68,17 +76,13 @@
     remove: x => x.todos.filter( todo => todo!=x.tgt ),
     insert: x => x.todos.concat( [x.tgt] ),
     assign: x => x.todos && x.todos.map(todo => Object.assign(todo,x.src)),
-    
-    filter: (todoFilters => x =>{
+   
+    filter: x =>{
 	const
 	  a = x.todos,
 	  f = x.filter && todoFilters[x.filter];
 	return a&&f ? a.filter(f) : a;
-    })({
-      "All": null,
-      "Active": todo => !todo.completed, 
-      "Completed": todo => !!todo.completed
-    })
+    }
     
   }
 })

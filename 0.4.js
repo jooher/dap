@@ -1460,7 +1460,6 @@ const	dap=(Env=>
 		}
 			
 	})(),
-*/	
 	State = (state=>{
 		const
 		check = node => {
@@ -1470,14 +1469,9 @@ const	dap=(Env=>
 		};
 		
 		return {
-			bind	: node => {
-					check(node);
-					window.addEventListener("hashchange",e=>{check(node)})
-				},
-			set	: str => location.hash=state="#"+str,
-			get	: _=>state.substr(1)
 		}
 	})(null),
+*/	
 
 
 	Blend	={
@@ -1570,7 +1564,7 @@ const	dap=(Env=>
 				request:(req,r) => r&& Http.execAsync(req),
 				query	: (req,r) => r&& Http.execAsync(req).then(Mime.parseResponse),
 				
-				state : (_,r) => r && State.get()
+				urlhash : (_,r) => r && location.hash.substr(1)
 			},
 			
 			flatten	:{
@@ -1597,9 +1591,13 @@ const	dap=(Env=>
 				
 				"!class":(value,alias,node)=>{ value && node.classList.add(value); },
 				
-				watchstate: (value,alias,node)=>State.bind(node),
-				state : str=>State.set(str)
+				listen : (value,alias,node)=> {
+						const target=value||node;
+						if(target.dispatchEvent)
+							window.addEventListener(alias,e=>{target.dispatchEvent(new window.Event(e.type))}); //Execute.u(target,e.type)
+					},
 				
+				urlhash	: str => location.hash=str
 			}
 		}
 	}		

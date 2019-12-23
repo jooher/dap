@@ -18,13 +18,10 @@ const
   };
 
 '#todoapp'
-.d("$todos= $filter= $recount="
+.a("urlhash $filter")
+.e("hashchange","$filter=:urlhash")
+.d("$todos= $filter=:urlhash $recount=; listen @hashchange"
 
-  ,'state'
-    .d("watchstate")
-    .a("state $filter")
-    .e("state","$filter=:state")
-/**/
   ,'#header'.d(""
     ,'H1'.d("")
     ,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
@@ -72,6 +69,7 @@ const
   )
   ,'loader'.d("u").u("$todos=todos:query")
 )
+
 .DICT({
   todos  : "//todo-backend-express.herokuapp.com/",
   headers: {"Content-type":"application/json"},

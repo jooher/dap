@@ -21,6 +21,7 @@
 				,'INPUT.toggle type=checkbox'
 					.d("#.checked=.completed")
 					.ui("$completed=#.checked")
+
 				,'LABEL.view'
 					.d("? $editing:!; ! .title")
 					.e("dblclick","$editing=`yes")
