@@ -1415,64 +1415,6 @@ const	dap=(Env=>
 				return node;
 			}
 	},
-/*	
-	State	= (function(){
-		
-		let	historian = null,
-			href = null, //window.location.href;
-			
-			refresh=function(){
-				if(!historian)return;
-				if(decodeURI(href)!=decodeURI(href=window.location.href)){
-					const	proto=historian.P,
-						instead=historian,
-						data=fromUri();
-					historian=null;
-					Env.render(proto,data,null,instead);
-				}
-			};
-			
-			//window.addEventListener("hashchange", refresh, false);
-			
-		function toHashbang(value,tag,node){
-			if(!historian)historian=node;
-			href=Uri.base+"#!"+value;
-			if(decodeURI(href)!=decodeURI(window.location.href))
-				window.location.href=href;
-		};
-			
-		function fromUri(){
-
-				const	full	= window.location.href.split(/#!?/),
-					query	= full[0].split("?")[1],
-					state	= full[1];
-/*					
-				if(query && query.indexOf("=")>0)
-					window.location.href=Uri.base+"#!"+QueryString.merge(query,state);
-				else
-/					
-					return QueryString.parse.hash(state);
-			};
-			
-		return	{
-			read	: fromUri,
-			write	: toHashbang					
-		}
-			
-	})(),
-	State = (state=>{
-		const
-		check = node => {
-			if(location.hash==state)return;
-			state=location.hash;
-			node.dispatchEvent(new window.Event("state"));
-		};
-		
-		return {
-		}
-	})(null),
-*/	
-
 
 	Blend	={
 		
