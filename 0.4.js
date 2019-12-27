@@ -298,7 +298,7 @@ const	dap=(Env=>
 						stuff	= this.stuff;
 
 					this.rules = {};				
-					for(let i in stuff)
+					for(const i in stuff)
 						this.rules[i] = new Rule(ns,stuff[i]);
 							
 					if(this.utag)
@@ -1517,7 +1517,9 @@ const	dap=(Env=>
 				confirm	:(values,tags)	=>{ for(let i=values.length;i--;)if(confirm(values[i]))return tags[i]||true; },
 				prompt	:(values)	=>{ for(let i=values.length,a;i--;)if(a=prompt(values[i]))return a;},
 
-				format	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
+				format	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop()),
+				"uri+"	:(values,tags)	=> QueryString.build.ordered(values,tags).replace(/ /g,'+').replace(/%20/g,'+'),
+				here	: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
 			},
 			
 			operate	:{
