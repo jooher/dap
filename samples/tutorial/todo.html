@@ -4,8 +4,9 @@
 	<meta charset="utf-8">
 	<title>Todo -- dap sample</title>
 	<link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
-	<script src="/0.5a5.js" _src="https://dap.js.org/0.4.js"></script>
+	<script src="/0.5a74.js" _src="https://dap.js.org/0.4.js"></script>
 	<style>
+		[dap-error]{outline:dashed red !important}
 		[ui=click]{cursor:pointer}
 		#todo-server{
 			position: absolute;
@@ -32,16 +33,16 @@ const
 '#todoapp'
 .d("$server=server $todos= $filter= $recount=; listen @hashchange"
 
-/*
 	,'SELECT#todo-server'.d("*@server :query,lines`good-servers"
 	,'OPTION'.d("! .server")
 	).ui("$server=(`// #.value)concat")
+/*
 */
 
 	,'#header'.d(""
 		,'H1'.d("","dap todos 0.5a")
 		,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
-			.ui("$todos=($todos (#.value@title)@tgt):insert #.value=") 
+			.ui("$todos=($todos (#.value@title)@tgt):insert #.value= $Rtet") 
 	)
 	,'#main'.d(""
 	
@@ -50,7 +51,7 @@ const
 				
 		,'UL#todo-list'.d("? $todos; * ($todos $filter):filter" // .h=`hi-;
 		
-			,'LI'.d("$completed=.completed $editing= $patch=; a!"
+			,'LI'.d("$completed=.completed $editing= $patch=; a!"//
 	
 				,'INPUT.toggle type=checkbox'
 					.d("#.checked=.completed")
@@ -58,11 +59,11 @@ const
 			
 				,'LABEL.view'
 					.d("? $editing:!; ! .title")// ..h
-					.e("dblclick","$editing=:!")
+					.ui("log $editing=`1")//"dblclick",
 			
 				,'INPUT.edit'
-					.d("? $editing; !! .title@value")
-					.ui("$patch=(.title=#.value)")
+					.d("? $editing; !! .title@value; #:focus")
+					.ui("$patch=(.title=#.value) $href=")
 					.e("blur","$editing=")
 			
 				,'BUTTON.destroy'
@@ -87,11 +88,14 @@ const
 	,'PRE#loader'
 		.d("$request=($server@url); u")
 		.u("? $todos:!=$request:query,array?; ! $request:debugrequest")//
-
+		
+/*
 	,'state'
-		.d("listen @hashchange; $state=window.location; u@hashchange")
-		.e("hashchange","$filter=$state.hash:afterhash")
+		.d("listen @hashchange; $state=window.location; u")
+		.u("hashchange","$filter=$state.hash:afterhash")
 		.a("$state.hash=$filter")
+*/
+
 )
 
 .DICT({
@@ -109,6 +113,7 @@ const
 		afterhash: str => str.split("#").pop(), // get rid if a leading #
 		lines:	txt => txt.split("\n"),
 		dehttp: url => url.replace(/^https?\:/,''),
+		focus: (n,r)=> r&& setTimeout(_=>{n.focus()},0),
 		
 		"array?": x => Array.isArray(x) && x,
 		insert: x => x.todos ? x.todos.concat( [x.tgt] ) : [x.tgt],
@@ -124,6 +129,7 @@ const
 		debugrequest : req => req.url+"\n"+ trace(req.debug,["status","statusText"])+"\n\n"
 	}
 })
+.COMPILE()
 .RENDER()
 </script>
 </body>

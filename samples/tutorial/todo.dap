@@ -1,0 +1,135 @@
+	Cool = ( txt=>{
+		
+		const elems = txt.split(/\n\s*\n+/g).map(
+		
+			elem=>{
+				
+				const
+					lines = elem.split(/\n/g),
+					indent = lines[0].search(/\S/),
+					utag = !lines[0].contains(": ") && lines.shift().trim();
+					
+				if(indent > stack.length){
+					stack.push(target)
+					target = new Proto();
+				}
+				
+				
+					target =  ? 
+					
+					
+					target = utag ? stack.put(utag,indent) : stack.pop(indent);
+										
+				if(lines.length){
+					
+					let key="d";
+						
+					for(const line of lines){
+						const
+							parts = line.trim().split(": "),
+							ruleline = parts.pop();
+							
+						if(parts.length)
+							key = parts.shift();
+						
+						rules[key] = key in rules ? rules[key]+' '+ruleline : ruleline;
+					}
+				}
+				
+			
+		})
+		
+	})
+	
+
+
+
+#todoapp
+$server=server $todos= $filter= $recount=; listen @hashchange
+
+ SELECT#todo-server
+ *@server :query,lines`good-servers
+ ui: $server=(`// #.value)concat
+  
+  OPTION
+  ! .server
+ 
+ #header
+ 
+  H1 "dap todos 0.5a"
+	
+  INPUT#new-todo placeholder="What needs to be done?" autofocus
+  ui: $todos=($todos (#.value@title)@tgt):insert #.value=
+ 
+ #main
+ 
+  INPUT#toggle-all type=checkbox
+  ui:
+	 *@ $todos=($todos (#.checked@completed)@src):assign;
+	 (@method`PATCH .url:dehttp headers (.completed)):query;
+  
+  UL#todo-list
+  ? $todos;
+	* ($todos $filter):filter
+
+   LI
+		$completed=.completed $editing= $patch=; a!
+		
+		d: ! .title
+
+    INPUT.toggle type=checkbox
+    #.checked=.completed
+    ui: $patch=(.completed=$completed=#.checked) $recount=()
+
+    LABEL.view
+    ? $editing:!; ! .title
+    dblclick: $editing=:!
+
+    INPUT.edit
+    d: ? $editing; !! .title@value; #:focus
+    ui: $patch=(.title=#.value) $href=
+    blur: $editing=
+   
+    BUTTON.destroy
+    ui:
+		 $todos=($todos $@tgt):remove
+		 (@method`DELETE .url:dehttp):query
+		
+   u:
+	  ? $patch;
+		(@method`PATCH .url:dehttp headers headers:check $patch@):query
+	  $patch=
+		
+   a:
+		!? $completed $editing; ? .url:!;
+		& (@method`POST $server@url headers $:check):query
+
+ #footer
+ $active=($todos @filter`Active):filter
+ $completed=($todos @filter`Completed):filter
+ $recount
+ 
+  #todo-count
+  ! (active $active.length)format
+	
+  UL#filters
+  * filter
+	
+   LI>A
+   !! (`# .filter)concat@href .filter@;
+	 !? (.filter $filter)eq@selected
+
+  #clear-completed
+	! (completed $completed.length)format
+  ui:
+   $todos=$active; *@ $completed;
+	 (@method`DELETE .url:dehttp):query
+
+ PRE#loader
+ $request=($server@url); u
+ u: ? $todos:!=$request:query,array?; ! $request:debugrequest
+  
+ #state
+ listen @hashchange; $state=window.location; u
+ hashchange: $filter=$state.hash:afterhash
+ a: $state.hash=$filter
