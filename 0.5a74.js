@@ -1173,6 +1173,12 @@ const	dap=(Env=>
 	doc	= window.document,
 	isArray	= Array.isArray,
 	newElem	=	e=> doc.createElement(e),
+	
+/*				const	c	= " "+node.className+" ",
+					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
+				if(!on!=!found)
+					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
+*/
 
 	DEFAULT	= {
 		TAG	: "DIV",
@@ -1357,13 +1363,7 @@ const	dap=(Env=>
 		attach	:(node,cls)=>Style.mark(node,cls,true),
 		detach	:(node,cls)=>Style.mark(node,cls,false),
 			
-		mark	:(node,cls,on)=>{
-				const	c	= " "+node.className+" ",
-					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
-				if(!on!=!found)
-					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
-				return node;
-			}
+		mark	:
 	},
 
 	Blend	={
@@ -1424,13 +1424,14 @@ const	dap=(Env=>
 		}, //P.cloneNode(true)
 		
 		Adopt	:(place,instead,elem,empty,postponed)=>{
-			if(!!empty)Style.attach(elem,"EMPTY");
+			
 			if(postponed){
-				instead	? Style.attach(instead,"STALE") :
-				place	? place.appendChild(Style.attach(instead=elem.cloneNode(true),"AWAIT")) :
+				instead	? instead.classList.add(,"STALE") :
+				place	? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT")) :
 				console.log('orphan postponed');
 				return instead;
-			}
+			}else
+				elem.classList.toggle("EMPTY",!!empty);
 			instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
 			place	? place.appendChild(elem) :
 			console.log('orphan element '+elem);
@@ -1491,7 +1492,7 @@ const	dap=(Env=>
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },			
+				"!?"	:(value,alias,node)=>{ node.classList.toggle(alias,!!value); },			
 				"!class":(value,alias,node)=>{ value && node.classList.add(value); },
 				
 				listen : (value,alias,node)=> {
