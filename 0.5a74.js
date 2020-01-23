@@ -1358,14 +1358,6 @@ const	dap=(Env=>
 		
 	})(),
 
-	Style	= {
-	
-		attach	:(node,cls)=>Style.mark(node,cls,true),
-		detach	:(node,cls)=>Style.mark(node,cls,false),
-			
-		mark	:
-	},
-
 	Blend	={
 		
 		change	:(elem,instead)=>{
@@ -1394,7 +1386,7 @@ const	dap=(Env=>
 		base: location.href,
 		
 		doc, log, 
-		Style, Http, Mime, QueryString, Blend,
+		Http, Mime, QueryString, Blend,
 	
 		Native : (str,ui)=>{
 			if(!str)return DEFAULT.ELEMENT;
@@ -1426,8 +1418,8 @@ const	dap=(Env=>
 		Adopt	:(place,instead,elem,empty,postponed)=>{
 			
 			if(postponed){
-				instead	? instead.classList.add(,"STALE") :
-				place	? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT")) :
+				instead	? instead.classList.add("STALE") :
+				place	? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT") :
 				console.log('orphan postponed');
 				return instead;
 			}else
