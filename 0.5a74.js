@@ -1234,34 +1234,6 @@ const	dap=(Env=>
 		},
 		
 		build	={
-			
-			hash	:(qstr,target)=>{
-				if(!target)target={};
-				if(qstr)
-					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i-->0;){
-						var	nv = tups[i].split('='),
-							key = nv[0]; //(remap&&remap[key])||
-						if(nv.length>1)target[key]=decode(nv[1]);
-						else target['!']=key;
-					}
-				return target;
-			},
-			
-			feed	:(qstr,tgt)=>{
-			
-				if(!tgt)tgt={values:[],tags:[]};
-
-				if(qstr)
-					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i-->0;)
-						if(tups[i]){
-							const	nv = tups[i].split('='),
-								value = decode(nv.pop()),
-								key = nv.length&&nv[0];
-							tgt.values.push(value);
-							tgt.tags.push(key);//(remap&&remap[key])||
-						}
-				return tgt;
-			},
 
 			neutral	:(hash)=>{
 				const arg=[];
@@ -1330,26 +1302,43 @@ const	dap=(Env=>
 		const
 		
 		decode = {
-			"text/plain"		: request => request.responseText,
-			"application/json"	: request => JSON.parse(request.responseText),
-			"application/javascript": request => eval(request.responseText),
-			"application/xml"		: request => request.responseXML.documentElement
+			
+			"text/plain": request =>
+				request.responseText,
+				
+			"application/json": request =>
+				JSON.parse(request.responseText),
+				
+			"application/x-www-form-urlencoded": request =>
+				QueryString.parse.hash(request.responseText),
+				
+			"application/javascript": request =>
+				eval(request.responseText),
+				
+			"application/xml": request =>
+				request.responseXML.documentElement,
 		},
 		
 		encode = {
-			"application/json"	: content=>JSON.stringify(content)		
+			
+			"application/json": content=>
+				JSON.stringify(content),
+				
+			"application/x-www-form-urlencoded": content=>
+			 QueryString.build.neutral(content)
+			 
 		},
 		
 		prepareContent= (req,content) => {
 			const
-				ctype	= req&&req.headers['Content-type'],
+				ctype	= req&&req.headers['content-type'],
 				h	= ctype&&encode[ctype.split(";")[0]];
-			return h ? h(content) : null;
+			return h ? h(content) : content;
 		},
 		
 		parseResponse= req => {
 			const	
-				ctype=req&&req.getResponseHeader('Content-type'),
+				ctype=req&&req.getResponseHeader('content-type'),
 				h=ctype&&decode[ctype.split(";")[0]];
 			return h ? h(req) : req.responseText;
 		};
