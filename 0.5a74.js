@@ -1237,7 +1237,9 @@ const	dap=(Env=>
 
 			neutral	:(hash)=>{
 				const arg=[];
-				hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encode(hash[k]))});
+				for(const k in hash)//Object.keys(hash).map((k,i)=>
+					if( k && hash[k]!=null )
+						arg.push(k+"="+encode(hash[k]));
 				return arg.join('&').replace(/%20/g,'+');
 			},
 			
@@ -1473,11 +1475,10 @@ const	dap=(Env=>
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ node.classList.toggle(alias,!!value); },			
-				"!class":(value,alias,node)=>{ value && node.classList.add(value); },
+				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : node.classList.add(value) },			
 				
 				listen : (value,alias,node)=> {
-						(value||window).addEventListener(alias,e=>dap.Update.onEvent(e,node));
+						(value||window).addEventListener(alias,e=>node.baseURI && dap.Update.onEvent(e,node));
 					}
 			}
 		}
