@@ -82,7 +82,7 @@
 				,'row.slide'
 					.e("MOVE","crop $:move")
 			)
-			.e("KEYDOWN MOUSEDOWN TOUCHSTART","? $over:! $over= $play:!=$:start; ? $top=$:drop $over=:!")
+			.e("KEYDOWN TOUCHSTART","? $over:! $over= $play:!=$:start; ? $top=$:drop $over=:!") // MOUSEDOWN
 			
 		)
 
