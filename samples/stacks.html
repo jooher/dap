@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>More stacks (dap.js.org sample)</title>
+		<style>
+body{
+	text-align:center;
+	width: 600px;
+	margin: 4em auto;
+}
+
+h2{
+	position:absolute;
+	color:white;z-index: 2;
+}
+
+.pot{
+	transform: rotate(180deg);
+  background: linear-gradient(0deg, #48f, #dff);
+  width: 600px;
+  height: 800px;
+  overflow: hidden;
+}
+
+.rows{
+ position:relative;
+ }
+
+.rows::before{
+ position:absolute;
+ left: 0;
+ bottom:-80px;
+ content:"";
+ width:600px;
+ height:900px;
+ transform:rotate(180deg);
+ background: url(https://avatanplus.com/files/resources/mid/5a223ae3d369a16015b60a1a.png) center no-repeat;
+}
+
+.row{
+	position: relative;
+	background: purple;
+	height:10px;
+}
+
+.slide{
+	background: fuchsia;
+}
+
+		</style>
+		<script src="../0.5a74.js"></script>
+	</head>
+	<body>
+		<script>
+		
+		const Stacks=(width=>{
+		
+			let
+				speed,
+				pos,
+				top;
+								
+			const  tick= _=>{
+				window.dispatchEvent(new Event("move"));
+				if(!Stacks.done())
+					requestAnimationFrame(tick);
+			};
+				
+			return {
+			
+				start: _=>{
+					if(speed)
+						return;
+					pos = {	left:0,	right:150 };
+					top = { left:0, right:0 };
+					speed = 10;
+					tick();
+					return pos;
+				},
+			
+				move: _=>{
+					pos.left+=speed;
+					pos.right-=speed;
+					if( pos.left<=0 || pos.right<=0)
+						speed = -speed;
+					return pos;
+				},
+				
+				drop: _=>{
+					top.left=Math.max(pos.left,top.left);
+					top.right=Math.max(pos.right,top.right);
+					if(top.left+top.right<width)
+						return Object.assign(pos,top);
+					else
+						speed=0;
+				},
+				
+				done: _=> !speed
+				
+			}
+			
+		})(600);
+		
+		
+		'stacks'.d("$play= $over=:! $top="
+		
+			,'H2'.d("? $over","Any key to play")
+		
+			,'pot'.d(""
+			
+				,'rows'
+					.d("$play")
+					.a(".pos=$top"
+						,'row'.d("? .pos;  crop .pos")
+					)
+					
+				,'row.slide'
+					.e("MOVE","crop $:move")
+			)
+			.e("KEYDOWN","? $over:! $over= $play:!=$:start; ? $top=$:drop $over=:!")
+			
+		)
+
+		.FUNC({
+
+			convert: Stacks,
+
+			operate:{
+				crop: (value,alias,node)=>{
+					if(value){
+						node.style.marginLeft = value.left+"px";
+						node.style.marginRight = value.right+"px";
+					}
+				}
+			}
+					
+		})
+		
+		.RENDER();
+		
+		</script>	</body>

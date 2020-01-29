@@ -1,0 +1,49 @@
+.EMPTY{display:none}
+
+body{
+	text-align:center;
+	width: 600px;
+	margin: 4em auto;
+}
+
+h2{
+	position:absolute;
+	color:white;
+	z-index: 2;
+	font: bold 2em cursive;
+  padding: 1em;
+}
+
+.pot{
+	transform: rotate(180deg);
+  background: linear-gradient(0deg, #48f, #dff);
+  width: 600px;
+  height: 800px;
+  overflow: hidden;
+}
+
+.rows{
+ position:relative;
+ }
+
+.rows::before{
+ position:absolute;
+ left: 0;
+ bottom:-80px;
+ content:"";
+ width:600px;
+ height:900px;
+ transform:rotate(180deg);
+ background: url(https://avatanplus.com/files/resources/mid/5a223ae3d369a16015b60a1a.png) center no-repeat;
+}
+
+.row{
+	position: relative;
+	background: rgba(255,0,255,.9);
+	height:1em;
+	box-shadow: 0 0 8px white;
+}
+
+.slide{
+	/* background: fuchsia; */
+}

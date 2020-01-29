@@ -76,11 +76,12 @@ const	dap=(Env=>
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		"&"	:(value,alias,node)=>	{ const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
 
-		"a!"	:(value,alias,node)=> { Execute.a(value||node); },
-		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
-		"d"	:(value,alias,node)=>	{ Execute.Rebuild(value||node) },
-		"a"	:(value,alias,node)=>	{ Env.delay(_=>Execute.a(value||node,alias)) },
-		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node))},
+		"d"	:(value,alias,node)=>	{ Update.Rebuild(value||node); },
+		"a!":(value,alias,node)=> { Update.Append(value||node); },
+		"u!":(value,alias,node)=>	{ Update.onDemand(value||node); },
+		
+		"a"	:(value,alias,node)=>	{ Env.delay(_=>Update.Append(value||node,alias)); },
+		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node)); },
 		
 		"*"	:(value,alias)=>	value && (alias ? value.map(v=>Box(v,alias)) : value),
 				 
@@ -473,8 +474,8 @@ const	dap=(Env=>
 						const
 							rule	= this.rules[k]||rules[""],
 							react	= k||this.elem.getAttribute("ui");
-						react.split(" ").forEach(e=>{this.rules[e]=rule});
-						return !react ? a : (a+" "+react);
+						react.split(" ").forEach(e=>{this.rules[e.toLowerCase()]=rule});
+						return (a&&react) ? (a+" "+react) : (react || a) ;
 					},
 					"").split(" ");					
 			},
@@ -508,12 +509,12 @@ const	dap=(Env=>
 			
 		};
 
-		function Context(ns,brackets,scope,relations){
+		function Context(ns,brackets,scope,define,depend){
 			this.ns = ns;
 			this.brackets = brackets;
 			this.scope = scope;
-			this.define = relations;
-			this.depend = relations;
+			this.define = define;
+			this.depend = depend;
 		};
 
 		function Step(branch,operate,feed,todo){
@@ -551,7 +552,8 @@ const	dap=(Env=>
 			this.ns	= ns;
 			this.scope = scope;
 			this.branches	= branches;
-			this.relations = this.dependency[type];
+			this.define = // type=='d';
+			this.depend = this.dependency[type];
 		}
 		Rule.prototype=(function(){
 			
@@ -730,7 +732,7 @@ const	dap=(Env=>
 					branches = this.branches.map(stuff=>{
 						const
 							rulestring = stuff.length&&stuff[0].replace&&stuff.shift(),
-							context = rulestring && new Context(this.ns,Parse(rulestring),this.scope,this.relations),//define,depend
+							context = rulestring && new Context(this.ns,Parse(rulestring),this.scope,this.define,this.depend),//define,depend
 							epilog = stuff.length ? new Step(null, Print, new Feed([stuff],oneNull,oneNull), null ) : null,
 							todo = context ? make(context)(epilog) : epilog;//
 							
@@ -773,7 +775,7 @@ const	dap=(Env=>
 				function(){return new Context(this.data, {$:this.stata})}, // $$x => outer x
 				
 			subData:
-				function(data){return new Context({'':data,$:this.data},this.stata)}, // ..y => outer y
+				function(data){return new Context({'':data||{},$:this.data},this.stata)}, // ..y => outer y
 				
 			adopt:
 				function(change,sift){
@@ -1061,11 +1063,6 @@ const	dap=(Env=>
 		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;};
 			
 		return	{ Context, Branch, Postpone, Perf,
-/*			
-			u	:(node,alias)=>Update(node,{}),
-*/
-			d	:Print,
-			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a||Fail("no a-rule",node); new Branch(node).run( rule.todo ); }
 		};
 
 	})(),
@@ -1104,7 +1101,7 @@ const	dap=(Env=>
 				return Rebuild(node)||true;
 				
 			if(depend&2)
-				Execute.a(node);
+				Append(node);
 			
 			if(depend&1){
 				let
@@ -1127,7 +1124,14 @@ const	dap=(Env=>
 		
 		Rebuild	=(node)	=>{ 
 			node.P.spawn(node.$,node.parentNode,node)
+		},
+		
+		Append = (node,rule)=>{
+			if(!rule)
+				rule=node.P.rules.a||Fail("no a-rule");
+			new Execute.Branch(node,node.$.subData()).run(rule.todo);
 		};
+
 
 		return {
 			
@@ -1370,7 +1374,25 @@ const	dap=(Env=>
 				place.removeChild(instead);
 		}
 		
-	};
+	},
+
+	Watch = (function(){
+
+		const
+			watchers ={},
+			route = e=>{
+				dap.Update.onEvent(e,watchers[e.type])
+			};
+
+		return (evtype,node)=> {
+			if(!(evtype in watchers))
+				window.addEventListener(evtype,route);
+			watchers[evtype] = node;
+		}
+
+	})()
+
+;
 	
 	return	{ DEFAULT, 
 		
@@ -1398,7 +1420,15 @@ const	dap=(Env=>
 		Spawn	: (elem,events,handler)=>{
 			const el = elem.cloneNode(false);
 			if(events)
-				events.forEach(e=>e&&el.addEventListener(e,handler));
+				events.forEach( e=> {
+					if(!e)
+						whut();
+					const evtype=e.toLowerCase();
+					if(e===evtype)
+						el.addEventListener(evtype,handler);
+					else
+						Watch(evtype,el);
+				});
 			return el;
 		},
 		
@@ -1475,11 +1505,8 @@ const	dap=(Env=>
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : node.classList.add(value) },			
-				
-				listen : (value,alias,node)=> {
-						(value||window).addEventListener(alias,e=>node.baseURI && dap.Update.onEvent(e,node));
-					}
+				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : node.classList.add(value) }			
+
 			}
 		}
 	}		

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Stacks (http://dap.js.org sample)</title>
+		<link rel="stylesheet" href="styles.css"/>
+		<script src="/0.5a74.js"></script>
+	</head>
+	<body>
+		<script>
+
+		// The game logic
+		
+		const Stacks=(width=>{
+		
+			let
+				speed,
+				pos,
+				top;
+								
+			const  tick= _=>{
+				window.dispatchEvent(new Event("move"));
+				if(!Stacks.done())
+					requestAnimationFrame(tick);
+			};
+				
+			return {
+			
+				start: _=>{
+					if(speed)
+						return;
+					pos = {	left:0,	right:150, bounce:0 };
+					top = { left:0, right:0, bounce:0 };
+					speed = 10;
+					tick();
+					return pos;
+				},
+			
+				move: _=>{
+					pos.left+=speed;
+					pos.right-=speed;
+					if( pos.left<=0 || pos.right<=0){
+						speed = -speed;
+						pos.bounce++;
+					}
+					return pos;
+				},
+				
+				drop: _=>{
+					top.left=Math.max(pos.left,top.left);
+					top.right=Math.max(pos.right,top.right);
+					top.bounce=pos.bounce;
+					if(top.left+top.right<width){
+						Object.assign(pos,top);
+						pos.bounce=0;
+						return top;
+					}
+					else
+						speed=0;
+				},
+				
+				done: _=> !speed
+				
+			}
+			
+		})(600);
+
+		// dap template
+		
+		'stacks'.d("$play= $over=:! $top="
+		
+			,'H2'.d("? $over","Tap or click oh hit any key")
+		
+			,'pot'.d(""
+			
+				,'rows'
+					.d("$play")
+					.a(".top=$top"
+						,'row'.d("? .top;  crop .top")
+					)
+					
+				,'row.slide'
+					.e("MOVE","crop $:move")
+			)
+			.e("KEYDOWN MOUSEDOWN","? $over:! $over= $play:!=$:start; ? $top=$:drop $over=:!")
+			
+		)
+
+		.FUNC({
+
+			convert: Stacks,
+
+			operate:{
+				crop: (value,alias,node)=>{
+					if(value){
+						node.style.marginLeft = value.left+"px";
+						node.style.marginRight = value.right+"px";
+						node.style.height=(value.bounce < 16 ? 20-value.bounce : 4)+"px";
+					}
+				}
+			}
+					
+		})		
+		.RENDER();
+	
+		</script>
+
+</body>
