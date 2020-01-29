@@ -39,7 +39,7 @@ h2{
 
 .row{
 	position: relative;
-	background: rgba(255,0,255,.9);
+	background: rgba(255,0,255,.95);
 	height:1em;
 	box-shadow: 0 0 8px white;
 }
