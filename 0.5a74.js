@@ -1451,7 +1451,9 @@ const	dap=(Env=>
 		},
 			
 		stopEvent	: e=>{
-			e.stopPropagation(); e.preventDefault();
+			e.stopPropagation();
+			if(e.cancelable)
+				e.preventDefault();
 			return e;
 		},
 		

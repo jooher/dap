@@ -34,7 +34,7 @@ h2{
 }
 
 .rows{
- position:relative;
+	position:relative;
  }
 
 .rows::before{
