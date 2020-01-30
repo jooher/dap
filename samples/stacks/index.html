@@ -11,9 +11,11 @@
 
 		// The game logic
 		
-		const Stacks=(width=>{
+		const Stacks=(_=>{
 		
 			let
+				width,
+				pace = 10,
 				speed,
 				pos,
 				top;
@@ -26,12 +28,14 @@
 				
 			return {
 			
-				start: _=>{
+				start: container=>{
 					if(speed)
 						return;
+
+					width = container.clientWidth;
 					pos = {	left:0,	right:150, bounce:0 };
 					top = { left:0, right:0, bounce:0 };
-					speed = 10;
+					speed = pace;
 					tick();
 					return pos;
 				},
@@ -52,6 +56,12 @@
 					top.bounce=pos.bounce;
 					if(top.left+top.right<width){
 						Object.assign(pos,top);
+
+						if(speed>0)
+							top.right-= top.right>pace ? pace : 0;
+						else
+							top.left-= top.left>pace ? pace : 0;
+/**/
 						pos.bounce=0;
 						return top;
 					}
@@ -63,13 +73,13 @@
 				
 			}
 			
-		})(600);
+		})();
 
 		// dap template
 		
 		'stacks'.d("$play= $over=:! $top="
 		
-			,'H2'.d("? $over","Tap or click oh hit any key")
+			,'H2'.d("? $over","Tap or hit any key")
 		
 			,'pot'.d(""
 			
@@ -82,7 +92,7 @@
 				,'row.slide'
 					.e("MOVE","crop $:move")
 			)
-			.e("KEYDOWN TOUCHSTART","? $over:! $over= $play:!=$:start; ? $top=$:drop $over=:!") // MOUSEDOWN
+			.e("KEYDOWN TOUCHSTART","? $over:! $over= $play:!=#:start; ? $top=$:drop $over=:!") // MOUSEDOWN
 			
 		)
 

@@ -1059,7 +1059,7 @@ const	dap=(Env=>
 		
 		const
 		
-		Perf	= (info,since)=>Env.log("PERF "+(Date.now()-since)+" ms "+info),
+		Perf	= (info,since)=>info,//Env.log("PERF "+(Date.now()-since)+" ms "+info),
 		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;};
 			
 		return	{ Context, Branch, Postpone, Perf,
