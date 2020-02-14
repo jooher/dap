@@ -3,8 +3,11 @@
 	<head>
 		<title>Stacks (http://dap.js.org sample)</title>
 		<meta name="viewport" content="width=device-width"/>
+		<style>
+			[data-dap=false]{display:none !important}
+		</style>
 		<link rel="stylesheet" href="styles.css"/>
-		<script src="/0.5a74.js"></script>
+		<script src="/0.5.js"></script>
 	</head>
 	<body>
 		<script>
@@ -16,6 +19,7 @@
 			let
 				width,
 				pace = 10,
+				bounce = pace,
 				speed,
 				pos,
 				top;
@@ -43,9 +47,10 @@
 				move: _=>{
 					pos.left+=speed;
 					pos.right-=speed;
-					if( pos.left<=0 || pos.right<=0){
+					if( pos.left*pos.right<=0){
 						speed = -speed;
-						pos.bounce++;
+						pos.left+=bounce;
+						pos.right+=bounce;
 					}
 					return pos;
 				},
@@ -53,7 +58,7 @@
 				drop: _=>{
 					top.left=Math.max(pos.left,top.left);
 					top.right=Math.max(pos.right,top.right);
-					top.bounce=pos.bounce;
+					//top.bounce=pos.bounce;
 					if(top.left+top.right<width){
 						Object.assign(pos,top);
 
@@ -61,8 +66,9 @@
 							top.right-= top.right>pace ? pace : 0;
 						else
 							top.left-= top.left>pace ? pace : 0;
-/**/
+/*
 						pos.bounce=0;
+*/					
 						return top;
 					}
 					else
@@ -77,14 +83,16 @@
 
 		// dap template
 		
-		'stacks'.d("$play= $over=:! $top="
+		'stacks'.d("$pic= $play= $over=:! $top="
 		
 			,'H2'.d("? $over","Tap or hit any key")
 		
-			,'pot'.d(""
+			,'pot'.d("? $pic"
 			
 				,'rows'
-					.d("$play")
+					.d("$play"
+						,'pic'.d("!? (`pic $pic)concat")
+					)
 					.a(".top=$top"
 						,'row'.d("? .top;  crop .top")
 					)
@@ -94,7 +102,15 @@
 			)
 			.e("KEYDOWN TOUCHSTART","? $over:! $over= $play:!=#:start; ? $top=$:drop $over=:!") // MOUSEDOWN
 			
+			,'gallery'.d("? $pic:!; * pic"
+				,'thumb'.d("!? (`pic .pic)concat").ui("$pic=.")
+			)
+			
 		)
+		
+		.DICT({
+			pic	:Array.from({length:12}).map((x,i)=>i)
+		})
 
 		.FUNC({
 
@@ -105,7 +121,7 @@
 					if(value){
 						node.style.marginLeft = value.left+"px";
 						node.style.marginRight = value.right+"px";
-						node.style.height=(value.bounce < 16 ? 20-value.bounce : 4)+"px";
+						//node.style.height=(value.bounce < 16 ? 20-value.bounce : 4)+"px";
 					}
 				}
 			}
@@ -114,5 +130,7 @@
 		.RENDER();
 	
 		</script>
+		
+		<!--script data-ad-client="ca-pub-3495835748911569" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script -->
 
 </body>

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Todo -- dap sample</title>
   <link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
-  <script src="/0.4.js" _src="https://dap.js.org/0.4.js"></script>
+  <script src="https://dap.js.org/0.5.js"></script>
 </head>
 
 <body>
@@ -17,10 +17,7 @@ const
     "Completed": todo => !!todo.completed
   };
 
-'#todoapp'
-.a("urlhash $filter")
-.e("hashchange","$filter=:urlhash")
-.d("$todos= $filter=:urlhash $recount=; listen @hashchange"
+'#todoapp'.d("$todos= $filter= $recount="
 
   ,'#header'.d(""
     ,'H1'.d("")

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Todo -- dap sample</title>
   <link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
-  <script src="/0.54a.js" _src="https://dap.js.org/0.4.js"></script>
+  <script src="https://dap.js.org/0.5.js"></script>
   <style>
     [ui=click]{cursor:pointer}
   </style>
@@ -19,9 +19,7 @@ const
   };
 
 '#todoapp'
-.a("urlhash $filter")
-.e("hashchange","$filter=:urlhash")
-.d("$todos= $filter=:urlhash $recount=; listen @hashchange"
+.d("$todos= $filter= $recount="
 
   ,'#header'.d(""
     ,'H1'.d("","dap todos")
@@ -68,7 +66,13 @@ const
       .d("! (completed $completed.length)format")
       .ui("$todos=$active; *@ $completed; (@method`DELETE .url:dehttp):query") // оставляем активные, удаляем звершенные
   )
-  ,'loader'.d("u").u("$todos=todos:query")
+	
+  ,'#loader'.d("u").u("$todos=todos:query")
+	,'#state'
+		.d("$state=state; u@hashchange")
+		.e("HASHCHANGE","$filter=$state.hash:afterhash")
+		.a("$state.hash=$filter")
+
 )
 
 .DICT({
@@ -76,7 +80,9 @@ const
   headers: {"Content-type":"application/json"},
   filter: Object.keys(todoFilters),
   active: "{length} items left",
-  completed: "Clear completed items ({length})"
+  completed: "Clear completed items ({length})",
+	
+	state: window.location
 })
 
 .FUNC({
@@ -90,7 +96,9 @@ const
 	  a = x.todos,
 	  f = x.filter && todoFilters[x.filter];
 	return a&&f ? a.filter(f) : a;
-    }
+    },
+		
+	afterhash: (h,r)=> r&& h.split("#").pop(), // get rid if a leading # in window.location.hash
   }
 })
 .RENDER()
