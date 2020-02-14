@@ -16,7 +16,6 @@ const	dap=(Env=>
 
 	convert	:{
 	
-		""	:()=>null,
 		"check"	:Check,
 	
 		"?"	:bool=>!!bool,	/// test
@@ -42,8 +41,6 @@ const	dap=(Env=>
 	
 	flatten	:{
 	
-		""	: Util.hash,
-		
 		"&"	: values=> values.reduce(Object.assign,values.pop()),
 		
 		"?"	: values=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
@@ -83,7 +80,7 @@ const	dap=(Env=>
 		"a"	:(value,alias,node)=>	{ Env.delay(_=>Update.Append(value||node,alias)); },
 		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node)); },
 		
-		"*"	:(value,alias)=>	value && (alias ? value.map(v=>Box(v,alias)) : value),
+		"*"	:(value,alias)=>	value ? (alias ? value.map(v=>({[alias]:v})) : value) : false,
 				 
 		"?"	:(value,alias)=>	!!value,
 		"??"	:(value,alias)=>	alias?alias==value:!value,
@@ -92,11 +89,6 @@ const	dap=(Env=>
 		
 	}),
 	
-	Box	=(value,alias)=>{
-		const r={};
-		r[alias]=value;
-		return r;
-	},
 	O	= [],
 	E	= "",
 
@@ -125,7 +117,7 @@ const	dap=(Env=>
 		hash	: (values,tags)=>{
 			const hash={};
 			for(let a,i=values.length;i--;)
-				if((a=tags[i])!='%')
+				if((a=tags[i])!='.')
 					hash[a]=values[i];
 				else if(a=values[i])
 					for(let j in a)
@@ -368,13 +360,13 @@ const	dap=(Env=>
 						pass[k]=changes[k];
 				return pass;
 			},
-			
+/*			
 			adopt:function(changes,stata){
 				for(const k in changes)
 					if(k in stata)
 						stata[k]=changes[k]
 			}
-			
+*/		
 		};
 					
 		function Proto(ns,utag){
@@ -446,24 +438,25 @@ const	dap=(Env=>
 				},
 		
 			prepare	:function(P,greedy){
-				const
-					scope = new Scope(P&&P.scope),
-					ns	= this.ns,
-					stuff	= this.stuff;
 
 				this.rules = {};
-				this.scope = scope;
-					
+				this.scope = new Scope(P&&P.scope);
+
+				const
+					rules = this.rules,
+					scope = this.scope,
+					stuff	= this.stuff;
+
 				for(const i in stuff)
-					this.rules[i] = new Rule(ns,scope,stuff[i],i);
+					rules[i] = new Rule(this.ns,scope,stuff[i],i);
 				
 				if(this.utag)
-					this.elem=Env.Native(this.utag,!!this.rules[""]);					
+					this.elem=Env.Native(this.utag,!!rules[""]);					
 				
 				if(greedy)
-					for(const i in this.rules)
+					for(const i in rules)
 						try{
-								this.rules[i].engage(greedy);
+								rules[i].engage(greedy);
 						}catch(e){
 							console.error(e.message,"in",this.utag);
 							this.elem.setAttribute("dap-error",e.message);
@@ -472,9 +465,9 @@ const	dap=(Env=>
 				if(this.reacts.length)
 					this.events=this.reacts.reduce((a,k)=>{
 						const
-							rule	= this.rules[k]||rules[""],
+							rule	= rules[k]||rules[""],
 							react	= k||this.elem.getAttribute("ui");
-						react.split(" ").forEach(e=>{this.rules[e.toLowerCase()]=rule});
+						react.split(" ").forEach(e=>{rules[e.toLowerCase()]=rule});
 						return (a&&react) ? (a+" "+react) : (react || a) ;
 					},
 					"").split(" ");					
@@ -531,15 +524,19 @@ const	dap=(Env=>
 		}
 		
 		function Token(lvalues,rvalue){
-			this.lvalues	= lvalues;
+			this.lvalues = lvalues;
 			this.rvalue	= rvalue;
 			this.value = null;
 		};
 		
-		function Rvalue(convert,flatten,feed,path){
-			this.convert = convert
+		function Expr(feed,flatten){
+			this.feed = feed;
 			this.flatten = flatten;
-			this.feed	= feed;
+		}
+		
+		function Rvalue(convert,expr,path){
+			this.convert = convert
+			this.expr = expr;
 			this.path	= path;
 		};
 		
@@ -594,8 +591,6 @@ const	dap=(Env=>
 			const
 			
 			make = context => {
-				
-				function branchSteps(n){ return context.brackets[n].split(STEPS); }
 				
 				function makeTodo(steps,todo,branches){
 				
@@ -662,11 +657,10 @@ const	dap=(Env=>
 								
 							const
 								convert = (a=a.split(":")).length>1 && makeConverts(a[1]),
-								flatten = (a=a[0].split(">")).length>1 && (context.ns.reach(a[1],FUNCS.FLATTEN) || Util.hash),
-								feed = (a=a[0].split("<")).length>1 && makeFeed(context.brackets[a[1]].split(TOKENS).reverse()),
+								expr = (a=a[0].split("<")).length>1 && makeExpr(a[1]),
 								path = (a=a[0]) && makePath(a,tag);
 								
-							let resolved = !feed;
+							let resolved = !expr;
 								
 							if(path){
 								if(!tag)
@@ -695,7 +689,7 @@ const	dap=(Env=>
 							}
 							
 							if(!resolved)
-								rvalue = new Rvalue(convert,flatten,feed,path);
+								rvalue = new Rvalue(convert,expr,path);
 						}
 						
 						if(alias==null)
@@ -711,7 +705,22 @@ const	dap=(Env=>
 					return new Feed(values,tags,tokens);
 				};
 				
-				function makeConverts(str){ return str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT)); }
+				function makeExpr(str){
+					const
+						a = str.split(">"),
+						feed = makeFeed(context.brackets[a[0]].split(TOKENS).reverse()),
+						flatten = a[1] && ( a[1].charAt(0)=="."
+							? makeAccessor(a[1].substr(1))
+							: context.ns.reach(a[1],FUNCS.FLATTEN)
+						);
+						
+					return new Expr(feed,flatten)
+				};
+				
+				const
+				branchSteps = n => context.brackets[n].split(STEPS),
+				makeAccessor = path => values=> Util.reach(values,path),
+				makeConverts = str => str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
 				
 				return epilog => makeTodo(branchSteps(0),epilog);
 			}
@@ -749,7 +758,7 @@ const	dap=(Env=>
 				},
 					
 				spawn: function($,node){
-					new Execute.Branch(node,$).run(this.engage());
+					new Execute.Branch(node,$).execBranch(this.engage());
 				}
 			}
 		})();		
@@ -822,7 +831,7 @@ const	dap=(Env=>
 						this.target.value=value;
 						Perf("Postpone resolve",Date.now(),
 							this.branch.up
-							? Update.checkUp(this.branch.node,this.branch.up,null,this.todo) /// [0] hack
+							? Update.checkUp(this.branch.node,this.branch.up,null,false,this.todo)
 							: this.branch.runDown(this.todo,this.place,this.instead)
 						);
 					}
@@ -839,7 +848,7 @@ const	dap=(Env=>
 		}
 		Branch.prototype={
 
-			execBranch: //returns true if empty
+			execBranch:
 			function(step){
 				
 				const	
@@ -848,7 +857,6 @@ const	dap=(Env=>
 					$	= this.$;
 					
 				let
-					empty	= true,
 					flow	= null;
 					
 				if(++stackDepth>100)
@@ -867,7 +875,7 @@ const	dap=(Env=>
 						if(value instanceof Postpone)
 							return value.assign({
 								branch: this,
-								todo: new Step(postpone.todo,null,null,step.todo)
+								todo: new Compile.Step(value.todo,null,null,step.todo)
 							});
 					}
 					else{									
@@ -914,10 +922,8 @@ const	dap=(Env=>
 							if(flow){
 								const
 									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
-								empty = rows.reduce(
-									(empty,row)=>
-										new Branch(node,$.subData(row),this.up).run(todo) && empty,
-									empty
+								rows.map( row=>
+										new Branch(node,$.subData(row),this.up).execBranch(todo)
 								);
 							}
 						}
@@ -925,11 +931,7 @@ const	dap=(Env=>
 					step = (flow==null) && todo;
 				}
 				--stackDepth;
-				
-				if(isArray(flow))
-					return	empty;
-				else
-					return flow===false;
+				return flow;
 			},
 
 			execToken:
@@ -950,45 +952,30 @@ const	dap=(Env=>
 				
 					const
 						path = rvalue.path,
-						entry = path.entry,
-						feed = rvalue.feed,
-						flatten = rvalue.flatten;
+						expr = rvalue.expr;
 						
 					if(path){
-						value = (up && (entry in up)) ? up : path.reach(this, $.stata);
+						value = (up && (path.entry in up)) ? up : path.reach(this, $.stata);
 						for(let route=path.route, i = route.length; value && i-->0; ){
 							const k=route[i];
 							value = value[k];
 						}
 					}
 					
-					if(feed){
-						const	
-							values = feed.values.slice(0),
-							tags = feed.tags,
-							tokens = feed.tokens,
-							proto = value||literal;
-							
-							for(let i = tokens.length;i-->0;){
-								const
-									value	=this.execToken(values[i],tokens[i]);
-									
-								if(value instanceof Postpone)
-									return value.blocking(true) && value.assign({// in a feed - always blocking?      !!i
-										token: new Compile.Token(
-											recap(parts,p,new Compile.Rvalue(
-												values.length && new Compile.Feed(values,tags,recap(tokens,i,value.token),feed.lscope),flatten,path)
-											),converts
-										)
-									});
-									
-								values[i]=value;
-							}
+					if(expr){
+						value = this.execExpr(expr,value||literal);
 						
-						value = flatten(values,tags);
-						
-						if(proto)
-							Print(proto,null,this.node,this.$.subData(value));
+						if(value instanceof Postpone)
+							return value.assign({
+								token: new Compile.Token(
+									lvalues,
+									new Compile.Rvalue(
+										converts,
+										value.expr,
+										path
+									)
+								)
+							});
 					}
 				}
 
@@ -1032,7 +1019,7 @@ const	dap=(Env=>
 								target=target[key]||(target[key]={});
 								key=route[--i];
 							}
-								
+							
 							target[key]=value;
 								
 							convert = lvalue.convert;
@@ -1042,17 +1029,47 @@ const	dap=(Env=>
 				return value;
 			},
 			
-			run:
-			function(todo){
-				const isEmpty = todo && this.execBranch(todo) && !this.node.childNodes.length; // is empty?
-				return isEmpty;
+			execExpr:
+			function(expr,proto){
+				const
+					feed = expr.feed,
+					values = feed.values.slice(0),
+					tags = feed.tags,
+					tokens = feed.tokens;
+					
+					for(let i = tokens.length;i-->0;){
+						const
+							value	=this.execToken(values[i],tokens[i]);
+							
+						if(value instanceof Postpone)
+							return value.blocking(true) && value.assign({// in a feed - always blocking?      !!i
+								expr: new Compile.Expr(
+									expr.flatten,
+									new Compile.Feed(values,tags,recap(tokens,i,value.token))
+								)
+							});
+							
+						values[i]=value;
+					}
+					
+				const
+					value = (expr.flatten||Util.hash)(values,tags);
+					
+				if(proto)
+					Print(proto,null,this.node,this.$.subData(value));
+				
+				return value;
 			},
 
 			runDown:
 			function(todo,place,instead){
-				const postpone = this.postpone,
-					elem = Env.Adopt(place,instead,this.node,this.run(todo),postpone);//
-				if(postpone)postpone.locate(elem);
+				const
+					result = todo && this.execBranch(todo),
+					postponed = result instanceof Postpone,
+					elem = Env.Adopt(place,instead,this.node,postponed,result);// !this.node.childNodes.length
+
+				if(postponed)
+					result.locate(elem);
 			}
 						
 		};
@@ -1066,28 +1083,35 @@ const	dap=(Env=>
 		};
 
 	})(),
-	
+
 	Update = (function(){
 		
 		const
-		
-		checkUp = (node,change,snitch,todo) => {
-		
-			if(!todo)
-				todo = node.P.rules.u && node.P.rules.u.engage();
 
-			const
-				value = new Execute.Branch(node,null,change).execBranch(todo),//
-				up = node.$.adopt(change,{}),
-				parent = node.parentNode;
-				
-			if(value instanceof Execute.Postpone){
+		checkUp = (node,change,snitch,result,todo) => {
+
+			const parent = node.parentNode;
+			
+			//assert(node.P);
+			
+			if(result!==false){
+				const rule = node.P.rules[Env.Classify(result)||"u"];
+				todo = rule && rule.engage();
+			}
+
+			if(todo)
+				result = new Execute.Branch(node,null,change).execBranch(todo);
+
+			const up = node.$.adopt(change,{});
+
+			if(result instanceof Execute.Postpone){
+				result.locate(node);
 				checkDown(node,change,false,snitch);
-				value.locate(node);
 				return;
 			}
 			
-			return (parent && parent.P && checkUp(parent,up,node)>3) || checkDown(node,change,snitch)>3;
+
+			return (parent && parent.P && checkUp(parent,up,node,result)>3) || checkDown(node,change,snitch)>3;
 		},			
 		
 		checkDown = (node,change,snitch)=>{//
@@ -1129,13 +1153,12 @@ const	dap=(Env=>
 		Append = (node,rule)=>{
 			if(!rule)
 				rule=node.P.rules.a||Fail("no a-rule");
-			new Execute.Branch(node,node.$.subData()).run(rule.todo);
+			new Execute.Branch(node).execBranch(rule.todo); //,node.$.subData()
 		};
-
 
 		return {
 			
-			checkUp,
+			checkUp, Rebuild, Append,
 			
 			onDemand: (value,alias,node)=>{
 				checkUp(node,{});
@@ -1143,19 +1166,18 @@ const	dap=(Env=>
 			
 			onEvent: (event,target)=>{
 				Env.stopEvent(event);
+
 				const
-					node = target||event.target,
-					rule = node.P && node.P.rules[event.type],
-					todo = rule && rule.engage();
+					node = target||event.currentTarget,
+					value = event.type;
 					
-				Execute.Perf(event.type,Date.now(),checkUp(node,{event},null,todo));
+				Execute.Perf(event.type,Date.now(),checkUp(node,{event},null,value));
 			}
 			
 		};
 		
 	})();
-	
-	
+		
 	return	{ Env, Util, Execute, Update,
 			
 		Infect	:function(typePrototype,rules){
@@ -1177,12 +1199,6 @@ const	dap=(Env=>
 	doc	= window.document,
 	isArray	= Array.isArray,
 	newElem	=	e=> doc.createElement(e),
-	
-/*				const	c	= " "+node.className+" ",
-					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
-				if(!on!=!found)
-					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
-*/
 
 	DEFAULT	= {
 		TAG	: "DIV",
@@ -1193,7 +1209,9 @@ const	dap=(Env=>
 			INPUT :'change',
 			TEXTAREA :'change'
 		},
-		UIEVENT: node => DEFAULT.UIEVENTS[node.nodeName] || ( node.isContentEditable ? 'blur' : DEFAULT.EVENT ),
+		
+		UIEVENT: node => 
+			DEFAULT.UIEVENTS[node.nodeName] || ( node.isContentEditable ? 'blur' : DEFAULT.EVENT ),
 	},
 	
 	log	=	m=>{ console.log("DAP "+m);return m; },
@@ -1265,23 +1283,33 @@ const	dap=(Env=>
 	Http	= (function(){
 
 		const
-
+		
+		lowerKeys = o => {
+			const
+				lower = {};
+			for(const k in o)
+				lower[k.toLowerCase()]=o[k];
+			return lower;
+		}
+		
 		makeXHR = (req,sync)=>{
 			
-			if(typeof req === "string") req={url:req};//url,body,headers,method,contentType,)
-			else if(req[""])req.body=Mime.prepareContent(req,req[""]);
+			if(typeof req === "string")
+				req={url:req};//url,body,headers,method,contentType,)
 		
 			const	
 				request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
-				method	= req.method || ( req.body ? "POST" : "GET" );
+				headers = req.headers && lowerKeys(req.headers),
+				body = req.body || (req[""] && Mime.prepareContent(headers,req[""]) ),
+				method	= req.method || ( body ? "POST" : "GET" );
 			
 			request.open( method,req.url,!sync ); //Uri.absolute(req.url)
 			
-			if(req.headers)
-				for(const i in req.headers)
-					request.setRequestHeader(i,req.headers[i]);
+			if(headers)
+				for(const i in headers)
+					request.setRequestHeader(i,headers[i]);
 			
-			try	{request.send(req.body||null);}
+			try	{request.send(body||null);}
 			catch(e){console.warn(e.message);}
 			
 			return request;
@@ -1335,9 +1363,9 @@ const	dap=(Env=>
 			 
 		},
 		
-		prepareContent= (req,content) => {
+		prepareContent= (headers,content) => {
 			const
-				ctype	= req&&req.headers['content-type'],
+				ctype	= headers&&headers['content-type'],
 				h	= ctype&&encode[ctype.split(";")[0]];
 			return h ? h(content) : content;
 		},
@@ -1401,7 +1429,7 @@ const	dap=(Env=>
 		doc, log, 
 		Http, Mime, QueryString, Blend,
 	
-		Native : (str,ui)=>{
+		Native: (str,ui)=>{
 			if(!str)return DEFAULT.ELEMENT;
 			const	space	= str.indexOf(" "),
 				extra	= space<0 ? null : str.substr(space),
@@ -1417,7 +1445,7 @@ const	dap=(Env=>
 			return elem;
 		},
 
-		Spawn	: (elem,events,handler)=>{
+		Spawn: (elem,events,handler)=>{
 			const el = elem.cloneNode(false);
 			if(events)
 				events.forEach( e=> {
@@ -1432,19 +1460,28 @@ const	dap=(Env=>
 			return el;
 		},
 		
-		Print	:(place,P)=>{
+		Print:(place,P)=>{
 			place.appendChild(P.nodeType ? P : doc.createTextNode(P));
 		}, //P.cloneNode(true)
 		
-		Adopt	:(place,instead,elem,empty,postponed)=>{
+		Classify: result=>
+			!result ? result :
+			typeof result == 'object' ? result.constructor.name :
+			result,
+
+		Adopt	:(place,instead,elem,postponed,result)=>{
+
+			const r = dap.Env.Classify(result)
+			if(r!=null)
+				elem.setAttribute('data-dap', r);//elem.classList.toggle("EMPTY",!!empty);
 			
 			if(postponed){
 				instead	? instead.classList.add("STALE") :
 				place	? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT") :
 				console.log('orphan postponed');
 				return instead;
-			}else
-				elem.classList.toggle("EMPTY",!!empty);
+			}
+
 			instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
 			place	? place.appendChild(elem) :
 			console.log('orphan element '+elem);
