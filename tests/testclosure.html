@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test</title>
+		<style>
+		.ui{cursor:pointer}
+		iframe{height:16em; width:100%; border:4px dashed orange;}
+		</style>
+		<script src="../0.52a.js"></script>
+	</head>
+	<body>  
+		<script>
+		
+			(function Datum(lift,route){
+				this.lift=lift;
+				this.route=route;
+			})
+			.prototype={
+				reach: function(context){
+					let
+						target = context.$.data,
+						i=lift;
+					while(i--)
+						target=target[1] || Fail("Out of data contexts: "+entry);
+					return target[0];
+				}
+			};
+
+
+		</script>
+
+	</body>
+</html>

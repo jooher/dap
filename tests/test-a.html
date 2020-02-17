@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test</title>
+		<style>
+		.ui{cursor:pointer}
+		iframe{height:16em; width:100%; border:4px dashed orange;}
+		</style>
+		<script src="../0.5a74.js"></script>
+	</head>
+	<body>  
+		<script>
+		
+'app'.d("$a=`a $b=`b"
+
+	,'a'.d("! $a")
+	
+	,'b'.d("! $b")
+
+	,'UL'.a("$a .b=$a" // ^a +b +c
+		,'LI'.d("! $a .b")
+	)
+	
+	
+	
+	,'INPUT'.ui("$a=#.value")
+
+)
+
+.RENDER();
+
+		</script>
+
+	</body>
+</html>

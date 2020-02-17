@@ -8,13 +8,13 @@
 <body>
 
 <h1>Understanding dap</h1>
-<p>All you need to use dap in your document is a reference to dap runtime script: <code>&lt;script src="https://dap.js.org/0.5.js"&gt;&lt;/script&gt;</code>. You can start your dap experiments with an .html document like this:</p>
+<p>All you need to use dap in your document is a reference to dap runtime script: <code>&lt;script src="https://dap.js.org/0.4.js"&gt;&lt;/script&gt;</code>. You can start your dap experiments with an .html document like this:</p>
 <pre>
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
  &lt;head&gt;
   &lt;title&gt;My dap playground&lt;/title&gt;
-  <b>&lt;script src="https://dap.js.org/0.5.js"&gt;&lt;/script&gt;</b>
+  <b>&lt;script src="https://dap.js.org/0.4.js"&gt;&lt;/script&gt;</b>
  &lt;/head&gt;
  &lt;body&gt;
   &lt;h2&gt;Welcome to dap&lt;/h2&gt;
@@ -202,7 +202,7 @@
 			.d("!! .name@ .id@title")
 			.ui("$id=.id $name=.name")
 	)
-	,'message'.d("? $id; ! (message $id $name)format")
+	,'message'.d("? $id; ! (message $id $name)here")
 )
 .DICT({
 	heroes:"/samples/heroes.json",
@@ -233,10 +233,10 @@
 			.ui("$model=#:value $engine=")
 		,'SELECT.engine' //once $model is set, carcodes are queried parametrically for given $make, $year and $model
 			.d("? $model; Hint(label.engine@label); * (base@ $make $year $model)uri:query; Option(.engine@label (`, .engine .carcode)join@value)")
-			.ui("$engine=#:value")
+			.ui("$engine=#:value ")
 	).u("$carname=( $engine ( $year $make $model $engine )spaced )!") // $carname will be empty until $engine is set
 	,'H3'.d("! ($carname label.hint)?") // print $carname if set, otherwise a hint
-	,'A target=_blank'.d("? $carname; !! label.redir@ (`https://www.rockauto.com/en/catalog/ (`, $make $year $model $engine)join)uri:space2plus@href")
+	,'A target=_blank'.d("? $carname; !! label.redir@ (`https://www.rockauto.com/en/catalog/ (`, $make $year $model $engine)join)uri+@href")
 )
 .DICT({
 	year	: Array.from({length:20},(v,i)=>2019-i), // back to 20 years from year 2019
@@ -254,11 +254,6 @@
 	// below are a couple of reusable parameterized templates
 	Hint	: 'OPTION selected disabled'.d("! .label"), // a placeholder hack for a SELECT
 	Option	: 'OPTION'.d("!! .value (.label .value)?") // set .value as attribute and display .label or .value 
-})
-.FUNC({
-	convert:{
-		space2plus: url=>url.replace(/ /g,'+').replace(/%20/g,'+')
-	}
 })
 </pre>
 <p>The new things in the example above are the <em>reusable templates</em> <code>Hint(.label)</code> and <code>Option(.label .value)</code> which are used in the several SELECT elements to display initial hints and available options.</p>
@@ -318,8 +313,8 @@
 <!--
 <script src="https://cdn.jsdelivr.net/gh/jooher/dap/0.4.min.js"></script>
 -->
-<script src="../0.5.js"></script>
-<script src="../stuff/dapify/ApplyToAllPreElements.js"></script>
+<script src="../0.4.js"></script>
+<script src="../stuff/dapify.js"></script>
 
 <link href="/stuff/talks.css" rel="stylesheet" type="text/css"/>	
 <script src="/stuff/talks.js#msg=7"></script>

@@ -1,4 +1,4 @@
-'talks'.d("! (.msg:# Entry@+ Ties@-)case; ! ")
+'talks'.d("! (.msg@ Entry Ties)?!; ! ")
 
 //.NS("https://dap.js.org/stuff/talks.js")
 

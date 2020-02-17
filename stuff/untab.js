@@ -1,6 +1,4 @@
-dap
-
-.NS("https://dap.js.org/stuff/untab.js")
+dap.NS("https://dap.js.org/stuff/untab.js")
 
 .FUNC({
 	convert	:{

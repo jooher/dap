@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dap playground</title>
+		<link href="https://dap.js.org/docs/dapify.css" rel="stylesheet" type="text/css"/>	
+		<style>
+		[ui]{cursor:pointer}
+		iframe{height:16em; width:100%; border:4px dashed orange;}
+		</style>
+		<script src="/0.5.js"></script>
+	</head>
+	<body> 
+	
+<script>
+
+'daptest'.d("! `wow; $code="
+	,'editor'.d("dapify($code)")
+	,'UL.samples'.d("* samples@"
+		,'LI.sample'.d("! .title").ui("$code=(samplesdir .fname)concat:query")
+	)
+)
+.USES({
+	dapify:"/stuff/dapify.dap.js"
+})
+.DICT({
+	samplesdir:"tests/",
+	samples:[
+		{title:"Preloader",fname:"preloader"}
+	]
+})
+.RENDER()
+
+</script>
+	</body>
+</html>

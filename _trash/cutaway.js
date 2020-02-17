@@ -411,3 +411,83 @@ return a;
 					function(signal){console.warn("Failed to fire event: "+signal)}
 			})()
 	
+
+	Request= (function(){
+
+		function Post(url){
+			this.url=url;
+			this.body=null;
+			this.mime=null;
+		};
+		
+		Post.prototype={
+			addForm	: function(values,tags){
+					var body="";
+					for(let i=values.length,v,t;i--;)
+						if(v=values[i])
+							body += (t=tags[i])
+							? "&"+t+"="+ encodeURIComponent( typeof v=="object" ? Json.encode(v) : v ) 
+							: Json.encode(v);
+					this.body=body;
+					v=body.charAt(0);
+					this.mime= v=='<'?"text/xml" : v=='&'?"application/x-www-form-urlencoded" : "text/plain";
+					return this;
+				},
+				
+			addBlob	: function(value,tag){
+					this.body=value;
+					this.mime=tag||"blob";
+					return this;
+				}
+		}
+		
+		return	{
+			post	:(url,values,tags)=>	new Post(url).addForm(values,tags),
+			blob	:(url,value,tag)=>	new Post(url).addBlob(value,tag)
+		}
+		
+	})(),
+	
+	
+	Uri	= (function(){
+	
+		const
+		
+		base = window.location.href.replace(/[?!#].*$/,""),
+
+		keys = ["source","origin","protocol","authority","userinfo","username","password","host","hostname","port","relative","path","directory","file","query","anchor"],
+		regx = /^(([^:\/?#]+:)?\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?(([^:\/?#]*)(?::(\d*))?))?)((((?:[^?#\/]*\/)*)([^?#]*))(\?[^#]*)?(#.*)?)/,
+			
+		parse	= str=>{// based on code from http://blog.stevenlevithan.com/archives/parseuri
+			const uri = {};
+			regx.exec(str).map((val,i)=>{uri[keys[i]]=val});
+			return uri;
+		},
+		
+		absolute=(href,rel)=>{	// evaluate absolute URL from relative to base URL
+			
+			if(!rel)rel=base;
+			if(!href)return rel;
+			if(/^\w*:\/\//.test(href))return href;
+							
+			const	uri	= parse(rel);
+			
+			switch(href.charAt(0)){
+				case'*': return base;
+				case'/': return uri.origin+href;
+				case'?': return uri.origin+uri.path+href;
+				case'#': return uri.origin+uri.path+uri.query+href;
+				case'.': 
+					const up = href.match(/\.\.\//g);
+					if(up){
+						uri.directory=uri.directory.split("/").slice(0,-up.length).join('/');
+						href=href.substr(up.length*3);
+					};
+			}
+			return uri.origin+uri.directory+href;
+		}
+		
+		return	{ base, parse, absolute }
+
+	})(),
+	

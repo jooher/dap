@@ -1,0 +1,32 @@
+<html><head>
+	<meta charset="utf-8">
+	<title>Todo -- dap sample</title>
+	<link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css">
+	<script src="/0.5a74.js" _src="https://dap.js.org/0.4.js"></script>
+	<style>
+		[ui=click]{cursor:pointer}
+		#todo-server{
+			position: absolute;
+			top: -1.5em;
+			width: 100%;
+			background-color: cornsilk;
+		}
+		#loader{
+		 padding-left:60px;
+		}
+	</style>
+</head>
+<body>
+<div id="todoapp"><select ui="change" id="todo-server" class="EMPTY"><option>todo-backend-catalyst.herokuapp.com/
+</option><option>mojo-todo-backend.herokuapp.com/
+</option><option>todo-backend-pef-front.herokuapp.com/
+</option><option>todo-backend-rocket-rust.herokuapp.com/
+</option><option>todo-backend-express.herokuapp.com/
+</option><option>todo-backend-express-csp.herokuapp.com/
+</option><option>todo-hapi-postgres.herokuapp.com/
+</option><option>todo-backend-micro.herokuapp.com/
+</option><option>todo-sails.herokuapp.com/todo
+</option><option>todo-backend-compojure.herokuapp.com/todos
+</option><option>todo-backend-clojure.herokuapp.com/todos</option></select><div id="header"><h1>dap todos 0.5a</h1><input placeholder="What needs to be done?" autofocus="" ui="change" id="new-todo"></div><div id="main"><input type="checkbox" ui="change" id="toggle-all"><ul id="todo-list"><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">1</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">2</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">3</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">4</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">1</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">2</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">3</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li><li><input type="checkbox" ui="change" class="toggle"><label ui="click" class="view">4</label><input ui="change" class="edit EMPTY"><button ui="click" class="destroy"></button></li></ul></div><div id="footer"><div id="todo-count">4 items left</div><ul id="filters"><li><a href="#All">All</a></li><li><a href="#Active">Active</a></li><li><a href="#Completed">Completed</a></li></ul><div ui="click" id="clear-completed">Clear completed items (0)</div></div><pre id="loader"></pre></div>
+
+</body></html>

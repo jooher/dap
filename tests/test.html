@@ -6,36 +6,39 @@
 		.ui{cursor:pointer}
 		iframe{height:16em; width:100%; border:4px dashed orange;}
 		</style>
-		<script src="../0.54a.js"></script>
+		<script src="../0.5a76.js"></script>
 	</head>
 	<body>  
 		<script>
-		'B'.d("$name=`@kitten .surname=`hoh" //
+/*			'B'.d("! $name=`@kitten .surname=:!") //
 			// ,'I'.d("! (@we`bah $name:upper kwan $name@):trace")
 			,'H2'.d("! $name .surname")
 		)
-/*		
-		
+		.d("? :!; ! `second")
+		.d("! `third")
 		'UL'.d("*@s :query,lines`good-servers"
 			,'LI'.d("! .s")
 		)
-		
-	'app'.d("$status=`theStatus" // `literal what  .datum=`theDatum
+*/
+
+//dap.debug();
+
+'app'.d("$status=`theStatus" // `literal what  .datum=`theDatum
 	,'B'.d("! $status").ui("$status=$status:!")
 	,'UL'.d("* eng"
 		,'LI'.d("! .eng"
 			,'UL'.d("* rus"
-				,'LI'.d("! .rus `- ..eng `= $status").ui("$status=.rus; ?")
+				,'LI'.d("! .rus `- ..eng `= $status").ui("$status=.rus")
 				)
-			).ui("$status=.eng")
+			).u("$status=($status `+ .eng)concat")
 	)
 
-	,'H3'.d("! `status: $status")
+	,'H3'.d("? ($status `)?; ! `status: $status")
 	,'sta'.d("!")
 	,'dat'.d("! `datum: .datum")
 	,'redat'.d("$=( @redatum`ooh); ! $:trace")
 )
-*/
+
 .FUNC({
 	convert:{
 		upper: str=>str.toUpperCase(),

@@ -16,6 +16,7 @@ const	dap=(Env=>
 
 	convert	:{
 	
+		""	:()=>null,
 		"check"	:Check,
 	
 		"?"	:bool=>!!bool,	/// test
@@ -41,6 +42,8 @@ const	dap=(Env=>
 	
 	flatten	:{
 	
+		""	: Util.hash,
+		
 		"&"	: values=> values.reduce(Object.assign,values.pop()),
 		
 		"?"	: values=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
@@ -73,14 +76,13 @@ const	dap=(Env=>
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		"&"	:(value,alias,node)=>	{ const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
 
-		"d"	:(value,alias,node)=>	{ Update.Rebuild(value||node); },
-		"a!":(value,alias,node)=> { Update.Append(value||node); },
-		"u!":(value,alias,node)=>	{ Update.onDemand(value||node); },
+		"a!"	:(value,alias,node)=> { Execute.a(value||node); },
+		"u!"	:(value,alias,node)=>	{ Execute.u(value||node); },
+		"d"	:(value,alias,node)=>	{ Execute.Rebuild(value||node) },
+		"a"	:(value,alias,node)=>	{ Env.delay(_=>Execute.a(value||node,alias)) },
+		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node))},
 		
-		"a"	:(value,alias,node)=>	{ Env.delay(_=>Update.Append(value||node,alias)); },
-		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node)); },
-		
-		"*"	:(value,alias)=>	value ? (alias ? value.map(v=>({[alias]:v})) : value) : false,
+		"*"	:(value,alias)=>	value && (alias ? value.map(v=>Box(v,alias)) : value),
 				 
 		"?"	:(value,alias)=>	!!value,
 		"??"	:(value,alias)=>	alias?alias==value:!value,
@@ -89,6 +91,11 @@ const	dap=(Env=>
 		
 	}),
 	
+	Box	=(value,alias)=>{
+		const r={};
+		r[alias]=value;
+		return r;
+	},
 	O	= [],
 	E	= "",
 
@@ -117,7 +124,7 @@ const	dap=(Env=>
 		hash	: (values,tags)=>{
 			const hash={};
 			for(let a,i=values.length;i--;)
-				if((a=tags[i])!='.')
+				if((a=tags[i])!='%')
 					hash[a]=values[i];
 				else if(a=values[i])
 					for(let j in a)
@@ -305,16 +312,20 @@ const	dap=(Env=>
 				Env.require(uri,true) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
 			)
 		},
-		rootns	= new Namespace(Env.base).FUNC(Env.Func);//Uri.absolute()
+		rootns	= new Namespace(Env.base).FUNC(Env.Func),//Uri.absolute()
+		
+		options = {
+			greedy: false
+		};
 			
-		let ids=0;
+		let scopes=0;
 
 		function Scope(scope){
 			this.up = scope;
 			this.defines = {};
 			this.depends = {};
 			
-			this.id= ++ids;
+			this.id= ++scopes;
 		}
 		Scope.prototype = {
 			
@@ -360,25 +371,24 @@ const	dap=(Env=>
 						pass[k]=changes[k];
 				return pass;
 			},
-/*			
+			
 			adopt:function(changes,stata){
 				for(const k in changes)
 					if(k in stata)
 						stata[k]=changes[k]
 			}
-*/		
+			
 		};
 					
-		function Proto(ns,utag){
+		function Proto(ns,utag,scope){
 			this.ns	= ns||rootns;
 			this.utag	= utag;
-			this.stuff	= {};
+			this.scope = scope;
+			this.rules	= {};
 			this.reacts	= [];
 			
-			this.scope = null;
 			
 			this.elem	= null;
-			this.rules	= null;
 			this.events = null;
 			
 			this.tgt	= null;
@@ -393,12 +403,12 @@ const	dap=(Env=>
 			$$	:function(){ return this.tgt=this },
 
 			set	:function(key,stuff,react){
-					const	p = this.tgt || new Proto(this.ns,this.utag).$$();
+					const	P = this.tgt || new Proto(this.ns,this.utag).$$();
 					if(stuff.length)
-						(p.stuff[key]||(p.stuff[key]=[])).push(stuff);
+						(P.rules[key]||(P.rules[key]=new Rule(this.ns,this.scope,key))).addBranch(stuff);
 					if(react)
-						p.reacts.push(key);
-					return p;
+						P.reacts.push(key);
+					return P;
 				},
 				
 			d	:function(...stuff)		{ return this.set("d",stuff) },
@@ -438,37 +448,34 @@ const	dap=(Env=>
 				},
 		
 			prepare	:function(P,greedy){
-
-				this.rules = {};
-				this.scope = new Scope(P&&P.scope);
-
 				const
-					rules = this.rules,
-					scope = this.scope,
-					stuff	= this.stuff;
+					scope = new Scope(P&&P.scope),
+					ns	= this.ns;
 
-				for(const i in stuff)
-					rules[i] = new Rule(this.ns,scope,stuff[i],i);
+				this.scope = scope;
 				
+				for(const i in this.rules)
+					this.rules[i].setScope(scope);
+					
 				if(this.utag)
-					this.elem=Env.Native(this.utag,!!rules[""]);					
+					this.elem=Env.Native(this.utag,!!this.rules[""]);					
 				
 				if(greedy)
-					for(const i in rules)
+					for(const i in this.rules)
 						try{
-								rules[i].engage(greedy);
+								this.rules[i].engage(greedy);
 						}catch(e){
 							console.error(e.message,"in",this.utag);
-							this.elem.setAttribute("dap-error",e.message);
+							this.elem.setAttribute("dap-error-"+i,e.message);
 						}
 						
 				if(this.reacts.length)
 					this.events=this.reacts.reduce((a,k)=>{
 						const
-							rule	= rules[k]||rules[""],
+							rule	= this.rules[k]||rules[""],
 							react	= k||this.elem.getAttribute("ui");
-						react.split(" ").forEach(e=>{rules[e.toLowerCase()]=rule});
-						return (a&&react) ? (a+" "+react) : (react || a) ;
+						react.split(" ").forEach(e=>{this.rules[e]=rule});
+						return !react ? a : (a+" "+react);
 					},
 					"").split(" ");					
 			},
@@ -496,18 +503,17 @@ const	dap=(Env=>
 				return node;
 			},
 			
-			COMPILE :function(){this.prepare(null,true); return this},
-
+			COMPILE :function(scope){this.scope = scope|| new Scope(); return this; },//{this.prepare(null,true); return this},
 			RENDER	:function(data,place,instead){Env.render(this,data,place,instead)}
 			
 		};
 
-		function Context(ns,brackets,scope,define,depend){
-			this.ns = ns;
+		function Context(brackets,P){//ns,scope,relations
 			this.brackets = brackets;
-			this.scope = scope;
-			this.define = define;
-			this.depend = depend;
+			this.ns = P.ns;
+			this.scope = P.scope;
+			this.define = P.relations;
+			this.depend = P.relations;
 		};
 
 		function Step(branch,operate,feed,todo){
@@ -524,19 +530,15 @@ const	dap=(Env=>
 		}
 		
 		function Token(lvalues,rvalue){
-			this.lvalues = lvalues;
+			this.lvalues	= lvalues;
 			this.rvalue	= rvalue;
 			this.value = null;
 		};
 		
-		function Expr(feed,flatten){
-			this.feed = feed;
-			this.flatten = flatten;
-		}
-		
-		function Rvalue(convert,expr,path){
+		function Rvalue(convert,flatten,feed,path){
 			this.convert = convert
-			this.expr = expr;
+			this.flatten = flatten;
+			this.feed	= feed;
 			this.path	= path;
 		};
 		
@@ -545,12 +547,11 @@ const	dap=(Env=>
 			this.convert=convert;
 		};
 				
-		function Rule(ns,scope,branches,type){
+		function Rule(ns,scope,type){
 			this.ns	= ns;
 			this.scope = scope;
-			this.branches	= branches;
-			this.define = // type=='d';
-			this.depend = this.dependency[type];
+			this.relations = this.dependency[type];
+			this.branches	= [];
 		}
 		Rule.prototype=(function(){
 			
@@ -591,6 +592,8 @@ const	dap=(Env=>
 			const
 			
 			make = context => {
+				
+				function branchSteps(n){ return context.brackets[n].split(STEPS); }
 				
 				function makeTodo(steps,todo,branches){
 				
@@ -657,10 +660,11 @@ const	dap=(Env=>
 								
 							const
 								convert = (a=a.split(":")).length>1 && makeConverts(a[1]),
-								expr = (a=a[0].split("<")).length>1 && makeExpr(a[1]),
+								flatten = (a=a[0].split(">")).length>1 && (context.ns.reach(a[1],FUNCS.FLATTEN) || Util.hash),
+								feed = (a=a[0].split("<")).length>1 && makeFeed(context.brackets[a[1]].split(TOKENS).reverse()),
 								path = (a=a[0]) && makePath(a,tag);
 								
-							let resolved = !expr;
+							let resolved = !feed;
 								
 							if(path){
 								if(!tag)
@@ -689,7 +693,7 @@ const	dap=(Env=>
 							}
 							
 							if(!resolved)
-								rvalue = new Rvalue(convert,expr,path);
+								rvalue = new Rvalue(convert,flatten,feed,path);
 						}
 						
 						if(alias==null)
@@ -705,25 +709,23 @@ const	dap=(Env=>
 					return new Feed(values,tags,tokens);
 				};
 				
-				function makeExpr(str){
-					const
-						a = str.split(">"),
-						feed = makeFeed(context.brackets[a[0]].split(TOKENS).reverse()),
-						flatten = a[1] && ( a[1].charAt(0)=="."
-							? makeAccessor(a[1].substr(1))
-							: context.ns.reach(a[1],FUNCS.FLATTEN)
-						);
-						
-					return new Expr(feed,flatten)
-				};
-				
-				const
-				branchSteps = n => context.brackets[n].split(STEPS),
-				makeAccessor = path => values=> Util.reach(values,path),
-				makeConverts = str => str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
+				function makeConverts(str){ return str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT)); }
 				
 				return epilog => makeTodo(branchSteps(0),epilog);
-			}
+			},
+			
+			makeBranch = (stuff,P) =>{
+				const
+					rulestring = stuff.length&&stuff[0].replace&&stuff.shift(),
+					context = rulestring && new Context(Parse(rulestring),P), // this.ns,this.scope,this.relations//define,depend
+					epilog = stuff.length ? new Step(null, Print, new Feed([stuff],oneNull,oneNull), null ) : null,
+					todo = context ? make(context)(epilog) : epilog;//
+/*					
+				if(epilog && greedy)
+					stuff.forEach(ch => ch.prepare && ch.prepare(P,greedy) );
+*/
+				return todo;
+			};
 
 			return {
 				
@@ -732,40 +734,34 @@ const	dap=(Env=>
 					d: 4	//Update.Rebuild
 				},
 				
-				engage: function(greedy){
-					
-					if(this.todo)
-						return this.todo;
-					
-					const 
-					branches = this.branches.map(stuff=>{
-						const
-							rulestring = stuff.length&&stuff[0].replace&&stuff.shift(),
-							context = rulestring && new Context(this.ns,Parse(rulestring),this.scope,this.define,this.depend),//define,depend
-							epilog = stuff.length ? new Step(null, Print, new Feed([stuff],oneNull,oneNull), null ) : null,
-							todo = context ? make(context)(epilog) : epilog;//
-							
-						if(epilog && greedy)
-							stuff.forEach(ch => ch.prepare && ch.prepare(this,greedy) );
-
-						return todo;
-					});
-					
-					return this.todo = (branches.length==1) ? branches[0] : branches.reverse().reduce(
-						(todo,branch)=>new Step(branch,null,null,todo),
-						null
-					);
+				addBranch:function(stuff){
+					this.branches.push(this.scope ? makeBranch(stuff,this) : stuff);
+				},
+				
+				setScope(scope){
+					if(this.scope) Fail("scope already set");
+					this.scope = scope;
+					this.branches = this.branches.map( stuff => makeBranch(stuff,this) );
 				},
 					
+				engage: function(greedy){
+					if(!this.todo)
+						this.todo = (this.branches.length==1) ? this.branches[0] : this.branches.reverse().reduce(
+							(todo,branch)=>new Step(branch,null,null,todo),
+							null
+						);
+					return this.todo;
+				},
+				
 				spawn: function($,node){
-					new Execute.Branch(node,$).execBranch(this.engage());
+					new Execute.Branch(node,$).run(this.engage());
 				}
 			}
 		})();		
 				
 		const	oneNull=[null];
 
-		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr }
+		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue }
 		
 	})(),
 	
@@ -784,7 +780,7 @@ const	dap=(Env=>
 				function(){return new Context(this.data, {$:this.stata})}, // $$x => outer x
 				
 			subData:
-				function(data){return new Context({'':data||{},$:this.data},this.stata)}, // ..y => outer y
+				function(data){return new Context({'':data,$:this.data},this.stata)}, // ..y => outer y
 				
 			adopt:
 				function(change,sift){
@@ -831,7 +827,7 @@ const	dap=(Env=>
 						this.target.value=value;
 						Perf("Postpone resolve",Date.now(),
 							this.branch.up
-							? Update.checkUp(this.branch.node,this.branch.up,null,false,this.todo)
+							? Update.checkUp(this.branch.node,this.branch.up,null,this.todo) /// [0] hack
 							: this.branch.runDown(this.todo,this.place,this.instead)
 						);
 					}
@@ -848,7 +844,7 @@ const	dap=(Env=>
 		}
 		Branch.prototype={
 
-			execBranch:
+			execBranch: //returns true if empty
 			function(step){
 				
 				const	
@@ -857,6 +853,7 @@ const	dap=(Env=>
 					$	= this.$;
 					
 				let
+					empty	= true,
 					flow	= null;
 					
 				if(++stackDepth>100)
@@ -875,7 +872,7 @@ const	dap=(Env=>
 						if(value instanceof Postpone)
 							return value.assign({
 								branch: this,
-								todo: new Compile.Step(value.todo,null,null,step.todo)
+								todo: new Step(postpone.todo,null,null,step.todo)
 							});
 					}
 					else{									
@@ -922,8 +919,10 @@ const	dap=(Env=>
 							if(flow){
 								const
 									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
-								rows.map( row=>
-										new Branch(node,$.subData(row),this.up).execBranch(todo)
+								empty = rows.reduce(
+									(empty,row)=>
+										new Branch(node,$.subData(row),this.up).run(todo) && empty,
+									empty
 								);
 							}
 						}
@@ -931,7 +930,11 @@ const	dap=(Env=>
 					step = (flow==null) && todo;
 				}
 				--stackDepth;
-				return flow;
+				
+				if(isArray(flow))
+					return	empty;
+				else
+					return flow===false;
 			},
 
 			execToken:
@@ -946,45 +949,61 @@ const	dap=(Env=>
 					rvalue = token.rvalue,
 					lvalues = token.lvalues;
 					
-				let
-					value	= token.value,
-					p = lvalues ? lvalues.length : 0,
-					convert = rvalue && rvalue.convert;
+				let value	= token.value;
 
 				if(rvalue && value==null){ 
 				
 					const
 						path = rvalue.path,
-						expr = rvalue.expr;
+						entry = path.entry,
+						feed = rvalue.feed,
+						flatten = rvalue.flatten;
 						
 					if(path){
-						value = (up && (path.entry in up)) ? up : path.reach(this, $.stata);
+						value = (up && (entry in up)) ? up : path.reach(this, $.stata);
 						for(let route=path.route, i = route.length; value && i-->0; ){
 							const k=route[i];
 							value = value[k];
 						}
 					}
 					
-					if(expr){
-						value = this.execExpr(expr,value||literal);
+					if(feed){
+						const	
+							values = feed.values.slice(0),
+							tags = feed.tags,
+							tokens = feed.tokens,
+							proto = value||literal;
+							
+							for(let i = tokens.length;i-->0;){
+								const
+									value	=this.execToken(values[i],tokens[i]);
+									
+								if(value instanceof Postpone)
+									return value.blocking(true) && value.assign({// in a feed - always blocking?      !!i
+										token: new Compile.Token(
+											recap(parts,p,new Compile.Rvalue(
+												values.length && new Compile.Feed(values,tags,recap(tokens,i,value.token),feed.lscope),flatten,path)
+											),converts
+										)
+									});
+									
+								values[i]=value;
+							}
 						
-						if(value instanceof Postpone)
-							return value.assign({
-								token: new Compile.Token(
-									lvalues,
-									new Compile.Rvalue(
-										convert,
-										value.expr,
-										path
-									)
-								)
-							});
+						value = flatten(values,tags);
+						
+						if(proto)
+							Print(proto,null,this.node,this.$.subData(value));
 					}
 				}
 
 				if( value == null )
 					value = literal;// || ""
 				
+				let 
+					p = lvalues ? lvalues.length : 0,
+					convert = rvalue && rvalue.convert;
+					
 				if(p||convert)
 					while(p>=0){
 						if(convert)
@@ -1018,7 +1037,7 @@ const	dap=(Env=>
 								target=target[key]||(target[key]={});
 								key=route[--i];
 							}
-							
+								
 							target[key]=value;
 								
 							convert = lvalue.convert;
@@ -1028,89 +1047,57 @@ const	dap=(Env=>
 				return value;
 			},
 			
-			execExpr:
-			function(expr,proto){
-				const
-					feed = expr.feed,
-					values = feed.values.slice(0),
-					tags = feed.tags,
-					tokens = feed.tokens;
-					
-					for(let i = tokens.length;i-->0;){
-						const
-							value	=this.execToken(values[i],tokens[i]);
-							
-						if(value instanceof Postpone)
-							return value.blocking(true) && value.assign({// in a feed - always blocking?      !!i
-								expr: new Compile.Expr(
-									new Compile.Feed(values,tags,recap(tokens,i,value.token)),
-									expr.flatten
-								)
-							});
-							
-						values[i]=value;
-					}
-					
-				const
-					value = (expr.flatten||Util.hash)(values,tags);
-					
-				if(proto)
-					Print(proto,null,this.node,this.$.subData(value));
-				
-				return value;
+			run:
+			function(todo){
+				const isEmpty = todo && this.execBranch(todo) && !this.node.childNodes.length; // is empty?
+				return isEmpty;
 			},
 
 			runDown:
 			function(todo,place,instead){
-				const
-					result = todo && this.execBranch(todo),
-					postponed = result instanceof Postpone,
-					elem = Env.Adopt(place,instead,this.node,postponed,result);// !this.node.childNodes.length
-
-				if(postponed)
-					result.locate(elem);
+				const postpone = this.postpone,
+					elem = Env.Adopt(place,instead,this.node,this.run(todo),postpone);//
+				if(postpone)postpone.locate(elem);
 			}
 						
 		};
 		
 		const
 		
-		Perf	= (info,since)=>info,//Env.log("PERF "+(Date.now()-since)+" ms "+info),
+		Perf	= (info,since)=>Env.log("PERF "+(Date.now()-since)+" ms "+info),
 		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;};
 			
 		return	{ Context, Branch, Postpone, Perf,
+/*			
+			u	:(node,alias)=>Update(node,{}),
+*/
+			d	:Print,
+			a	:(node,rule)=>{ if(!rule)rule=node.P.rules.a||Fail("no a-rule",node); new Branch(node).run( rule.todo ); }
 		};
 
 	})(),
-
+	
 	Update = (function(){
 		
 		const
+		
+		checkUp = (node,change,snitch,todo) => {
+		
+			if(!todo)
+				todo = node.P.rules.u && node.P.rules.u.engage();
 
-		checkUp = (node,change,snitch,result,todo) => {
-
-			const parent = node.parentNode;
-			
-			//assert(node.P);
-			
-			if(result!==false){
-				const rule = node.P.rules[Env.Classify(result)||"u"];
-				todo = rule && rule.engage();
-			}
-
-			if(todo)
-				result = new Execute.Branch(node,null,change).execBranch(todo);
-
-			const up = node.$.adopt(change,{});
-
-			if(result instanceof Execute.Postpone){
-				result.locate(node);
+			const
+				value = new Execute.Branch(node,null,change).execBranch(todo),//
+				up = node.$.adopt(change,{}),
+				parent = node.parentNode;
+				
+			if(value instanceof Execute.Postpone){
 				checkDown(node,change,false,snitch);
+				value.locate(node);
 				return;
 			}
-			
-
-			return (parent && parent.P && checkUp(parent,up,node,result)>3) || checkDown(node,change,snitch)>3;
+				
+			return (parent && parent.P && checkUp(parent,up,node)>3) || checkDown(node,change,snitch)>3;
 		},			
 		
 		checkDown = (node,change,snitch)=>{//
@@ -1118,13 +1105,13 @@ const	dap=(Env=>
 			const depend = node.P.scope.depend(change); // bit 0=down 1=append 2=rebuild
 			
 			if(!depend)
-				return false;
+				return depend;
 			
 			if(depend&4)
 				return Rebuild(node)||true;
 				
 			if(depend&2)
-				Append(node);
+				Execute.a(node);
 			
 			if(depend&1){
 				let
@@ -1147,17 +1134,11 @@ const	dap=(Env=>
 		
 		Rebuild	=(node)	=>{ 
 			node.P.spawn(node.$,node.parentNode,node)
-		},
-		
-		Append = (node,rule)=>{
-			if(!rule)
-				rule=node.P.rules.a||Fail("no a-rule");
-			new Execute.Branch(node).execBranch(rule.todo); //,node.$.subData()
 		};
 
 		return {
 			
-			checkUp, Rebuild, Append,
+			checkUp,
 			
 			onDemand: (value,alias,node)=>{
 				checkUp(node,{});
@@ -1165,18 +1146,19 @@ const	dap=(Env=>
 			
 			onEvent: (event,target)=>{
 				Env.stopEvent(event);
-
 				const
-					node = target||event.currentTarget,
-					value = event.type;
+					node = target||event.target,
+					rule = node.P && node.P.rules[event.type],
+					todo = rule && rule.engage();
 					
-				Execute.Perf(event.type,Date.now(),checkUp(node,{event},null,value));
+				Execute.Perf(event.type,Date.now(),checkUp(node,{event},null,todo));
 			}
 			
 		};
 		
 	})();
-		
+	
+	
 	return	{ Env, Util, Execute, Update,
 			
 		Infect	:function(typePrototype,rules){
@@ -1186,6 +1168,8 @@ const	dap=(Env=>
 			},
 			
 		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RENDER(data),
+		
+		fromtxt :
 		
 		NS	: uri => new Compile.Namespace(uri)
 
@@ -1208,9 +1192,7 @@ const	dap=(Env=>
 			INPUT :'change',
 			TEXTAREA :'change'
 		},
-		
-		UIEVENT: node => 
-			DEFAULT.UIEVENTS[node.nodeName] || ( node.isContentEditable ? 'blur' : DEFAULT.EVENT ),
+		UIEVENT: node => DEFAULT.UIEVENTS[node.nodeName] || ( node.isContentEditable ? 'blur' : DEFAULT.EVENT ),
 	},
 	
 	log	=	m=>{ console.log("DAP "+m);return m; },
@@ -1255,12 +1237,38 @@ const	dap=(Env=>
 		},
 		
 		build	={
+			
+			hash	:(qstr,target)=>{
+				if(!target)target={};
+				if(qstr)
+					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i-->0;){
+						var	nv = tups[i].split('='),
+							key = nv[0]; //(remap&&remap[key])||
+						if(nv.length>1)target[key]=decode(nv[1]);
+						else target['!']=key;
+					}
+				return target;
+			},
+			
+			feed	:(qstr,tgt)=>{
+			
+				if(!tgt)tgt={values:[],tags:[]};
+
+				if(qstr)
+					for(let tups = qstr.replace('+',' ').replace(/^!/,'').split('&'),i=tups.length;i-->0;)
+						if(tups[i]){
+							const	nv = tups[i].split('='),
+								value = decode(nv.pop()),
+								key = nv.length&&nv[0];
+							tgt.values.push(value);
+							tgt.tags.push(key);//(remap&&remap[key])||
+						}
+				return tgt;
+			},
 
 			neutral	:(hash)=>{
 				const arg=[];
-				for(const k in hash)//Object.keys(hash).map((k,i)=>
-					if( k && hash[k]!=null )
-						arg.push(k+"="+encode(hash[k]));
+				hash.keys().map((k,i)=>{if(k&&hash[k]!=null)arg.push(k+"="+encode(hash[k]))});
 				return arg.join('&').replace(/%20/g,'+');
 			},
 			
@@ -1282,33 +1290,23 @@ const	dap=(Env=>
 	Http	= (function(){
 
 		const
-		
-		lowerKeys = o => {
-			const
-				lower = {};
-			for(const k in o)
-				lower[k.toLowerCase()]=o[k];
-			return lower;
-		}
-		
+
 		makeXHR = (req,sync)=>{
 			
-			if(typeof req === "string")
-				req={url:req};//url,body,headers,method,contentType,)
+			if(typeof req === "string") req={url:req};//url,body,headers,method,contentType,)
+			else if(req[""])req.body=Mime.prepareContent(req,req[""]);
 		
 			const	
 				request	= window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Msxml2.XMLHTTP'),
-				headers = req.headers && lowerKeys(req.headers),
-				body = req.body || (req[""] && Mime.prepareContent(headers,req[""]) ),
-				method	= req.method || ( body ? "POST" : "GET" );
+				method	= req.method || ( req.body ? "POST" : "GET" );
 			
 			request.open( method,req.url,!sync ); //Uri.absolute(req.url)
 			
-			if(headers)
-				for(const i in headers)
-					request.setRequestHeader(i,headers[i]);
+			if(req.headers)
+				for(const i in req.headers)
+					request.setRequestHeader(i,req.headers[i]);
 			
-			try	{request.send(body||null);}
+			try	{request.send(req.body||null);}
 			catch(e){console.warn(e.message);}
 			
 			return request;
@@ -1335,43 +1333,26 @@ const	dap=(Env=>
 		const
 		
 		decode = {
-			
-			"text/plain": request =>
-				request.responseText,
-				
-			"application/json": request =>
-				JSON.parse(request.responseText),
-				
-			"application/x-www-form-urlencoded": request =>
-				QueryString.parse.hash(request.responseText),
-				
-			"application/javascript": request =>
-				eval(request.responseText),
-				
-			"application/xml": request =>
-				request.responseXML.documentElement,
+			"text/plain"		: request => request.responseText,
+			"application/json"	: request => JSON.parse(request.responseText),
+			"application/javascript": request => eval(request.responseText),
+			"application/xml"		: request => request.responseXML.documentElement
 		},
 		
 		encode = {
-			
-			"application/json": content=>
-				JSON.stringify(content),
-				
-			"application/x-www-form-urlencoded": content=>
-			 QueryString.build.neutral(content)
-			 
+			"application/json"	: content=>JSON.stringify(content)		
 		},
 		
-		prepareContent= (headers,content) => {
+		prepareContent= (req,content) => {
 			const
-				ctype	= headers&&headers['content-type'],
+				ctype	= req&&req.headers['Content-type'],
 				h	= ctype&&encode[ctype.split(";")[0]];
-			return h ? h(content) : content;
+			return h ? h(content) : null;
 		},
 		
 		parseResponse= req => {
 			const	
-				ctype=req&&req.getResponseHeader('content-type'),
+				ctype=req&&req.getResponseHeader('Content-type'),
 				h=ctype&&decode[ctype.split(";")[0]];
 			return h ? h(req) : req.responseText;
 		};
@@ -1379,6 +1360,20 @@ const	dap=(Env=>
 		return {encode,decode,parseResponse,prepareContent}
 		
 	})(),
+
+	Style	= {
+	
+		attach	:(node,cls)=>Style.mark(node,cls,true),
+		detach	:(node,cls)=>Style.mark(node,cls,false),
+			
+		mark	:(node,cls,on)=>{
+				const	c	= " "+node.className+" ",
+					found	= c.indexOf(" "+cls+" ")>-1; //styled(c,cls);
+				if(!on!=!found)
+					node.className = (on ? (c+cls) : c.replace(new RegExp("\\s+"+cls+"\\s+","g")," ")).trim();
+				return node;
+			}
+	},
 
 	Blend	={
 		
@@ -1401,34 +1396,16 @@ const	dap=(Env=>
 				place.removeChild(instead);
 		}
 		
-	},
-
-	Watch = (function(){
-
-		const
-			watchers ={},
-			route = e=>{
-				dap.Update.onEvent(e,watchers[e.type])
-			};
-
-		return (evtype,node)=> {
-			if(!(evtype in watchers))
-				window.addEventListener(evtype,route);
-			watchers[evtype] = node;
-		}
-
-	})()
-
-;
+	};
 	
 	return	{ DEFAULT, 
 		
 		base: location.href,
 		
 		doc, log, 
-		Http, Mime, QueryString, Blend,
+		Style, Http, Mime, QueryString, Blend,
 	
-		Native: (str,ui)=>{
+		Native : (str,ui)=>{
 			if(!str)return DEFAULT.ELEMENT;
 			const	space	= str.indexOf(" "),
 				extra	= space<0 ? null : str.substr(space),
@@ -1444,52 +1421,32 @@ const	dap=(Env=>
 			return elem;
 		},
 
-		Spawn: (elem,events,handler)=>{
+		Spawn	: (elem,events,handler)=>{
 			const el = elem.cloneNode(false);
 			if(events)
-				events.forEach( e=> {
-					if(!e)
-						whut();
-					const evtype=e.toLowerCase();
-					if(e===evtype)
-						el.addEventListener(evtype,handler);
-					else
-						Watch(evtype,el);
-				});
+				events.forEach(e=>e&&el.addEventListener(e,handler));
 			return el;
 		},
 		
-		Print:(place,P)=>{
+		Print	:(place,P)=>{
 			place.appendChild(P.nodeType ? P : doc.createTextNode(P));
 		}, //P.cloneNode(true)
 		
-		Classify: result=>
-			!result ? result :
-			typeof result == 'object' ? result.constructor.name :
-			result,
-
-		Adopt	:(place,instead,elem,postponed,result)=>{
-
-			const r = dap.Env.Classify(result)
-			if(r!=null)
-				elem.setAttribute('data-dap', r);//elem.classList.toggle("EMPTY",!!empty);
-			
+		Adopt	:(place,instead,elem,empty,postponed)=>{
+			if(!!empty)Style.attach(elem,"EMPTY");
 			if(postponed){
-				instead	? instead.classList.add("STALE") :
-				place	? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT") :
+				instead	? Style.attach(instead,"STALE") :
+				place	? place.appendChild(Style.attach(instead=elem.cloneNode(true),"AWAIT")) :
 				console.log('orphan postponed');
 				return instead;
 			}
-
 			instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
 			place	? place.appendChild(elem) :
 			console.log('orphan element '+elem);
 		},
 			
 		stopEvent	: e=>{
-			e.stopPropagation();
-			if(e.cancelable)
-				e.preventDefault();
+			e.stopPropagation(); e.preventDefault();
 			return e;
 		},
 		
@@ -1543,8 +1500,12 @@ const	dap=(Env=>
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : node.classList.add(value) }			
-
+				"!?"	:(value,alias,node)=>{ Style.mark(node,alias,!!value); },			
+				"!class":(value,alias,node)=>{ value && node.classList.add(value); },
+				
+				listen : (value,alias,node)=> {
+						(value||window).addEventListener(alias,e=>dap.Update.onEvent(e,node));
+					}
 			}
 		}
 	}		
