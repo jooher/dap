@@ -1501,16 +1501,16 @@ const	dap=(Env=>
 			: Http.execAsync(url).then(Mime.parseResponse),
 				
 		render	:(proto,data,place,instead)=>{
-				if(!place){
-					if(!instead)instead = document.currentScript;
-					place = instead ? instead.parentNode : document.body;
-				}
-				if(!data)
-					data=QueryString.parse.hash(location.hash);
-				const	ready = proto.spawn((new dap.Execute.Context()).subData(data),place);//||newStub("dap"); ||State.read()
-				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
-				return 0;
-			},
+			if(!place){
+				if(!instead)instead = document.currentScript;
+				place = instead ? instead.parentNode : document.body;
+			}
+			if(!data)
+				data=QueryString.parse.hash(location.hash);
+			const	ready = proto.spawn((new dap.Execute.Context()).subData(data),place);//||newStub("dap"); ||State.read()
+			instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
+			return 0;
+		},
 			
 		delay	:f=>setTimeout(f,200),
 			
