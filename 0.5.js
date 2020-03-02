@@ -450,8 +450,8 @@ const	dap=(Env=>
 				for(const i in stuff)
 					rules[i] = new Rule(this.ns,scope,stuff[i],i);
 				
-				if(this.utag)
-					this.elem=Env.Native(this.utag,!!rules[""]);					
+				//if(this.utag)
+					this.elem=Env.Native(this.utag,!!rules[""]);
 				
 				if(greedy)
 					for(const i in rules)
@@ -567,7 +567,7 @@ const	dap=(Env=>
 				BRACKETS=/[({[][;\s]*([^(){}\[\]]*?)[;\s]*[\]})]/g,
 
 				Parse	= str=> {
-						str	= str.replace(CLEANUP,'').replace(SHRINK,' ');
+						str	= str.replace(CLEANUP,'').replace(SHRINK,' ').replace(/"/g,"`");
 						const	brackets=[],
 							stub=(match,inner)=> "<"+brackets.push(inner.trim())+">";
 						while(str!=(str=str.replace( BRACKETS, stub )));
@@ -1429,18 +1429,21 @@ const	dap=(Env=>
 		Http, Mime, QueryString, Blend,
 	
 		Native: (str,ui)=>{
-			if(!str)return DEFAULT.ELEMENT;
-			const	space	= str.indexOf(" "),
-				extra	= space<0 ? null : str.substr(space),
-				head	= (extra ? str.substr(0,space) : str).split('#'),
-				id	= head&&head[1],
-				type	= head[0]&&head[0].split("."),
-				tag	= (type&&type.length&&type[0]==type[0].toUpperCase()) ? type.shift() : DEFAULT.TAG,
+			let elem = !str && DEFAULT.ELEMENT;
+			if(!elem){
+				const	space	= str.indexOf(" "),
+					extra	= space<0 ? null : str.substr(space),
+					head	= (extra ? str.substr(0,space) : str).split('#'),
+					id	= head&&head[1],
+					type	= head[0]&&head[0].split("."),
+					tag	= (type&&type.length&&type[0]==type[0].toUpperCase()) ? type.shift() : DEFAULT.TAG;
+					
 				elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
+				if(type.length)elem.className = type.join(" ");//.toLowerCase();
+				if(id)elem.id=id;
+			}
 			
 			if(ui)elem.setAttribute("ui",DEFAULT.UIEVENT(elem));
-			if(type.length)elem.className = type.join(" ");//.toLowerCase();
-			if(id)elem.id=id;
 			return elem;
 		},
 
@@ -1525,7 +1528,7 @@ const	dap=(Env=>
 				confirm:(msg,r) => r&& confirm(msg),
 				
 				request:(req,r) => r&& Http.execAsync(req),
-				query	: (req,r) => r&& Http.execAsync(req).then(Mime.parseResponse).catch(debug=>{if(req instanceof Object)req.debug=debug})
+				query	: (req,r) => r&& Http.execAsync(req).then(Mime.parseResponse).catch(debug=>{if(typeof req ==='object')req.debug=debug})
 			},
 			
 			flatten	:{
@@ -1547,8 +1550,8 @@ const	dap=(Env=>
 
 			}
 		}
-	}		
-		
+	}
+
 })()
 );
 
