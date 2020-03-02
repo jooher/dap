@@ -22,7 +22,7 @@ const
 .d("$todos= $filter= $recount="
 
   ,'#header'.d(""
-    ,'H1'.d("","dap todos")
+    ,'H1 `dap todos'.d("")
     ,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
       .ui("$todos=($todos (#.value@title)@tgt):insert #.value=") 
   )
