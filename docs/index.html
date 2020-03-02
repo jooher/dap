@@ -229,19 +229,19 @@
 				.ui("$make=#:value")
 		).u("$model= $engine=") // reset $model and $engine, when make or year were changed 
 		,'SELECT.model' // once both $make and $year are set, related models are queried
-			.d("? ($make $year)!; Hint(label.model@label); * (base@ $make $year)uri:query@model; Option(.model@value)")
+			.d("? ($make $year)!; Hint(label.model@label); * (api@ $make $year)uri:query@model; Option(.model@value)")
 			.ui("$model=#:value $engine=")
 		,'SELECT.engine' //once $model is set, carcodes are queried parametrically for given $make, $year and $model
-			.d("? $model; Hint(label.engine@label); * (base@ $make $year $model)uri:query; Option(.engine@label (`, .engine .carcode)join@value)")
+			.d("? $model; Hint(label.engine@label); * (api@ $make $year $model)uri:query; Option(.engine@label (`, .engine .carcode)join@value)")
 			.ui("$engine=#:value")
 	).u("$carname=( $engine ( $year $make $model $engine )spaced )!") // $carname will be empty until $engine is set
 	,'H3'.d("! ($carname label.hint)?") // print $carname if set, otherwise a hint
 	,'A target=_blank'.d("? $carname; !! label.redir@ (`https://www.rockauto.com/en/catalog/ (`, $make $year $model $engine)join)uri:space2plus@href")
 )
 .DICT({
+	api	: "https://dapmx.org/stuff/rockauto.php?", // dynamic data is taken from Rockauto.com
 	year	: Array.from({length:20},(v,i)=>2019-i), // back to 20 years from year 2019
 	makes	: "/samples/carmakes.json", // car makes are collected in a static file
-	base	: "https://dapmx.org/stuff/rockauto.php?", // dynamic data is taken from Rockauto.com
 	label	:{
 		hint	: "Select a car, please",
 		please	: "Please select",
