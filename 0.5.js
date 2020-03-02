@@ -97,7 +97,7 @@ const	dap=(Env=>
 	Print	= (value,alias,place,$)=> {
 		if( value != null )
 			isArray(value) ? value.forEach(v=>Print(v,null,place,$)) :
-			value.spawn	? value.spawn($,place) :
+			value.print	? value.print($,place) :
 			Env.Print(place,value);
 		},
 		
@@ -297,14 +297,16 @@ const	dap=(Env=>
 		
 		const		
 		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Func(Func);
+		
 		evaluate= js	=> Function('return '+js)(dap),
-		require	= uri	=> {
-			let	a = namespaces[uri];
-			return	a||(namespaces[uri]=
-				a=document.getElementById(uri) ? evaluate(a.textContent) :
-				Env.require(uri,true) || Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
-			)
-		},
+		
+		require	= uri	=> namespaces[uri] ||
+			( namespaces[uri]=
+				(elem => elem && evaluate(elem.textContent))(document.getElementById(uri)) ||
+				Env.require(uri,true) ||
+				Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
+			),
+		
 		rootns	= new Namespace(Env.base).FUNC(Env.Func);//Uri.absolute()
 			
 		let ids=0;
@@ -326,7 +328,8 @@ const	dap=(Env=>
 					if(depend) // bit 0=down 1=append 2=rebuild
 						scope.depends[entry] |= scope==this ? depend : 1;
 				}
-				return found || Fail("Statum (rvalue) not found: $"+entry);
+				return found ||
+					Fail("Statum (rvalue) not found: $"+entry);
 			},
 		
 			lvalue: function(entry,define){ //$x=
@@ -402,9 +405,9 @@ const	dap=(Env=>
 				},
 				
 			d	:function(...stuff)		{ return this.set("d",stuff) },
-			a	:function(...stuff)		{ return this.set("a",stuff) },
 			u	:function(...stuff)		{ return this.set("u",stuff) },
 			ui:function(...stuff)		{ return this.set("",stuff,true) },//
+			a	:function(...stuff)		{ return this.set("a",stuff) },
 			e	:function(events,...stuff)	{ return this.set(events,stuff,true) },
 			
 			DICT	:function(dict){
@@ -473,7 +476,7 @@ const	dap=(Env=>
 					"").split(" ");					
 			},
 			
-			spawn	:function($,place,instead){
+			print	:function($,place,instead){
 				
 				if(!this.scope)
 					this.prepare(place.P);
@@ -502,26 +505,21 @@ const	dap=(Env=>
 			
 		};
 
-		function Context(ns,brackets,scope,define,depend){
-			this.ns = ns;
-			this.brackets = brackets;
-			this.scope = scope;
-			this.define = define;
-			this.depend = depend;
-		};
-
 		function Step(branch,operate,feed,todo){
 			this.branch	= branch;
 			this.operate= operate;
 			this.feed	= feed;
 			this.todo	= todo;
-		}
+		};
+		Step.prototype={
+			print: function($,place){new Execute.Branch(place,$).execBranch(this);}
+		};
 		
 		function Feed(values,tags,tokens){
 			this.values = values;
 			this.tags = tags;
 			this.tokens = tokens;
-		}
+		};
 		
 		function Token(lvalues,rvalue){
 			this.lvalues = lvalues;
@@ -532,7 +530,7 @@ const	dap=(Env=>
 		function Expr(feed,flatten){
 			this.feed = feed;
 			this.flatten = flatten;
-		}
+		};
 		
 		function Rvalue(convert,expr,path){
 			this.convert = convert
@@ -545,13 +543,13 @@ const	dap=(Env=>
 			this.convert=convert;
 		};
 				
-		function Rule(ns,scope,branches,type){
+		function Rule(ns,scope,threads,type){
 			this.ns	= ns;
 			this.scope = scope;
-			this.branches	= branches;
+			this.threads	= threads;
 			this.define = // type=='d';
 			this.depend = this.dependency[type];
-		}
+		};
 		Rule.prototype=(function(){
 			
 			const
@@ -584,36 +582,31 @@ const	dap=(Env=>
 					CONVERT	: "convert"
 				},
 				
-				REUSE	= Env.REUSE;
+				oneNull=[null];
 				
 			// makers
 			
 			const
 			
-			make = context => {
-				
-				function makeTodo(steps,todo,branches){
+			make = (context,brackets) => {
+
+				function makeTodo(steps,epilog){//branches
 				
 					const
-						stepstr = steps.pop(),
+						stepstr = steps.shift(),
 						isbranch = stepstr.match(/^<(\d+)>$/);
 
-					if(isbranch){
-						const branch = makeTodo(branchSteps(isbranch[1]),null);
-						todo = new Step(branch,null,null,todo)
-					}
-					else{
-						const
-							tokens= stepstr.split(TOKENS),
-							head	= !/[<$=:`]/.test(tokens[0]) && tokens.shift().split("@"),
-							operate = head[0] && context.ns.reach(head[0],FUNCS.OPERATE),
-							alias	= head[1],
-							feed	= tokens.length && makeFeed( tokens.reverse(), alias );
-						
-						todo = new Step(null,operate,feed,todo);
-					}
+					if(isbranch)
+							return new Step(makeTodo(branchSteps(isbranch[1])),null,null,epilog)
 
-					return steps.length ? makeTodo(steps,todo) : todo;
+					const
+						tokens= stepstr.split(TOKENS),
+						head	= !/[<$=:`]/.test(tokens[0]) && tokens.shift().split("@"),
+						operate = head[0] && context.ns.reach(head[0],FUNCS.OPERATE),
+						alias	= head[1],
+						feed	= tokens.length && makeFeed( tokens.reverse(), alias );
+					
+					return new Step(null, operate, feed, steps.length ? makeTodo(steps,epilog) : epilog);
 				};
 
 				function makeFeed(tokens,defaultalias){
@@ -708,7 +701,7 @@ const	dap=(Env=>
 				function makeExpr(str){
 					const
 						a = str.split(">"),
-						feed = makeFeed(context.brackets[a[0]].split(TOKENS).reverse()),
+						feed = makeFeed(brackets[a[0]].split(TOKENS).reverse()),
 						flatten = a[1] && ( a[1].charAt(0)=="."
 							? makeAccessor(a[1].substr(1))
 							: context.ns.reach(a[1],FUNCS.FLATTEN)
@@ -717,13 +710,36 @@ const	dap=(Env=>
 					return new Expr(feed,flatten)
 				};
 				
-				const
-				branchSteps = n => context.brackets[n].split(STEPS),
-				makeAccessor = path => values=> Util.reach(values,path),
-				makeConverts = str => str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT));
+				function makeConverts(str){return str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT))}
+				function makeAccessor(path){return values=> Util.reach(values,path)}
 				
-				return epilog => makeTodo(branchSteps(0),epilog);
-			}
+				function branchSteps(n){return brackets[n].split(STEPS)}
+				
+				return makeTodo(branchSteps(0));//,epilog)
+			},
+			
+			makeBranch = (rule,greedy,rulestring,stuff)=>{
+					const
+						todo = rulestring && make(rule,Parse(rulestring));
+						
+					if(stuff){
+						const
+							subnodes = stuff.map(branch => typeof branch === "string" ? makeBranch(rule,greedy,branch) : branch), //  new Rule(rule.ns,rule.scope,branches,type)
+							epilog = new Step(null, Print, new Feed([subnodes],oneNull,oneNull), null );
+							
+						if(greedy)
+							stuff.forEach(ch => ch.prepare && ch.prepare(rule,greedy) );
+						
+						if(!todo)
+							return epilog;
+						
+						let tail=todo;
+						while(tail.todo)tail=tail.todo;			
+						tail.todo=epilog;
+					}
+
+					return todo;
+			};
 
 			return {
 				
@@ -731,41 +747,36 @@ const	dap=(Env=>
 					a: 2, //Update.Append
 					d: 4	//Update.Rebuild
 				},
-				
+					
 				engage: function(greedy){
 					
-					if(this.todo)
-						return this.todo;
-					
-					const 
-					branches = this.branches.map(stuff=>{
-						const
-							rulestring = stuff.length&&stuff[0].replace&&stuff.shift(),
-							context = rulestring && new Context(this.ns,Parse(rulestring),this.scope,this.define,this.depend),//define,depend
-							epilog = stuff.length ? new Step(null, Print, new Feed([stuff],oneNull,oneNull), null ) : null,
-							todo = context ? make(context)(epilog) : epilog;//
-							
-						if(epilog && greedy)
-							stuff.forEach(ch => ch.prepare && ch.prepare(this,greedy) );
-
-						return todo;
-					});
-					
-					return this.todo = (branches.length==1) ? branches[0] : branches.reverse().reduce(
-						(todo,branch)=>new Step(branch,null,null,todo),
-						null
-					);
+					if(!this.todo){
+						const 
+							branches = this.threads.map(thread =>
+								makeBranch(
+									this,
+									greedy,
+									thread.length && thread[0].replace && thread.shift(),
+									thread.length && thread
+								)
+							);
+						
+						this.todo = (branches.length==1) ? branches[0] : branches.reverse().reduce(
+							(todo,branch)=>new Step(branch,null,null,todo),
+							null
+						);
+					}
+					return this.todo;
 				},
-					
-				spawn: function($,node){
+/*					
+				print: function($,node){
 					new Execute.Branch(node,$).execBranch(this.engage());
 				}
+*/
 			}
 		})();		
-				
-		const	oneNull=[null];
-
-		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr }
+			
+		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr, require }
 		
 	})(),
 	
@@ -1146,7 +1157,7 @@ const	dap=(Env=>
 		},
 		
 		Rebuild	=(node)	=>{ 
-			node.P.spawn(node.$,node.parentNode,node)
+			node.P.print(node.$,node.parentNode,node)
 		},
 		
 		Append = (node,rule)=>{
@@ -1187,7 +1198,19 @@ const	dap=(Env=>
 			
 		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RENDER(data),
 		
+		require :Compile.require,
+/*		
+		: uri => {
+			const
+				text = Env.require(uri,true),
+				ret = "return " + text;
+				value = eval();
+			return value;
+		},
+*/
+
 		NS	: uri => new Compile.Namespace(uri)
+		
 
 	}
 			
@@ -1417,8 +1440,23 @@ const	dap=(Env=>
 			watchers[evtype] = node;
 		}
 
-	})()
+	})(),
 
+	Element = str =>{
+		const
+			space	= str.indexOf(" "),
+			extra	= space<0 ? null : str.substr(space),
+			head	= (extra ? str.substr(0,space) : str).split('#'),
+			id	= head&&head[1],
+			type	= head[0]&&head[0].split("."),
+			tag	= (type&&type.length&&type[0]==type[0].toUpperCase()) ? type.shift() : DEFAULT.TAG,
+			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
+			
+		if(type.length)elem.className = type.join(" ");//.toLowerCase();
+		if(id)elem.id=id;
+		
+		return elem;
+	}
 ;
 	
 	return	{ DEFAULT, 
@@ -1427,28 +1465,26 @@ const	dap=(Env=>
 		
 		doc, log, 
 		Http, Mime, QueryString, Blend,
+		
+		Element,
 	
 		Native: (str,ui)=>{
-			let elem = !str && DEFAULT.ELEMENT;
-			if(!elem){
-				const	space	= str.indexOf(" "),
-					extra	= space<0 ? null : str.substr(space),
-					head	= (extra ? str.substr(0,space) : str).split('#'),
-					id	= head&&head[1],
-					type	= head[0]&&head[0].split("."),
-					tag	= (type&&type.length&&type[0]==type[0].toUpperCase()) ? type.shift() : DEFAULT.TAG;
-					
-				elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
-				if(type.length)elem.className = type.join(" ");//.toLowerCase();
-				if(id)elem.id=id;
-			}
+			const
+				parts = str.split(/ `/g),
+				head = parts.shift(),
+				elem = head ? Element(head) : DEFAULT.ELEMENT;
+				
+			if(parts.length)
+				elem.textContent = parts.join("\n");
 			
-			if(ui)elem.setAttribute("ui",DEFAULT.UIEVENT(elem));
+			if(ui)
+				elem.setAttribute("ui",DEFAULT.UIEVENT(elem));
+			
 			return elem;
 		},
 
 		Spawn: (elem,events,handler)=>{
-			const el = elem.cloneNode(false);
+			const el = elem.cloneNode(true);
 			if(events)
 				events.forEach( e=> {
 					if(!e)
@@ -1501,16 +1537,16 @@ const	dap=(Env=>
 			: Http.execAsync(url).then(Mime.parseResponse),
 				
 		render	:(proto,data,place,instead)=>{
-			if(!place){
-				if(!instead)instead = document.currentScript;
-				place = instead ? instead.parentNode : document.body;
-			}
-			if(!data)
-				data=QueryString.parse.hash(location.hash);
-			const	ready = proto.spawn((new dap.Execute.Context()).subData(data),place);//||newStub("dap"); ||State.read()
-			instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
-			return 0;
-		},
+				if(!place){
+					if(!instead)instead = document.currentScript;
+					place = instead ? instead.parentNode : document.body;
+				}
+				if(!data)
+					data=QueryString.parse.hash(location.hash);
+				const	ready = proto.print((new dap.Execute.Context()).subData(data),place);//||newStub("dap"); ||State.read()
+				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
+				return 0;
+			},
 			
 		delay	:f=>setTimeout(f,200),
 			

@@ -41,7 +41,7 @@ const
 	).ui("$server=(`// #.value)concat")
 
 	,'#header'.d(""
-		,'H1'.d("","dap todos 0.5a")
+		,'H1 `dap todos 0.5'.d("")
 		,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
 			.ui("$todos=($todos (#.value@title)@tgt):insert #.value=") 
 	)
@@ -89,9 +89,7 @@ const
 	,'PRE#loader'
 		.d("$request=($server@url); u")
 		.u("? $todos:!=$request:query,array?; ! $request:debugrequest")//
-		
-/*
-*/
+
 	,'state'
 		.d("$state=window.location; u@hashchange")
 		.e("HASHCHANGE","$filter=$state.hash:afterhash")

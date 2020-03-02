@@ -4,9 +4,9 @@
 
 <head>
 	<title>Tic Tac Toe - dap example</title>
-	<!--script src="http://jooher.github.io/dap/0.4.3.js"></script-->
-	<script src="/0.4.js"></script>
+	<script src="/0.5.js"></script>
 	<style>
+		[data-dap=false]{display:none}
 		body{font:normal 1em sans-serif}
 		.board,.history{ display:inline-block; width:10em; vertical-align:top; }
 		.square{border:1px solid black; width:2em; height:2em; padding:.5em; display:inline-block; vertical-align:top;}
@@ -64,11 +64,11 @@ const	TicTacToe=(function(){ // all the game logic is encapsulated into this clo
 })();
 
 
-// dap only enteres the scene when it comes to ui
+// dap only enters the scene when it comes to ui
 
 'game'.d("$game=:gotoMove`0 $squares=:emptyBoard"
 	,'H1.winner'.d("? $game.winner; ! `Winner: $game.winner")
-	,'H1.turn'.d("?:! $game.winner; ! `Turn: .key=($game.turn:# @+`X @-`O)case")
+	,'H1.turn'.d("? $game.winner:!; ! `Turn: .key=($game.turn `X `O)?!")
 	,'board'.d(".n=`0; * $squares@key"
 		,'square'.d("! .key; ..n=.n:++=..n")
 			.ui("? (.key $game.winner)?:!; ! .key=..key; $game=(.n .key):addMove")
