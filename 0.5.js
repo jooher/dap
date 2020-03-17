@@ -41,7 +41,7 @@ const	dap=(Env=>
 	
 	flatten	:{
 	
-		"&"	: values=> values.reduce(Object.assign,values.pop()),
+		"&"	: values=> Object.assign(values.pop(),...values),
 		
 		"?"	: values=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
 		"!"	: values=>{ for(let i=values.length;i--;)if(!values[i])return null; return values[0]; },	/// all - succeeds if empty token found
@@ -235,7 +235,7 @@ const	dap=(Env=>
 			}
 			
 		})();
-				
+		
 		function Namespace(uri){
 			
 			Env.log("New namespace: "+uri);
@@ -244,7 +244,6 @@ const	dap=(Env=>
 			this.func	= Func;
 			this.dict	= {};
 			this.uses	= {};
-			
 			this.inherit	= null;
 			
 			namespaces[uri]	= this;
@@ -257,20 +256,24 @@ const	dap=(Env=>
 					return this;
 				},
 
-			FUNC	: function(func){
-					for(let d in this.func)
-						func[d]=Util.union(this.func[d],func[d]);
-					this.func=func;
-					return this;
-				},
+			FUNC	: function(...funcs){
+				for(const d in this.func)
+					this.func[d]=funcs.reduce( 
+						(tgt,f)=> f[d] ? Object.assign(tgt,f[d]) : tgt,
+						Object.assign({},this.func[d])
+					);
+				return this;
+			},
 				
-			DICT	: function(dict){
-					for(let i in dict){
-						var p=(this.dict[i]=dict[i]);
-						if(p instanceof Proto)p.ns=this;
-					}
-					return this;
-				},
+			DICT	: function(...dicts){
+				dicts.forEach(dict=>{
+					for(const i in dict)
+						if(dict[i] instanceof Proto)
+							dict[i].ns=this;
+					Object.assign(this.dict,dict)
+				});
+				return this;
+			},
 				
 			reach	:function(route,domain){
 					const
@@ -291,8 +294,8 @@ const	dap=(Env=>
 						? (path.length?require(xtrn).lookup(path,domain):require(xtrn))
 						: scope&&scope[key] || this.inherit&&this.inherit.lookup(path,domain,key);
 				return entry;
-			}						
-				
+			}
+			
 		};
 		
 		const		
@@ -363,13 +366,7 @@ const	dap=(Env=>
 						pass[k]=changes[k];
 				return pass;
 			},
-/*			
-			adopt:function(changes,stata){
-				for(const k in changes)
-					if(k in stata)
-						stata[k]=changes[k]
-			}
-*/		
+
 		};
 					
 		function Proto(ns,utag){
@@ -410,13 +407,13 @@ const	dap=(Env=>
 			a	:function(...stuff)		{ return this.set("a",stuff) },
 			e	:function(events,...stuff)	{ return this.set(events,stuff,true) },
 			
-			DICT	:function(dict){
-					this.ns.DICT(dict);
+			DICT	:function(...dicts){
+					this.ns.DICT(...dicts);
 					return this;
 				},
 				
-			FUNC	:function(func){
-					this.ns.FUNC(func);
+			FUNC	:function(...funcs){
+					this.ns.FUNC(...funcs);
 					return this;
 				},
 				
@@ -842,7 +839,7 @@ const	dap=(Env=>
 						this.target.value=value;
 						Perf("Postpone resolve",Date.now(),
 							this.branch.up
-							? Update.checkUp(this.branch.node,this.branch.up,null,false,this.todo)
+							? Update.checkUp(this.branch.node,this.branch.up,false,null,this.todo)
 							: this.branch.runDown(this.todo,this.place,this.instead)
 						);
 					}
@@ -1098,7 +1095,7 @@ const	dap=(Env=>
 		
 		const
 
-		checkUp = (node,change,snitch,result,todo) => {
+		checkUp = (node,change,result,snitch,todo) => {
 
 			const parent = node.parentNode;
 			
@@ -1121,7 +1118,7 @@ const	dap=(Env=>
 			}
 			
 
-			return (parent && parent.P && checkUp(parent,up,node,result)>3) || checkDown(node,change,snitch)>3;
+			return (parent && parent.P && checkUp(parent,up,result,node)>3) || checkDown(node,change,snitch)>3;
 		},			
 		
 		checkDown = (node,change,snitch)=>{//
@@ -1171,7 +1168,7 @@ const	dap=(Env=>
 			checkUp, Rebuild, Append,
 			
 			onDemand: (value,alias,node)=>{
-				checkUp(node,{});
+				checkUp(value||node,{},alias);
 			},
 			
 			onEvent: (event,target)=>{
@@ -1181,7 +1178,7 @@ const	dap=(Env=>
 					node = target||event.currentTarget,
 					value = event.type;
 					
-				Execute.Perf(event.type,Date.now(),checkUp(node,{event},null,value));
+				Execute.Perf(event.type,Date.now(),checkUp(node,{event},value));
 			}
 			
 		};
@@ -1198,17 +1195,16 @@ const	dap=(Env=>
 			
 		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RENDER(data),
 		
-		require :Compile.require,
-/*		
-		: uri => {
-			const
-				text = Env.require(uri,true),
-				ret = "return " + text;
-				value = eval();
-			return value;
-		},
-*/
-
+		require : urls => {
+			const promises = [];
+			for(const key in urls)
+				promises.push(
+					Env.require(urls[key])
+					.then(result=>urls[key]=result)
+				);
+			return Promise.all(promises);
+		},	
+	
 		NS	: uri => new Compile.Namespace(uri)
 		
 
@@ -1564,7 +1560,15 @@ const	dap=(Env=>
 				confirm:(msg,r) => r&& confirm(msg),
 				
 				request:(req,r) => r&& Http.execAsync(req),
-				query	: (req,r) => r&& Http.execAsync(req).then(Mime.parseResponse).catch(debug=>{if(typeof req ==='object')req.debug=debug})
+				query	: (req,r) => r&& Http.execAsync(req)
+					.then(Mime.parseResponse)
+					.catch(xhr=>{
+						if(typeof req ==='object'){
+							if('error' in req)req.error = Mime.parseResponse(xhr);
+							if('debug' in req)req.debug = xhr;
+							return req;
+						}
+					})
 			},
 			
 			flatten	:{
@@ -1582,7 +1586,7 @@ const	dap=(Env=>
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : node.classList.add(value) }			
+				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : (value && node.classList.add(value)) }			
 
 			}
 		}

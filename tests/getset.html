@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<script src="/0.5.js"></script>
+<script>
+const
+
+	foo = {
+		value: null
+	},
+
+	bar = {
+		set fancySetter (value){
+			alert(foo.value=value)
+		}
+	},
+
+	a={
+		b : { c: null },
+		get fancyGetter(){
+			return bar;
+		}
+	};
+
+
+'test'.d("$a=a; $a.b.c=`X $a.fancyGetter.fancySetter=`Z")
+.DICT({a})
+.RENDER()
+
+</script>
