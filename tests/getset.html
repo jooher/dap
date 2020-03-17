@@ -13,7 +13,7 @@ const
 		}
 	},
 
-	a={
+	tricky={
 		b : { c: null },
 		get fancyGetter(){
 			return bar;
@@ -21,8 +21,8 @@ const
 	};
 
 
-'test'.d("$a=a; $a.b.c=`X $a.fancyGetter.fancySetter=`Z")
-.DICT({a})
+'test'.d("$a=tricky; $a.b.c=`X $a.fancyGetter.fancySetter=`Z")
+.DICT({tricky})
 .RENDER()
 
 </script>
