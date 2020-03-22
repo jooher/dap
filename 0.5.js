@@ -316,8 +316,8 @@ const	dap=(Env=>
 
 		function Scope(scope){
 			this.up = scope;
-			this.defines = {};
-			this.depends = {};
+			this.defines = null;
+			this.depends = null;
 			
 			this.id= ++ids;
 		}
@@ -326,10 +326,10 @@ const	dap=(Env=>
 			rvalue: function(entry,depend){ // =$x
 				let found=null;
 				for(let scope=this; scope&&!found; scope=scope.up){
-					if((entry in scope.depends)||(entry in scope.defines))
+					if((scope.depends && entry in scope.depends)||(scope.defines && entry in scope.defines))
 						found = this;
 					if(depend) // bit 0=down 1=append 2=rebuild
-						scope.depends[entry] |= scope==this ? depend : 1;
+						(scope.depends||(scope.depends={}))[entry] |= scope==this ? depend : 1;
 				}
 				return found ||
 					Fail("Statum (rvalue) not found: $"+entry);
@@ -337,29 +337,31 @@ const	dap=(Env=>
 		
 			lvalue: function(entry,define){ //$x=
 				if(define){
-					this.defines[entry]=null; // or init value
+					(this.defines||(this.defines={}))[entry]=null; // or init value
 					return this;
 				}
 				for(let scope=this; scope; scope=scope.up)
-					if(entry in scope.defines)
+					if(scope.defines && entry in scope.defines)
 						return scope;
 				Fail("Statum (lvalue) not found: $"+entry);
 			},
 
 			instance: function($){
-				return this.defines ? $.subState(Object.assign({},this.defines)) : $;
+				return this.defines ? $.subState(Object.assign({},this.defines)) : $;// (||this.depends) //notEmpty()
 			},
 			
 			depend: function(changes){
 				let depend = 0;
 				for(const k in changes)
-					if(k in this.depends)
+					if(this.depends && k in this.depends)
 						depend |= this.depends[k];
 					else delete changes[k];
 				return depend;
 			},
 
 			sift:function(changes){
+				if(!this.defines)
+					return Object.assign({},changes);//;
 				const pass={};
 				for(const k in changes)
 					if(!(k in this.defines))
@@ -489,7 +491,7 @@ const	dap=(Env=>
 					a.engage();					
 					
 				node.P = this;
-				node.$ = this.scope.instance($);
+				node.$ = this.scope.instance($||place.$);
 					
 				new Execute.Branch(node).runDown(todo,place,instead); 
 				
@@ -1099,8 +1101,6 @@ const	dap=(Env=>
 
 			const parent = node.parentNode;
 			
-			//assert(node.P);
-			
 			if(result!==false){
 				const rule = node.P.rules[Env.Classify(result)||"u"];
 				todo = rule && rule.engage();
@@ -1108,15 +1108,16 @@ const	dap=(Env=>
 
 			if(todo)
 				result = new Execute.Branch(node,null,change).execBranch(todo);
-
-			const up = node.$.adopt(change,{});
+			
+			const
+				up = (!parent || node.$!=parent.$) ? node.$.adopt(change,{}) : change;
 
 			if(result instanceof Execute.Postpone){
+				//Object.assign(node.$,change);
 				result.locate(node);
 				checkDown(node,change,false,snitch);
 				return;
 			}
-			
 
 			return (parent && parent.P && checkUp(parent,up,result,node)>3) || checkDown(node,change,snitch)>3;
 		},			
@@ -1153,8 +1154,8 @@ const	dap=(Env=>
 			return depend;
 		},
 		
-		Rebuild	=(node)	=>{ 
-			node.P.print(node.$,node.parentNode,node)
+		Rebuild	=(node)	=>{
+			node.P.print(null,node.parentNode,node)
 		},
 		
 		Append = (node,rule)=>{
