@@ -94,10 +94,10 @@ const	dap=(Env=>
 
 	isArray = Array.isArray,
 	
-	Print	= (value,alias,place,$)=> {
+	Print	= (value,alias,place,data)=> {
 		if( value != null )
-			isArray(value) ? value.forEach(v=>Print(v,null,place,$)) :
-			value.print	? value.print($,place) :
+			isArray(value) ? value.forEach(v=>Print(v,null,place,data)) :
+			value.print	? value.print(place,data) :
 			Env.Print(place,value);
 		},
 		
@@ -171,7 +171,7 @@ const	dap=(Env=>
 			Datum.prototype={
 				reach: function(context){
 					let
-						target = context.$.data,
+						target = context.data,
 						i=this.lift;
 					while(i-->0)
 						target=target.$ || Fail("Out of data contexts: "+entry);
@@ -185,7 +185,7 @@ const	dap=(Env=>
 			}
 			Statum.prototype={
 				reach: function(context, up){
-					let target = up || context.$.stata;
+					let target = up || context.stata;
 					if(up)
 						while(!(this.entry in target))
 							target=target.$ || Fail("Statum not declared: $"+this.entry);
@@ -345,11 +345,12 @@ const	dap=(Env=>
 						return scope;
 				Fail("Statum (lvalue) not found: $"+entry);
 			},
-
-			instance: function($){
-				return this.defines ? $.subState(Object.assign({},this.defines)) : $;// (||this.depends) //notEmpty()
+/*
+			instance: function($,data){
+				return new $.subContext(data,this.defines)//&&Object.assign({},this.defines)
+				//return this.defines ? $.subState(Object.assign({},this.defines)) : $;// (||this.depends) //notEmpty()
 			},
-			
+*/			
 			depend: function(changes){
 				let depend = 0;
 				for(const k in changes)
@@ -475,7 +476,7 @@ const	dap=(Env=>
 					"").split(" ");					
 			},
 			
-			print	:function($,place,instead){
+			print	:function(place,data,instead){
 				
 				if(!this.scope)
 					this.prepare(place.P);
@@ -491,7 +492,7 @@ const	dap=(Env=>
 					a.engage();					
 					
 				node.P = this;
-				node.$ = this.scope.instance($||place.$);
+				node.$ = (place.$ || new Execute.Context()).subContext(data,this.scope.defines);//this.scope.instance(place.$,data);
 					
 				new Execute.Branch(node).runDown(todo,place,instead); 
 				
@@ -511,7 +512,7 @@ const	dap=(Env=>
 			this.todo	= todo;
 		};
 		Step.prototype={
-			print: function($,place){new Execute.Branch(place,$).execBranch(this);}
+			print: function(place){new Execute.Branch(place).execBranch(this)}//.subContext(data,this.scope.defines)
 		};
 		
 		function Feed(values,tags,tokens){
@@ -767,11 +768,6 @@ const	dap=(Env=>
 					}
 					return this.todo;
 				},
-/*					
-				print: function($,node){
-					new Execute.Branch(node,$).execBranch(this.engage());
-				}
-*/
 			}
 		})();		
 			
@@ -790,9 +786,19 @@ const	dap=(Env=>
 			getDataContext:
 				function(){return this.data['']},
 			
+			subContext:
+				function(data,stata){
+					return !data && !stata ? this :
+					new Context(
+						data ? {'':data, $:this.data} : this.data,
+						stata ? Object.assign({$:this.stata},stata) : this.stata
+					)
+					//return new Context(this.data, {$:this.stata})}, // $$x => outer x
+				},
+/*				
 			subState:
 				function(){return new Context(this.data, {$:this.stata})}, // $$x => outer x
-				
+*/				
 			subData:
 				function(data){return new Context({'':data||{},$:this.data},this.stata)}, // ..y => outer y
 				
@@ -851,9 +857,9 @@ const	dap=(Env=>
 
 		let	stackDepth	= 0;		
 
-		function Branch(node,$,up){
+		function Branch(node,data,up){
 			this.node = node;
-			this.$ = $||node.$;
+			this.data = data;
 			this.up = up;
 		}
 		Branch.prototype={
@@ -863,8 +869,7 @@ const	dap=(Env=>
 				
 				const	
 					isArray	= Array.isArray,
-					node	= this.node,
-					$	= this.$;
+					node	= this.node;
 					
 				let
 					flow	= null;
@@ -881,7 +886,7 @@ const	dap=(Env=>
 						branch =step.branch;
 
 					if(branch){
-						const value = new Branch(node,$,this.up).execBranch(branch); // node.$ ?
+						const value = new Branch(node,null,this.up).execBranch(branch); // node.$ ?
 						if(value instanceof Postpone)
 							return value.assign({
 								branch: this,
@@ -896,7 +901,7 @@ const	dap=(Env=>
 							feed		= step.feed;
 
 						if(!feed)
-							flow=operate(null,null,node,$);
+							flow=operate(null,null,node,this.data);//,$
 						
 						else{
 							const
@@ -923,7 +928,7 @@ const	dap=(Env=>
 									});
 
 								if(operate)
-									flow = operate(value,tags[i],node,$);
+									flow = operate(value,tags[i],node,this.data);//,$.data
 							}
 							
 							if(flow===true)
@@ -933,7 +938,7 @@ const	dap=(Env=>
 								const
 									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
 								rows.map( row=>
-										new Branch(node,$.subData(row),this.up).execBranch(todo)
+										new Branch(node,row,this.up).execBranch(todo)//
 								);
 							}
 						}
@@ -951,7 +956,6 @@ const	dap=(Env=>
 					return literal;
 				
 				const
-					$ = this.$,
 					up = this.up,
 					rvalue = token.rvalue,
 					lvalues = token.lvalues;
@@ -965,10 +969,11 @@ const	dap=(Env=>
 				
 					const
 						path = rvalue.path,
-						expr = rvalue.expr;
+						expr = rvalue.expr,
+						context = this.node.$;
 						
 					if(path){
-						value = (up && (path.entry in up)) ? up : path.reach(this, $.stata);
+						value = (up && (path.entry in up)) ? up : path.reach(context,context.stata);//this, .stata
 						for(let route=path.route, i = route.length; value && i-->0; ){
 							const k=route[i];
 							value = value[k];
@@ -1020,7 +1025,7 @@ const	dap=(Env=>
 								entry = path.entry;
 								
 							let
-								target = entry && up || path.reach(this),
+								target = entry && up || path.reach(this.node.$),
 								i = route.length,
 								key = route[--i];
 								
@@ -1065,7 +1070,7 @@ const	dap=(Env=>
 					value = (expr.flatten||Util.hash)(values,tags);
 					
 				if(proto)
-					Print(proto,null,this.node,this.$.subData(value));
+					Print(proto,null,this.node,value);//this.$.subData()
 				
 				return value;
 			},
@@ -1154,16 +1159,17 @@ const	dap=(Env=>
 			return depend;
 		},
 		
-		Rebuild	=(node)	=>{
-			node.P.print(null,node.parentNode,node)
-		},
-		
 		Append = (node,rule)=>{
 			if(!rule)
 				rule=node.P.rules.a||Fail("no a-rule");
 			new Execute.Branch(node).execBranch(rule.todo); //,node.$.subData()
-		};
+		},
 
+		Rebuild	=(node)	=>{
+			const place=node.parentNode;
+			node.P.print(place,(node.$.data!=place.$.data)&&node.$.data,node);
+		};
+		
 		return {
 			
 			checkUp, Rebuild, Append,
@@ -1540,7 +1546,7 @@ const	dap=(Env=>
 				}
 				if(!data)
 					data=QueryString.parse.hash(location.hash);
-				const	ready = proto.print((new dap.Execute.Context()).subData(data),place);//||newStub("dap"); ||State.read()
+				const	ready = proto.print(place,data);//||newStub("dap"); ||State.read()//(new dap.Execute.Context()).subData()
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 				return 0;
 			},
