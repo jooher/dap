@@ -72,6 +72,7 @@ const	dap=(Env=>
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		"&"	:(value,alias,node)=>	{ const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
+		"&?":(value,alias,node)=>	{ if(value==null)return; const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
 
 		"d"	:(value,alias,node)=>	{ Update.Rebuild(value||node); },
 		"a!":(value,alias,node)=> { Update.Append(value||node); },
@@ -80,11 +81,15 @@ const	dap=(Env=>
 		"a"	:(value,alias,node)=>	{ Env.delay(_=>Update.Append(value||node,alias)); },
 		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node)); },
 		
-		"*"	:(value,alias)=>	value ? (alias ? value.map(v=>({[alias]:v})) : value) : false,
+		"*"	:(value,alias)=>
+			! value ? false :
+			! alias ? value :
+			! value.map ? {[alias]:value} :
+			value.map(v=>({[alias]:v})),
 				 
 		"?"	:(value,alias)=>	!!value,
-		"??"	:(value,alias)=>	alias?alias==value:!value,
-		"?!"	:(value,alias)=>	alias?alias!=value:!!value
+		"??":(value,alias)=>	alias?alias==value:!value,
+		"?!":(value,alias)=>	alias?alias!=value:!!value
 		}
 		
 	}),
@@ -140,8 +145,8 @@ const	dap=(Env=>
 				this.where=where;
 			}
 			This.prototype={
-				reach: function(context){
-					return context[this.where] || Fail("Unknown mesh: #"+this.where);
+				reach: function(context,branch){
+					return branch[this.where] || Fail("Unknown mesh: #"+this.where);
 				}
 			};
 		
@@ -184,9 +189,9 @@ const	dap=(Env=>
 				this.entry=route[route.length-1];
 			}
 			Statum.prototype={
-				reach: function(context, up){
-					let target = up || context.stata;
-					if(up)
+				reach: function(context){ //, up
+					let target = context.stata; //up || 
+					//if(up)
 						while(!(this.entry in target))
 							target=target.$ || Fail("Statum not declared: $"+this.entry);
 					return target;
@@ -196,8 +201,8 @@ const	dap=(Env=>
 			const
 			
 			cache = {
-				"$" : new This(['','data'],"$"),
-				"#" : new This([],"node")
+				"$" : new This(['','data','$'],'node'),
+				"#" : new This([],'node')
 			},
 			
 			parse = route=>{
@@ -219,7 +224,7 @@ const	dap=(Env=>
 							return new Statum(route);
 							
 						case'#':
-							return new This(route,entry.substr(1)||"node"); 
+							return new This(route,entry.substr(1)||'node'); 
 
 						default:
 							route.push(entry);
@@ -310,7 +315,7 @@ const	dap=(Env=>
 				Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
 			),
 		
-		rootns	= new Namespace(Env.base).FUNC(Env.Func);//Uri.absolute()
+		rootns	= new Namespace("").FUNC(Env.Func);//Uri.absolute()
 			
 		let ids=0;
 
@@ -800,17 +805,7 @@ const	dap=(Env=>
 				function(){return new Context(this.data, {$:this.stata})}, // $$x => outer x
 */				
 			subData:
-				function(data){return new Context({'':data||{},$:this.data},this.stata)}, // ..y => outer y
-				
-			adopt:
-				function(change,sift){
-					for(const k in change)
-						if(k in this.stata)
-							this.stata[k]=change[k];
-						else
-							sift[k]=change[k];
-					return sift;
-				}
+				function(data){return new Context({'':data||{},$:this.data},this.stata)} // ..y => outer y
 			
 		}
 		
@@ -855,17 +850,14 @@ const	dap=(Env=>
 				}
 		};
 
-		let	stackDepth	= 0;		
-
-		function Branch(node,data,up){
+		function Branch(node,up){
 			this.node = node;
-			this.data = data;
 			this.up = up;
 		}
 		Branch.prototype={
 
 			execBranch:
-			function(step){
+			function(step,data){
 				
 				const	
 					isArray	= Array.isArray,
@@ -874,9 +866,6 @@ const	dap=(Env=>
 				let
 					flow	= null;
 					
-				if(++stackDepth>100)
-					Fail("Suspicious recursion depth: "+node.P.rules.d.rulestring);
-				
 				this.postpone=null;
 				
 				while(step){
@@ -886,7 +875,7 @@ const	dap=(Env=>
 						branch =step.branch;
 
 					if(branch){
-						const value = new Branch(node,null,this.up).execBranch(branch); // node.$ ?
+						const value = new Branch(node,this.up).execBranch(branch); // node.$ ?
 						if(value instanceof Postpone)
 							return value.assign({
 								branch: this,
@@ -901,7 +890,7 @@ const	dap=(Env=>
 							feed		= step.feed;
 
 						if(!feed)
-							flow=operate(null,null,node,this.data);//,$
+							flow=operate(null,null,node,data);//,$
 						
 						else{
 							const
@@ -928,7 +917,7 @@ const	dap=(Env=>
 									});
 
 								if(operate)
-									flow = operate(value,tags[i],node,this.data);//,$.data
+									flow = operate(value,tags[i],node,data);//,$.data
 							}
 							
 							if(flow===true)
@@ -938,14 +927,13 @@ const	dap=(Env=>
 								const
 									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
 								rows.map( row=>
-										new Branch(node,row,this.up).execBranch(todo)//
+										new Branch(node,this.up).execBranch(todo,row)//
 								);
 							}
 						}
 					}
 					step = (flow==null) && todo;
 				}
-				--stackDepth;
 				return flow;
 			},
 
@@ -957,6 +945,7 @@ const	dap=(Env=>
 				
 				const
 					up = this.up,
+					context = this.node.$,
 					rvalue = token.rvalue,
 					lvalues = token.lvalues;
 					
@@ -969,15 +958,12 @@ const	dap=(Env=>
 				
 					const
 						path = rvalue.path,
-						expr = rvalue.expr,
-						context = this.node.$;
+						expr = rvalue.expr;
 						
 					if(path){
-						value = (up && (path.entry in up)) ? up : path.reach(context,context.stata);//this, .stata
-						for(let route=path.route, i = route.length; value && i-->0; ){
-							const k=route[i];
-							value = value[k];
-						}
+						value = (up && (path.entry in up)) ? up : path.reach(context,this);//this, .stata,context.stata
+						for(let route=path.route, i = route.length; value && i-->0; )
+							value = value[route[i]];
 					}
 					
 					if(expr){
@@ -1025,7 +1011,7 @@ const	dap=(Env=>
 								entry = path.entry;
 								
 							let
-								target = entry && up || path.reach(this.node.$),
+								target = entry && up || path.reach(context,this),
 								i = route.length,
 								key = route[--i];
 								
@@ -1070,7 +1056,8 @@ const	dap=(Env=>
 					value = (expr.flatten||Util.hash)(values,tags);
 					
 				if(proto)
-					Print(proto,null,this.node,value);//this.$.subData()
+					proto.print(this.node,value);
+					//Print(proto,null,this.node,value);//this.$.subData()
 				
 				return value;
 			},
@@ -1101,6 +1088,15 @@ const	dap=(Env=>
 	Update = (function(){
 		
 		const
+		
+		adopt = (stata,defs,change,sift) => {
+			for(const k in change)
+				if(k in defs)//this.stata
+					stata[k]=change[k];
+				else
+					sift[k]=change[k];
+			return sift;
+		},
 
 		checkUp = (node,change,result,snitch,todo) => {
 
@@ -1112,10 +1108,13 @@ const	dap=(Env=>
 			}
 
 			if(todo)
-				result = new Execute.Branch(node,null,change).execBranch(todo);
+				result = new Execute.Branch(node,change).execBranch(todo);
 			
 			const
-				up = (!parent || node.$!=parent.$) ? node.$.adopt(change,{}) : change;
+				defs = node.P.scope.defines,
+				up = defs && (!parent || node.$!=parent.$)
+					? adopt(node.$.stata,defs,change,{})
+					: change;					
 
 			if(result instanceof Execute.Postpone){
 				//Object.assign(node.$,change);
@@ -1167,7 +1166,7 @@ const	dap=(Env=>
 
 		Rebuild	=(node)	=>{
 			const place=node.parentNode;
-			node.P.print(place,(node.$.data!=place.$.data)&&node.$.data,node);
+			node.P.print(place,(node.$.data!=place.$.data)&&node.$.data[""],node);//
 		};
 		
 		return {
@@ -1448,11 +1447,11 @@ const	dap=(Env=>
 	Element = str =>{
 		const
 			space	= str.indexOf(" "),
-			extra	= space<0 ? null : str.substr(space),
+			extra	= space>=0 && str.substr(space),
 			head	= (extra ? str.substr(0,space) : str).split('#'),
-			id	= head&&head[1],
-			type	= head[0]&&head[0].split("."),
-			tag	= (type&&type.length&&type[0]==type[0].toUpperCase()) ? type.shift() : DEFAULT.TAG,
+			id	= head && head[1],
+			type	= head[0] && head[0].split("."),
+			tag	= (type && type.length && type[0]==type[0].toUpperCase()) ? type.shift() : DEFAULT.TAG,
 			elem	= extra ? parseWithExtra(tag,extra) : newElem(tag);
 			
 		if(type.length)elem.className = type.join(" ");//.toLowerCase();
@@ -1462,9 +1461,7 @@ const	dap=(Env=>
 	}
 ;
 	
-	return	{ DEFAULT, 
-		
-		base: location.href,
+	return	{
 		
 		doc, log, 
 		Http, Mime, QueryString, Blend,
