@@ -350,12 +350,7 @@ const	dap=(Env=>
 						return scope;
 				Fail("Statum (lvalue) not found: $"+entry);
 			},
-/*
-			instance: function($,data){
-				return new $.subContext(data,this.defines)//&&Object.assign({},this.defines)
-				//return this.defines ? $.subState(Object.assign({},this.defines)) : $;// (||this.depends) //notEmpty()
-			},
-*/			
+			
 			depend: function(changes){
 				let depend = 0;
 				for(const k in changes)
@@ -798,12 +793,8 @@ const	dap=(Env=>
 						data ? {'':data, $:this.data} : this.data,
 						stata ? Object.assign({$:this.stata},stata) : this.stata
 					)
-					//return new Context(this.data, {$:this.stata})}, // $$x => outer x
 				},
-/*				
-			subState:
-				function(){return new Context(this.data, {$:this.stata})}, // $$x => outer x
-*/				
+				
 			subData:
 				function(data){return new Context({'':data||{},$:this.data},this.stata)} // ..y => outer y
 			
@@ -961,7 +952,7 @@ const	dap=(Env=>
 						expr = rvalue.expr;
 						
 					if(path){
-						value = (up && (path.entry in up)) ? up : path.reach(context,this);//this, .stata,context.stata
+						value = (up && (path.entry in up)) ? up : path.reach(context,this);
 						for(let route=path.route, i = route.length; value && i-->0; )
 							value = value[route[i]];
 					}
@@ -1020,7 +1011,8 @@ const	dap=(Env=>
 								key=route[--i];
 							}
 							
-							target[key]=value;
+							if((typeof value === 'object') || target[key]!==value)
+								target[key]=value;
 								
 							convert = lvalue.convert;
 						}
@@ -1057,7 +1049,6 @@ const	dap=(Env=>
 					
 				if(proto)
 					proto.print(this.node,value);
-					//Print(proto,null,this.node,value);//this.$.subData()
 				
 				return value;
 			},
@@ -1080,8 +1071,7 @@ const	dap=(Env=>
 		Perf	= (info,since)=>info,//Env.log("PERF "+(Date.now()-since)+" ms "+info),
 		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;};
 			
-		return	{ Context, Branch, Postpone, Perf,
-		};
+		return	{ Context, Branch, Postpone, Perf };
 
 	})(),
 
