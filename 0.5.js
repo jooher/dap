@@ -1082,7 +1082,10 @@ const	dap=(Env=>
 		adopt = (stata,defs,change,sift) => {
 			for(const k in change)
 				if(k in defs)//this.stata
-					stata[k]=change[k];
+					if(stata[k]===change[k]&&(typeof change[k]!=='object'))
+						delete change[k];
+					else
+						stata[k]=change[k];
 				else
 					sift[k]=change[k];
 			return sift;
