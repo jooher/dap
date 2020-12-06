@@ -841,14 +841,15 @@ const	dap=(Env=>
 				}
 		};
 
-		function Branch(node,up){
+		function Branch(node,up,$){
 			this.node = node;
+			this.$ = $ || node.$;
 			this.up = up;
 		}
 		Branch.prototype={
 
 			execBranch:
-			function(step,data){
+			function(step){
 				
 				const	
 					isArray	= Array.isArray,
@@ -881,7 +882,7 @@ const	dap=(Env=>
 							feed		= step.feed;
 
 						if(!feed)
-							flow=operate(null,null,node,data);//,$
+							flow=operate(null,null,node,this.$.data);//,$
 						
 						else{
 							const
@@ -908,7 +909,7 @@ const	dap=(Env=>
 									});
 
 								if(operate)
-									flow = operate(value,tags[i],node,data);//,$.data
+									flow = operate(value,tags[i],this.$.data);//,$.data
 							}
 							
 							if(flow===true)
@@ -917,8 +918,8 @@ const	dap=(Env=>
 							if(flow){
 								const
 									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
-								rows.map( row=>
-										new Branch(node,this.up).execBranch(todo,row)//
+								rows.forEach( row=>
+										new Branch(node,this.up,this.$.subData(row)).execBranch(todo)//
 								);
 							}
 						}
@@ -936,7 +937,7 @@ const	dap=(Env=>
 				
 				const
 					up = this.up,
-					context = this.node.$,
+					context = this.$||this.node.$,
 					rvalue = token.rvalue,
 					lvalues = token.lvalues;
 					
