@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<script src="https://dap.js.org/0.5.js"></script>
+<script>
+const
+
+	foo = {
+		value: null
+	},
+
+	bar = {
+		set fancySetter value => alert(foo.value=value)
+	},
+
+	a={
+		b : { c: null },
+		get fancyGetter()=>foo
+	};
+
+
+'test'.d("a.b.c=`X a.fancyGetter.fancySetter=`Z")
+.DICT({a})
+.RENDER()
+
+</script>
