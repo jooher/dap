@@ -909,7 +909,7 @@ const	dap=(Env=>
 									});
 
 								if(operate)
-									flow = operate(value,tags[i],this.$.data);//,$.data
+									flow = operate(value,tags[i],node,this.$.data);//,$.data
 							}
 							
 							if(flow===true)
