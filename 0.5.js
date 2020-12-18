@@ -492,7 +492,7 @@ const	dap=(Env=>
 					a.engage();					
 					
 				node.P = this;
-				node.$ = context.subContext(null,this.scope.defines);//this.scope.defines ? new Execute.Context(context,) : context; //(place.$ || new Execute.Context()).subContext(data,this.scope.defines);//this.scope.instance(place.$,data);
+				node.$ = context.subContext(null,this.scope.defines);
 					
 				new Execute.Branch(node).runDown(todo,place,instead); 
 				
@@ -777,9 +777,12 @@ const	dap=(Env=>
 	
 	Execute	= (function(){
 		
-		function Context(data,stata,updata){
-			this.data= data ? {"":data, $:updata} : updata;
-			this.stata=stata;
+		const GlobalContext={};
+		
+		function Context(data,stata,derive){
+			if(!derive)derive=GlobalContext;
+			this.data = data ? {"":data, $:derive.data} : derive.data;
+			this.stata=stata ? Object.assign({$:derive.stata},stata) : derive.stata;
 		}
 		Context.prototype={
 			
@@ -788,19 +791,8 @@ const	dap=(Env=>
 			
 			subContext:
 				function(data,stata){
-					return !data && !stata ? this :
-					new Context( data,
-						stata ? Object.assign({$:this.stata},stata) : this.stata,
-						this.data
-					)
-				},
-				
-			subData:
-				function(data){return new Context({'':data||{},$:this.data},this.stata)}, // ..y => outer y
-				
-/*			subStata:
-				function(stata)
-*/			
+					return !data && !stata ? this : new Context(data,stata,this)
+				}
 		}
 		
 		function Postpone(promise,block,token){//(info,handle)
@@ -846,7 +838,7 @@ const	dap=(Env=>
 
 		function Branch(node,up,data){
 			this.node = node;
-			this.$ = data ? node.$.subContext(data) : node.$; //data = data;//
+			this.$ = node.$.subContext(data);
 			this.up = up;
 		}
 		Branch.prototype={
