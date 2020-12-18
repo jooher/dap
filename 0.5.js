@@ -99,10 +99,10 @@ const	dap=(Env=>
 
 	isArray = Array.isArray,
 	
-	Print	= (value,alias,place,data)=> {
+	Print	= (value,alias,place,context)=> {
 		if( value != null )
-			isArray(value) ? value.forEach(v=>Print(v,null,place,data)) :
-			value.print	? value.print(place,data) :
+			isArray(value) ? value.forEach(v=>Print(v,null,place,context)) :
+			value.print	? value.print(place,context) :
 			Env.Print(place,value);
 		},
 		
@@ -476,7 +476,7 @@ const	dap=(Env=>
 					"").split(" ");					
 			},
 			
-			print	:function(place,data,instead){
+			print	:function(place,context,instead){
 				
 				if(!this.scope)
 					this.prepare(place.P);
@@ -492,7 +492,7 @@ const	dap=(Env=>
 					a.engage();					
 					
 				node.P = this;
-				node.$ = (place.$ || new Execute.Context()).subContext(data,this.scope.defines);//this.scope.instance(place.$,data);
+				node.$ = context.subContext(null,this.scope.defines);//this.scope.defines ? new Execute.Context(context,) : context; //(place.$ || new Execute.Context()).subContext(data,this.scope.defines);//this.scope.instance(place.$,data);
 					
 				new Execute.Branch(node).runDown(todo,place,instead); 
 				
@@ -777,8 +777,8 @@ const	dap=(Env=>
 	
 	Execute	= (function(){
 		
-		function Context(data,stata){
-			this.data=data;
+		function Context(data,stata,updata){
+			this.data= data ? {"":data, $:updata} : updata;
 			this.stata=stata;
 		}
 		Context.prototype={
@@ -789,15 +789,18 @@ const	dap=(Env=>
 			subContext:
 				function(data,stata){
 					return !data && !stata ? this :
-					new Context(
-						data ? {'':data, $:this.data} : this.data,
-						stata ? Object.assign({$:this.stata},stata) : this.stata
+					new Context( data,
+						stata ? Object.assign({$:this.stata},stata) : this.stata,
+						this.data
 					)
 				},
 				
 			subData:
-				function(data){return new Context({'':data||{},$:this.data},this.stata)} // ..y => outer y
-			
+				function(data){return new Context({'':data||{},$:this.data},this.stata)}, // ..y => outer y
+				
+/*			subStata:
+				function(stata)
+*/			
 		}
 		
 		function Postpone(promise,block,token){//(info,handle)
@@ -841,9 +844,9 @@ const	dap=(Env=>
 				}
 		};
 
-		function Branch(node,up,$){
+		function Branch(node,up,data){
 			this.node = node;
-			this.$ = $ || node.$;
+			this.$ = data ? node.$.subContext(data) : node.$; //data = data;//
 			this.up = up;
 		}
 		Branch.prototype={
@@ -882,7 +885,7 @@ const	dap=(Env=>
 							feed		= step.feed;
 
 						if(!feed)
-							flow=operate(null,null,node,this.$.data);//,$
+							flow=operate(null,null,node);//,$,this.$.data
 						
 						else{
 							const
@@ -909,7 +912,7 @@ const	dap=(Env=>
 									});
 
 								if(operate)
-									flow = operate(value,tags[i],node,this.$.data);//,$.data
+									flow = operate(value,tags[i],node,this.$);//,$.data
 							}
 							
 							if(flow===true)
@@ -919,7 +922,7 @@ const	dap=(Env=>
 								const
 									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
 								rows.forEach( row=>
-										new Branch(node,this.up,this.$.subData(row)).execBranch(todo)//
+										new Branch(node,this.up,row).execBranch(todo)
 								);
 							}
 						}
@@ -1049,7 +1052,7 @@ const	dap=(Env=>
 					value = (expr.flatten||Util.hash)(values,tags);
 					
 				if(proto)
-					proto.print(this.node,value);
+					proto.print(this.node, new dap.Execute.Context(value));
 				
 				return value;
 			},
@@ -1160,7 +1163,7 @@ const	dap=(Env=>
 
 		Rebuild	=(node)	=>{
 			const place=node.parentNode;
-			node.P.print(place,(node.$.data!=place.$.data)&&node.$.data[""],node);//
+			node.P.print(place,node.$,node);//(node.$.data!=place.$.data)&&node.$.data[""]
 		};
 		
 		return {
@@ -1537,7 +1540,7 @@ const	dap=(Env=>
 				}
 				if(!data)
 					data=QueryString.parse.hash(location.hash);
-				const	ready = proto.print(place,data);//||newStub("dap"); ||State.read()//(new dap.Execute.Context()).subData()
+				const	ready = proto.print(place, new dap.Execute.Context(data));//||newStub("dap"); ||State.read()//()).subData()
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 				return 0;
 			},

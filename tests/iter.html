@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test</title>
+		<style>
+		.ui{cursor:pointer}
+		iframe{height:16em; width:100%; border:4px dashed orange;}
+		</style>
+		<script src="../0.5.js"></script>
+	</head>
+	<body>  
+		<script>
+'heroes'.d("$id= $name=" // S
+	,'UL'.d("* (heroes@)uri:query@" // D
+		,'LI.hero'
+			.d(".oh=`oh; !! .oh@ .name@ .id@title") // 
+			.ui("$id=.id $name=.name")
+	)
+	,'message'.d("? $id; ! (message $id $name)format")
+)
+.DICT({
+	heroes:"/samples/heroes.json",
+	message:"Hero id: {id}\n Hero name: {name}"
+})
+.RENDER();
+
+		</script>
+
+	</body>
+</html>
