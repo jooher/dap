@@ -5,7 +5,7 @@ dap&&
 'dapify'.d("$edit=.code $run=.code $dirty= $own="
 	,'PRE contenteditable'
 		.d("! .code; a!")
-		.a("log `a; #.innerHTML=$run:hilite")
+		.a("log `a; #.innerHTML=$run:format")
 		.e("keyup","$edit=#.innerText")
 	,'buttons'.d(""
 		,'welcome'.d("? $own:!; ! welcome")
@@ -23,11 +23,7 @@ dap&&
 
 .FUNC({
 	convert	:{
-		hilite:code=>code
-			.replace(/</g,"&lt;").replace(/>/g,"&gt;")	// html
-			.replace(/( \/\/.+?)$/gm,"<i>$1</i>")		// comments
-			.replace(/('.+?')/g,"<em>$1</em>") 		// element signatures
-			.replace(/(\$[^\s=.;@:"()`]*)/g,"<b>$1</b>")
+		format: dap.import('format.js')
 	},
 
 	operate	: {

@@ -8,12 +8,12 @@ hilite	= code=>code
 	.replace(/('.+?')/g,"<em>$1</em>") 		// element signatures
 	.replace(/(\$[^\s=.;@:"()`]*)/g,"<b>$1</b>"),	// $status variables
 	
-dapify	= dap &&
-
+dapify	= dap && dap.NS("dapify.dap.js") ;
+/*
 	'dapify'.d("$edit=.code $run=.code $dirty= $own="
 		,'PRE contenteditable'
 			.d("! .code; a!")
-			.a("log `a; #.innerHTML=$run:hilite")
+			.a("#.innerHTML=$run:hilite")
 			.e("keyup","$edit=#.innerText")
 		,'buttons'.d(""
 			,'welcome'.d("? $own:!; ! welcome")
@@ -51,12 +51,13 @@ dapify	= dap &&
 			}
 		}
 	});
-	
-	nodes.forEach(dapify
-		? pre=>dapify.RENDER({code:pre.textContent,style:pre.getAttribute("data-style")},null,pre)
-		: pre=>pre.innerHTML=hilite(pre.innerHTML)
-	);
+*/	
 
-})(
-	[...document.getElementsByClassName("dap")]//.filter(pre=>pre.getAttribute("lang")=="dap")
+[...document.getElementsByClassName("dap")]
+.filter(pre=>pre.getAttribute("lang")=="dap")
+.forEach(dapify
+	? pre=>dapify.RENDER({code:pre.textContent,style:pre.getAttribute("data-style")},null,pre)
+	: pre=>pre.innerHTML=hilite(pre.innerHTML)
 );
+
+})();
