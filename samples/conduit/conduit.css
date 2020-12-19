@@ -1,0 +1,302 @@
+[ui=click]{cursor:pointer}
+
+body {
+  font-family: source sans pro,sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #373a3c;
+  background-color: #fff;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  text-align: center;
+  overflow-y: scroll;
+}
+
+header{
+	position:relative;
+	text-align: left;
+	color: #fff;
+	padding: 1em 8em;
+	margin: 0 -8em;
+	text-align: center;
+	background: #5cb85c;
+}
+
+.article>header{
+	text-align: left;
+  background: #333;
+}
+
+.profile>header{
+  color: initial;
+  background: #f3f3f3;
+}
+
+header>h2{
+	font-size: 2.5rem;
+	/* font-weight: 400; */
+}
+
+roof {
+  display: flex;
+}
+
+roof>.logo{
+	flex: 1;
+	font-size:1.5rem;
+	text-align: left;
+}
+
+nav>a{
+	margin:0 1em;
+}
+
+.logo::before{
+	content:"conduit";
+	font-family: titillium web,sans-serif;
+	font-weight: 700!important;
+}
+
+h1.logo{
+	/* text-align: center; */
+	font-size: 3rem;
+	text-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+
+button{
+  display: inline-block;
+  padding: .25rem .5rem;
+  font-size: .875rem;
+  white-space: nowrap;
+  background: none;
+  color: #5cb85c;
+  border-radius: .2rem;
+  border: 1px solid;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+	margin:0 4px;
+}
+
+button.add{
+  color: #ccc;
+}
+
+input,textarea{
+  padding: .75rem 1.5rem;
+  margin: .5em 0;
+  font-size: 1.25rem;
+  border-radius: .3rem;
+  display: block;
+  line-height: 1.25;
+  color: #55595c;
+  border: 1px solid rgba(0,0,0,.15);
+  width: 100%;
+  /* display: block; */
+  box-sizing: border-box;
+}
+
+
+page{
+	display: block;
+	/* max-width: 32em; */
+	text-align: center;
+}
+
+a{
+	color: #5cb85c;
+  text-decoration: none;
+}
+a:focus, a:hover {
+  color: #3d8b3d;
+  text-decoration: underline;
+}
+
+.tag{
+  padding-top: .1rem;
+  padding-bottom: .1rem;
+  white-space: nowrap;
+  margin-right: 3px;
+  margin-bottom: .2rem;
+  display: inline-block;
+  padding-right: .6em;
+	padding-left: .6em;
+	border-radius: 10rem;
+}
+
+.preview-link>.tags{
+  font-size: .8rem;
+	position: absolute;
+	right: 0;
+	text-align:right;
+}
+
+.preview-link>.tags>.tag{
+	color:lightgray;
+	border:1px solid;
+}
+
+page>.tags{
+	margin: 4em 0;
+	/* text-align:justify; */
+}
+
+page>.tags>.tag{
+	background-color: #818a91;	
+  color: #fff!important;
+}
+
+.preview{
+	border-top: 1px solid rgba(0,0,0,.1);
+	padding: 1.5rem 0;
+	position: relative;
+}
+
+.articles, .meta {
+  text-align: left;
+}
+.meta{
+  display: flex;
+}
+
+.info{
+	flex: 1;
+	position: relative;
+	padding-left: 40px;
+	margin: 0 1.5rem 0 0;
+	display: inline-block;
+	vertical-align: middle;
+	line-height: 1rem;
+}
+
+.info>a.userimg{
+  position: absolute;
+  left: 0;
+}
+
+.userimg>img{
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+}
+
+.info>.date {
+  color: #bbb;
+  font-size: .8rem;
+  display: block;
+}
+
+.preview-link{
+	color: inherit!important;
+	text-decoration:none;
+}
+.preview-link:hover {
+  text-decoration: inherit!important;
+}
+
+.preview-link::after{
+	content:"Read more...";
+	font-size:.8rem;
+	color: lightgray;
+}
+
+.preview>button.favorite {
+  position: absolute;
+  right: 0;
+}
+.article>.body{
+	font-family: 'source serif pro',serif;
+	text-align: left;
+	font-size: 1.2rem;
+	line-height: 1.8rem;
+	margin: 4rem 0;
+}
+
+form {
+  /* max-width: 32em; */
+  margin: 0 auto;
+  text-align: right;
+  padding: 0;
+}
+
+form>button{
+  border-radius: .3rem;
+  padding: .75rem 1.5rem;
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #5cb85c;
+  margin: 1em;
+}
+
+.comment {
+  position: relative;
+  border: 1px solid rgba(0,0,0,.15);
+  margin: 1rem auto;
+  border-radius: .25rem;
+  padding: 0;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.comment>textarea {
+  border: none;
+  margin: 0;
+}
+
+.comments {
+  /* max-width: 32em; */
+  margin: 4em 0;
+  text-align: left;
+}
+
+.comment>.body {
+  background: #fff;
+  padding: 1.25rem;
+}
+
+.comment>.info {
+	font-size: .75em;
+	margin: .5em;
+}
+
+.article>.meta {
+  /* display: inline-block; */
+}
+
+.preview>button {
+  position: absolute;
+  right: 0;
+}
+
+app.conduit {
+  /* max-width: 48em; */
+  /* min-width: 24em; */
+  display: block;
+  margin: 0 8em;
+}
+
+button.favorited {
+  background: #5cb85c;
+  color: white;
+}
+
+h2.title {}
+
+page>h2 {
+  margin-bottom: 0;
+}
+
+page>h1 {
+  margin: 2em;
+  /* text-align: left; */
+}
+
+h2 {
+  margin-bottom: .1em;
+}
+
+.description {
+  color: gray;
+  margin: .2em 0;
+}
