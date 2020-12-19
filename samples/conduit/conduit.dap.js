@@ -19,7 +19,7 @@ const
 		.replace(/\/&/g,"?")
 		.replace(/@\//g,"@"),
 	
-	unroute = router(
+	parseRoute = router(
 		["tag/:tag", {page:""}],
 		["article/:slug", {page:"article"}],
 		["editor/:slug", {page:"editor",slug:""}],
@@ -37,11 +37,11 @@ const
 	;
 
 	
-'APP.conduit'.d("$page=`- $article=  $user=:auth.load; u @HASHCHANGE"
+'APP.conduit'.d("$page=. $tag=. $slug=. $user=:auth.load; u @HASHCHANGE"
 
 	,'ROOF'.d(""
 	
-		,'A.logo href=#/'.d()//.d("!? .nav@; !! (.nav)nav@href")
+		,'A.logo href=#'.d()
 		
 		,'NAV'
 			.d("? $user"
@@ -57,19 +57,21 @@ const
 	,'PAGE.home'
 	///
 	.d("? $page:!; ! html.HEADER; Tags( (`tags)api:query@. )"
+	
+		,'H2'.d("! $page")
 
 		,'feed-toggle'.d(""
 			,'A `Your feed'.d("? .username; !! (`@ .username `feed)nav@href")
-			,'A href="#/" `Global feed'.d()
+			,'A href=# `Global feed'.d()
 		)
 
-		,"Articles( .feed (.tag)uri@criteria )"
+		,'matching'.d("Articles( .feed ($tag)uri@criteria )")
 
 	)
 
 	,'PAGE.article'
 	/// article.
-	.d("?? $page@article; ? $!=(`articles .slug)api:query; u!"//; * $!.article@
+	.d("?? $page@article; ? $!=(`articles $slug)api:query; u!"
 		,'HEADER'.d("! Title Meta")//
 		,"! Body Meta Comments"
 	)
@@ -98,7 +100,7 @@ const
 
 	,'PAGE.editor'
 	/// user
-	.d("?? $page@editor; ? $!=.slug:! $!=(`articles .slug)api:query; *@ $!.article ()"
+	.d("?? $page@editor; ? $!=$slug:! $!=(`articles $slug)api:query; *@ $!.article ()"
 		,'FORM'.d(""
 			,'INPUT name=title type=text placeholder="Article Title"'.d("#.value=.title")
 			,'INPUT name=description type=text placeholder="What is this article about?"'.d("#.value=.description")
@@ -107,8 +109,8 @@ const
 				,'INPUT type=text placeholder="Enter tags"'.d("#.value=$tagList:tags2str").ui(".tagList=$tagList=#.value:str2tags")
 				,"Tags($tagList@tags)"
 			)
-			,'BUTTON `Publish article'.d("? .slug:!").ui("(((#.form:grab@. .tagList)@article)@POST `articles)api:query $page=")
-			,'BUTTON `Save changes'.d("? .slug").ui("(((#.form:grab@. .tagList)@article)@PUT `articles .slug)api:query $page=")
+			,'BUTTON `Publish article'.d("? $slug:!").ui("(((#.form:grab@. .tagList)@article)@POST `articles)api:query $page=")
+			,'BUTTON `Save changes'.d("? $slug").ui("(((#.form:grab@. .tagList)@article)@PUT `articles .slug)api:query $page=")
 		)
 	)
 
@@ -125,7 +127,7 @@ const
 		)
 	)
 
-).e('HASHCHANGE',"& :unroute; $page=.")
+).e('HASHCHANGE',"& :parseRoute; $page=. $tag=. $slug=.")
 
 .DICT(
 	dict,
@@ -170,7 +172,7 @@ const
 		
 		pages: $ => Array .from({length:Math.ceil($.pagesCount/$.limit)}) .map(num=>({num,offset:num*$.limit})),
 		
-		unroute: (dummy,r) => r && unroute(location.hash)
+		parseRoute: (dummy,r) => r && parseRoute(location.hash)
 		
 	}
 })

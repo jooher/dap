@@ -27,7 +27,7 @@ export default{
 	:'body'.d("# .body:marked@innerHTML")
 	
 ,Tags
-	// tagList
+	// tags
 	:'tags'.d("* .tags@tag"
 		,'A.tag'.d("!! .tag@ (`tag .tag)nav@href")
 	)
