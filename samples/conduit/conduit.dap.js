@@ -41,12 +41,12 @@ const
 
 	,'ROOF'.d(""
 	
-		,'A.logo href=/#/'.d()//.d("!? .nav@; !! (.nav)nav@href")
+		,'A.logo href=#/'.d()//.d("!? .nav@; !! (.nav)nav@href")
 		
 		,'NAV'
 			.d("? $user"
-				,'A icon=create href=/#/editor/ `Create article'.d("!? ($page `editor)eq@selected")
-				,'A icon=settings href=/#/settings `Settings'.d("!? ($page `settings)eq@selected")
+				,'A icon=create href=#/editor/ `Create article'.d("!? ($page `editor)eq@selected")
+				,'A icon=settings href=#/settings `Settings'.d("!? ($page `settings)eq@selected")
 				,'A'.d("!! $user.username@ (`@ $user.username)nav@href")
 			)
 			.d("? $user:!"
@@ -60,7 +60,7 @@ const
 
 		,'feed-toggle'.d(""
 			,'A `Your feed'.d("? .username; !! (`@ .username `feed)nav@href")
-			,'A href="/#/" `Global feed'.d()
+			,'A href="#/" `Global feed'.d()
 		)
 
 		,"Articles( .feed (.tag)uri@criteria )"
@@ -135,7 +135,7 @@ const
 
 .FUNC({
 	flatten:{
-		nav: values => "/#/"+route(values),
+		nav: values => "#/"+route(values),
 		api: (values,names) => {
 			const
 				method = names[names.length-1],
