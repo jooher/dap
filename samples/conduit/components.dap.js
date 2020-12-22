@@ -88,10 +88,10 @@ export default{
 	:'comments'.d("$append="
 
 		,'FORM.comment'.d("$body="
-			,'TEXTAREA rows=3 placeholder="Write a comment..."'.d("! $body").ui("$body=#:check,value")
+			,'TEXTAREA rows=3 placeholder="Write a comment..."'.d("! $body").ui("$body=#:value")
 			,'IMG.user'.d("!! .user.image@src")
 			,'BUTTON `Post comment'
-			.ui("? $body dict.error.emptyComment:alert; ? $user $user=Login():wait; $append=( (($body)@comment)@POST `articles .slug `comments )api:query $body=")
+			.ui("? $body dict.error.emptyComment:alert; ? $user $user=LoginModal():wait; $append=( (($body)@comment)@POST `articles .slug `comments )api:query $body=")
 		)
 
 		,'comments'

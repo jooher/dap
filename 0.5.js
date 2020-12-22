@@ -1106,9 +1106,8 @@ const	dap=(Env=>
 					: change;					
 
 			if(result instanceof Execute.Postpone){
-				//Object.assign(node.$,change);
 				result.locate(node);
-				checkDown(node,change,false,snitch);
+				checkDown(node,Object.assign({},change),false,snitch);
 				return;
 			}
 

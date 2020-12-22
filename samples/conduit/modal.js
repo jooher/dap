@@ -1,7 +1,8 @@
 export default{
 	
 	convert:{
-		wait: $ => new Promise((resolve,reject)=>{$.$post={resolve,reject};})
+		wait: ($,r) => 
+			r && new Promise((resolve,reject)=>{$.$post={resolve,reject};})
 	},
 	
 	operate:{
@@ -10,9 +11,9 @@ export default{
 			const
 				data = node.$.getDataContext(),
 				post = data.$post;
+			data[name||"value"]=value;
 			if(post)
 				post.resolve(value);
-			else data[name||"value"]=value;
 		},
 		
 		top	:(value,alias,node)=>{

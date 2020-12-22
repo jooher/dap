@@ -6,7 +6,7 @@ export default function(headers){
 	return {
 		save: user => localStorage.setItem("user",JSON.stringify(user))||auth(user),
 		load: _=> auth(JSON.parse(localStorage.getItem("user"))),
-		quit: _=> auth(localStorage.removeItem("user"))
+		quit: _=> auth(localStorage.removeItem("user"))&&null
 	}
 	
 }

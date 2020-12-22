@@ -59,7 +59,6 @@ nav>a{
 }
 
 h1.logo{
-	/* text-align: center; */
 	font-size: 3rem;
 	text-shadow: 0 1px 3px rgba(0,0,0,.3);
 }
@@ -93,7 +92,6 @@ input,textarea{
   color: #55595c;
   border: 1px solid rgba(0,0,0,.15);
   width: 100%;
-  /* display: block; */
   box-sizing: border-box;
 }
 
@@ -139,7 +137,6 @@ a:focus, a:hover {
 
 page>.tags{
 	margin: 4em 0;
-	/* text-align:justify; */
 }
 
 page>.tags>.tag{
@@ -279,6 +276,13 @@ app.conduit {
 button.favorited {
   background: #5cb85c;
   color: white;
+}
+
+button.logout {
+	color:brown;
+	border:none;
+	display:block;
+	margin:1em auto 1em 0;
 }
 
 h2.title {}

@@ -8,6 +8,7 @@ const
 
 	api = "//conduit.productionready.io/api/", //https:
 	
+	
 	headers = {
 		"Content-Type": "application/json",
 		"charset":"utf-8",
@@ -32,12 +33,15 @@ const
 		Object.assign({}, ...elems.map(el=>({[el.id||el.tagName]:el}))),
 		
 	grabFormInputs = form =>
-		Object.assign({}, ...[...form.elements].map( el => el.name&&{[el.name]:el.value}))
+		Object.assign({}, ...[...form.elements].map( el => el.name&&{[el.name]:el.value})),
+		
+	
+	state = "& :parseRoute; $page=. $tag=. $slug=.; "
 	
 	;
 
 	
-'APP.conduit'.d("$page=. $tag=. $slug=. $user=:auth.load; u @HASHCHANGE"
+'APP.conduit'.d( state + "$user=:auth.load" //; u! @HASHCHANGE
 
 	,'ROOF'.d(""
 	
@@ -58,8 +62,6 @@ const
 	///
 	.d("? $page:!; ! html.HEADER; Tags( (`tags)api:query@. )"
 	
-		,'H2'.d("! $page")
-
 		,'feed-toggle'.d(""
 			,'A `Your feed'.d("? .username; !! (`@ .username `feed)nav@href")
 			,'A href=# `Global feed'.d()
@@ -125,9 +127,10 @@ const
 			,'INPUT name=password type=password placeholder="Password"'.d()
 			,'BUTTON `Update'.ui("(((#.form:grab)@user)@POST `article)api:query")
 		)
+		,'BUTTON.logout `Logout'.ui("$user=$user:auth.quit $page=")
 	)
 
-).e('HASHCHANGE',"& :parseRoute; $page=. $tag=. $slug=.")
+).e('HASHCHANGE', state)//"& :parseRoute; $page=. $tag=. $slug=."
 
 .DICT(
 	dict,
