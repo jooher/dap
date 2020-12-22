@@ -18,12 +18,19 @@ body{
 	}
 }
 
+.over{
+	transform: rotate(180deg);
+	color:slateblue;
+	font:bold 1em cursive;
+}
+
+a{cursor:pointer}
+a:hover{text-decoration:underline}
+
 h2{
-	position:absolute;
-	color:white;
-	z-index: 2;
-	font: bold 2em cursive;
-  padding: 1em;
+	font-size: 2em;
+	color: white;
+	text-shadow: 0 2px 4px darkblue;
 }
 
 .pot{
@@ -66,13 +73,18 @@ h2{
 */
 
 .thumb{
-	display:inline-block;
-	margin-top:1em;
-	border-bottom: 1em solid;
-	width: 33%;
-	height:8em;
+	display: inline-block;
+	margin-top: 1em;
+	border: 1px solid lightgray;
+	width: 10em;
+	height: 10em;
 	background: bottom no-repeat;
 	background-size: contain;
+	margin: .5em;
+}
+
+.thumb:hover{
+	background-color: beige;
 }
 
 .pic0{background-image:url(pics/5baa557d5b436166115df1be.png)}

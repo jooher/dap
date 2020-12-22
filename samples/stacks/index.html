@@ -10,6 +10,9 @@
 		<script src="/0.5.js"></script>
 	</head>
 	<body>
+	
+		<p id="copyright">Images courtesy of <a href="https://avatanplus.com/users/nektarindzn">NEKTARIN</a></p>
+				
 		<script>
 
 		// The game logic
@@ -58,7 +61,6 @@
 				drop: _=>{
 					top.left=Math.max(pos.left,top.left);
 					top.right=Math.max(pos.right,top.right);
-					//top.bounce=pos.bounce;
 					if(top.left+top.right<width){
 						Object.assign(pos,top);
 
@@ -66,9 +68,7 @@
 							top.right-= top.right>pace ? pace : 0;
 						else
 							top.left-= top.left>pace ? pace : 0;
-/*
-						pos.bounce=0;
-*/					
+
 						return top;
 					}
 					else
@@ -85,8 +85,6 @@
 		
 		'stacks'.d("$pic= $play= $over=:! $top="
 		
-			,'H2'.d("? $over","Tap or hit any key")
-		
 			,'pot'.d("? $pic"
 			
 				,'rows'
@@ -99,17 +97,26 @@
 					
 				,'row.slide'
 					.e("MOVE","crop $:move")
+				
+				,'over'.d("? $over"
+					,'H2 `Tap or hit any key to start'.d()
+					,'A `back to gallery'.ui("? $pic=")
+				)
+			
 			)
 			.e("KEYDOWN TOUCHSTART","? $over:! $over= $play:!=#:start; ? $top=$:drop $over=:!") // MOUSEDOWN
 			
-			,'gallery'.d("? $pic:!; * pic"
+			,'gallery'.d("? $pic:!; ! copyright; * pic"
 				,'thumb'.d("!? (`pic .pic)concat").ui("$pic=.")
 			)
+			
+			,''
 			
 		)
 		
 		.DICT({
-			pic	:Array.from({length:12}).map((x,i)=>i)
+			pic	:Array.from({length:12}).map((x,i)=>i),
+			copyright: (e=>e&&e.parentNode.removeChild(e))(document.getElementById("copyright"))
 		})
 
 		.FUNC({
