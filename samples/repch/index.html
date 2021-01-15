@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>repch</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0" />
+	
+	
+	<style>
+		[data-dap=false]{display:none !important}
+		[ui=click]{cursor:pointer;}
+	</style>
+	
+	<link rel="stylesheet" href="css/material.css"/>
+	<link rel="stylesheet" href="css/colors.css"/>
+	<link rel="stylesheet" href="css/locale/en.css"/>
+	
+	
+	<link rel="manifest" href="manifest.json"/>
+	
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">	
+
+</head>
+
+<body>
+
+<div id="content">
+
+	<article id="help">
+		<h3>Repch.io</h3>
+		<p>Repch.io is an anonymous social network, that allows to gather and share the impressions.</p>
+	</article>
+	
+	<article id="welcome">
+		<h3>Welcome to Repch.io</h3> 
+		<p>Keep track of your impressions from the things around you: the products you buy, places you visit, books you read, websites you surf, or even people you know! All in one app!</p>
+		<p>Ever been dissatisfied with a product you bought? Or, otherwise, extremely happy with it? Scan its code, rate it, and next time you'll be aware. Refer to your own records and records from other people, before showing your money!</p>
+		<p>A website, a movie, a venue, a book... whatever you've contacted with and want to give a feedback — you can do it with a single tap now. Or, if you feel like, provide a detailed report why you loved or hated your interaction.</p>
+		<p>Experiences of thousands of us are collected anonymously and statistically agregated to aware all of us from what's bad — and promote what's good!</p>
+<!--
+		<h4>Can I trust it?</h4>
+		<p>Unlike many of ratings scattered around in the Internet, where you can't actually be sure that the rating is "real" (not spinned up by the seller or pushed down by competitors), Repch.io works on other principles. Our algorithms evaluate the reputation of each voter, based on all their previous feedbacks, and their correlation to The Truth. This reputation is the main asset of a voter in Repch.io. It is hard to earn, and easy to lose. Those who don't have much reputation can't really influence the rating. Those who have reputation, will not risk it by posting falsey votes. If they do, the falsey vote will have a very short effect and will be corrected by other votes very quickly, so it simply doesn't worth it.</p>
+		<h4>What is The Truth?</h4>
+		<p>There's only one criterion for thruth, when it comes to evaluation of a thing's worthness: the totality of people's voices. However the weight of each voice is individual and calculated from the voter's reputation.</p>
+-->
+	</article>
+	
+	<article id="promo">
+		<h3>Recommended stuff</h3>
+	</article>
+	
+	<article id="about-lists">
+		<h3>Lists</h3>
+		<p>Lists help you organize your items. Any item can be added to any number of lists. Add new list with the <icon class="add_circle"></icon> button.</p>
+	</article>
+	
+	<article id="about-listitems">
+		<h3>List items</h3>
+		<p>To add an item to the list, go to the item details, and toggle the list name marker.</p>
+	</article>
+	
+	<article id="about-recent">
+		<h3>Recent items</h3>
+		<p>Here, you will see items you recently interacted with.</p>
+	</article>
+	
+</div>
+
+<script src="https://dap.js.org/0.5.js"></script>
+
+<script type="module">
+
+	import App from "./repch.js";
+	App.RENDER();
+
+	if(navigator.serviceWorker)
+		window.addEventListener('load', e=>
+			navigator.serviceWorker.register('service-worker.js')
+			.then(registration=>console.log('Registered!'),err=>console.log('Registration failed: ', err))
+			.catch(err=>console.log(err))
+		)
+	else
+		console.log('service worker is not supported');
+		
+	// prevent from exit by back button
+	(stay =>{
+		window.addEventListener('load', stay);
+		window.addEventListener('popstate', stay);
+	})(e=>{window.history.pushState({},'')})
+
+
+
+</script>
+
+
+</body>
+
+</html>
