@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Todo -- dap sample</title>
+	<link rel="stylesheet" href="https://www.todobackend.com/client/css/vendor/todomvc-common.css"/>
+	<script src="https://dap.js.org/0.5.js"></script>
+	<style>
+		[dap-data=false]{display:none !important}
+		[dap-error]{outline:dashed red !important}
+		[ui=click]{cursor:pointer}
+		
+		#todo-server{
+			position: absolute;
+			top: -1.5em;
+			width: 100%;
+			background-color: cornsilk;
+		}
+		#loader{
+		 padding-left:60px;
+		}
+		
+	</style>
+</head>
+<body>
+<script>
+const
+	todoFilters = {
+		"All": null,
+		"Active": todo => !todo.completed, 
+		"Completed": todo => !!todo.completed
+	},
+	
+	trace = (obj,fields)=>obj&&fields.map(f=>f+": "+obj[f]).join("\n");
+
+'#todoapp'
+.d("$server=default-server $todos= $filter= $recount="
+
+	,'SELECT#todo-server'.d("*@server servers-list:query,lines"
+	,'OPTION'.d("! .server")
+	).ui("$server=(`// #.value)concat")
+
+	,'#header'.d(""
+		,'H1 `dap todos 0.5'.d("")
+		,'INPUT#new-todo placeholder="What needs to be done?" autofocus'
+			.ui("$todos=($todos (#.value@title)@tgt):insert #.value=") 
+	)
+	,'#main'.d(""
+	
+		,'INPUT#toggle-all type=checkbox'
+			.ui("*@ $todos=($todos (#.checked@completed)@src):assign; (@method`PATCH .url:dehttp headers (.completed)):query")
+				
+		,'UL#todo-list'.d("? $todos; * ($todos $filter):filter"
+		
+			,'LI'.d("$completed=.completed $editing= $patch=; a!"
+	
+				,'INPUT.toggle type=checkbox'
+					.d("#.checked=.completed")
+					.ui("$patch=(.completed=$completed=#.checked) $recount=()")
+			
+				,'LABEL.view'
+					.d("? $editing:!; ! .title")
+					.ui("log $editing=.url")//"dblclick",
+			
+				,'INPUT.edit'
+					.d("? $editing; !! .title@value; #:focus")
+					.ui("$patch=(.title=#.value)")
+					.e("blur","$editing=")
+			
+				,'BUTTON.destroy'
+					.ui("$todos=($todos $@tgt):remove (@method`DELETE .url:dehttp):query")
+			)
+			.a("!? $completed $editing; ? .url:!; & (@method`POST $server@url headers $):query")
+			.u("? $patch; (@method`PATCH .url:dehttp headers headers $patch@):query $patch=")
+		)
+	)
+	,'#footer'.d("$active=($todos @filter`Active):filter $completed=($todos @filter`Completed):filter $recount"
+		,'#todo-count'.d("! (active $active.length)format")
+		,'UL#filters'.d("* filter"
+			,'LI'.d(""
+				,'A'.d("!! (`# .filter)concat@href .filter@; !? (.filter $filter)eq@selected")
+			)
+		)
+		,'#clear-completed'
+			.d("! (completed $completed.length)format")
+			.ui("$todos=$active; *@ $completed; (@method`DELETE .url:dehttp):query")
+	)
+
+	,'PRE#loader'
+		.d("$request=($server@url); u")
+		.u("? $todos:!=$request:query,array?; ! $request:debugrequest")//
+
+	,'state'
+		.d("$state=window.location; u@hashchange")
+		.e("HASHCHANGE","$filter=$state.hash:afterhash")
+		.a("$state.hash=$filter")
+)
+
+.DICT({
+	"default-server"	: "//todo-backend-express.herokuapp.com/",
+	"servers-list" : "servers.txt",
+	
+	headers: {"Content-type":"application/json"},
+	filter: Object.keys(todoFilters),
+	active: "{length} items left",
+	completed: "Clear completed items ({length})",
+	
+	window	
+})
+
+.FUNC({
+	convert:{
+		lines:	txt => txt.split("\n"),
+		dehttp: url => url.replace(/^https?\:/,''),
+		focus: (n,r)=> r&& setTimeout(_=>{n.focus()},0),
+		afterhash: (h,r)=> r&& h.split("#").pop(), // get rid if a leading # in window.location.hash
+		
+		"array?": x => Array.isArray(x) && x,
+		insert: x => x.todos ? x.todos.concat( [x.tgt] ) : [x.tgt],
+		remove: x => x.todos && x.todos.filter( todo => todo!=x.tgt ),
+		assign: x => x.todos && x.todos.map(todo => Object.assign(todo,x.src)),
+		filter: x =>{
+			const
+				a = x.todos,
+				f = x.filter && todoFilters[x.filter];
+			return a&&f ? a.filter(f) : a;
+		},
+		
+		debugrequest : req => req.url+"\n"+ trace(req.debug,["status","statusText"])+"\n\n"
+	}
+})
+.COMPILE()
+.RENDER()
+</script>
+</body>
+</html>

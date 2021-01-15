@@ -1,13 +1,10 @@
-export default css=>{
+Drag =(()=>{
 
 	let
-	dragged	= null,
-	wasOutside = null;
+	dragged	= null;
 
 
 	const
-	dragClass = css.drag || "drag",
-	dragOutClass = css.dragOut || "dragOut",
 	
 	listen	= (el,ev,h)=>el.addEventListener(ev,h),
 	
@@ -17,25 +14,15 @@ export default css=>{
 		
 			dragstart: e=>{
 				dragged = e.target;
-				dragged.classList.add(dragClass);
+				dragged.style.opacity=.5;
 			},
 		
 			dragenter: e=>{
-				
-				const
-					entered=e.target,
-					within=entered.parentNode==dragged.parentNode;
-					
-				if(dragged!=entered){
-					
-					if(within!=wasWithin)
-						dragged.classList.toggle(dragOutClass,!(wasWithin=within));
-						
-					if(within)
-						entered.parentNode.insertBefore(dragged,entered);
-						
-				}
-					
+				const entered=e.target;
+				if(entered.parentNode!=dragged.parentNode)
+					return;
+				if(dragged!=entered)
+					entered.parentNode.insertBefore(dragged,entered);
 				e.stopPropagation();
 			},
 			
@@ -45,7 +32,7 @@ export default css=>{
 			},
 			
 			dragend: e=>{
-				dragged.classList.remove(dragClass);
+				dragged.style.opacity=1;
 				dap.Execute.u(dragged.parentNode,'reorder');
 			}
 		}
@@ -64,4 +51,5 @@ export default css=>{
 			console.error("unknown drag type: "+alias);
 	}
 
-};
+})()
+;

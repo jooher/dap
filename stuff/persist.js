@@ -1,71 +1,112 @@
-const Persist=((storage,box,unbox)=>{ // keeps the data coherent among several tabs
+const
 
-	function P(name,pkey,keep,delay){//,autosync
+uid	= ((storage,uidkey)=>{
+		let last=parseInt(storage.getItem(uidkey)||"1");
+		return n=>n||storage.setItem(uidkey,++last)||last;
+	})(localStorage,"uid"),
 		
-		let	order,
-			index,
+Persist	=(storage,box,unbox,single)=> // keeps the data coherent among several tabs via Storage
+	key	=>{
+		let	order=[],
+			index={},
 			stamp=-1,
-			stampname=name+"_stamp";
+			stampname=key+"_stamp";
 			
-		const	ixrow	= (ix,r)=>(ix[r[pkey]]=r)&&ix,
-			ixset	= (ix,s)=>s.reduce(ixrow,ix),		
-			
-			data	= ()=>order,
-			find	= match=>(index?index[match]:order.find(r=>r[pkey]==match))||false,
-			augment	= keys=> index && keys.map(k=>index[k]),
-			
-			update	= ()=>	{
-					++stamp;
-					if(!delay)sync();
-				},
-				
-			anew	= d=>{
-					order=d&&d.reduce?d:[];
-					if(pkey)index=order?ixset({},order):{};
-					update();
-				},
-				
-			add	= r=>{
-					if( !index || index[r[pkey]]!=r){
-						order.push(r);
-						if(index)ixrow(index,r);
-					}
-					update();
-				},
-				
-			sync	= i=>{
-				const saved=parseInt(storage.getItem(stampname))||0;
-				if(saved<stamp){ //save
-					if(index)order=order.filter(r=>index[r[pkey]]==r);
-					if(keep)order=order.filter(keep);
-					storage.setItem(name,box(order));
-					storage.setItem(stampname,stamp);
-				}
-				if(saved>stamp){ //load
-					anew(unbox(storage.getItem(name)));
-					stamp=saved;
-				}
-			};
-			
-		sync();
+		const
 		
-		return	{data,find,anew,add,update,sync}
-	}
+		keys	= key.indexOf("-")>0 && key.split("-"),
+		ixkey	= r=>keys?keys.map(k=>r[k]).join("|"):uid(),
+		
+		ixrow	= r=>index[r[key]||(r[key]=ixkey(r))]=r,
+		ixset	= s=>{ s.forEach&&s.length&&s.forEach(ixrow); },
+		flush	= _=>{
+				order=order.filter(r=>index[r[key]]==r && r.TIME);
+				storage.setItem(key,box(order));
+				storage.setItem(stampname,stamp);
+				console.log(key+" saved, rows: "+order.length);
+			},
+		anew	= s=>{ index={}; ixset(order=s&&s.reduce?s:[]); ++stamp; flush(); },
+		merge	= d=>{ order=order.concat(d); ixset(d); },
+		sync	= r=>{
+			if(stamp>0&&single&&!r)return;
+			const saved=parseInt(storage.getItem(stampname))||0;
+			if(stamp<saved){ //load
+				anew(unbox(storage.getItem(key)));
+				stamp=saved;
+			}
+			if(r){
+				r.TIME=Date.now();
+				ixrow(r);
+				order.push(r);
+				stamp++;
+			}
+			if(stamp>saved){ /// TODO: delay the save to page leave/enter
+				flush();
+			}
+		};
+			
+		return	{
+			anew,
+			flush,
+			merge,
+			
+			data	: _ => sync()	||order,
+			take	: m => sync()	||index[m],
+			save	: r => sync(r)||r,
+			
+			kill	: m => index[m].TIME=null,
+			killr	: r => index[r[key]||ixkey(r)]=null
+		}
+},
+
+P	= Persist(localStorage,JSON.stringify,JSON.parse,true),
+tables= {},
+T	= key=> tables[key]||(tables[key]=P(key)),
+detach= r=> {r=Object.assign({},r);if(r[""])delete r[""];return r},
+
+filter= (data,values,tags)	=> !values.length?data:values.reduce((a,v,i)=>a.length?a.filter(r=>r[tags[i]]==v):a,data),	// :[]
+join	= (row,values,tags)	=> row&&Object.assign({}, row, ...values.map((v,i)=>T(tags[i]).take(v))),	// :{}
+save	= (table,values)		=> { values.forEach(r=>table.save(detach(r)))||table.data()},
+reset	= (values,tags)		=> { values.length ? values.forEach((v,i)=>T(tags[i]).anew(v)) : Object.keys(tables).forEach(t=>tables[t].anew()); };
+
+			
+export default { // Persist wrapped as dap flatteners 
 	
-	const	wrap	= p=>({p,data:p.data()});
+	uid,
+
+	P, T,
 	
-	return	{
-		convert	:{
-			db	:o=>wrap(P(o.name||o.pkey,o.pkey,o.keep))
+	basic	:(values,tags)=>{
+			const	v=values.pop(),
+				c=values.length,
+				t=c&&tags[c-1],
+				a=tags[c];
+				
+			return	!a&&!v ? reset(values,tags) :			// ( @ ... ) anew... 
+					!a ? filter(T(v).data(),values,tags) :				// ( `key $x $y ... )
+					!v&&!t ? save(T(a),values) :						// ( @key $row1@ $row2@ ... )
+					!t ? c?T(a).take(v):join(T(a).take(v),values,tags) :		// ( $key `t1 `t2 ... )
+					values.push(v) && T(a).save(dap.Util.hash(values,tags));	// ( $key $x $y ... ) | (@key $x $y)
 		},
-		flatten	:{
-			db	:(values,tags)=>{
-				const p=values.pop().p;
-				for(let i=values.length,a;i--;)
-					if((a=p[tags[i]](values[i]))!=null)
-						return a||null;
-				return wrap(p);
+		
+	multi	:(values,tags)=>{
+			const add=values.pop(),
+				key=tags[values.length],
+				mul=values.pop();
+				
+			if(mul&&mul.length){
+				const	ite=tags[values.length],
+					tail=values.length&&dap.Util.hash(values,tags),
+					t = T(key);
+				mul.forEach(r=>{
+					const row={[ite]:r};
+					if(tail)
+						Object.assign(row,tail);
+					add
+						?t.save(row)
+						:t.killr(row);
+				});
+				t.flush();
 			}
 		}
-	}
-})(localStorage,dap.Env.Json.encode,dap.Env.Json.decode)
+}
