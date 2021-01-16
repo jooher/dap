@@ -1,7 +1,7 @@
 {
   "name": "Repch.io",
   "short_name": "Repch",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "display": "standalone",
 
   "background_color": "#3E4EB8",
