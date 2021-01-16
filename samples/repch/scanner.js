@@ -53,7 +53,8 @@ export default async where=>{
 		if(w>0){
 			context.drawImage(video,0,0,w,h);
 			
-			detector.detect(context.getImageData(0,0,w,h))////video
+/*
+detector.detect(context.getImageData(0,0,w,h))////video
 				.then( barcodes => {
 					//barcodes.forEach(barcode => console.log(barcodes.rawValue))
 					decoded=barcodes[0].rawValue;
@@ -63,6 +64,7 @@ export default async where=>{
 					decoded="https://error.com";
 				});
 			
+*/
 		}
 		await timeout(25); //paused?1e3:
 	};
