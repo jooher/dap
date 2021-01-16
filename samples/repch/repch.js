@@ -1,16 +1,13 @@
 import Await from "/./stuff/await.js";
 import Persist from "/./stuff/persist.js";
-import Starbar from "/./stuff/bricks/starbar.js";	
 import {untab} from "/./stuff/parse.js";
-import Barkodnik from "./barkodnik.js";
+
+//import Barkodnik from "./barkodnik.js";
+import Scan from "./scanner.js";
+import Starbar from "/./stuff/bricks/starbar.js";	
 
 const
-/*
-	edit	= what =>'what contenteditable tabindex=0'.d("! .what@").ui("? (.what .what=#:text)ne").FOR({what}), //!! dict.editable.what@title 
-	input	= what =>'INPUT.what'.d("!! dict.editable.what@placeholder .what@value").ui(".what=#:value").FOR({what}),
-*/	
 	grab	= src	=> [...src.children].reduce((a,n)=>{if(n.id)a[n.id]=src.removeChild(n); return a},{}),
-
 	dataset	= (tags,raws)=>raws.map( raw=>{const row={};tags.forEach((t,i)=>row[t]=raw[i]); return row;} )
 	
 ;
@@ -103,7 +100,7 @@ export default
 	,'PAGE.entity'.d("? $Entity; scroll #; * $Entity@"//; (`list-entity @list`recent .entity)db
 	
 		,'ATTIC'.d(""
-			,'ICON.share'.ui(":alert`share")
+			,'ICON.share'.ui("$:share")
 		)
 		
 		,'ETAGE'.d(""
@@ -317,7 +314,7 @@ export default
 		starbar	: Starbar(document.createElement("stars"),10),
 		"?uid"	: bool	=> bool?Persist.uid():"-",
 		split		: str		=> str.split(/,/g),
-		share		: data	=> window.navigator.share ? window.navigator.share(data) : alert("Can't share"),
+		share		: ( share => share ? data => share(data) : _ => alert ("Can't share") )(window.navigator.share),
 		
 		checked	: ((set,count)=>({
 				"?"	: key	=> set[key],
@@ -381,7 +378,7 @@ export default
 				};
 			})(),
 			
-		scan	: (_,r) => r&& Barkodnik.Execute()
+		scan	: (_,r) => r&& Scan()
 	}
 })
 
