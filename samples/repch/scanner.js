@@ -68,7 +68,8 @@ export default async where=>{
 				detector.detect(context.getImageData(0,0,w,h))////video
 					.then( barcodes => {
 						//barcodes.forEach(barcode => console.log(barcodes.rawValue))
-						decoded=barcodes[0].rawValue;
+						if(barcodes)
+							decoded=barcodes[0].rawValue;
 					})
 					.catch(e=>{
 						console.error("Barcode Detection failed: " + e);
