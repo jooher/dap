@@ -1,4 +1,4 @@
-alert("scanner 2");
+alert("scanner 1");
 
 const
 
@@ -18,7 +18,7 @@ const
 	
 	scanner	= el("scanner"),
 	video		= scanner.appendChild(el("video")),
-	canvas	= scanner.appendChild(el("canvas")),
+	//canvas	= scanner.appendChild(el("canvas")),
 	deck		= scanner.appendChild(el("div")),
 	cancelbtn	= deck.appendChild(el("button","cancel"));
 	
@@ -45,28 +45,22 @@ export default async where=>{
 		track	= video.srcObject.getVideoTracks()[0];
 		
 		video.play();
+		const
+			w = video.videoWidth,
+			h = video.videoHeight,
+			context = canvas.getContext('2d');
 			
+		canvas.width	= w;
+		canvas.height	= h;
+		console.log("video size: "+w+" x "+h);
+		
 		while (!decoded && track.readyState==="live") {
-			
-			const
-				w = video.videoWidth,
-				h = video.videoHeight,
-				context = canvas.getContext('2d');
-			
-			canvas.width	= w;
-			canvas.height	= h;
+		
 			context.drawImage(video,0,0,w,h);
 			
-			if(w*h){
-				
-				//console.log("video size: "+w+" x "+h);
-			
-				const barcodes = await detector.detect(context.getImageData(0,0,w,h));
-				if(barcodes && barcodes.length)
-					decoded=barcodes[0].rawValue;
-			}
-			else
-				await timeout(25); //paused?1e3:
+			const barcodes = await detector.detect(context.getImageData(0,0,w,h));
+			if(barcodes && barcodes.length)
+				decoded=barcodes[0].rawValue;
 		}
 		
 		stop();
