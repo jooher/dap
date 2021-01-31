@@ -7,7 +7,7 @@ const
 		if(cls)e.className=cls;
 		return e;
 	},
-	
+		
 	scanner	= el("scanner"),
 	video		= scanner.appendChild(el("video")),
 	canvas	= scanner.appendChild(el("canvas")),
