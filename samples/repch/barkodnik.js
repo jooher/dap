@@ -5,7 +5,6 @@ let
 	h,
 	ofs=0,
 	dump=false,
-	nativeBarcodeDetector = window.BarcodeDetector && new BarcodeDetector()
 	;
 
 const

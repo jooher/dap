@@ -1,15 +1,7 @@
-alert("scanner 2");
-
 const
 
 	timeout = ms => new Promise(resolve=>setTimeout(resolve, ms)),
 
-	stub = {
-		detect: async src=> {await timeout(1); return [{rawValue:"stub"}]; },
-	},
-
-	detector = window.BarcodeDetector ? new BarcodeDetector() : stub,
-	
 	el = (tag,cls)=>{
 		const e = document.createElement(tag);
 		if(cls)e.className=cls;
@@ -20,7 +12,10 @@ const
 	video		= scanner.appendChild(el("video")),
 	canvas	= scanner.appendChild(el("canvas")),
 	deck		= scanner.appendChild(el("div")),
-	cancelbtn	= deck.appendChild(el("button","cancel"));
+	cancelbtn	= deck.appendChild(el("button","cancel")),
+	
+	detector = window.BarcodeDetector && new BarcodeDetector();
+	
 	
 let
 	track = null,
@@ -34,68 +29,46 @@ cancelbtn.onclick = stop;
 
 export default async where=>{
 	
-	let decoded=null;
+	if(!detector)
+		return alert("Barcode detection not available");
 	
+	const
+		stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment",width:640}});
+	
+	if(!stream)
+		return alert("Can't access media");
+		
 	(where||document.body).appendChild(scanner);
 	
-	let stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment",width:640}});
-	
-	if(stream){
-		video.srcObject=stream;
-		track	= video.srcObject.getVideoTracks()[0];
+	video.srcObject=stream;
+	track	= video.srcObject.getVideoTracks()[0];
+	video.play();
 		
-		video.play();
-			
-		while (!decoded && track.readyState==="live") {
-			
-			const
-				w = video.videoWidth,
-				h = video.videoHeight,
-				context = canvas.getContext('2d');
-			
-			canvas.width	= w;
-			canvas.height	= h;
-			context.drawImage(video,0,0,w,h);
-			
-			if(w*h){
-				
-				//console.log("video size: "+w+" x "+h);
-			
-				const barcodes = await detector.detect(context.getImageData(0,0,w,h));
-				if(barcodes && barcodes.length)
-					decoded=barcodes[0].rawValue;
-			}
-			else
-				await timeout(25); //paused?1e3:
+	let
+		decoded=null,
+		context=null,	
+		w=0, h=0;
+	
+	while (!decoded && track.readyState==="live") {
+		
+		if( w!=video.videoWidth || h!=video.videoHeight){
+			canvas.width	= w = video.videoWidth;
+			canvas.height	= h = video.videoHeight;
+			context = canvas.getContext('2d');
 		}
 		
-		stop();
-		console.log(decoded);
-		return decoded;//resolve(decoded); //"1234567890122";//
-		
+		if(w*h){
+			context.drawImage(video,0,0,w,h);
+			const barcodes = await detector.detect(context.getImageData(0,0,w,h));
+			if(barcodes && barcodes.length)
+				decoded=barcodes[0].rawValue;
+		}
+		else
+			await timeout(100);
 	}
-	else alert("Can't access media");
-/*			
-		let
-			context=null,
-			w=0,h=0;
-			if(video.videoWidth!=w){
-			}
-			if(w>0){
-			.then( barcodes => {
-				//barcodes.forEach(barcode => console.log(barcodes.rawValue))
-				if(barcodes&&barcodes.length)
-					;
-			})
-			.catch(e=>{
-				console.error("Barcode Detection failed: " + e);
-				decoded="https://error.com";
-			});
-				
-			}
-			await timeout(25); //paused?1e3:
-		};
-	}
-*/
+	
+	stop();
+	console.log(decoded);
+	return decoded;
 
 }
