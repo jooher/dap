@@ -42,16 +42,16 @@
 <h3>Signatures</h3>
 <p>Signatures designate generic properties for generated elements. In HTML, these generic properties are: tag name, css class, id and all other HTML attributes.</p>
 <p>The simplest and the most common signature consists of a single lower-case word. Such signatures designate a default element, which is DIV, assigned a CSS class. For example: <code>'sidebar'</code> will render into DOM as <code>&lt;DIV class="sidebar"&gt;</code> element. Multiple classes can be combined using a dot, in a CSS-like manner: <code>'message.critical'</code> will render <code>&lt;DIV class="message critical"&gt;</code>.</p>
-<p>When a specific element is needed, its tag name is specified in upper case: <code>'SECTION.text.small'</code> will render <code>&lt;SECTION class="text small"&gt;</code>.</p>
-<p>Element id can be specified with a <code>#</code> (also, in a CSS-like manner): <code>'IMG.cropped#Portrait'</code> will render <code>&lt;IMG class="cropped" id="Portrait"&gt;</code>.</p>
-<p>Any other desired attributes can also be specified in the signature, just as in HTML. Examples of valid signatures are: <code>'A href=about.html'</code>, <code>'description contenteditable'</code>, <code>'OPTION disabled selected value="Please select"'</code>, <code>'FORM#pay method=post target=_blank action="http://mysite.com/pay.php"'</code>, etc.</p>
+<p>When a specific element is needed, its tag name is specified in upper case, e.g. <code>'SECTION.text.small'</code> will render <code>&lt;SECTION class="text small"&gt;</code>.</p>
+<p>Element id can be specified with a <code>#</code> (also, in a CSS-like manner), e.g. <code>'IMG.cropped#Portrait'</code> will render <code>&lt;IMG class="cropped" id="Portrait"&gt;</code>.</p>
+<p>Any other desired attributes can also be specified in the signature, just as in HTML. Examples of valid signatures are: <code>'A href=about.html'</code>, <code>'description contenteditable'</code>, <code>'OPTION disabled selected value="Please select"'</code>, <code>'FORM#pay method=post action="http://mysite.com/pay.php"'</code>, etc.</p>
 
 <a name="rules-and-contexts"/>
 <h3>Rules</h3>
 <p>Rules are the most essential part of dap. Generation and interaction rules define the element's behavior on different phases of its life cycle:</p>
 <ul>
-	<li><em>d-rule</em> is executed on "down" phase, when the document is populated, from root <i>down</i> to child elements</li>
-	<li><em>a-rule</em> is accumulation rule, similar to d-rule, but appends changes to the existing element instead of building it anew</li>
+	<li><em>d-rule</em> is a generation rule, executed on "down" phase, when the element tree is being generated, from root <i>down</i> to child elements</li>
+	<li><em>a-rule</em> is an accumulation rule, similar to d-rule, but appends changes to the existing element instead of building it anew</li>
 	<li><em>u-rule</em> is executed on "up" phase, when an event bubbles through the element <i>up</i> to the root</li>
 	<li><em>e-rule</em> is a variant of u-rule, that not only handles events, but generates them, too</li>
 	<li><em>ui-rule</em> is a convenience variant of e-rule dealing with the element's default UI event</li>

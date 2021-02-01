@@ -1,3 +1,5 @@
+import "https://dap.js.org/0.5";
+
 import Await from "/./stuff/await.js";
 import Persist from "/./stuff/persist.js";
 import {untab} from "/./stuff/parse.js";

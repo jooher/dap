@@ -1302,7 +1302,7 @@ const	dap=(Env=>
 			for(const k in o)
 				lower[k.toLowerCase()]=o[k];
 			return lower;
-		}
+		},
 		
 		makeXHR = (req,sync)=>{
 			
@@ -1589,4 +1589,5 @@ const	dap=(Env=>
 
 dap.Infect(String.prototype);
 
-(inline=>inline&&eval(inline.replace(/\/\/.*$/gm,' ').replace(/\s\s+/g,' ')))(document.currentScript.text);
+if(document.currentScript)
+	(inline=>inline&&eval(inline.replace(/\/\/.*$/gm,' ').replace(/\s\s+/g,' ')))(document.currentScript.text);

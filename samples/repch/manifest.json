@@ -1,7 +1,7 @@
 {
   "name": "Repch.io",
   "short_name": "Repch",
-  "start_url": "/samples/repch/index.html", /* https://dap.js.org/ */
+  "start_url": "/samples/repch/index.html",
   "display": "standalone",
 	"orientation":"portrait",
 
