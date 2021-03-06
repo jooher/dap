@@ -11,8 +11,7 @@ const
 	scanner	= el("scanner"),
 	video		= scanner.appendChild(el("video")),
 	canvas	= scanner.appendChild(el("canvas")),
-	deck		= scanner.appendChild(el("div")),
-	cancelbtn	= deck.appendChild(el("button","cancel")),
+	cancelbtn	= scanner.appendChild(el("button","cancel")),
 	
 	detector = window.BarcodeDetector && new BarcodeDetector();
 	

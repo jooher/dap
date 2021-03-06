@@ -1,0 +1,18 @@
+.scanner{
+	position:absolute;
+	top: 0;
+	width: 100%;
+	margin:auto;
+	text-align:center;
+}
+.scanner>video{
+	display:none;
+}
+.scanner>canvas{
+	display:block;
+	width:100%;
+}
+.scanner>button{
+	padding:.5em;
+	flex: 1;
+}

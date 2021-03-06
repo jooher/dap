@@ -9,37 +9,6 @@ urlsToCache = [
 //  '/0.4.js'
 ],
 
-db = (function(){
-	
-	const
-	keep	={
-		opinion	: $ => $.entity && $.aspect && ($.credit || $.note),
-		entity	: $ => $.title || $.desc || T('opinion', $.entity),
-		entry		: $ => T('entity', $.entity),
-		listentity	: $ => T('entity', $.entity)
-//		list		:
-//		cat		:
-	}
-	
-	return {
-		
-		cleanup:_=>{
-			for(let t in keep)try{
-				const	I=localStorage.getItem(t),
-					T=JSON.parse(I).filter(keep[t]);
-				if(T){
-					console.log("Cleanup table "+t);
-					//console.table(T);
-					localStorage.setItem(t,JSON.stringify(T));
-				}
-			}catch(e){
-				console.warn("Cleanup table "+t+" :: "+e.message);
-			}
-		}
-	}
-	
-})(),
-
 events={
 
 	install: event=>{

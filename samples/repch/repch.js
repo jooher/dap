@@ -4,7 +4,6 @@ import Await from "/./stuff/await.js";
 import Persist from "/./stuff/persist.js";
 import {untab} from "/./stuff/parse.js";
 
-//import Barkodnik from "./barkodnik.js";
 import Scan from "./scanner.js";
 import Starbar from "/./stuff/bricks/starbar.js";	
 
@@ -261,7 +260,6 @@ export default
 		scroll:(value,alias,node)=>{
 				if(value);
 				window.setTimeout( _=>{
-					//node.offsetParent.parentNode.scrollLeft=node.offsetLeft;
 					node.scrollIntoView({behavior:"smooth",inline:"end"});
 				},200);
 			},

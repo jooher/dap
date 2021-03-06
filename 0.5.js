@@ -1,6 +1,6 @@
 // 0.5
 
-function Check(value,r){
+function check(value,r){
 	return r && value;
 }
 
@@ -16,7 +16,7 @@ const	dap=(Env=>
 
 	convert	:{
 	
-		"check"	:Check,
+		check,
 	
 		"?"	:bool=>!!bool,	/// test
 		"!"	:bool=>!bool,	/// test inverse
@@ -1529,8 +1529,8 @@ const	dap=(Env=>
 					if(!instead)instead = document.currentScript;
 					place = instead ? instead.parentNode : document.body;
 				}
-				if(!data)
-					data=QueryString.parse.hash(location.hash);
+				if(!data&&location.hash)
+					data=QueryString.parse.hash(location.hash.replace(/^#!?/,''));
 				const	ready = proto.print(place, new dap.Execute.Context(data));//||newStub("dap"); ||State.read()//()).subData()
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 				return 0;

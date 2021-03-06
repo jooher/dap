@@ -1,0 +1,28 @@
+.modal {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 3;
+	display: flex;
+}
+.modal>.scrim{
+	background: rgba(0,0,0,.32);
+	position:absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	animation: fadein .25s ease-out;
+}
+.modal>.dialog {
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.4);
+    position: relative;
+    margin: auto;
+    max-width: 60%;
+    display: inline-block;
+}
