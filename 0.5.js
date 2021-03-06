@@ -1529,8 +1529,8 @@ const	dap=(Env=>
 					if(!instead)instead = document.currentScript;
 					place = instead ? instead.parentNode : document.body;
 				}
-				if(!data&&location.hash)
-					data=QueryString.parse.hash(location.hash.replace(/^#!?/,''));
+				if(!data)
+					data=location.hash ? QueryString.parse.hash(location.hash.replace(/^#!?/,'')) : {};
 				const	ready = proto.print(place, new dap.Execute.Context(data));//||newStub("dap"); ||State.read()//()).subData()
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 				return 0;
