@@ -1,0 +1,18 @@
+[icon]::before
+{
+	content:attr(icon);
+	
+  font-family: 'Material Icons';
+  display: inline-block;
+  margin: 4px;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;	/* Support for all WebKit browsers. */
+  text-rendering: optimizeLegibility;	/* Support for Safari and Chrome. */
+  -moz-osx-font-smoothing: grayscale; 	/* Support for Firefox. */
+  font-feature-settings: 'liga';		/* Support for IE. */
+  vertical-align: middle;
+}

@@ -86,7 +86,7 @@
 		,'LI'	.d("! .fruit") // each LI element shows fruit value from its associated data row, and
 			.ui("$choice=.fruit") // on UI event (click by default) will update $choice with the fruit from its data
 	)
-	,'BUTTON'.d("? $choice; ! `Reset").ui("$choice=") // if $choice is set, show a reset button
+	,'BUTTON `Reset'.d("? $choice").ui("$choice=") // if $choice is set, show a reset button
 	,'nothing'.d("? $choice:!; ! nothing") // if $choice is not set, print a message
 )
 .DICT({ // strings and other constants are defined here in dictionary, not inside the rules

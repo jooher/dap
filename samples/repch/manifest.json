@@ -1,7 +1,7 @@
 {
-  "name": "Repch.io",
-  "short_name": "Repch",
-  "start_url": "/samples/repch/index.html",
+  "name": "Order Tracker",
+  "short_name": "Orders",
+  "start_url": "-.html",
   "display": "standalone",
 	"orientation":"portrait",
 

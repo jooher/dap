@@ -57,7 +57,7 @@ export default css=>{
 		const	evs=types[alias];
 		node.draggable=true;
 		if(evs){
-			for(let e in evs)
+			for(const e in evs)
 				listen(node,e,evs[e]);
 		}
 		else
