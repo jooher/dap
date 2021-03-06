@@ -179,7 +179,7 @@ const	dap=(Env=>
 						target = context.data,
 						i=this.lift;
 					while(i-->0)
-						target=target.$ || Fail("Out of data contexts: "+entry);
+						target=target.$ || Fail("Out of data contexts: "+this.route);
 					return target[''];
 				}
 			};
