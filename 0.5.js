@@ -202,7 +202,8 @@ const	dap=(Env=>
 			
 			cache = {
 				"$" : new This(['','data','$'],'node'),
-				"#" : new This([],'node')
+				"#" : new This([],'node'),
+				"#event": new This(['event'],'up')
 			},
 			
 			parse = route=>{
@@ -961,7 +962,7 @@ const	dap=(Env=>
 								token: new Compile.Token(
 									lvalues,
 									new Compile.Rvalue(
-										convert,
+										convert, // TODO: converts into postpone
 										value.expr,
 										path
 									)
