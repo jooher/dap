@@ -1045,7 +1045,7 @@ const	dap=(Env=>
 					value = (expr.flatten||Util.hash)(values,tags);
 					
 				if(proto)
-					proto.print(this.node, new dap.Execute.Context(value,this.$));
+					proto.print(this.node, new Context(value,this.$.stata));//dap.Execute.
 				
 				return value;
 			},
