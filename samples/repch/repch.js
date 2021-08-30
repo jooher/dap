@@ -1,4 +1,4 @@
-import "https://dap.js.org/0.5";
+import "https://dap.js.org/0.5.js";
 
 import Await from "/./stuff/await.js";
 import Persist from "/./stuff/persist.js";
