@@ -67,8 +67,19 @@ detach= r=> {r=Object.assign({},r);if(r[""])delete r[""];return r},
 filter= (data,values,tags)	=> !values.length?data:values.reduce((a,v,i)=>a.length?a.filter(r=>r[tags[i]]==v):a,data),	// :[]
 join	= (row,values,tags)	=> row&&Object.assign({}, row, ...values.map((v,i)=>T(tags[i]).take(v))),	// :{}
 save	= (table,values)		=> { values.forEach(r=>table.save(detach(r)))||table.data()},
-reset	= (values,tags)		=> { values.length ? values.forEach((v,i)=>T(tags[i]).anew(v)) : Object.keys(tables).forEach(t=>tables[t].anew()); };
+reset	= (values,tags)		=> { values.length ? values.forEach((v,i)=>T(tags[i]).anew(v)) : Object.keys(tables).forEach(t=>tables[t].anew()); },
 
+hash	= //window.dap.Util.hash;
+	(values,tags)=>{
+		const hash={};
+		for(let a,i=values.length;i--;)
+			if((a=tags[i])!='.')
+				hash[a]=values[i];
+			else if(a=values[i])
+				for(let j in a)
+					if(j)hash[j]=a[j];
+		return hash;
+	};
 			
 export default { // Persist wrapped as dap flatteners 
 	
@@ -86,7 +97,7 @@ export default { // Persist wrapped as dap flatteners
 					!a ? filter(T(v).data(),values,tags) :				// ( `key $x $y ... )
 					!v&&!t ? save(T(a),values) :						// ( @key $row1@ $row2@ ... )
 					!t ? c?T(a).take(v):join(T(a).take(v),values,tags) :		// ( $key `t1 `t2 ... )
-					values.push(v) && T(a).save(dap.Util.hash(values,tags));	// ( $key $x $y ... ) | (@key $x $y)
+					values.push(v) && T(a).save(hash(values,tags));	// ( $key $x $y ... ) | (@key $x $y)
 		},
 		
 	multi	:(values,tags)=>{
@@ -96,7 +107,7 @@ export default { // Persist wrapped as dap flatteners
 				
 			if(mul&&mul.length){
 				const	ite=tags[values.length],
-					tail=values.length&&dap.Util.hash(values,tags),
+					tail=values.length&&hash(values,tags),
 					t = T(key);
 				mul.forEach(r=>{
 					const row={[ite]:r};
