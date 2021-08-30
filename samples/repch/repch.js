@@ -161,9 +161,9 @@ export default
 	Aspect:
 		'aspect'.d("$?="
 			,'summary'.d(""
-				,'IMG.stats'.d()
-				,'credit'.d("! $!=.credit:starbar.enabled").ui("$?=.credit=$!.value")
 				,'name'.d("! .aspect").ui("$?=$?:!; ?")
+				,'credit'.d("! $!=.credit:starbar.enabled").ui("$?=.credit=$!.value")
+				,'IMG.stats'.d()
 			)
 			,'notes'.d(""
 				,'public'.d("? $?; ? .ref; * (`notes .ref)db"
