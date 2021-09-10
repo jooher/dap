@@ -22,8 +22,8 @@ export default (target,scrollToTag) => {
 	if(toFocus)return;
 	toFocus=target;
 	setTimeout( _=>{
-		const scrolltgt = scrollToTag&&upTo(target,scrollToTag) || target;
-		scrolltgt.scrollIntoView(scrollOptions)
+		const scrolltgt = scrollToTag ? upTo(target,scrollToTag) || target : null;
+		if(scrolltgt)scrolltgt.scrollIntoView(scrollOptions);
 		if(target.focus)setTimeout(scrollEnd,100);
 	},0);
 }

@@ -123,7 +123,7 @@ attic>select{
 	/* font-weight: bold; */
 	font-size: 1.25em;
 	border: none;
-	/* background: antiquewhite; */
+	background: none;
 	outline: none;
 	/* text-decoration: underline; */
 	border-bottom: 1px solid;
@@ -265,7 +265,7 @@ section.entry {
 }
 
 section.opinions {
-    border: 1px;
+    /* border: 1px; */
     text-align: left;
 }
 
@@ -587,7 +587,7 @@ p>icon {
 }
 
 .tagslist {
-  margin: 1rem 0;
+  /* margin: 1rem 0; */
 }
 
 .desc {

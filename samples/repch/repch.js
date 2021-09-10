@@ -125,16 +125,37 @@ export default
 			,'SECTION.entries'.d("* (`entry .entity)db"
 				,'A.entry target=_blank'.d(".href=.entry:scope.href; !! .entry@ .href .href@title")
 			)
-			,'SECTION.tags'.d("$lists! $?=:!"
+			,'SECTION.tags'.d("$lists! $?="
 			
-				,'tagslist.short'.d("* (`list)db"
+/*			
+				,'tagslist'.d("$?; * (`list-entity .entity)db"//$Entity
+					,'tag'.d(".!=(`list .list)db; ! .!.0.title")
+				).ui("$?=:!")
+				
+				,'modal'.d("? $?"
+					,'scrim'.ui("? $?=")
+					,'dialog'.d(""
+						,'tagslist'.d("* (`list)db"
+							,'tag'
+								.d("! .title; $tagged=(`list-entity .list .entity=$Entity.entity)db:??; a!")
+								.a("!? $tagged $tagged:!@unset")
+								.ui("(@list-entity .list .entity $tagged:?uid=$tagged:!)db")//
+						)
+						,'actions'.d(""
+							,'ACTION.ok'.ui("? $?=")
+						)
+					)
+				).u("?")//.u("$?=$?:!; ")
+*/
+
+				,'tagslist'.d("a!; * (`list)db"
 					,'tag'
 						.d("! .title; $tagged=(`list-entity .list .entity=$Entity.entity)db:??; a!")
 						.a("!? $tagged $tagged:!@unset")
-						.ui("(@list-entity .list .entity $tagged:?uid=$tagged:!)db")//
-				).a("!? $?@short")
+						.ui("? ($? $?=:!)eq; (@list-entity .list .entity $tagged:?uid=$tagged:!)db")//
+				).a("!? $?:!@short").u("?")
 				
-				,'BUTTON'.d("!? ($? `add `check)?!").ui("$?=$?:!")
+				,'BUTTON.check'.d("? $?").ui("$?=")
 				
 			)
 /*			
@@ -144,7 +165,7 @@ export default
 */
 
 
-			,'SECTION.opinions'.d("$?= $aspects!=; focus #"
+			,'SECTION.opinions'.d("$?= $aspects!=; focus #@SECTION"
 			
 				,'present'.d("$aspects!; * (`entity-aspect .entity)db"
 					,'opinion'.d("! Aspect").u("(@entity-aspect $)db")
