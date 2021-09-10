@@ -11,8 +11,8 @@ li.recent::before	{content: "Recent"}
 .desc:empty::before	{content: "What kind of thing is this?"}
 
 
-section.tags::before {content: "Tags"}
-section.opinions::before{content: "Opinions"}
+section.tags::before {/* content: "Tags" */}
+section.opinions::before{/* content: "Opinions" */}
 
 /*
 .createlist>.title::before{content:"Create a new list"}

@@ -56,7 +56,7 @@ const	dap=(Env=>
 		join	: values=>values.reverse().join(values.shift()),
 		concat	: values=>values.reverse().join(""),
 		spaced	: values=>values.reverse().join(" ").replace(/\s\s+/g," ").trim(),
-		
+
 		"case"	: (values,tags)=>{ const match=values.pop(); for(let i=values.length; i--;)if(tags[i]==match)return values[i]; },
 		"pull"	: (values)=>{const a=values.pop();for(let i=values.length,v; i--;)if(v=a[values[i]])return v;}
 	},

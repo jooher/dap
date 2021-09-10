@@ -19,7 +19,7 @@ icon, button::before, .checked::before
   font-weight: normal;
   font-style: normal;
   font-size: 1.5rem;  /* Preferred icon size */
-  padding: .75rem;
+  padding: .5em;
   display: inline-block;
   line-height: 1;
   text-transform: none;
@@ -43,7 +43,7 @@ icon::before, button::before, action:empty::before{
 button::before{
 	/* display: block; */
 	vertical-align: middle;
-	margin: 0 .25em;
+	/* margin: 0 .25em; */
 	box-shadow:0 4px 4px rgba(0,0,0,.25);
 	/* height: 1em; */
 	/* width: 1em; */
@@ -76,7 +76,7 @@ html,body {
 }
 
 @media(max-width: 38rem){/* orientation:portrait */
-	body{ max-width:100%; overflow-x: auto; }
+	body{max-width:100%;/* overflow-x: auto; */}
 	.client{ width: 200%;}
 }
 
@@ -96,10 +96,10 @@ page {
 
 roof{
     position:relative;
-    height:3rem;
+    /* height:3rem; */
     z-index: 1;
     box-shadow: 0 8px 8px rgba(0,0,0,.2);
-    text-align: right;
+    /* text-align: right; */
 }
 
 etage {
@@ -109,6 +109,24 @@ etage {
     flex-direction: column;
     overflow-y: auto;
     /* margin-top: 1rem; */
+}
+
+
+attic{
+	display:flex;
+}
+
+attic>select{
+	width:100%;
+	/* padding: .5em; */
+	color: inherit;
+	/* font-weight: bold; */
+	font-size: 1.25em;
+	border: none;
+	/* background: antiquewhite; */
+	outline: none;
+	/* text-decoration: underline; */
+	border-bottom: 1px solid;
 }
 
 attic>bar {
@@ -159,7 +177,7 @@ tab.selected {
 
 
 section{
-    margin: 2rem 1rem;
+    padding: 1rem;
     position: relative;
 }
 
@@ -214,6 +232,7 @@ input.credit {
     padding: .25em .5em;
     border: 1px solid transparent;
     border-radius: 1em;
+    color: lightgray;
 }
 
 
@@ -229,12 +248,12 @@ ul.entities {
 }
 
 ul.entities>li {
-    padding: 1rem;
+    padding: .5rem;
     box-sizing: border-box;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    border-bottom: 1px solid #eee;
+    /* border-bottom: 1px solid #eee; */
     position: relative;
 }
 
@@ -246,7 +265,8 @@ section.entry {
 }
 
 section.opinions {
-    /* text-align: left; */
+    border: 1px;
+    text-align: left;
 }
 
 section::before{
@@ -282,7 +302,7 @@ section.entries {
 .summary>.name{
     flex: 1;
     text-align: left;
-    margin: 0 .5em;
+    /* margin: 0 .5em; */
 }
 
 .summary>.credit{
@@ -303,7 +323,7 @@ section.info{
 }
 
 .tags{
-    font-size: .8em;
+    /* font-size: .8em; */
 }
 
 stars {
@@ -337,7 +357,7 @@ stars>stars {
 
 
 attic {
-    /* padding: .5rem; */
+    padding: .5rem;
     margin: 0;
     /* box-shadow: 0 .5rem .5rem rgba(0,0,0,.1); */
     /* background: linen; */
@@ -435,7 +455,7 @@ a.entry {
 }
 
 .editables {
-	padding:1em;
+	padding-bottom: 1em;
 }
 
 
@@ -568,4 +588,8 @@ p>icon {
 
 .tagslist {
   margin: 1rem 0;
+}
+
+.desc {
+  margin: .5em 0;
 }

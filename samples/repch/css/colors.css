@@ -2,12 +2,16 @@ input::placeholder, [contenteditable]:empty::before, .fallback, .aspect>.name::b
 {color:lightgray}
 
 [contenteditable]:focus, [contenteditable]:empty
-{background-color: white}
+{/* background-color: white */}
 
 button{border:none; background:none}
 
-roof, button::before, .lists>li.selected
-{background: #52f;border-color: #52f;color: white;}
+roof{color:white}
+
+roof {}
+
+button::before, .lists>li.selected
+{background: #52f; color: white;}
 
 tab	{color: rgba(255,255,255,.75)}
 tab.selected {color: white}
@@ -16,17 +20,18 @@ tab.selected {color: white}
 
 .entities>.selected {/* background: #eee */}
 
-.editables {background-color: white;position: sticky;top: 0;z-index: 2;border-bottom: 1px solid lightgray;/* box-shadow: 0 1rem 1rem white; */}
+.editables {text-align: center;/* background-color: white; *//* position: sticky; *//* top: 0; *//* z-index: 2; *//* border-bottom: 1px solid lightgray; *//* box-shadow: 0 1rem 1rem white; */}
 .append>textarea {background-color: floralwhite}
 
 stars{-webkit-text-stroke: 1px black/* #52f; */;color:transparent;}
 
-.tag.tagged {border-color: inherit}
+.tag.tagged {/* border-color: inherit */color: inherit;}
 
 
 .note {
     font-style: italic;
     color: #aaa;
+    text-align: left;
     /* display: inline; */
 }
 
@@ -43,4 +48,15 @@ input.key, .dialog>input
 ul.lists {
     padding: 0 .5rem;
     margin: 1rem 0 0 0;
+}
+
+
+.nav>roof {
+background: #52f;
+text-align: right;
+}
+
+.entity>roof {
+  background: blueviolet;
+  text-align: center;
 }
