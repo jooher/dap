@@ -59,11 +59,11 @@ text-align: right;
 .nav>roof::before{
 	position:absolute;
 	content:"REPCH.IO";
-	left:-4px;
-	top:-14px;
-	font:bold 39px sans-serif;
-	/* color: currentColor; */
-	text-shadow: 0px 2px 2px darkslategrey;
+	left: -10px;
+	top: -4px;
+	font: bold 32px sans-serif;
+	color: rgba(255,255,255,.25);
+	/* text-shadow: 0px 2px 2px slategrey; */
 }
 
 .entity>roof {
