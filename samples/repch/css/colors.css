@@ -6,7 +6,7 @@ input::placeholder, [contenteditable]:empty::before, .fallback, .aspect>.name::b
 
 button{border:none;background:none;}
 
-roof{color:white}
+roof{color:white;height: 5rem;}
 
 roof {}
 
@@ -18,14 +18,14 @@ tab.selected {color: white}
 
 /*li[ui]:hover {background: #eee}*/
 
-.entities>.selected {/* background: #eee */}
+.entities>.selected {background: #eee;/* font-weight: bold; *//* text-decoration: underline; */}
 
 .editables {text-align: center;/* background-color: white; *//* position: sticky; *//* top: 0; *//* z-index: 2; *//* border-bottom: 1px solid lightgray; *//* box-shadow: 0 1rem 1rem white; */}
 .append>textarea {background-color: floralwhite}
 
 stars{-webkit-text-stroke: 1px black/* #52f; */;color:transparent;}
 
-.tag.tagged {/* border-color: inherit */color: inherit;}
+.tag.tagged {/* border-color: inherit */color: #25f;}
 
 
 .note {
@@ -56,7 +56,21 @@ background: #52f;
 text-align: right;
 }
 
+.nav>roof::before{
+	position:absolute;
+	content:"REPCH.IO";
+	left:-4px;
+	top:-14px;
+	font:bold 39px sans-serif;
+	/* color: currentColor; */
+	text-shadow: 0px 2px 2px darkslategrey;
+}
+
 .entity>roof {
   background: blueviolet;
   text-align: center;
+}
+
+li>.desc {
+  color: gray;
 }

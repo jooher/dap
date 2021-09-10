@@ -60,10 +60,12 @@ export default
 			)
 			
 			,'UL.entities'.d("$entities!; *@ ( (`list-entity $list)db @TIME`dsc )sort"
-				,'LI'	.d("? .TIME; $=(.entity)db; ! (.title .fallback)?; !? .title:!@fallback"
+				,'LI'	.d("? .TIME; $=(.entity)db; "
+					,'title'.d("! (.title .fallback)?; !? .title:!@fallback")
+					,'desc'.d("! .desc")
 					,'tick'
-					.d ("!?@checked .entity:checked.?")
-					.ui("$checked=.entity:checked.!; !?@checked .entity:checked.?; ?")
+						.d ("!?@checked .entity:checked.?")
+						.ui("$checked=.entity:checked.!; !?@checked .entity:checked.?; ?")
 				)
 				.a("!? ($ $Entity)eq@selected")
 				.ui("$Entity=$")

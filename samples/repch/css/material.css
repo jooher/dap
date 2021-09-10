@@ -89,6 +89,7 @@ html,body {
 
 page {
     flex: 1;
+    max-width: 32em;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -96,10 +97,8 @@ page {
 
 roof{
     position:relative;
-    /* height:3rem; */
     z-index: 1;
     box-shadow: 0 8px 8px rgba(0,0,0,.2);
-    /* text-align: right; */
 }
 
 etage {
@@ -108,7 +107,6 @@ etage {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    /* margin-top: 1rem; */
 }
 
 
@@ -118,31 +116,18 @@ attic{
 
 attic>select{
 	width:100%;
-	/* padding: .5em; */
 	color: inherit;
-	/* font-weight: bold; */
 	font-size: 1.25em;
 	border: none;
 	background: none;
 	outline: none;
-	/* text-decoration: underline; */
 	border-bottom: 1px solid;
 }
 
 attic>bar {
-	/* position: fixed; */
-	/* top: 0; */
-	/* width: 100%; */
 	height: 3rem;
-	/* padding: 1rem; */
-	/* background: floralwhite; */
-	/* color: #52f; */
-	/* z-index: 1; */
 	display: flex;
 	flex-direction: row;
-	/* font-size: .8rem; */
-	/* margin: 1rem; */
-	/* text-align: right; */
 }
 
 vault {
@@ -175,7 +160,6 @@ tab.selected {
 }
 
 
-
 section{
     padding: 1rem;
     position: relative;
@@ -184,7 +168,6 @@ section{
 
 input.key {
     flex: 1;
-    /* margin-right: .5rem; */
     text-align: center;
     border: 2px solid;
     border-radius: 1.5rem;
@@ -227,7 +210,6 @@ input.credit {
 
 .tag {
     display: inline-block;
-    /* white-space: nowrap; */
     margin: .2em;
     padding: .25em .5em;
     border: 1px solid transparent;
@@ -238,7 +220,6 @@ input.credit {
 
 
 ul.entities {
-    /* border-top: 1px solid gray; */
     padding: 0;
     margin: 0;
     text-align: left;
@@ -248,12 +229,11 @@ ul.entities {
 }
 
 ul.entities>li {
-    padding: .5rem;
+    padding: .75rem .5rem;
     box-sizing: border-box;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* border-bottom: 1px solid #eee; */
     position: relative;
 }
 
@@ -265,7 +245,6 @@ section.entry {
 }
 
 section.opinions {
-    /* border: 1px; */
     text-align: left;
 }
 
@@ -274,7 +253,6 @@ section::before{
 	padding-top: .25rem;
 	text-align: left;
 	text-transform: uppercase;
-	/* text-decoration: underline; */
 	color: gray;
 	border-top: 1px solid lightgray;
 	display: block;
@@ -286,23 +264,15 @@ section.entries {
 }
 
 
-.title{font-size: 1.25em;/* line-height: 2em; */margin: .5em 0;/* margin:.2em 0; */}
-
-.aspect{
-    /* margin: 1em 0; */
-    /* line-height: 2; */
-}
-
+roof>.title{font-size: 1.25em; margin: .5em 0;}
 
 .aspect>.summary {
     display: flex;
-    font-size: 1.25em;
 }
 
 .summary>.name{
     flex: 1;
     text-align: left;
-    /* margin: 0 .5em; */
 }
 
 .summary>.credit{
@@ -320,10 +290,6 @@ img.stats {
 
 section.info{
     overflow-y: auto;
-}
-
-.tags{
-    /* font-size: .8em; */
 }
 
 stars {
@@ -359,8 +325,6 @@ stars>stars {
 attic {
     padding: .5rem;
     margin: 0;
-    /* box-shadow: 0 .5rem .5rem rgba(0,0,0,.1); */
-    /* background: linen; */
 }
 
 .lists>li {
@@ -375,7 +339,6 @@ attic {
 .opinion {
     margin: 1.5em 0;
     position: relative;
-    /* border-top: 1px dotted lightgray; */
 }
 
 .addaspect {
@@ -418,7 +381,6 @@ li>.category{
 
 ul.addaspects {
     padding: 0;
-    /* line-height: 1.4; */
     list-style: none;
 }
 
@@ -490,10 +452,7 @@ bar>.multi {
     flex: 1;
 }
 
-etage>.entities {
-    /* display: flex; */
-    /* flex-direction: column; */
-}
+
 
 .modal {
 	position: fixed;
@@ -530,7 +489,7 @@ etage>.entities {
     border-bottom: 2px solid;
 }
 
-.dialog>.actions{/* position:absolute; *//* bottom:0; *//* right:0; */padding:.5rem;text-align: right;margin: 1rem -1rem -1rem -1rem;}
+.dialog>.actions{padding:.5rem;text-align: right;margin: 1rem -1rem -1rem -1rem;}
 
 
 
@@ -584,12 +543,4 @@ p>icon {
 
 .short>.tag.unset {
   display: none;
-}
-
-.tagslist {
-  /* margin: 1rem 0; */
-}
-
-.desc {
-  margin: .5em 0;
 }
