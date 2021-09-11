@@ -545,3 +545,9 @@ p>icon {
 .short>.tag.unset {
   display: none;
 }
+
+section>button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}

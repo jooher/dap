@@ -1,22 +1,24 @@
 {
-  "name": "Order Tracker",
-  "short_name": "Orders",
-  "start_url": "-.html",
-  "display": "standalone",
-  "orientation":"portrait",
+"name": "Repch.io",
+"short_name": "Repch",
+"start_url": "./index.html",
+"display": "standalone",
+"orientation":"portrait",
 
-  "background_color": "#3E4EB8",
-  "theme_color": "#2F3BA2",
+"background_color": "#3E4EB8",
+"theme_color": "#2F3BA2",
 
-  "icon": [{
-    "src": "icon/128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    }, {
-      "src": "icon/512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }]
-		
+"icon": [{
+	"src": "./icon/128.png",
+	"sizes": "128x128",
+	"type": "image/png",
+	"purpose": "any maskable"
+	}, {
+	"src": "./icon/512.png",
+	"sizes": "512x512",
+	"type": "image/png",
+	"purpose": "any maskable"
+}]
+	
 
 }
