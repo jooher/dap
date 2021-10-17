@@ -14,7 +14,6 @@ const scrollOptions={behavior:"smooth",inline:"end"},
 		else setTimeout(scrollEnd,100);
 	},
 
-	
 	upTo = (elem,tag) => 
 		!elem ? null : elem.nodeName==tag ? elem : upTo(elem.parentNode,tag);
 	
@@ -27,16 +26,3 @@ export default (target,scrollToTag) => {
 		if(target.focus)setTimeout(scrollEnd,100);
 	},0);
 }
-
-
-/*
-let page=0;
-
-scrolldiscreet(e){
-	if(!stopped())return;
-	
-		if(page!=(page = book.offsetParent.offsetWidth/window.scrollX))
-			book.children[page].scrollIntoView(scrollOptions);
-	}
-}
-*/

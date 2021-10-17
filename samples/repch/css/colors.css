@@ -6,7 +6,7 @@ input::placeholder, [contenteditable]:empty::before, .fallback, .aspect>.name::b
 
 button{border:none;background:none;}
 
-roof{color:white;height: 5rem;}
+roof{color:white;/* min-height: 5rem; */}
 
 roof {}
 
@@ -23,9 +23,9 @@ tab.selected {color: white}
 .editables {text-align: center;/* background-color: white; *//* position: sticky; *//* top: 0; *//* z-index: 2; *//* border-bottom: 1px solid lightgray; *//* box-shadow: 0 1rem 1rem white; */}
 .append>textarea {background-color: floralwhite}
 
-stars{-webkit-text-stroke: 1px black/* #52f; */;color:transparent;}
+.credit>stars:before{/* -webkit-text-stroke: 1px black/* #52f; */ */;/* color:transparent; */opacity: .2;}
 
-.tag.tagged {/* border-color: inherit */color: #25f;}
+.tag.tagged {/* border-color: inherit */color: #14b;}
 
 
 .note {
@@ -35,9 +35,9 @@ stars{-webkit-text-stroke: 1px black/* #52f; */;color:transparent;}
     /* display: inline; */
 }
 
-stars>stars {color:black}
+stars>stars {/* color:black */}
 
-.xtag, attic, action
+.xtag, action
 	{color: #52f;}
 	
 input.key, .dialog>input
@@ -51,26 +51,28 @@ ul.lists {
 }
 
 
-.nav>roof {
-background: #52f;
-text-align: right;
-}
+.nav>roof {background: #52f;text-align: right;height: 4rem;}
 
 .nav>roof::before{
 	position:absolute;
 	content:"REPCH.IO";
-	left: -10px;
-	top: -4px;
-	font: bold 32px sans-serif;
-	color: rgba(255,255,255,.25);
+	left: -.3em;
+	top: -.2em;
+	font: bold 1em sans-serif;
+	color: rgba(255,255,255,.15);
 	/* text-shadow: 0px 2px 2px slategrey; */
 }
 
 .entity>roof {
   background: blueviolet;
   text-align: center;
+  height: 8rem;
 }
 
 li>.desc {
   color: gray;
+}
+
+.nav>etage>attic {
+  background: antiquewhite;
 }

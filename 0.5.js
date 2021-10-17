@@ -1590,5 +1590,7 @@ const	dap=(Env=>
 
 dap.Infect(String.prototype);
 
+window["https://dap.js.org/"] = dap;
+
 if(document.currentScript)
 	(inline=>inline&&eval(inline.replace(/\/\/.*$/gm,' ').replace(/\s\s+/g,' ')))(document.currentScript.text);

@@ -2,11 +2,12 @@ import "https://dap.js.org/0.5.js";
 
 import Await from "/./stuff/await.js";
 import Persist from "/./stuff/persist.js";
-import {untab} from "/./stuff/parse.js";
 import scrollfocus from "/./stuff/scrollfocus.js";	
+import Starbar from "/./stuff/bricks/starbar.js";
+
+import {untab} from "/./stuff/parse.js";
 
 import Scan from "./scanner.js";
-import Starbar from "/./stuff/bricks/starbar.js";
 
 const
 	grab	= src	=> [...src.children].reduce((a,n)=>{if(n.id)a[n.id]=src.removeChild(n); return a},{}),
@@ -32,19 +33,6 @@ export default
 		,'ETAGE'.d("?? $tab@lists; $list= $checked=$:checked.set,??"
 		
 			,'ATTIC'.d(""
-/*			
-				,'UL.lists'.d(""
-					,'LI.recent'.d("a!").ui("$list=`recent").a("!? (`recent $list)eq@selected")
-					//,'LI.favorite'.ui()
-					//,'LI.offers'.ui()
-				)
-			
-				,'UL.lists'.d("$lists!; * (`list)db"
-					,'LI'.d("! .title; a!")
-					.ui("$list=.; ? $:checked.set,?! Ask(dict.addtolist@.):wait,! (:!@list-entity .entity:checked.set .list)dbmulti ")//
-						.a("!? (.list $list)eq@selected")
-				)
-*/				
 				,'SELECT.lists'.d(""
 					,'OPTGROUP.basic'.d("* :split@value`recent,favorite,offers"
 						,'OPTION'.d("!! .value .value@")
@@ -52,9 +40,10 @@ export default
 					,'OPTGROUP.lists'.d("$lists!; * (`list)db"
 						,'OPTION'.d("!! .title@ .list@value")
 					)					
-				).ui("$list=#:value; ? $:checked.set,?! Ask(dict.addtolist@.):wait,! (:!@list-entity .entity:checked.set $list)dbmulti ")//
+				).ui("$list=#:value; ? $:checked.set,?! Ask(dict.addtolist@.):wait,! (:!@list-entity .entity:checked.set $list)dbmul ")//
 			
-				,'ICON.add_circle'.ui("? .title=Ask(dict.createlist@.):wait; (@list (.title))db $lists!=()")//.List=(@list (.title))db $list=List.list (:!@list-entity .entity:checked.set $list )dbmulti
+				,'ICON.add_circle'.ui("? .title=Ask(dict.createlist@.):wait; (@list (.title))db $lists!=()")
+				//.List=(@list (.title))db $list=List.list (:!@list-entity .entity:checked.set $list )dbmul
 				,'ICON.share'.ui(":alert`share")
 					
 			)
@@ -74,8 +63,8 @@ export default
 			
 			,'BAR'.d(""
 				,'multi'.d("? $checked"
-					,'ICON.remove_circle_outline'.ui("? Ask(dict.remove@.):wait; log `remove; (@list-entity .entity:checked.set $list)dbmulti")//
-					,'ICON.delete'.ui("? Ask(dict.delete@.):wait; (@entity $:checked.set)dbmulti")
+					,'ICON.remove_circle_outline'.ui("? Ask(dict.remove@.):wait; log `remove; (@list-entity .entity:checked.set $list)dbmul")//
+					,'ICON.delete'.ui("? Ask(dict.delete@.):wait; (@entity $:checked.set)dbmul")
 					,'ICON.clear'.ui("")//ui("")
 				).u("$checked=$:checked.clear $entities!=()")
 			)
@@ -88,7 +77,7 @@ export default
 		)
 		
 		,'VAULT'.d("$?= $entry="
-			,'INPUT.key'.d("!! $entry@value").ui("log $entry=#:value,scope.guess")//.d("textonly")
+			,'INPUT.key placeholder="🔎"'.d("!! $entry@value").ui("log $entry=#:value,scope.guess")//.d("textonly")
 			,'BUTTON.center_focus_weak'.ui("log $entry=#:scan,scope.guess") //.camera
 	
 		).u("? $entry; ? $Entity= .Entry=($entry)db ($Entity=(@entity $entry@fallback)db .Entry=(@entry $entry $Entity.entity)db)!; ? $Entity $Entity=(.Entry.entity)db; (@list-entity @list`recent $Entity.entity)db $entry=") /// $Entity=(server@ $entry)uri:query 
@@ -118,8 +107,7 @@ export default
 		,'ROOF'.d(""
 			,'title contenteditable tabindex=0'.d("textonly; ! .title; focus .title:!@PAGE").ui(".title=#:value")
 			,'desc contenteditable tabindex=0'.d("textonly; ! .desc; focus .desc:!@PAGE").ui(".desc=#:value")
-//			,'editables'.d(""
-//			)
+			,'credit'.d("! $!=.credit:starbar.enabled").ui(".credit=$!.value")
 		).u("(@entity $)db $entities!=()")
 		
 		,'ETAGE'.d(""
@@ -128,27 +116,6 @@ export default
 				,'A.entry target=_blank'.d(".href=.entry:scope.href; !! .entry@ .href .href@title")
 			)
 			,'SECTION.tags'.d("$lists! $?="
-			
-/*			
-				,'tagslist'.d("$?; * (`list-entity .entity)db"//$Entity
-					,'tag'.d(".!=(`list .list)db; ! .!.0.title")
-				).ui("$?=:!")
-				
-				,'modal'.d("? $?"
-					,'scrim'.ui("? $?=")
-					,'dialog'.d(""
-						,'tagslist'.d("* (`list)db"
-							,'tag'
-								.d("! .title; $tagged=(`list-entity .list .entity=$Entity.entity)db:??; a!")
-								.a("!? $tagged $tagged:!@unset")
-								.ui("(@list-entity .list .entity $tagged:?uid=$tagged:!)db")//
-						)
-						,'actions'.d(""
-							,'ACTION.ok'.ui("? $?=")
-						)
-					)
-				).u("?")//.u("$?=$?:!; ")
-*/
 
 				,'tagslist'.d("a!; * (`list)db"
 					,'tag'
@@ -160,12 +127,6 @@ export default
 				,'BUTTON.check'.d("? $?").ui("$?=")
 				
 			)
-/*			
-				,'SELECT multiple'.d("* (`list)db"
-					,'OPTION'.d("!! .title@ .list@value (`list-entity .list .entity=$Entity.entity)db:??@selected")
-				)
-*/
-
 
 			,'SECTION.opinions'.d("$?= $aspects!=; focus #@SECTION"
 			
@@ -327,7 +288,7 @@ export default
 	
 	flatten	:{
 		db	:Persist.basic,
-		dbmulti:Persist.multi,
+		dbmul	:Persist.multi,
 		
 		trace	:(values,names)=>console.log(values.map((v,i)=>names[i]+": "+v).join("; ")),
 
