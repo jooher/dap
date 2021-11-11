@@ -257,7 +257,7 @@ const	dap=(Env=>
 		Namespace.prototype={
 			
 			USES	: function(uses){
-					for(let ns in uses)
+					for(const ns in uses)
 						this.uses[ns]=uses[ns]//Env.Uri.absolute(,this.uri);
 					return this;
 				},
@@ -999,9 +999,11 @@ const	dap=(Env=>
 								entry = path.entry;
 								
 							let
-								target = entry && up || path.reach(context,this),
+							//	target = entry && up || path.reach(context,this),
 								i = route.length,
-								key = route[--i];
+								key = route[--i],
+								target = up && entry && !i ? up : path.reach(context,this);
+								
 								
 							while(i){
 								target=target[key]||(target[key]={});
@@ -1541,13 +1543,14 @@ const	dap=(Env=>
 			
 		Func	:{
 			
-			convert	:{ log,
-				
+			convert	:{ 
+			
 				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
 				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
 				
 				//run-time converters
 				
+				log	: (msg,r) => r&& console.log(msg),
 				alert : (msg,r) => r&& alert(msg),
 				prompt: (msg,r) => r&& prompt(msg),
 				confirm:(msg,r) => r&& confirm(msg),

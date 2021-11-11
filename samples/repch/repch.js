@@ -193,20 +193,20 @@ export default
 	Option	: 'OPTION'.d("!! (.label .value)? .value (.value .selected)eq@selected"),
 */
 	Ask	: 'modal'.d("top; $value="
-				,'scrim'.ui("$value=")
-				,'dialog'.d(""
-					,'title'.d("! (.title .message)?")
-					,'details'.d("! .details")
-					,'INPUT'.d("? .pattern; !! .pattern; focus #")
-						.e("blur","$value=#:value; ?") //change 
-					,'actions'.d(""
-						,'ACTION.cancel'.ui("$value=")
-						,'ACTION.ok'.d("! .action")
-							.ui("value ($value .action)?")//
-							.a("!? (.pattern $value:!)!@disabled")
-					)
+			,'scrim'.ui("$value=")
+			,'dialog'.d(""
+				,'title'.d("! (.title .message)?")
+				,'details'.d("! .details")
+				,'INPUT'.d("? .pattern; !! .pattern; focus #")
+					.e("blur","$value=#:value; ?") //change 
+				,'actions'.d(""
+					,'ACTION.cancel'.ui("$value=")
+					,'ACTION.ok'.d("! .action")
+						.ui("value ($value .action)?")//
+						.a("!? (.pattern $value:!)!@disabled")
 				)
-			).u("kill; ?"),//value $value; 
+			)
+		).u("kill; ?"),//value $value; 
 
 	dict	:{
 		createlist	:{
