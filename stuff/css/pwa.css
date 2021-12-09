@@ -1,0 +1,282 @@
+/*
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(MaterialIcons-Regular.eot);
+  src: local('Material Icons'),
+       local('MaterialIcons-Regular'),
+       url(MaterialIcons-Regular.woff2) format('woff2'),
+       url(MaterialIcons-Regular.woff) format('woff'),
+       url(MaterialIcons-Regular.ttf) format('truetype');
+}
+*/
+
+[data-dap=false]{display:none !important;}
+[ui=click]{cursor:pointer;}
+
+[FADE]{/* position:absolute; */animation: 1s fadein;width: 100%;}
+[FADE].STALE{opacity:0; transition:opacity 1s ease}
+@keyframes fadein { from {opacity:0;} to {opacity:1} }
+
+
+icon, tap, button {
+	vertical-align: middle;
+}
+
+icon::before, tap::before, [icon]::before, .checked::before
+{
+	font-size: 1.2em;
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	padding: .25em;
+	display: inline-block;
+	vertical-align: middle;
+	line-height: 1;
+	text-transform: none;
+	letter-spacing: normal;
+	word-wrap: normal;
+	white-space: nowrap;
+	direction: ltr;
+	-webkit-font-smoothing: antialiased;	/* Support for all WebKit browsers. */
+	text-rendering: optimizeLegibility;		/* Support for Safari and Chrome. */
+	-moz-osx-font-smoothing: grayscale; 	/* Support for Firefox. */
+	font-feature-settings: 'liga';		/* Support for IE. */
+}
+
+.checked::before {
+	content: "check";
+	position: absolute;
+	right:0;
+	top:0;
+}
+
+[icon]::before {
+	content: attr(icon);
+}
+
+icon::before, tap::before{
+	content:attr(class);
+}
+
+tap::before {
+	border-radius:50%
+}
+
+icon::after {
+	  font-size: .8em;
+}
+
+label>icon{
+	margin: 0;
+	padding: 0;
+	font-size: inherit;
+	position:absolute;
+}
+
+label::before {
+	color: gray;
+	margin: .5em 0;
+}
+
+button {
+	display: inline-block;
+	padding: .5em 2em;
+	border-radius:.5em;
+}
+
+button.shy{background:none; }
+
+input, select, textarea {
+	font-size: inherit;
+	font-family:inherit;
+	text-align: inherit;
+}
+
+input[type=number] {
+	text-align: right;
+}
+
+input[type=month], input[type=date]{
+	width: 10em;
+}
+
+input::placeholder {
+	font: italic 1em sans-serif;
+}
+
+input, button, [contenteditable] {
+	outline:none;
+	border: none;
+}
+
+label>input {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	border: none;
+	border-bottom: 1px solid;
+}
+
+[contenteditable] {
+	cursor: text !important;
+	white-space: pre-wrap;
+}
+
+
+[contenteditable]:empty::before{
+	color: silver;
+}
+
+
+
+html,body {
+	height: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+@media(max-width: 38rem){
+	body{max-width:100%;overflow-x: hidden;}
+}
+
+body{
+	max-width: 720px;
+	margin: 0 auto;
+}
+
+body,section,article{
+	position: relative;
+}
+
+app	{
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	transition: all .5s;
+}
+
+page	{
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+roof	{
+	position:relative;
+	z-index: 1;
+}
+
+attic	{
+	display: block;
+	position: sticky;
+	top: 0;
+	margin: 0;
+	z-index: 2;
+}
+
+
+
+toggle {
+	display: block;
+	font-size:.8em;
+}
+
+attic>bar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 3rem;
+	font-size: 1.25rem;
+}
+
+attic>bar>icon {
+	margin: .25em;
+}
+
+etage {
+	flex: 1;
+	position: relative;
+	flex-direction: column;
+	overflow-y: auto;
+	scroll-behavior: smooth;
+}
+
+vault{
+	display: flex;
+	justify-content: flex-end;
+	gap: 1em;
+	position: relative;
+}
+
+page>vault {
+	padding: .5rem;
+	box-sizing: border-box;
+	margin: 0;
+	font-size: 1.25em;
+	z-index: 1;
+}
+
+.dialog>vault{
+	margin-top: 2em;
+}
+
+tabset {
+	position:absolute;
+	bottom:0;
+	left: 1rem;
+	text-transform: uppercase;
+	font-size: .9em;
+}
+
+tab {
+	display: inline-block;
+	transition: all .5s;
+	padding: .5em;
+	border-bottom: 3px solid transparent;
+}
+
+tab.selected {
+	border-bottom-color: inherit;
+}
+
+article {
+	padding: 1rem;
+}
+
+article.focused {
+	background-color: white;
+	box-shadow: 0 2px 4px rgb(0 0 0 / 25%);
+	margin-top: .5rem;
+	box-sizing: border-box;
+	z-index: 1;
+}
+
+
+.overlay {
+	position: absolute;
+	background: inherit;
+	box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+}
+
+.form>label {
+  margin: 2em 0;
+  display: block;
+}
+
+.centered {
+  text-align: center;
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 1em;
+  align-items: center;
+}
+
+.search::before {
+  font-size: inherit;
+}

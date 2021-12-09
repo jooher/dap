@@ -18,6 +18,8 @@ const	dap=(Env=>
 	
 		check,
 	
+		""	:promise=>promise,/// good to run Promises
+	
 		"?"	:bool=>!!bool,	/// test
 		"!"	:bool=>!bool,	/// test inverse
 		
@@ -43,6 +45,8 @@ const	dap=(Env=>
 	
 		"&"	: values=> Object.assign(values.pop(),...values),
 		
+		"*"	: values=>values.reverse(),
+		
 		"?"	: values=>{ for(let i=values.length;i--;)if(values[i])return values[i]; },			/// any - first non-empty //return false; 
 		"!"	: values=>{ for(let i=values.length;i--;)if(!values[i])return null; return values[0]; },	/// all - succeeds if empty token found
 		"?!"	: values=>values.pop() ? values[1] : values[0], // if-then-else
@@ -50,8 +54,8 @@ const	dap=(Env=>
 		"~"	: values=>{ const a=values[values.length-1]; let i=0;while(a!=values[++i]);return values[i-1]},	/// next in a row
 		eq	: values=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return null;return true; },
 		ne	: values=>{ const a=values.pop(); for(let i=values.length;i--;)if(values[i]!=a)return true;return null; },
-		asc	: values=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a>(a=parseFloat(values[i])))return null;return a; },
-		dsc	: values=>{ for(let a=parseFloat(values.pop()),i=values.length;i--;)if(a<(a=parseFloat(values[i])))return null;return a; },
+		asc	: values=>{ let a=parseFloat(values.pop());for(let i=values.length;i--;)if(a>(a=parseFloat(values[i])))return null;return a; },
+		dsc	: values=>{ let a=parseFloat(values.pop());for(let i=values.length;i--;)if(a<(a=parseFloat(values[i])))return null;return a; },
 				
 		join	: values=>values.reverse().join(values.shift()),
 		concat	: values=>values.reverse().join(""),
@@ -167,8 +171,8 @@ const	dap=(Env=>
 			function Datum(route){
 				let lift=0;
 				while(!route[route.length-1]){
-						route.pop();
-						++lift;
+					route.pop();
+					++lift;
 				}
 				this.route=route;
 				this.lift=lift;
@@ -593,12 +597,15 @@ const	dap=(Env=>
 
 				function makeTodo(steps,epilog){//branches
 				
+					if(!steps.length)
+						return epilog;
+				
 					const
 						stepstr = steps.shift(),
 						isbranch = stepstr.match(/^<(\d+)>$/);
 
 					if(isbranch)
-							return new Step(makeTodo(branchSteps(isbranch[1])),null,null,epilog)
+						return new Step(makeTodo(branchSteps(isbranch[1])),null,null,makeTodo(steps,epilog))//epilog
 
 					const
 						tokens= stepstr.split(TOKENS),
@@ -607,7 +614,7 @@ const	dap=(Env=>
 						alias	= head[1],
 						feed	= tokens.length && makeFeed( tokens.reverse(), alias );
 					
-					return new Step(null, operate, feed, steps.length ? makeTodo(steps,epilog) : epilog);
+					return new Step(null, operate, feed, makeTodo(steps,epilog));// steps.length ? : epilog
 				};
 
 				function makeFeed(tokens,defaultalias){
@@ -639,7 +646,7 @@ const	dap=(Env=>
 								if(path){						
 									if(!tag)
 										tag=path.route[0];
-									if(path.entry)
+									if(path.entry&&path.route.length==1)
 										context.scope.lvalue(path.entry,context.define);
 								}
 								return new Lvalue(path,convert);
@@ -702,7 +709,8 @@ const	dap=(Env=>
 				function makeExpr(str){
 					const
 						a = str.split(">"),
-						feed = makeFeed(brackets[a[0]].split(TOKENS).reverse()),
+						tokens = brackets[a[0]],
+						feed = makeFeed(tokens ? tokens.split(TOKENS).reverse() : O ),
 						flatten = a[1] && ( a[1].charAt(0)=="."
 							? makeAccessor(a[1].substr(1))
 							: context.ns.reach(a[1],FUNCS.FLATTEN)
@@ -827,7 +835,7 @@ const	dap=(Env=>
 					if(this.branch){
 						Perf("Postpone wait",this.time);
 						this.target.value=value;
-						Perf("Postpone resolve",Date.now(),
+						Perf("Postpone resolve",new Date(),
 							this.branch.up
 							? Update.checkUp(this.branch.node,this.branch.up,false,null,this.todo)
 							: this.branch.runDown(this.todo,this.place,this.instead)
@@ -999,11 +1007,12 @@ const	dap=(Env=>
 								entry = path.entry;
 								
 							let
-							//	target = entry && up || path.reach(context,this),
 								i = route.length,
 								key = route[--i],
-								target = up && entry && !i ? up : path.reach(context,this);
-								
+								target = up && entry && (!i||up[entry]) ? up : path.reach(context,this);
+							
+if(i<0)
+Fail("bzzz i<0");	
 								
 							while(i){
 								target=target[key]||(target[key]={});
@@ -1092,7 +1101,7 @@ const	dap=(Env=>
 
 		checkUp = (node,change,result,snitch,todo) => {
 
-			const parent = node.parentNode;
+			const parent = node.$parent || node.parentNode;
 			
 			if(result!==false){
 				const rule = node.P.rules[Env.Classify(result)||"u"];
@@ -1102,17 +1111,14 @@ const	dap=(Env=>
 			if(todo)
 				result = new Execute.Branch(node,change).execBranch(todo);
 			
+			if(result instanceof Execute.Postpone)
+				return result.locate(node);
+
 			const
 				defs = node.P.scope.defines,
 				up = defs && (!parent || node.$!=parent.$)
 					? adopt(node.$.stata,defs,change,{})
 					: change;					
-
-			if(result instanceof Execute.Postpone){
-				result.locate(node);
-				checkDown(node,Object.assign({},change),false,snitch);
-				return;
-			}
 
 			return (parent && parent.P && checkUp(parent,up,result,node)>3) || checkDown(node,change,snitch)>3;
 		},			
@@ -1175,7 +1181,7 @@ const	dap=(Env=>
 					node = target||event.currentTarget,
 					value = event.type;
 					
-				Execute.Perf(event.type,Date.now(),checkUp(node,{event},value));
+				Execute.Perf(event.type,new Date(),checkUp(node,{event},value));
 			}
 			
 		};
