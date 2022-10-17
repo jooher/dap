@@ -1601,5 +1601,5 @@ dap.Infect(String.prototype);
 
 window["https://dap.js.org/"] = dap;
 
-if(document.currentScript)
-	(inline=>inline&&eval(inline.replace(/\/\/.*$/gm,' ').replace(/\s\s+/g,' ')))(document.currentScript.text);
+if(document.currentScript&&document.currentScript.text)
+	eval(document.currentScript.text.replace(/\/\/.*$/gm,' ').replace(/\s\s+/g,' '));
