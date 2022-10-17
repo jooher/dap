@@ -19,18 +19,20 @@ dapify	= dap &&
 			,'welcome'.d("? $own:!; ! welcome")
 			,'BUTTON.reset'	.d("? $own; !! reset@title").ui("$run= $run=$edit=.code")
 			,'BUTTON.render'.d("? $dirty; !! render@title").ui("$run=$edit")
-			//,'BUTTON'.d("! submit").ui(".form:submit")
 		)
 		,'run'.d("!! .style; inline $run")
+		/*
+		,'BUTTON'.d("! submit").ui(".form:submit")
 		,'FORM action="https://dapmx.org/playground.php" target="_blank" method="post"'.d(".form=#"
 			,'INPUT type="hidden" name="code"'.d("#.value=$edit")
 		)
+		*/
 	).u("$dirty=($edit $run)ne $own=($edit .code)ne")
 	
 	.DICT({
 		welcome	:"You're welcome to modify this code!",
 		render	:"Run this code",
-		reset	:"Reset to original code",
+		reset		:"Reset to original code",
 		submit	:"Open in separate window"
 	})
 	.FUNC({
@@ -43,7 +45,7 @@ dapify	= dap &&
 			inline	:(value,alias,node)=>{
 				try{
 					eval(value)
-					.RENDER(null,node);
+					.RENDER();
 				}
 				catch(e){
 					alert(e.message);
