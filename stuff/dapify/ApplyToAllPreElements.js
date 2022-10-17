@@ -22,7 +22,7 @@ dapify	= dap &&
 		)
 		,'run'.d("!! .style; inline $run")
 		/*
-		,'BUTTON'.d("! submit").ui(".form:submit")
+		//,'BUTTON'.d("! submit").ui(".form:submit")
 		,'FORM action="https://dapmx.org/playground.php" target="_blank" method="post"'.d(".form=#"
 			,'INPUT type="hidden" name="code"'.d("#.value=$edit")
 		)
@@ -45,7 +45,7 @@ dapify	= dap &&
 			inline	:(value,alias,node)=>{
 				try{
 					eval(value)
-					.RENDER();
+					.RENDER(null,node);
 				}
 				catch(e){
 					alert(e.message);
