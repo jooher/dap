@@ -241,7 +241,7 @@ const	dap=(Env=>
 			return (str,tag)=>{
 				if(str.slice(-1)==".")
 					str += tag || Fail("Invalid shorthand: "+str);
-				return cache[str] || parse(str.split(".").reverse()); //(cache[str]=)
+				return cache[str] || (cache[str]=parse(str.split(".").reverse()));
 			}
 			
 		})();
@@ -276,6 +276,7 @@ const	dap=(Env=>
 			},
 				
 			DICT	: function(...dicts){
+				/*
 				dicts.forEach(dict=>{
 					for(const i in dict)
 						if(dict[i] instanceof Proto)
@@ -283,6 +284,8 @@ const	dap=(Env=>
 					Object.assign(this.dict,dict)
 				});
 				return this;
+				*/
+				this.
 			},
 				
 			reach	:function(route,domain){

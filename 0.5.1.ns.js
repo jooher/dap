@@ -276,6 +276,9 @@ const	dap=(Env=>
 			},
 				
 			DICT	: function(...dicts){
+				/*
+				this.
+				*/
 				dicts.forEach(dict=>{
 					for(const i in dict)
 						if(dict[i] instanceof Proto)

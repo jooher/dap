@@ -10,6 +10,6 @@ pre>em{background:lavender; font-style:normal}
 
 .dapify>.buttons{position:absolute; right:4px; margin-top:-28px;}
 .dapify>.buttons>button{margin:0; width:32px; height:24px; }
-.dapify>.buttons>.welcome{display:inline; color:cornflowerblue; font:italic .9em sans-serif; margin-right:1em; }
+.dapify>.buttons>.welcome{display:inline;background: gold;padding: .2em .4em;/* color:cornflowerblue; */font:italic .9em sans-serif;margin-right:1em;}
 button.render:before{content:"►"}
 button.reset:before{content:"⌂"}

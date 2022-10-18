@@ -2,7 +2,7 @@
 	
 const
 
-hilite	= code=>code
+hilite	= code => code
 	.replace(/</g,"&lt;").replace(/>/g,"&gt;")	// html
 	.replace(/( \/\/.+?)$/gm,"<i>$1</i>")		// comments
 	.replace(/('.+?')/g,"<em>$1</em>") 		// element signatures
@@ -45,7 +45,7 @@ dapify	= dap &&
 			inline	:(value,alias,node)=>{
 				try{
 					eval(value)
-					.RENDER(null,node);
+					.RENDER({},node);
 				}
 				catch(e){
 					alert(e.message);
