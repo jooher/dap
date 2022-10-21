@@ -240,7 +240,7 @@
 	,'A target=_blank'.d("? $carname; !! label.redir@ (`https://www.rockauto.com/en/catalog/ (`, $make $year $model $engine)join)uri:space2plus@href")
 )
 .DICT({
-	api	: "https://dapmx.org/stuff/rockauto.php?", // dynamic data is taken from Rockauto.com
+	api	: "https://dapmx-org.1gb.ru/stuff/rockauto.php?", // dynamic data is taken from Rockauto.com
 	year	: Array.from({length:20},(v,i)=>2019-i), // back to 20 years from year 2019
 	makes	: "/samples/carmakes.json", // car makes are collected in a static file
 	label	:{

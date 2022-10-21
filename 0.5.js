@@ -1211,25 +1211,12 @@ Fail("bzzz i<0");
 	return	{ Env, Util, Execute, Update,
 			
 		Infect	:function(typePrototype,rules){
-				(rules||"d a u ui e r").split(" ").forEach(a=>typePrototype[a]=
-					function(...x){return new Compile.Proto(null,this)[a](...x)}
-				);
-			},
-			
-		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RENDER(data),
-		
-		require : urls => {
-			const promises = [];
-			for(const key in urls)
-				promises.push(
-					Env.require(urls[key])
-					.then(result=>urls[key]=result)
-				);
-			return Promise.all(promises);
-		}	
+			(rules||"d a u ui e r").split(" ").forEach(a=>typePrototype[a]=
+				function(...x){return new Compile.Proto(null,this)[a](...x)}
+			);
+		},
 	
-		,NS	: uri => namespaces[uri] = 'NAMESPACE'.d("")
-		
+		NS	: uri => 'NAMESPACE'.d("")
 
 	}
 			
