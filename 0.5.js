@@ -98,8 +98,12 @@ const	dap=(Env=>
 		
 	}),
 	
+	namespaces = {},//stdns	= new Ns("",true).Func(Func);
+		
 	O	= [],
 	E	= "",
+	
+	inherit = o => Object.create(o),
 
 	isArray = Array.isArray,
 	
@@ -246,45 +250,49 @@ const	dap=(Env=>
 			
 		})();
 		
+				
 		function Namespace(uri){
 			
 			Env.log("New namespace: "+uri);
 			
 			this.uri	= uri;
-			this.func	= Func;
+			this.func	= {};
 			this.dict	= {};
 			this.uses	= {};
-			this.inherit	= null;
 			
 			namespaces[uri]	= this;
 		}
 		Namespace.prototype={
 			
-			USES	: function(uses){
-					for(const ns in uses)
-						this.uses[ns]=uses[ns]//Env.Uri.absolute(,this.uri);
+			inherit:
+			function(stuff){
+				
+				if(!stuff)
 					return this;
-				},
+				
+				const ns = Object.create(this);
+				
+				if(stuff.uses.length)
+					ns.uses = Object.assign(Object.create(this.uses),...stuff.uses);
+				
+				if(stuff.dicts.length)
+					ns.dict = Object.assign(Object.create(this.dict),...stuff.dicts);
+				
+				if(stuff.funcs.length){
+					ns.func = Object.create(this.func);
+					stuff.funcs.forEach( func => {
+							for(const f in func){
+								if(!ns.func.hasOwnProperty(f))
+									ns.func[f]=Object.create(ns.func[f]||null);
+								Object.assign(ns.func[f],func[f]);
+							}
+						}
+					)
+				}
+				
+				return ns;
+			},
 
-			FUNC	: function(...funcs){
-				for(const d in this.func)
-					this.func[d]=funcs.reduce( 
-						(tgt,f)=> f[d] ? Object.assign(tgt,f[d]) : tgt,
-						Object.assign({},this.func[d])
-					);
-				return this;
-			},
-				
-			DICT	: function(...dicts){
-				dicts.forEach(dict=>{
-					for(const i in dict)
-						if(dict[i] instanceof Proto)
-							dict[i].ns=this;
-					Object.assign(this.dict,dict)
-				});
-				return this;
-			},
-				
 			reach	:function(route,domain){
 					const
 						path = route.split(".").reverse(),
@@ -299,28 +307,36 @@ const	dap=(Env=>
 				
 				const	
 					scope	= domain ? this.func[domain] : this.dict,
-					xtrn	= this.uses[key],
+					xtrn	= this.uses && this.uses[key],
 					entry	= xtrn
 						? (path.length?require(xtrn).lookup(path,domain):require(xtrn))
-						: scope&&scope[key] || this.inherit&&this.inherit.lookup(path,domain,key);
+						: scope[key]; // scope&& || this.inherit&&this.inherit.lookup(path,domain,key);
 				return entry;
 			}
 			
 		};
 		
-		const		
-		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Func(Func);
+		const
 		
 		evaluate= js	=> Function('return '+js)(dap),
 		
-		require	= uri	=> namespaces[uri] ||
-			( namespaces[uri]=
-				(elem => elem && evaluate(elem.textContent))(document.getElementById(uri)) ||
-				Env.require(uri,true) ||
-				Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
-			),
+		require	= uri	=> {
+			
+			if(!namespaces[uri]){
+				const p = Env.require(uri,true) || Fail("Can't resolve namespace: "+uri);
+				p.prepare();
+				namespaces[uri] = p.ns;
+			}
+			return namespaces[uri];
+			
+		},
 		
-		rootns	= new Namespace("").FUNC(Env.Func);//Uri.absolute()
+		rootns	= new Namespace("",{}).inherit(
+			{
+				uses	:[],
+				dicts	:[],
+				funcs	:[Func,Env.Func]
+			});
 			
 		let ids=0;
 
@@ -378,14 +394,15 @@ const	dap=(Env=>
 		};
 					
 		function Proto(ns,utag){
-			this.ns	= ns||rootns;
 			this.utag	= utag;
 			this.stuff	= {};
 			this.reacts	= [];
 			
 			this.scope = null;
+			this.nsraw	= null;
 			
 			this.elem	= null;
+			this.ns	= null;
 			this.rules	= null;
 			this.events = null;
 			
@@ -415,18 +432,22 @@ const	dap=(Env=>
 			a	:function(...stuff)		{ return this.set("a",stuff) },
 			e	:function(events,...stuff)	{ return this.set(events,stuff,true) },
 			
+			getns	:function() { return this.nsraw || ( this.nsraw = { uses:[], dicts:[], funcs:[] } ) },
+			
+			USES	:function(uses){
+					//Object.assign(this.getns().uses,uses);
+					this.getns().uses.push(uses);
+					return this;
+				},
+				
 			DICT	:function(...dicts){
-					this.ns.DICT(...dicts);
+					//this.getns().dicts.push(...dicts);
+					this.getns().dicts.push(...dicts);
 					return this;
 				},
 				
 			FUNC	:function(...funcs){
-					this.ns.FUNC(...funcs);
-					return this;
-				},
-				
-			USES	:function(uses){
-					this.ns.USES(uses);
+					this.getns().funcs.push(...funcs);
 					return this;
 				},
 				
@@ -447,19 +468,18 @@ const	dap=(Env=>
 		
 			prepare	:function(P,greedy){
 
-				this.rules = {};
-				this.scope = new Scope(P&&P.scope);
-
 				const
-					rules = this.rules,
-					scope = this.scope,
+					rules = this.rules = {},
+					scope = this.scope = new Scope(P&&P.scope),
+					ns	= this.ns = (P ? P.ns : rootns).inherit(this.nsraw),
 					stuff	= this.stuff;
+					
 
 				for(const i in stuff)
-					rules[i] = new Rule(this.ns,scope,stuff[i],i);
+					rules[i] = new Rule(ns,scope,stuff[i],i);
 				
 				//if(this.utag)
-					this.elem=Env.Native(this.utag,!!rules[""]);
+					this.elem = Env.Native(this.utag,!!rules[""]);
 				
 				if(greedy)
 					for(const i in rules)
@@ -478,7 +498,7 @@ const	dap=(Env=>
 						react.split(" ").forEach(e=>{rules[e.toLowerCase()]=rule});
 						return (a&&react) ? (a+" "+react) : (react || a) ;
 					},
-					"").split(" ");					
+					"").split(" ");
 			},
 			
 			print	:function(place,context,instead){
@@ -1206,9 +1226,9 @@ Fail("bzzz i<0");
 					.then(result=>urls[key]=result)
 				);
 			return Promise.all(promises);
-		},	
+		}	
 	
-		NS	: uri => new Compile.Namespace(uri)
+		,NS	: uri => namespaces[uri] = 'NAMESPACE'.d("")
 		
 
 	}
@@ -1380,7 +1400,7 @@ Fail("bzzz i<0");
 				JSON.stringify(content),
 				
 			"application/x-www-form-urlencoded": content=>
-			 QueryString.build.neutral(content)
+				QueryString.build.neutral(content)
 			 
 		},
 		
@@ -1501,8 +1521,7 @@ Fail("bzzz i<0");
 		
 		Classify: result=>
 			!result ? result :
-			typeof result == 'object' ? result.constructor.name :
-			result,
+			typeof result == 'object' ? result.constructor.name : result,
 
 		Adopt	:(place,instead,elem,postponed,result)=>{
 
@@ -1511,14 +1530,14 @@ Fail("bzzz i<0");
 				elem.setAttribute('data-dap', r);//elem.classList.toggle("EMPTY",!!empty);
 			
 			if(postponed){
-				instead	? instead.classList.add("STALE") :
-				place	? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT") :
+				instead ? instead.classList.add("STALE") :
+				place ? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT") :
 				console.log('orphan postponed');
 				return instead;
 			}
 
-			instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
-			place	? place.appendChild(elem) :
+			instead ? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
+			place ? place.appendChild(elem) :
 			console.log('orphan element '+elem);
 		},
 			
@@ -1588,7 +1607,12 @@ Fail("bzzz i<0");
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : (value && node.classList.add(value)) }			
+				"!?"	:(value,alias,node)=>{ 
+						if(alias) 
+							node.classList.toggle(alias,!!value) 
+						else
+							value && node.classList.add(value)
+					}			
 
 			}
 		}

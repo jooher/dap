@@ -13,7 +13,7 @@
 <p>The <code>?</code> operator that can be called "if-gate" for simplicity, offers some interesting possibilities. When several tokens are given, they are in fact executed sequentially until truthy result (or out of tokens). This allows to execute some conditional operation right there, in the <code>?</code>-step. For example: <code>? $data $data=source:query (dict.error.no-data)alert; </code> step will first check if <code>$data</code> is set, if not set (and only if not set!) it will try to query it from the <code>source</code>, and if the query fails and <code>$data</code> is still not set — alert the <code>dict.error.no-data</code> message and terminate the rule execution. If the <code>$data</code> is set (initially or after query), rule execution will continue.</p> 
 
 <h2>Asynchronous converters</h2>
-<p>Consider expression <code>$a:c1,c2,c3</code> where converters are applied in a chain. The naive interpretation of this expression in javascript terms would be <code>c3(c2(c1($a)))</code> which is okay in many cases. However, what if converters are asynchronous? Surprisingly, a semantically better javascript's equivalent for this simple dap construct is expressed in terms of Promises: <code>$a.then(c1).then(c2).then(c3)</code>.</p>
+<p>Consider expression <code>$a:c1,c2,c3</code> where converters are applied in a chain. The naive interpretation of this expression in javascript terms would be <code>c3(c2(c1($a)))</code> which is okay in many cases. However, what if converters are asynchronous? Surprisingly, a semantically better javascript's equivalent for this simple dap construct is expressed in terms of Promises: <code>c1($a).then(c2).then(c3)</code>.</p>
 
 <h2>Dot notation for array elements</h2>
 <p>In dap, array elements are accessed using dot notation instead of square bracket notation.</p>
@@ -31,7 +31,7 @@
 <!--
 <script src="https://cdn.jsdelivr.net/gh/jooher/dap/0.4.min.js"></script>
 -->
-<script src="../0.4.js"></script>
+<script src="../0.5.js"></script>
 <script src="../stuff/dapify.js"></script>
 
 <link href="/stuff/talks.css" rel="stylesheet" type="text/css"/>	
