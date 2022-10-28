@@ -119,9 +119,9 @@ const	dap=(Env=>
 		merge	: Object.assign || ((tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;}) ,//() ||
 		union	: (...src)=>src.reduce(Util.merge,{}),
 
-		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
+		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.replace(k,map[k]);return tgt},
 		
-		reach	: (entry,path)=>{//path.reduce(o,v=>o&&o[v],start),
+		reach	: (entry,path)=>{//path.reduce((o,v)=>o&&o[v],entry),
 				let i=path.length; 
 				while(entry&&i--)entry=entry[path[i]];
 				return entry;
@@ -147,7 +147,7 @@ const	dap=(Env=>
 		const
 		
 		makePath = (()=>{
-		
+
 			function This(route,where){
 				this.route=route;
 				this.where=where;
@@ -159,24 +159,22 @@ const	dap=(Env=>
 			};
 		
 			function Const(route,entry){
-				route.push(entry);
-				this.route=route;
-				this.value=undefined;
+				this.route = route;
+				this.entry = entry;
 			}
 			Const.prototype={
-				reach: function(context){
+/*				reach: function(context){
 					if(this.value === undefined){
 						const route = this.route.slice(0);
 						this.value = Util.reach(context.ns.lookup(route),route) || null;
 					}
 					return this.value;
 				},
-
-				_reach:	function(context){
-					const route = this.route.slice(0);
-					return Util.reach(context.ns.lookup(route),route) || null;
+*/
+				given	:function(context){
+					return Util.reach(context.ns.lookup(null,null,this.entry),this.route) || null;
 				}
-/**/			};
+			};
 		
 			function Statum(route,entry){
 				route.push(entry);
@@ -186,8 +184,8 @@ const	dap=(Env=>
 			Statum.prototype={
 				reach: function(context){
 					let target = context.stata;
-					while(!(this.entry in target))
-						target=target.$ || Fail("Statum not declared: $"+this.entry);
+					while(!target.hasOwnProperty(this.entry))
+						target=Object.getPrototypeOf(target) || Fail("Statum not declared: $"+this.entry);
 					return target;
 				}
 			};
@@ -203,8 +201,7 @@ const	dap=(Env=>
 			}
 			Datum.prototype={
 				reach: function(context){
-					let
-						target = context.data,
+					let	target = context.data,
 						i=this.lift;
 					while(i-->0)
 						target=target.$ || Fail("Out of data contexts: "+this.route);
@@ -231,10 +228,8 @@ const	dap=(Env=>
 			}
 	
 			return (str,tag)=>{
-				if(str.slice(-1)==".")
-					str += tag || Fail("Invalid shorthand: "+str);
-				return cache[str] || (cache[str]=parse(str.split(".").reverse())); //
-//				return cache[str] || parse(str.split(".").reverse()); //(cache[str]=)
+				if(str.slice(-1)==".") str += tag || Fail("Invalid shorthand: "+str);
+				return cache[str] || (cache[str] = parse(str.split(".").reverse())); //
 			}
 			
 		})();
@@ -632,7 +627,7 @@ const	dap=(Env=>
 						count	= tokens.length;
 						
 					const
-						values= new Array(count),
+						values	= new Array(count),
 						tags	= new Array(count);
 					
 					while(count--){
@@ -674,10 +669,10 @@ const	dap=(Env=>
 								
 							if(path){
 								if(!tag)
-									tag=path.route[0];
+									tag = path.route.length ? path.route[0] : path.entry;
 								
-								if("value" in path)
-									literal = path.reach(context) || literal;
+								if("given" in path)
+									literal = path.given(context) || literal;
 								else{
 									resolved=false;
 									if(path.entry)
@@ -797,10 +792,10 @@ const	dap=(Env=>
 		
 		const GlobalContext={};
 		
-		function Context(data,stata,derive){
+		function Context(data,defines,derive){
 			if(!derive)derive=GlobalContext;
 			this.data = data ? {"":data, $:derive.data} : derive.data;
-			this.stata=stata ? Object.assign({$:derive.stata},stata) : derive.stata;
+			this.stata= defines ? Object.assign(new Object(derive.stata),defines) : derive.stata;
 		}
 		Context.prototype={
 			
@@ -966,10 +961,16 @@ const	dap=(Env=>
 						expr = rvalue.expr;
 						
 					if(path){
-						value = (up && (path.entry in up)) ? up : path.reach(context,this);
-						for(let route=path.route, i = route.length; value && i-->0; )
-							value = value[route[i]];
+						const entry = path.entry;
+						
+						value =	!entry ? path.reach(context,this) :
+							up && entry in up ? up :
+							entry in context.stata ? context.stata :
+							Fail("Status not defined: "+entry);
+						
+						for( let route=path.route, i = route.length; value && i-->0; value = value[route[i]] );
 					}
+					
 					
 					if(expr){
 						value = this.execExpr(expr,value||literal);
@@ -1018,10 +1019,9 @@ const	dap=(Env=>
 							let
 								i = route.length,
 								key = route[--i],
-								target = up && entry && (!i||up[entry]) ? up : path.reach(context,this);
-							
-if(i<0)
-Fail("bzzz i<0");	
+								target = 
+									up && entry && (!i||up[entry]) ? up : 
+									path.reach(context,this);
 								
 							while(i){
 								target=target[key]||(target[key]={});

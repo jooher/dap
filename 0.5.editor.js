@@ -158,8 +158,7 @@ const	dap=(Env=>
 				}
 			};
 		
-			function Const(route,entry){
-				route.push(entry);
+			function Const(route){
 				this.route=route;
 				this.value=undefined;
 			}
@@ -170,28 +169,9 @@ const	dap=(Env=>
 						this.value = Util.reach(context.ns.lookup(route),route) || null;
 					}
 					return this.value;
-				},
-
-				_reach:	function(context){
-					const route = this.route.slice(0);
-					return Util.reach(context.ns.lookup(route),route) || null;
-				}
-/**/			};
-		
-			function Statum(route,entry){
-				route.push(entry);
-				this.route=route;
-				this.entry=entry;
-			}
-			Statum.prototype={
-				reach: function(context){
-					let target = context.stata;
-					while(!(this.entry in target))
-						target=target.$ || Fail("Statum not declared: $"+this.entry);
-					return target;
 				}
 			};
-			
+		
 			function Datum(route){
 				let lift=0;
 				while(!route[route.length-1]){
@@ -212,6 +192,20 @@ const	dap=(Env=>
 				}
 			};
 
+			function Statum(route){
+				this.route=route;
+				this.entry=route[route.length-1];
+			}
+			Statum.prototype={
+				reach: function(context){ //, up
+					let target = context.stata; //up || 
+					//if(up)
+						while(!(this.entry in target))
+							target=target.$ || Fail("Statum not declared: $"+this.entry);
+					return target;
+				}
+			};
+			
 			const
 			
 			cache = {
@@ -224,17 +218,35 @@ const	dap=(Env=>
 				
 				const entry = route.pop();
 				
-				return	!entry || entry==='$' ? new Datum(route) :
-					entry.startsWith('$') ? new Statum(route,entry.substr(1)) :
-					entry.startsWith('#') ? new This(route,entry.substr(1)||'node') :
-					new Const(route,entry);
+				if(!entry)
+					return new Datum(route);
+				else
+					switch(entry.charAt(0)){
+							// $.datum => .datum (TODO: traced?)
+						
+						case'$':
+							// $statum
+							if(entry.length==1){
+								return new Datum(route);
+							}
+							route.push(entry.substr(1));
+							return new Statum(route);
+							
+						case'#':
+							return new This(route,entry.substr(1)||'node'); 
+
+						default:
+							route.push(entry);
+							return new Const(route)
+							
+					};					
 			}
 	
 			return (str,tag)=>{
 				if(str.slice(-1)==".")
 					str += tag || Fail("Invalid shorthand: "+str);
-				return cache[str] || (cache[str]=parse(str.split(".").reverse())); //
-//				return cache[str] || parse(str.split(".").reverse()); //(cache[str]=)
+//				return cache[str] || (cache[str]=parse(str.split(".").reverse())); //
+				return cache[str] || parse(str.split(".").reverse()); //(cache[str]=)
 			}
 			
 		})();
