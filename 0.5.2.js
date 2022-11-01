@@ -98,26 +98,30 @@ const	dap=(Env=>
 		
 	}),
 	
+	namespaces = {},
+		
 	O	= [],
 	E	= "",
+	
+	inherit = o => Object.create(o),
 
 	isArray = Array.isArray,
 	
 	Print	= (value,alias,place,context)=> {
 		if( value != null )
-			isArray(value) ? value.forEach(v=>Print(v,null,place,context)) :
+			isArray(value)	? value.forEach(v => Print(v,null,place,context)) :
 			value.print	? value.print(place,context) :
 			Env.Print(place,value);
 		},
 		
-	Util	={
+	Util	= {
 			
 		merge	: Object.assign || ((tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;}) ,//() ||
 		union	: (...src)=>src.reduce(Util.merge,{}),
 
-		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
+		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.replace(k,map[k]);return tgt},
 		
-		reach	: (entry,path)=>{//path.reduce(o,v=>o&&o[v],start),
+		reach	: (entry,path)=>{//path.reduce((o,v)=>o&&o[v],entry),
 				let i=path.length; 
 				while(entry&&i--)entry=entry[path[i]];
 				return entry;
@@ -129,7 +133,7 @@ const	dap=(Env=>
 				if((a=tags[i])!='.')
 					hash[a]=values[i];
 				else if(a=values[i])
-					for(let j in a)
+					for(const j in a)
 						if(j)hash[j]=a[j];
 			return hash;
 		}
@@ -143,7 +147,7 @@ const	dap=(Env=>
 		const
 		
 		makePath = (()=>{
-		
+
 			function This(route,where){
 				this.route=route;
 				this.where=where;
@@ -154,20 +158,38 @@ const	dap=(Env=>
 				}
 			};
 		
-			function Const(route){
-				this.route=route;
-				this.value=undefined;
+			function Const(route,entry){
+				this.route = route;
+				this.entry = entry;
 			}
 			Const.prototype={
-				reach: function(context){
+/*				reach: function(context){
 					if(this.value === undefined){
 						const route = this.route.slice(0);
 						this.value = Util.reach(context.ns.lookup(route),route) || null;
 					}
 					return this.value;
+				},
+*/
+				given	:function(context){
+					return Util.reach(context.ns.lookup(null,null,this.entry),this.route) || null;
 				}
 			};
 		
+			function Statum(route,entry){
+				route.push(entry);
+				this.route=route;
+				this.entry=entry;
+			}
+			Statum.prototype={
+				reach: function(context){
+					let target = context.stata;
+					while(!target.hasOwnProperty(this.entry))
+						target=Object.getPrototypeOf(target) || Fail("Statum not declared: $"+this.entry);
+					return target;
+				}
+			};
+			
 			function Datum(route){
 				let lift=0;
 				while(!route[route.length-1]){
@@ -179,8 +201,7 @@ const	dap=(Env=>
 			}
 			Datum.prototype={
 				reach: function(context){
-					let
-						target = context.data,
+					let	target = context.data,
 						i=this.lift;
 					while(i-->0)
 						target=target.$ || Fail("Out of data contexts: "+this.route);
@@ -188,20 +209,6 @@ const	dap=(Env=>
 				}
 			};
 
-			function Statum(route){
-				this.route=route;
-				this.entry=route[route.length-1];
-			}
-			Statum.prototype={
-				reach: function(context){ //, up
-					let target = context.stata; //up || 
-					//if(up)
-						while(!(this.entry in target))
-							target=target.$ || Fail("Statum not declared: $"+this.entry);
-					return target;
-				}
-			};
-			
 			const
 			
 			cache = {
@@ -214,80 +221,60 @@ const	dap=(Env=>
 				
 				const entry = route.pop();
 				
-				if(!entry)
-					return new Datum(route);
-				else
-					switch(entry.charAt(0)){
-							// $.datum => .datum (TODO: traced?)
-						
-						case'$':
-							// $statum
-							if(entry.length==1){
-								return new Datum(route);
-							}
-							route.push(entry.substr(1));
-							return new Statum(route);
-							
-						case'#':
-							return new This(route,entry.substr(1)||'node'); 
-
-						default:
-							route.push(entry);
-							return new Const(route)
-							
-					};					
+				return	!entry || entry==='$' ? new Datum(route) :
+					entry.startsWith('$') ? new Statum(route,entry.substr(1)) :
+					entry.startsWith('#') ? new This(route,entry.substr(1)||'node') :
+					new Const(route,entry);
 			}
 	
 			return (str,tag)=>{
-				if(str.slice(-1)==".")
-					str += tag || Fail("Invalid shorthand: "+str);
-				return cache[str] || (cache[str]=parse(str.split(".").reverse()));
+				if(str.slice(-1)==".") str += tag || Fail("Invalid shorthand: "+str);
+				return cache[str] || (cache[str] = parse(str.split(".").reverse())); //
 			}
 			
 		})();
 		
+				
 		function Namespace(uri){
 			
 			Env.log("New namespace: "+uri);
 			
 			this.uri	= uri;
-			this.func	= Func;
+			this.func	= {};
 			this.dict	= {};
 			this.uses	= {};
-			this.inherit	= null;
 			
 			namespaces[uri]	= this;
 		}
 		Namespace.prototype={
 			
-			USES	: function(uses){
-					for(const ns in uses)
-						this.uses[ns]=uses[ns]//Env.Uri.absolute(,this.uri);
+			inherit:
+			function(stuff){
+				
+				if(!stuff)
 					return this;
-				},
+				
+				const ns = Object.create(this);
+				
+				if(stuff.uses.length)
+					ns.uses = Object.assign(Object.create(this.uses),...stuff.uses);
+				
+				if(stuff.dicts.length)
+					ns.dict = Object.assign(Object.create(this.dict),...stuff.dicts);
+				
+				if(stuff.funcs.length){
+					ns.func = Object.create(this.func);
+					for( const func of stuff.funcs) 
+						for(const f in func){
+							if(!ns.func.hasOwnProperty(f))
+								ns.func[f]=Object.create(ns.func[f]||null);
+							Object.assign(ns.func[f],func[f]);
+						}
+				}
+				
+				return ns;
+			},
 
-			FUNC	: function(...funcs){
-				for(const d in this.func)
-					this.func[d]=funcs.reduce( 
-						(tgt,f)=> f[d] ? Object.assign(tgt,f[d]) : tgt,
-						Object.assign({},this.func[d])
-					);
-				return this;
-			},
-				
-			DICT	: function(...dicts){
-				/*
-				dicts.forEach(dict=>{
-					for(const i in dict)
-						if(dict[i] instanceof Proto)
-							dict[i].ns=this;
-					Object.assign(this.dict,dict)
-				});
-				return this;
-				*/
-				this.
-			},
-				
 			reach	:function(route,domain){
 					const
 						path = route.split(".").reverse(),
@@ -302,28 +289,36 @@ const	dap=(Env=>
 				
 				const	
 					scope	= domain ? this.func[domain] : this.dict,
-					xtrn	= this.uses[key],
+					xtrn	= this.uses && this.uses[key],
 					entry	= xtrn
 						? (path.length?require(xtrn).lookup(path,domain):require(xtrn))
-						: scope&&scope[key] || this.inherit&&this.inherit.lookup(path,domain,key);
+						: scope[key]; // scope&& || this.inherit&&this.inherit.lookup(path,domain,key);
 				return entry;
 			}
 			
 		};
 		
-		const		
-		namespaces={},//stdns	= new Ns("http://dapmx.org/",true).Func(Func);
+		const
 		
 		evaluate= js	=> Function('return '+js)(dap),
 		
-		require	= uri	=> namespaces[uri] ||
-			( namespaces[uri]=
-				(elem => elem && evaluate(elem.textContent))(document.getElementById(uri)) ||
-				Env.require(uri,true) ||
-				Fail("Can't resolve namespace: "+uri) //Env.Uri.absolute(uri)
-			),
+		require	= uri	=> {
+			
+			if(!namespaces[uri]){
+				const p = Env.require(uri,true) || Fail("Can't resolve namespace: "+uri);
+				p.prepare();
+				namespaces[uri] = p.ns;
+			}
+			return namespaces[uri];
+			
+		},
 		
-		rootns	= new Namespace("").FUNC(Env.Func);//Uri.absolute()
+		rootns	= new Namespace("",{}).inherit(
+			{
+				uses	:[],
+				dicts	:[],
+				funcs	:[Func,Env.Func]
+			});
 			
 		let ids=0;
 
@@ -381,16 +376,17 @@ const	dap=(Env=>
 		};
 					
 		function Proto(ns,utag){
-			this.ns	= ns||rootns;
 			this.utag	= utag;
 			this.stuff	= {};
 			this.reacts	= [];
 			
-			this.scope = null;
+			this.scope	= null;
+			this.nsraw	= null;
 			
 			this.elem	= null;
+			this.ns		= null;
 			this.rules	= null;
-			this.events = null;
+			this.events 	= null;
 			
 			this.tgt	= null;
 		}
@@ -418,18 +414,22 @@ const	dap=(Env=>
 			a	:function(...stuff)		{ return this.set("a",stuff) },
 			e	:function(events,...stuff)	{ return this.set(events,stuff,true) },
 			
+			getns	:function() { return this.nsraw || ( this.nsraw = { uses:[], dicts:[], funcs:[] } ) },
+			
+			USES	:function(uses){
+					//Object.assign(this.getns().uses,uses);
+					this.getns().uses.push(uses);
+					return this;
+				},
+				
 			DICT	:function(...dicts){
-					this.ns.DICT(...dicts);
+					//this.getns().dicts.push(...dicts);
+					this.getns().dicts.push(...dicts);
 					return this;
 				},
 				
 			FUNC	:function(...funcs){
-					this.ns.FUNC(...funcs);
-					return this;
-				},
-				
-			USES	:function(uses){
-					this.ns.USES(uses);
+					this.getns().funcs.push(...funcs);
 					return this;
 				},
 				
@@ -439,7 +439,8 @@ const	dap=(Env=>
 			FOR	:function(stub){
 					this.utag=Util.stub(this.utag,stub);
 					for(const a in this.stuff)
-						this.stuff[a].forEach(stuff=>stuff[0]=Util.stub(stuff[0],stub));
+						for(const stuff of this.stuff[a])
+							stuff[0]=Util.stub(stuff[0],stub);
 					return this;
 				},
 			
@@ -450,19 +451,18 @@ const	dap=(Env=>
 		
 			prepare	:function(P,greedy){
 
-				this.rules = {};
-				this.scope = new Scope(P&&P.scope);
-
 				const
-					rules = this.rules,
-					scope = this.scope,
+					rules = this.rules = {},
+					scope = this.scope = new Scope(P&&P.scope),
+					ns	= this.ns = (P ? P.ns : rootns).inherit(this.nsraw),
 					stuff	= this.stuff;
+					
 
 				for(const i in stuff)
-					rules[i] = new Rule(this.ns,scope,stuff[i],i);
+					rules[i] = new Rule(ns,scope,stuff[i],i);
 				
 				//if(this.utag)
-					this.elem=Env.Native(this.utag,!!rules[""]);
+					this.elem = Env.Native(this.utag,!!rules[""]);
 				
 				if(greedy)
 					for(const i in rules)
@@ -478,10 +478,13 @@ const	dap=(Env=>
 						const
 							rule	= rules[k]||rules[""],
 							react	= k||this.elem.getAttribute("ui");
-						react.split(" ").forEach(e=>{rules[e.toLowerCase()]=rule});
+							
+						for(const e of react.split(" "))
+							rules[e.toLowerCase()] = rule;
+						
 						return (a&&react) ? (a+" "+react) : (react || a) ;
 					},
-					"").split(" ");					
+					"").split(" ");
 			},
 			
 			print	:function(place,context,instead){
@@ -493,8 +496,8 @@ const	dap=(Env=>
 					rules	= this.rules,
 					d	= rules.d,
 					a	= rules.a,
-					node = Env.Spawn(this.elem,this.events,Update.onEvent),
-					todo = d&&d.engage();
+					node	= Env.Spawn(this.elem,this.events,Update.onEvent),
+					todo	= d&&d.engage();
 				
 				if(a)
 					a.engage();					
@@ -519,7 +522,7 @@ const	dap=(Env=>
 			this.feed	= feed;
 			this.todo	= todo;
 		};
-		Step.prototype={
+		Step.prototype = {
 			print: function(place){new Execute.Branch(place).execBranch(this)}//.subContext(data,this.scope.defines)
 		};
 		
@@ -626,7 +629,7 @@ const	dap=(Env=>
 						count	= tokens.length;
 						
 					const
-						values= new Array(count),
+						values	= new Array(count),
 						tags	= new Array(count);
 					
 					while(count--){
@@ -668,10 +671,10 @@ const	dap=(Env=>
 								
 							if(path){
 								if(!tag)
-									tag=path.route[0];
+									tag = path.route.length ? path.route[0] : path.entry;
 								
-								if("value" in path)
-									literal = path.reach(context) || literal;
+								if("given" in path)
+									literal = path.given(context) || literal;
 								else{
 									resolved=false;
 									if(path.entry)
@@ -740,7 +743,8 @@ const	dap=(Env=>
 							epilog = new Step(null, Print, new Feed([subnodes],oneNull,oneNull), null );
 							
 						if(greedy)
-							stuff.forEach(ch => ch.prepare && ch.prepare(rule,greedy) );
+							for(const ch of stuff)
+								ch.prepare && ch.prepare(rule,greedy);
 						
 						if(!todo)
 							return epilog;
@@ -791,10 +795,10 @@ const	dap=(Env=>
 		
 		const GlobalContext={};
 		
-		function Context(data,stata,derive){
+		function Context(data,defines,derive){
 			if(!derive)derive=GlobalContext;
 			this.data = data ? {"":data, $:derive.data} : derive.data;
-			this.stata=stata ? Object.assign({$:derive.stata},stata) : derive.stata;
+			this.stata= defines ? Object.assign(new Object(derive.stata),defines) : derive.stata;
 		}
 		Context.prototype={
 			
@@ -886,7 +890,7 @@ const	dap=(Env=>
 							
 						const
 							operate	= step.operate,
-							feed		= step.feed;
+							feed	= step.feed;
 
 						if(!feed)
 							flow=operate(null,null,node);//,$,this.$.data
@@ -923,11 +927,9 @@ const	dap=(Env=>
 								flow = null; // skip to next step
 							
 							if(flow){
-								const
-									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
-								rows.forEach( row=>
-										new Branch(node,this.up,row).execBranch(todo)
-								);
+								const	rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
+								for(const row of rows)
+									new Branch(node,this.up,row).execBranch(todo);
 							}
 						}
 					}
@@ -960,10 +962,16 @@ const	dap=(Env=>
 						expr = rvalue.expr;
 						
 					if(path){
-						value = (up && (path.entry in up)) ? up : path.reach(context,this);
-						for(let route=path.route, i = route.length; value && i-->0; )
-							value = value[route[i]];
+						const entry = path.entry;
+						
+						value =	!entry ? path.reach(context,this) :
+							up && entry in up ? up :
+							entry in context.stata ? context.stata :
+							Fail("Status not defined: "+entry);
+						
+						for( let route=path.route, i = route.length; value && i-->0; value = value[route[i]] );
 					}
+					
 					
 					if(expr){
 						value = this.execExpr(expr,value||literal);
@@ -1012,10 +1020,9 @@ const	dap=(Env=>
 							let
 								i = route.length,
 								key = route[--i],
-								target = up && entry && (!i||up[entry]) ? up : path.reach(context,this);
-							
-if(i<0)
-Fail("bzzz i<0");	
+								target = 
+									up && entry && (!i||up[entry]) ? up : 
+									path.reach(context,this);
 								
 							while(i){
 								target=target[key]||(target[key]={});
@@ -1194,25 +1201,12 @@ Fail("bzzz i<0");
 	return	{ Env, Util, Execute, Update,
 			
 		Infect	:function(typePrototype,rules){
-				(rules||"d a u ui e r").split(" ").forEach(a=>typePrototype[a]=
-					function(...x){return new Compile.Proto(null,this)[a](...x)}
-				);
-			},
-			
-		fromjs	:(proto,data)=>proto((utag,...stuff)=>new Compile.Proto().$(utag,stuff)).RENDER(data),
-		
-		require : urls => {
-			const promises = [];
-			for(const key in urls)
-				promises.push(
-					Env.require(urls[key])
-					.then(result=>urls[key]=result)
-				);
-			return Promise.all(promises);
-		},	
+			(rules||"d a u ui e r").split(" ").forEach(a=>typePrototype[a]=
+				function(...x){return new Compile.Proto(null,this)[a](...x)}
+			);
+		},
 	
-		NS	: uri => new Compile.Namespace(uri)
-		
+		NS	: uri => 'NAMESPACE'.d("")
 
 	}
 			
@@ -1383,7 +1377,7 @@ Fail("bzzz i<0");
 				JSON.stringify(content),
 				
 			"application/x-www-form-urlencoded": content=>
-			 QueryString.build.neutral(content)
+				QueryString.build.neutral(content)
 			 
 		},
 		
@@ -1485,16 +1479,13 @@ Fail("bzzz i<0");
 
 		Spawn: (elem,events,handler)=>{
 			const el = elem.cloneNode(true);
-			if(events)
-				events.forEach( e=> {
-					if(!e)
-						whut();
-					const evtype=e.toLowerCase();
-					if(e===evtype)
-						el.addEventListener(evtype,handler);
-					else
-						Watch(evtype,el);
-				});
+			if(events)for(const e of events){ //events.forEach( e=> {
+				const evtype=e.toLowerCase();
+				if(e===evtype)
+					el.addEventListener(evtype,handler);
+				else
+					Watch(evtype,el);
+			};
 			return el;
 		},
 		
@@ -1504,8 +1495,7 @@ Fail("bzzz i<0");
 		
 		Classify: result=>
 			!result ? result :
-			typeof result == 'object' ? result.constructor.name :
-			result,
+			typeof result == 'object' ? result.constructor.name : result,
 
 		Adopt	:(place,instead,elem,postponed,result)=>{
 
@@ -1514,14 +1504,14 @@ Fail("bzzz i<0");
 				elem.setAttribute('data-dap', r);//elem.classList.toggle("EMPTY",!!empty);
 			
 			if(postponed){
-				instead	? instead.classList.add("STALE") :
-				place	? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT") :
+				instead ? instead.classList.add("STALE") :
+				place ? place.appendChild(instead=elem.cloneNode(true)).classList.add("AWAIT") :
 				console.log('orphan postponed');
 				return instead;
 			}
 
-			instead	? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
-			place	? place.appendChild(elem) :
+			instead ? Blend.change(elem,instead) ://instead.parentNode.replaceChild(elem,instead) : //
+			place ? place.appendChild(elem) :
 			console.log('orphan element '+elem);
 		},
 			
@@ -1591,7 +1581,12 @@ Fail("bzzz i<0");
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ alias ? node.classList.toggle(alias,!!value) : (value && node.classList.add(value)) }			
+				"!?"	:(value,alias,node)=>{ 
+						if(alias) 
+							node.classList.toggle(alias,!!value) 
+						else
+							value && node.classList.add(value)
+					}			
 
 			}
 		}

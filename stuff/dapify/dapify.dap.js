@@ -1,11 +1,9 @@
-dap&&
-
-//dap.NS("https://dap.js.org/stuff/dapify.dap.js")
+dap && //dap.NS("https://dap.js.org/stuff/dapify.dap.js")
 
 'dapify'.d("$edit=.code $run=.code $dirty= $own="
 	,'PRE contenteditable'
 		.d("! .code; a!")
-		.a("log `a; #.innerHTML=$run:hilite")
+		.a("#.innerHTML=$run:hilite")
 		.e("keyup","$edit=#.innerText")
 	,'buttons'.d(""
 		,'welcome'.d("? $own:!; ! welcome")
@@ -33,7 +31,7 @@ dap&&
 	operate	: {
 		inline	:(value,alias,node)=>{
 			try{
-				const sample=eval(value);
+				const sample = eval(value);
 				if(sample&&sample.RENDER)
 					sample.RENDER(null,node);
 			}
