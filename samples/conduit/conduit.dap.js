@@ -1,5 +1,5 @@
-import "//dap.js.org/0.5.2.js";
-import "//cdn.jsdelivr.net/npm/marked/marked.min.js"; // const marked
+import "https://dap.js.org/0.5.2.js"; 
+import "https://cdn.jsdelivr.net/npm/marked/marked.min.js"; // const marked
 import dict from "./dict.dap.js";
 import components from "./components.dap.js";
 import router from "./route.js";
@@ -156,7 +156,7 @@ const
 		
 		JSON,
 		auth,
-		marked,
+		marked :marked.parse,
 		
 		storage:{
 			load: key => JSON.parse(localStorage.getItem(key)),

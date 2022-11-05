@@ -300,7 +300,7 @@ const	dap=(Env=>
 		
 		const
 		
-		evaluate= js	=> Function('return '+js)(dap),
+		evaluate	= js	=> Function('return '+js)(dap),
 		
 		require	= uri	=> {
 			
