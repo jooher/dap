@@ -1,4 +1,4 @@
-import "//dap.js.org/0.5.1.js";
+import "//dap.js.org/0.5.2.js";
 import "//cdn.jsdelivr.net/npm/marked/marked.min.js"; // const marked
 import dict from "./dict.dap.js";
 import components from "./components.dap.js";

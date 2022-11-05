@@ -961,7 +961,7 @@ const	dap=(Env=>
 						path = rvalue.path,
 						expr = rvalue.expr;
 						
-					if(path){
+					if(path && !path instanceof Const){
 						const entry = path.entry;
 						
 						value =	!entry ? path.reach(context,this) :
