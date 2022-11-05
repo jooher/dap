@@ -1,3 +1,4 @@
+import "//dap.js.org/0.5.1.js";
 import dict from "./dict.dap.js";
 import components from "./components.dap.js";
 import router from "./route.js";

@@ -103,7 +103,7 @@ const	dap=(Env=>
 	O	= [],
 	E	= "",
 	
-	inherit = o => Object.create(o),
+	inherit = ( base, ...setup ) => Object.assign( Object.create(base), ...setup ),
 
 	isArray = Array.isArray,
 	
