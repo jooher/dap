@@ -8,7 +8,7 @@ import modal from "./modal.js";
 
 const
 
-	api = "//conduit.productionready.io/api/", //https:
+	api = "https://conduit.productionready.io/api/", //
 	
 	
 	headers = {
@@ -32,10 +32,12 @@ const
 	),
 	
 	dictFromHtmlElements = elems =>
-		Object.assign({}, ...elems.map(el=>({[el.id||el.tagName]:el}))),
+		//Object.assign({}, ...elems.map(el=>({[el.id||el.tagName]:el}))),
+		Object.fromEntries( elems.map(el=>[ el.id||el.tagName, el ]) ),
 		
 	grabFormInputs = form =>
-		Object.assign({}, ...[...form.elements].map( el => el.name&&{[el.name]:el.value})),
+		//Object.assign({}, ...[...form.elements].map( el => el.name&&{[el.name]:el.value})),
+		Object.fromEntries( [...form.elements].filter(el=>el.name).map( el => [ el.name, el.value ])),
 		
 	
 	state = "& :parseRoute; $page=. $tag=. $slug=.; "
