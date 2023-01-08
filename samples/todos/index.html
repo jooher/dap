@@ -25,7 +25,12 @@
 </head>
 <body>
 <script>
+
 const
+	insert = (a,v) => a?a.concat(v):v,
+	remove = (a,v) => a&&a.filter(x=>x!=v),
+	assign = (a,v) => a&&a.map(x=>Object.assign(x,v)),
+
 	todoFilters = {
 		"All": null,
 		"Active": todo => !todo.completed, 
@@ -117,9 +122,13 @@ const
 		afterhash: (h,r)=> r&& h.split("#").pop(), // get rid if a leading # in window.location.hash
 		
 		"array?": x => Array.isArray(x) && x,
+		
+/*		
 		insert: x => x.todos ? x.todos.concat( [x.tgt] ) : [x.tgt],
 		remove: x => x.todos && x.todos.filter( todo => todo!=x.tgt ),
 		assign: x => x.todos && x.todos.map(todo => Object.assign(todo,x.src)),
+*/
+
 		filter: x =>{
 			const
 				a = x.todos,
@@ -128,9 +137,15 @@ const
 		},
 		
 		debugrequest : req => req.url+"\n"+ trace(req.debug,["status","statusText"])+"\n\n"
+	},
+	
+	flatten:{
+		insert: v => insert(v.pop(),v),
+		remove: v => remove(v.pop(),...v),
+		assign: v => assign(v.pop(),...v),
 	}
 })
-.COMPILE()
+//.COMPILE()
 .RENDER()
 </script>
 </body>
