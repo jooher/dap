@@ -1,4 +1,6 @@
 import "https://dap.js.org/0.5.js";
+import "https://dap.js.org/stuff/pwa.jsm";
+//import "https://dap.js.org/stuff/html.jsm";
 
 import Await from "/./stuff/await.js";
 import Persist from "/./stuff/persist.js";
@@ -15,7 +17,6 @@ const
 	
 ;
 
-export default
 
 'client'.d("$Entity=; $aspects= $entities= $opinions= $lists!= $entities!="
 
@@ -380,4 +381,7 @@ export default
 	}
 })
 
-.FUNC(Await);
+.FUNC(Await)
+.RENDER()
+
+;
