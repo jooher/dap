@@ -1,5 +1,5 @@
 import "https://dap.js.org/0.5.js";
-import "https://dap.js.org/stuff/pwa.jsm";
+import "https://dap.js.org/stuff/jsm/pwa.jsm";
 //import "https://dap.js.org/stuff/html.jsm";
 
 import Await from "/./stuff/await.js";
