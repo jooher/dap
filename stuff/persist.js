@@ -52,7 +52,7 @@ Persist	=(storage,box,unbox,single)=> // keeps the data coherent among several t
 			
 			data	: _ => sync()	||order,
 			take	: m => sync()	||index[m],
-			save	: r => sync(r)||r,
+			save	: r => sync(r)	||r,
 			
 			kill	: m => index[m].TIME=null,
 			killr	: r => index[r[key]||ixkey(r)]=null
