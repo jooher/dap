@@ -13,7 +13,7 @@ Route.prototype.fit=function(str){
 }
 
 export default function(urls){
-	const routes = Object.entries(urls).map( [match,seed] => new Route(match,seed) );
+	const routes = Object.entries(urls).map( ([match,seed]) => new Route(match,seed) );
 	return hashstr => {
 		hashstr=hashstr.replace(/^#\/*/,"");
 		for(const route of routes){
