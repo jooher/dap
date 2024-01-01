@@ -42,7 +42,7 @@ const
 	;
 
 	
-'APP.conduit'.d( state, "$user=:auth.load" //; u! @HASHCHANGE
+'APP.conduit'.d( state, "$user=:auth.load"
 
 	,'ROOF'.d(""
 	
