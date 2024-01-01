@@ -30,32 +30,19 @@ const
 		"@:username/:feed": {page:"profile"},
 		":page"		: {}
 	}),
-/*
-		["tag/:tag", {page:""}],
-		["article/:slug", {page:"article"}],
-		["editor/:slug", {page:"editor",slug:""}],
-		["@:username", {page:"profile"}],
-		["@:username/:feed", {page:"profile"}],
-		[":page",{}]
-*/
-
-
 	
 	dictFromHtmlElements = elems =>
-		//Object.assign({}, ...elems.map(el=>({[el.id||el.tagName]:el}))),
 		Object.fromEntries( elems.map(el=>[ el.id||el.tagName, el ]) ),
 		
 	grabFormInputs = form =>
-		//Object.assign({}, ...[...form.elements].map( el => el.name&&{[el.name]:el.value})),
-		Object.fromEntries( [...form.elements].filter(el=>el.name).map( el => [ el.name, el.value ])),
-		
+		Object.fromEntries( [...form.elements].filter(el=>el.name).map( el => [ el.name, el.value ])),		
 	
-	state = "& :parseRoute; $page=. $tag=. $slug=.; "
+	state = "& :parseRoute; $page=. $tag=. $slug=."
 	
 	;
 
 	
-'APP.conduit'.d( state + "$user=:auth.load" //; u! @HASHCHANGE
+'APP.conduit'.d( state, "$user=:auth.load" //; u! @HASHCHANGE
 
 	,'ROOF'.d(""
 	

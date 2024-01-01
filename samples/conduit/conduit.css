@@ -309,3 +309,12 @@ h2 {
   color: gray;
   margin: .2em 0;
 }
+
+.feed-toggle {
+    text-align: left;
+}
+
+.feed-toggle>a {
+    display: inline-block;
+    margin: 0 1em;
+}
