@@ -8,7 +8,9 @@ Route.prototype.fit=function(str){
 	const match = str.match(this.match);
 	if(match){
 		match.shift();
-		return Object.assign({}, this.seed, ...match.map((v,i)=>({[this.params[i]]:v})));
+		//return Object.assign({}, this.seed, ...match.map((v,i)=>({[this.params[i]]:v})));
+		return  Object.assign( Object.fromEntries(match.map((v,i)=>[this.params[i],v])), this.seed );
+		
 	}
 }
 
@@ -27,7 +29,7 @@ export default function(urls){
 urls={
 	"tag/:tag"		: {page:""},
 	"article/:slug"	: {page:"article"},
-	"editor/:slug"	: {page:"editor",slug:""},
+	"editor/:slug"	: {page:"editor"},//,slug:""
 	"@:username"	: {page:"profile"},
 	"@:username/:feed": {page:"profile"},
 	":page"		: {}
