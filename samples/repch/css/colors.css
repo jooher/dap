@@ -6,7 +6,7 @@ input::placeholder, [contenteditable]:empty::before, .fallback, .aspect>.name::b
 
 button{border:none;background:none;}
 
-roof{color:white;/* min-height: 5rem; */}
+roof{/* color:white; *//* min-height: 5rem; */}
 
 roof {}
 
@@ -64,9 +64,10 @@ ul.lists {
 }
 
 .entity>roof {
-  background: blueviolet;
+  /* background: blueviolet; */
   text-align: center;
-  height: 8rem;
+  /* height: 8rem; */
+  margin: 1em;
 }
 
 li>.desc {

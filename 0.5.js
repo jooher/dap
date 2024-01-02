@@ -98,7 +98,7 @@ const	dap=(Env=>
 		
 	}),
 	
-	namespaces = {},//stdns	= new Ns("",true).Func(Func);
+	namespaces = {},
 		
 	O	= [],
 	E	= "",
@@ -1023,12 +1023,12 @@ const	dap=(Env=>
 if(i<0)
 Fail("bzzz i<0");	
 								
-							while(i){
+							while(i){ //>0
 								target=target[key]||(target[key]={});
 								key=route[--i];
 							}
 							
-							if((typeof value === 'object') || target[key]!==value)
+							if(target[key]!==value)//(typeof value === 'object') || 
 								target[key]=value;
 								
 							convert = lvalue.convert;
@@ -1330,7 +1330,7 @@ Fail("bzzz i<0");
 			catch(e){console.warn(e.message);}
 			
 			return request;
-		};	
+		};
 		
 		return {			
 			request: makeXHR,

@@ -1,36 +1,22 @@
 import "https://dap.js.org/0.5.js";
-import "/./stuff/jsm/pwa.js";
+import "https://dap.js.org/stuff/jsm/pwa.js";
 //import "https://dap.js.org/stuff/html.jsm";
 
 import Await from "/./stuff/await.js";
 import Persist from "/./stuff/persist.js";
+import multiselect from "/./stuff/multiselect.js";
 import scrollfocus from "/./stuff/scrollfocus.js";	
 import Starbar from "/./stuff/bricks/starbar.js";
 
 import {untab} from "/./stuff/parse.js";
 
 import Scan from "./scanner.js";
+import guess from "./guess.js";
 
 const
 	grab	= src	=> [...src.children].reduce((a,n)=>{if(n.id)a[n.id]=src.removeChild(n); return a},{}),
-	dataset	= (tags,raws)=>raws.map( raw=>{const row={};tags.forEach((t,i)=>row[t]=raw[i]); return row;} )
-	
+	dataset	= (tags,raws)=>raws.map( raw=>{const row={};tags.forEach((t,i)=>row[t]=raw[i]); return row;} )	
 ;
-
-class Selection {
-	
-	items = {};
-	count = 0;
-		
-	"?"	= key	=> this.items[key];
-	"!"	= key => (this.items[key]=this.items[key]?null:Date.now())? ++this.count : --this.count;
-	all	= _=>Object.keys(this.items);
-	set	= _=>Object.keys(this.items).filter(k=>this.items[k]);
-	clear	= _=>{ this.items={}; this.count=0 };
-	
-};
-
-
 
 'client'.d("$Entity=; $aspects= $entities= $opinions= $lists!= $entities!="
 
@@ -45,7 +31,7 @@ class Selection {
 			,'ICON.settings'.ui("$Entity=")
 		)
 		
-		,'ETAGE'.d("?? $tab@lists; $list= $checked=$:checked.items,??"
+		,'ETAGE'.d("?? $tab@lists; $list=`recent $checked=:checked.size"
 		
 			,'ATTIC'.d(""
 				,'SELECT.lists'.d(""
@@ -55,7 +41,7 @@ class Selection {
 					,'OPTGROUP.lists'.d("$lists!; * (`list)db"
 						,'OPTION'.d("!! .title@ .list@value")
 					)					
-				).ui("$list=#:value; ? $:checked.items,?! Ask(dict.addtolist@.):wait,! (:!@list-entity .entity:checked.items $list)dbmul ")//
+				).ui("$list=#:value; ? :checked.size,! Ask(dict.addtolist@.):wait,! (:!@list-entity :checked.all@entity $list)dbmul")//
 			
 				,'ICON.add_circle'.ui("? .title=Ask(dict.createlist@.):wait; (@list (.title))db $lists!=()")
 				//.List=(@list (.title))db $list=List.list (:!@list-entity .entity:checked.items $list )dbmul
@@ -64,12 +50,12 @@ class Selection {
 			)
 			
 			,'UL.entities'.d("$entities!; *@ ( (`list-entity $list)db @TIME`dsc )sort"
-				,'LI'	.d("? .TIME; $=(.entity)db; "
-					,'title'.d("! (.title .fallback)?; !? .title:!@fallback")
+				,'LI'	.d("? .TIME; $=(.entity)db"
 					,'desc'.d("! .desc")
+					,'title'.d("! (.title .fallback)?; !? .title:!@fallback")
 					,'tick'
-						.d ("!?@checked .entity:checked.?")
-						.ui("$checked=.entity:checked.!; !?@checked .entity:checked.?; ?")
+						.d ("!? .entity:checked.?@checked")
+						.ui("!? .entity:checked.!@checked; $checked=:checked.size; ?")
 				)
 				.a("!? ($ $Entity)eq@selected")
 				.ui("$Entity=$")
@@ -126,8 +112,12 @@ class Selection {
 	,'PAGE.entity'.d("? $Entity; * $Entity@"//; scroll #; (`list-entity @list`recent .entity)db
 	
 		,'ROOF'.d(""
-			,'title contenteditable tabindex=0'.d("textonly; ! .title; focus .title:!@PAGE").ui(".title=#:value")
-			,'desc contenteditable tabindex=0'.d("textonly; ! .desc; focus .desc:!@PAGE").ui(".desc=#:value")
+			,'desc contenteditable tabindex=0'
+				.d("textonly; ! .desc; focus .desc:!@PAGE")
+				.ui(".desc=#:value")
+			,'title contenteditable tabindex=0'
+				.d("textonly; ! .title; focus .title:!@PAGE")
+				.ui(".title=#:value")
 			,'credit'.d("! $!=.credit:starbar.enabled").ui(".credit=$!.value")
 		).u("(@entity $)db $entities!=()")
 		
@@ -138,16 +128,18 @@ class Selection {
 			)
 			,'SECTION.tags'.d("$lists! $?="
 
-				,'tagslist'.d("a!; * (`list)db"
-					,'tag'
+				,'tagslist'.d("a!; * $_list=(`list)db@" //
+					,'tag `tag:'
 						.d("! .title; $tagged=(`list-entity .list .entity=$Entity.entity)db:??; a!")
 						.a("!? $tagged $tagged:!@unset")
 						.ui("? ($? $?=:!)eq; (@list-entity .list .entity $tagged:?uid=$tagged:!)db")//
-				).a("!? $?:!@short").u("?")
+				)
+				.a("!? $?:!@short")
+				.u("?")
 				
-				,'BUTTON.check'.d("? $?").ui("$?=")
+				//,'BUTTON.check `check'.d("? $?")
 				
-			)
+			).ui("$?=$?:!")
 
 			,'SECTION.opinions'.d("$?= $aspects!=; focus #@SECTION"
 			
@@ -319,13 +311,13 @@ class Selection {
 				return src&&src.map(row=>Object.assign(row,tail));
 			},
 			
-/*		sort	:(
+		sort	:(
 				ops=>(values,names)=>values.reduceRight((a,v,i)=>v?ops[v](a,names[i]):a)
 			)({
 				asc	:(a,v)=>a.sort((x,y)=>x[v]-y[v]),
 				dsc	:(a,v)=>a.sort((x,y)=>y[v]-x[v])
 			})
-*/
+/**/
 	},
 	convert	:{
 	
@@ -336,61 +328,12 @@ class Selection {
 		split		: str		=> str.split(/,/g),
 		share		: ( share => share ? data => share(data) : _ => alert ("Can't share") )(window.navigator.share),
 		
-		checked	: new Selection,
+		checked	: multiselect,
 		
 		
 		timestamp	: _ => +Date.now(),
 		
-		scope		:(function(){
-				const
-					web	=[
-							[ /^(?:www.youtube.com\/watch\?v=)([a-zA-Z0-9-]+)/, "youtube"],
-							[ /^(?:youtu.be\/)([a-zA-Z0-9-]+)/, "youtube"],
-							[ /^(?:www.facebook.com\/)([^?]+)/, "facebook" ]
-						],
-						
-					nonweb={
-							gtin		:/^\d{13}$/
-						},
-						
-					redir	={
-							gtin		: gtin=>"http://srs.gs1ru.org/id/gtin/"+gtin,
-							youtube	: v	=>"https://youtu.be/"+v, // https://www.youtube.com/watch?v=
-							facebook	: id	=>"https://www.facebook.com/"+id
-						};
-					
-				return	{
-				
-					guess	: entry => {
-					
-						if(!entry)
-							return entry;
-					
-						if(entry.startsWith("https://")){
-							const	key=entry.substring(8);									
-							for(let i=web.length; i--;){
-								const match=web[i][0].exec(key);
-								if(match)return web[i][1]+":"+match[1];
-							};
-							return decodeURI(entry);
-						}
-					
-						const	parts	= entry.split(":"),
-							key	= parts.pop(),
-							f	= parts.length&&parts.pop();
-							
-						if(f)return key.match(nonweb[f])?entry:console.log("format mismatch:"+entry);
-						else for(let f in nonweb)if(key.match(nonweb[f]))return f+":"+key;
-						console.log("Can't recognize key format");
-					},
-					
-					href	: entry =>{
-						const parts	= entry.split(":"),
-							urltp	= redir[parts[0]];
-						return urltp ? urltp(parts[1]) : parts[1];
-					}
-				};
-			})(),
+		scope		: guess,
 			
 		scan	: (_,r) => r&& Scan()
 	}
