@@ -9,58 +9,24 @@
 		<script src="../0.5a76.js"></script>
 	</head>
 	<body>  
-		<script>
-/*			'B'.d("! $name=`@kitten .surname=:!") //
-			// ,'I'.d("! (@we`bah $name:upper kwan $name@):trace")
-			,'H2'.d("! $name .surname")
-		)
-		.d("? :!; ! `second")
-		.d("! `third")
-		'UL'.d("*@s :query,lines`good-servers"
-			,'LI'.d("! .s")
-		)
-*/
+		<script type="module">
+class Selection {
+	
+	items = {};
+	count = 0;
+		
+	"?"	= key	=> this.items[key];
+	"!"	= key => (this.items[key]=this.items[key]?null:Date.now())? ++this.count : --this.count;
+	all	= _=>Object.keys(this.items);
+	set	= _=>Object.keys(this.items).filter(k=>this.items[k]);
+	clear	= _=>{ this.items={}; this.count=0 };
+	
+};
 
-//dap.debug();
+const a=new Selection;
 
-'app'.d("$status=`theStatus" // `literal what  .datum=`theDatum
-	,'B'.d("! $status").ui("$status=$status:!")
-	,'UL'.d("* eng"
-		,'LI'.d("! .eng"
-			,'UL'.d("* rus"
-				,'LI'.d("! .rus `- ..eng `= $status").ui("$status=.rus")
-				)
-			).u("$status=($status `+ .eng)concat")
-	)
-
-	,'H3'.d("? ($status `)?; ! `status: $status")
-	,'sta'.d("!")
-	,'dat'.d("! `datum: .datum")
-	,'redat'.d("$=( @redatum`ooh); ! $:trace")
-)
-
-.FUNC({
-	convert:{
-		upper: str=>str.toUpperCase(),
-		lines: txt=>txt.split("\n"),
-		trace: o => 
-			Object.keys(o).reduce((a,k)=>a+=(k+": "+o[k]+"; "),"")
-	}
-})
-.DICT({
-	kwan:{ram:"haram"},
-	what: "theConst",
-	n:5,
-	rus: "раз два три".split(" "),
-	eng: "one two three".split(" ")
-})
-.RENDER()
-/*
-.FUNC({
-	convert:{
-	}
-})
-*/
+console.log(a["!"]("first"));
+console.log(a["?"]("first"));
 
 		</script>
 

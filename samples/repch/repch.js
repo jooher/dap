@@ -17,6 +17,20 @@ const
 	
 ;
 
+class Selection {
+	
+	items = {};
+	count = 0;
+		
+	"?"	= key	=> this.items[key];
+	"!"	= key => (this.items[key]=this.items[key]?null:Date.now())? ++this.count : --this.count;
+	all	= _=>Object.keys(this.items);
+	set	= _=>Object.keys(this.items).filter(k=>this.items[k]);
+	clear	= _=>{ this.items={}; this.count=0 };
+	
+};
+
+
 
 'client'.d("$Entity=; $aspects= $entities= $opinions= $lists!= $entities!="
 
@@ -31,7 +45,7 @@ const
 			,'ICON.settings'.ui("$Entity=")
 		)
 		
-		,'ETAGE'.d("?? $tab@lists; $list= $checked=$:checked.set,??"
+		,'ETAGE'.d("?? $tab@lists; $list= $checked=$:checked.items,??"
 		
 			,'ATTIC'.d(""
 				,'SELECT.lists'.d(""
@@ -41,10 +55,10 @@ const
 					,'OPTGROUP.lists'.d("$lists!; * (`list)db"
 						,'OPTION'.d("!! .title@ .list@value")
 					)					
-				).ui("$list=#:value; ? $:checked.set,?! Ask(dict.addtolist@.):wait,! (:!@list-entity .entity:checked.set $list)dbmul ")//
+				).ui("$list=#:value; ? $:checked.items,?! Ask(dict.addtolist@.):wait,! (:!@list-entity .entity:checked.items $list)dbmul ")//
 			
 				,'ICON.add_circle'.ui("? .title=Ask(dict.createlist@.):wait; (@list (.title))db $lists!=()")
-				//.List=(@list (.title))db $list=List.list (:!@list-entity .entity:checked.set $list )dbmul
+				//.List=(@list (.title))db $list=List.list (:!@list-entity .entity:checked.items $list )dbmul
 				,'ICON.share'.ui(":alert`share")
 					
 			)
@@ -64,8 +78,8 @@ const
 			
 			,'BAR'.d(""
 				,'multi'.d("? $checked"
-					,'ICON.remove_circle_outline'.ui("? Ask(dict.remove@.):wait; log `remove; (@list-entity .entity:checked.set $list)dbmul")//
-					,'ICON.delete'.ui("? Ask(dict.delete@.):wait; (@entity $:checked.set)dbmul")
+					,'ICON.remove_circle_outline'.ui("? Ask(dict.remove@.):wait; log `remove; (@list-entity .entity:checked.items $list)dbmul")//
+					,'ICON.delete'.ui("? Ask(dict.delete@.):wait; (@entity $:checked.items)dbmul")
 					,'ICON.clear'.ui("")//ui("")
 				).u("$checked=$:checked.clear $entities!=()")
 			)
@@ -81,7 +95,13 @@ const
 			,'INPUT.key placeholder="🔎"'.d("!! $entry@value").ui("log $entry=#:value,scope.guess")//.d("textonly")
 			,'BUTTON.center_focus_weak'.ui("log $entry=#:scan,scope.guess") //.camera
 	
-		).u("? $entry; ? $Entity= .Entry=($entry)db ($Entity=(@entity $entry@fallback)db .Entry=(@entry $entry $Entity.entity)db)!; ? $Entity $Entity=(.Entry.entity)db; (@list-entity @list`recent $Entity.entity)db $entry=") /// $Entity=(server@ $entry)uri:query 
+		).u(`	? $entry;
+			? $Entity=
+			  .Entry=($entry)db
+			  ($Entity=(@entity $entry@fallback)db .Entry=(@entry $entry $Entity.entity)db)!;
+			? $Entity $Entity=(.Entry.entity)db;
+			(@list-entity @list"recent $Entity.entity)db $entry=;
+		`) /// $Entity=(server@ $entry)uri:query 
 	)
 	
 	,'PAGE.other'.d("? $Entity:!; focus #; $tab="
@@ -299,12 +319,13 @@ const
 				return src&&src.map(row=>Object.assign(row,tail));
 			},
 			
-		sort	:(
-				ops=>(values,names)=>values.reduce((a,v,i)=>v?ops[v](a,names[i]):a,values.pop())
+/*		sort	:(
+				ops=>(values,names)=>values.reduceRight((a,v,i)=>v?ops[v](a,names[i]):a)
 			)({
 				asc	:(a,v)=>a.sort((x,y)=>x[v]-y[v]),
 				dsc	:(a,v)=>a.sort((x,y)=>y[v]-x[v])
 			})
+*/
 	},
 	convert	:{
 	
@@ -315,13 +336,7 @@ const
 		split		: str		=> str.split(/,/g),
 		share		: ( share => share ? data => share(data) : _ => alert ("Can't share") )(window.navigator.share),
 		
-		checked	: ((set,count)=>({
-				"?"	: key	=> set[key],
-				"!"	: key => (set[key]=set[key]?null:Date.now())? ++count : --count,
-				all	: _=>Object.keys(set),
-				set	: _=>Object.keys(set).filter(k=>set[k]),
-				clear	: _=>{ set={}; count=0 }
-			}))({},0),
+		checked	: new Selection,
 		
 		
 		timestamp	: _ => +Date.now(),
