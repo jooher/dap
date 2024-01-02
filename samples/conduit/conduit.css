@@ -18,9 +18,10 @@ header{
 	text-align: left;
 	color: #fff;
 	padding: 1em 8em;
-	margin: 0 -8em;
+	/* margin: 0 -8em; */
 	text-align: center;
 	background: #5cb85c;
+	border-radius: .5em;
 }
 
 .article>header{
@@ -59,7 +60,7 @@ nav>a{
 }
 
 h1.logo{
-	font-size: 3rem;
+	/* font-size: 3rem; */
 	text-shadow: 0 1px 3px rgba(0,0,0,.3);
 }
 
@@ -119,8 +120,8 @@ a:focus, a:hover {
   margin-bottom: .2rem;
   display: inline-block;
   padding-right: .6em;
-	padding-left: .6em;
-	border-radius: 10rem;
+  padding-left: .6em;
+  border-radius: .6rem;
 }
 
 .preview-link>.tags{
@@ -136,7 +137,11 @@ a:focus, a:hover {
 }
 
 page>.tags{
-	margin: 4em 0;
+	margin: 1em 0;
+	background: whitesmoke;
+	border-radius: .5em;
+	padding: 1em;
+	font-size: .8em;
 }
 
 page>.tags>.tag{
@@ -267,10 +272,10 @@ form>button{
 }
 
 app.conduit {
-  /* max-width: 48em; */
+  max-width: 48em;
   /* min-width: 24em; */
   display: block;
-  margin: 0 8em;
+  margin: 0 auto;
 }
 
 button.favorited {
@@ -303,4 +308,13 @@ h2 {
 .description {
   color: gray;
   margin: .2em 0;
+}
+
+.feed-toggle {
+    text-align: left;
+}
+
+.feed-toggle>a {
+    display: inline-block;
+    margin: 0 1em;
 }

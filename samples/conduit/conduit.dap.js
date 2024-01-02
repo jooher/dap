@@ -2,7 +2,7 @@ import "https://dap.js.org/0.5.2.js";
 import "https://cdn.jsdelivr.net/npm/marked/marked.min.js"; // const marked
 import dict from "./dict.dap.js";
 import components from "./components.dap.js";
-import router from "./route.js";
+import router from "./route-m.js";
 import authorizer from "./auth.js";
 import modal from "./modal.js";
 
@@ -22,30 +22,27 @@ const
 		.replace(/\/&/g,"?")
 		.replace(/@\//g,"@"),
 	
-	parseRoute = router(
-		["tag/:tag", {page:""}],
-		["article/:slug", {page:"article"}],
-		["editor/:slug", {page:"editor",slug:""}],
-		["@:username", {page:"profile"}],
-		["@:username/:feed", {page:"profile"}],
-		[":page",{}]
-	),
+	parseRoute = router({
+		"tag/:tag"		: {page:""},
+		"article/:slug"	: {page:"article"},
+		"editor/:slug"	: {page:"editor",slug:""},
+		"@:username"	: {page:"profile"},
+		"@:username/:feed": {page:"profile"},
+		":page"		: {}
+	}),
 	
 	dictFromHtmlElements = elems =>
-		//Object.assign({}, ...elems.map(el=>({[el.id||el.tagName]:el}))),
 		Object.fromEntries( elems.map(el=>[ el.id||el.tagName, el ]) ),
 		
 	grabFormInputs = form =>
-		//Object.assign({}, ...[...form.elements].map( el => el.name&&{[el.name]:el.value})),
-		Object.fromEntries( [...form.elements].filter(el=>el.name).map( el => [ el.name, el.value ])),
-		
+		Object.fromEntries( [...form.elements].filter(el=>el.name).map( el => [ el.name, el.value ])),		
 	
-	state = "& :parseRoute; $page=. $tag=. $slug=.; "
+	state = "& :parseRoute; $page=. $tag=. $slug=."
 	
 	;
 
 	
-'APP.conduit'.d( state + "$user=:auth.load" //; u! @HASHCHANGE
+'APP.conduit'.d( state, "$user=:auth.load"
 
 	,'ROOF'.d(""
 	
