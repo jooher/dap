@@ -488,7 +488,7 @@ const	dap=(Env=>
 					"").split(" ");
 			},
 			
-			print	:function(place,context,instead){
+			print	:function(place,context,instead,data){
 				
 				if(!this.scope)
 					this.prepare(place.P);
@@ -504,7 +504,7 @@ const	dap=(Env=>
 					a.engage();					
 					
 				node.P = this;
-				node.$ = context.subContext(null,this.scope.defines);
+				node.$ = context.subContext(data,this.scope.defines);
 					
 				new Execute.Branch(node).runDown(todo,place,instead); 
 				
@@ -930,7 +930,7 @@ const	dap=(Env=>
 								const
 									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
 								rows.forEach( row=>
-										new Branch(node,this.up,row).execBranch(todo)
+									new Branch(node,this.up,row).execBranch(todo)
 								);
 							}
 						}
@@ -1063,7 +1063,7 @@ Fail("bzzz i<0");
 					value = (expr.flatten||Util.hash)(values,tags);
 					
 				if(proto){
-					proto.print(this.node, new Context(value,null,this.$));//dap.Execute.					
+					proto.print(this.node,this.$,null,value)//this.$.subContext(value));//dap.Execute.					
 				}
 				
 				return value;

@@ -1,4 +1,5 @@
-import "https://dap.js.org/0.5.js";
+import "/./0.5.3.js"; //https://dap.js.org
+//import "https://dap.js.org/0.5.2.js"; //
 import "https://dap.js.org/stuff/jsm/pwa.js";
 //import "https://dap.js.org/stuff/html.jsm";
 
@@ -18,17 +19,23 @@ const
 	dataset	= (tags,raws)=>raws.map( raw=>{const row={};tags.forEach((t,i)=>row[t]=raw[i]); return row;} )	
 ;
 
+const 
+	Tabset =
+		'TABSET'.d("* .tab"// :split`help,data"//
+				,'TAB'.d("!? .tab; ! .tab; a!")
+					.a("!? (.tab $tab)eq@selected")
+					.ui("$tab=.")
+			).u("?");
+
+ 
 'client'.d("$Entity=; $aspects= $entities= $opinions= $lists!= $entities!="
 
 	,'PAGE.nav'.d("$tab=`lists"
 	
-		,'ROOF'.d(""
-			,'TABSET'.d("*@tab :split`lists,categories"//
-				,'TAB'.d("!? .tab@; a!")
-				.ui("$tab=.tab")
-				.a("!? (..tab $tab)eq@selected")
-			)				
-			,'ICON.settings'.ui("$Entity=")
+		,'ROOF'.d("Tabset(:split@tab`lists,categories)"
+			,'DECK'.d(""
+				,'ICON.settings'.ui("$Entity=")
+			)
 		)
 		
 		,'ETAGE'.d("?? $tab@lists; $list=`recent $checked=:checked.size"
@@ -53,16 +60,17 @@ const
 				,'LI'	.d("? .TIME; $=(.entity)db"
 					,'desc'.d("! .desc")
 					,'title'.d("! (.title .fallback)?; !? .title:!@fallback")
+					,'credit'.d("! $!=.credit:starbar.disabled")
 					,'tick'
 						.d ("!? .entity:checked.?@checked")
-						.ui("!? .entity:checked.!@checked; $checked=:checked.size; ?")
+						.ui("!? .entity:checked.!@checked; $checked=:checked.size,?; ?")
 				)
 				.a("!? ($ $Entity)eq@selected")
 				.ui("$Entity=$")
 				//.e("contextmenu",)	
 			)
 			
-			,'BAR'.d(""
+			,'DECK'.d(""
 				,'multi'.d("? $checked"
 					,'ICON.remove_circle_outline'.ui("? Ask(dict.remove@.):wait; log `remove; (@list-entity .entity:checked.items $list)dbmul")//
 					,'ICON.delete'.ui("? Ask(dict.delete@.):wait; (@entity $:checked.items)dbmul")
@@ -92,12 +100,14 @@ const
 	
 	,'PAGE.other'.d("? $Entity:!; focus #; $tab="
 	
-		,'ROOF'.d(""
-			,'TABSET'.d("*@tab :split`help,data"//
+		,'ROOF'.d("Tabset(:split@tabs`help,data)"
+/*
+			,'TABSET'.d("*@tab "//
 				,'TAB'.d("!? .tab; a!")
 				.ui("$tab=.tab")
 				.a("!? (.tab $tab)eq@selected")
 			)
+*/
 		)
 		
 		,'ETAGE'
@@ -111,7 +121,7 @@ const
 	
 	,'PAGE.entity'.d("? $Entity; * $Entity@"//; scroll #; (`list-entity @list`recent .entity)db
 	
-		,'ROOF'.d(""
+		,'ROOF'.d("focus #@PAGE"
 			,'desc contenteditable tabindex=0'
 				.d("textonly; ! .desc; focus .desc:!@PAGE")
 				.ui(".desc=#:value")
@@ -121,28 +131,20 @@ const
 			,'credit'.d("! $!=.credit:starbar.enabled").ui(".credit=$!.value")
 		).u("(@entity $)db $entities!=()")
 		
-		,'ETAGE'.d(""
+		,'ETAGE'.d("$tab=`tags Tabset(:split@tab`tags,links,aspects,discuss)"
 		
-			,'SECTION.entries'.d("* (`entry .entity)db"
-				,'A.entry target=_blank'.d(".href=.entry:scope.href; !! .entry@ .href .href@title")
+			,'SECTION.tags'.d("?? $tab@tags; $lists!; * (`list)db"
+
+				,'tag'
+					.d("! .title; $tagged=(`list-entity .list .entity=$Entity.entity)db:??; a!")
+					.a("!? $tagged $tagged:!@unset")
+					.ui("(@list-entity .list .entity $tagged:?uid=$tagged:!)db; ?")//? ($? $?=:!)eq;		
+				
 			)
-			,'SECTION.tags'.d("$lists! $?="
-
-				,'tagslist'.d("a!; * $_list=(`list)db@" //
-					,'tag `tag:'
-						.d("! .title; $tagged=(`list-entity .list .entity=$Entity.entity)db:??; a!")
-						.a("!? $tagged $tagged:!@unset")
-						.ui("? ($? $?=:!)eq; (@list-entity .list .entity $tagged:?uid=$tagged:!)db")//
-				)
-				.a("!? $?:!@short")
-				.u("?")
-				
-				//,'BUTTON.check `check'.d("? $?")
-				
-			).ui("$?=$?:!")
-
-			,'SECTION.opinions'.d("$?= $aspects!=; focus #@SECTION"
+		
+			,'SECTION.opinions'.d("?? $tab@aspects; $?= $aspects!="
 			
+				
 				,'present'.d("$aspects!; * (`entity-aspect .entity)db"
 					,'opinion'.d("! Aspect").u("(@entity-aspect $)db")
 				)
@@ -162,7 +164,13 @@ const
 				
 				,'BUTTON'.d("!? ($?:! `add `check)?!").ui("$?=$?:!")
 			)
-		).u("(@list-entity @list`recent .entity)db")
+		
+			,'SECTION.entries'.d("?? $tab@links; * (`entry .entity)db"
+				,'A.entry target=_blank'.d(".href=.entry:scope.href; !! .entry@ .href .href@title")
+			)
+			
+
+		)//.u("(@list-entity @list`recent .entity)db")
 		
 		,'VAULT'.d(""
 			,'ICON.share'.ui("$:share")
@@ -173,6 +181,13 @@ const
 .DICT({
 
 	server	:"https://cookstat.dapmx.org/repch/query.php?",
+	
+	Tabset:
+		'TABSET'.d("* .tab"
+			,'TAB'.d("!? .tab; ! .tab; a!")
+				.a("!? (.tab $tab)eq@selected")
+				.ui("$tab=.")
+		).u("?"),
 
 	Aspect:
 		'aspect'.d("$?="
@@ -222,6 +237,7 @@ const
 		).u("kill; ?"),//value $value; 
 
 	dict	:{
+		
 		createlist	:{
 			title:"Create a new list",
 			details:"What will be its name?",

@@ -6,19 +6,18 @@ input::placeholder, [contenteditable]:empty::before, .fallback, .aspect>.name::b
 
 button{border:none;background:none;}
 
-roof{/* color:white; *//* min-height: 5rem; */}
-
 roof {}
 
 button::before, .lists>li.selected
-{background: #52f; color: white;}
+{/* background: #52f; *//* color: white; */background: white;color: indianred;}
 
-tab	{color: rgba(255,255,255,.75)}
-tab.selected {color: white}
+roof>tabset>tab	{color: rgba(255,255,255,.5);}
+roof>tabset>tab.selected {color: white}
 
 /*li[ui]:hover {background: #eee}*/
 
-.entities>.selected {background: #eee;/* font-weight: bold; *//* text-decoration: underline; */}
+.entities>li{background: white;box-shadow: 0 2px 6px rgba(0,0,0,.2);}
+.entities>.selected {margin:.5em 0;border-radius:0;box-shadow:none;padding-left: 1.5em;}
 
 .editables {text-align: center;/* background-color: white; *//* position: sticky; *//* top: 0; *//* z-index: 2; *//* border-bottom: 1px solid lightgray; *//* box-shadow: 0 1rem 1rem white; */}
 .append>textarea {background-color: floralwhite}
@@ -35,13 +34,13 @@ tab.selected {color: white}
     /* display: inline; */
 }
 
-stars>stars {/* color:black */}
+stars>stars {color: lightslategray;}
 
 .xtag, action
 	{color: #52f;}
 	
 input.key, .dialog>input
-	{border-color: #52f}
+	{/* border-color: #52f; */border: none;}
 
 
 
@@ -51,15 +50,15 @@ ul.lists {
 }
 
 
-.nav>roof {background: #52f;text-align: right;height: 4rem;}
+.nav>roof {background: darkslategray;color: white;/* text-align: right; *//* padding-left: 4rem; *//* height: 2rem; */}
 
 .nav>roof::before{
 	position:absolute;
-	content:"REPCH.IO";
-	left: -.3em;
-	top: -.2em;
+	/* content: "REPCH"; */
+	left: -.1em;
+	/* top: -.2em; */
 	font: bold 1em sans-serif;
-	color: rgba(255,255,255,.15);
+	color: rgba(255,255,255,.25);
 	/* text-shadow: 0px 2px 2px slategrey; */
 }
 
@@ -75,5 +74,9 @@ li>.desc {
 }
 
 .nav>etage>attic {
-  background: antiquewhite;
+  background: slategray;
+}
+
+vault {
+    background: lightslategray;
 }
