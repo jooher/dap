@@ -1,4 +1,4 @@
-import "/./0.5.3.js"; //https://dap.js.org
+import "/./0.5.js"; //https://dap.js.org
 //import "https://dap.js.org/0.5.2.js"; //
 import "https://dap.js.org/stuff/jsm/pwa.js";
 //import "https://dap.js.org/stuff/html.jsm";

@@ -16,24 +16,25 @@ const
 	,'H1'.d("! $tab")
 	
 	
-	,'ETAGE'.d("$tab=`tags Tabset(tab`)"//; & :split@tab`tags,links,aspects,discuss; ! Tabset:check"
+	,'ETAGE'.d("$tab=`tags Tabset(tab)"
 	
-		,'tab'.d("Tabset(tab)")
+		,'tabs'.d("Tabset(tab)"
+			,'I'.d("! $tab")
+		)
 		
-		,'tab'.d("& tab; ! Tabset")
+		,'tabs'.d("& tab; ! Tabset")
 		
-		,'tab'.d(""
+		,'tabs'.d(""
 			,Tabset
 		)
 		
 		,Tabset
 		
-		,'H2'.d("! $tab")
+		//,'H2'.d("! $tab")
 	)
 )
 .DICT({
 	Tabset,
-	
 	
 	tab:[
 		'tags',

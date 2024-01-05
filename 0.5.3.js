@@ -600,7 +600,7 @@ const	dap=(Env=>
 			
 			const
 			
-			make = (context,brackets) => {
+			make = (rule,brackets) => {
 
 				function makeTodo(steps,epilog){//branches
 				
@@ -617,7 +617,7 @@ const	dap=(Env=>
 					const
 						tokens= stepstr.split(TOKENS),
 						head	= !/[<$=:`]/.test(tokens[0]) && tokens.shift().split("@"),
-						operate = head[0] && context.ns.reach(head[0],FUNCS.OPERATE),
+						operate = head[0] && rule.ns.reach(head[0],FUNCS.OPERATE),
 						alias	= head[1],
 						feed	= tokens.length && makeFeed( tokens.reverse(), alias );
 					
@@ -654,7 +654,7 @@ const	dap=(Env=>
 									if(!tag)
 										tag=path.route[0];
 									if(path.entry&&path.route.length==1)
-										context.scope.lvalue(path.entry,context.define);
+										rule.scope.lvalue(path.entry,rule.define);
 								}
 								return new Lvalue(path,convert);
 							});
@@ -675,11 +675,11 @@ const	dap=(Env=>
 									tag=path.route[0];
 								
 								if("value" in path){
-									literal = path.reach(context) || literal;
+									literal = path.reach(rule) || literal;
 								}else{
 									resolved=false;
 									if(path.entry)
-										context.scope.rvalue(path.entry,context.depend); // TODO: static init
+										rule.scope.rvalue(path.entry,rule.depend); // TODO: static init
 								}
 							}
 
@@ -703,6 +703,9 @@ const	dap=(Env=>
 						if(alias==null)
 							alias = defaultalias;
 						
+						//if(literal instanceof Proto){} // TODO: sneak scope.depends
+							
+						
 						values[count]	= literal;
 						tags	[count]	= alias!=null ? alias : (tag||"");
 						tokens[count]	= (lvalues||rvalue) ? new Token(lvalues,rvalue) : null;
@@ -720,13 +723,13 @@ const	dap=(Env=>
 						feed = makeFeed(tokens ? tokens.split(TOKENS).reverse() : O ),
 						flatten = a[1] && ( a[1].charAt(0)=="."
 							? makeAccessor(a[1].substr(1))
-							: context.ns.reach(a[1],FUNCS.FLATTEN)
+							: rule.ns.reach(a[1],FUNCS.FLATTEN)
 						);
 						
 					return new Expr(feed,flatten)
 				};
 				
-				function makeConverts(str){return str.split(",").reverse().map(path=>context.ns.reach(path,FUNCS.CONVERT))}
+				function makeConverts(str){return str.split(",").reverse().map(path=>rule.ns.reach(path,FUNCS.CONVERT))}
 				function makeAccessor(path){return values=> Util.reach(values,path)}
 				
 				function branchSteps(n){return brackets[n].split(STEPS)}
