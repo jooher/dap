@@ -19,14 +19,6 @@ const
 	dataset	= (tags,raws)=>raws.map( raw=>{const row={};tags.forEach((t,i)=>row[t]=raw[i]); return row;} )	
 ;
 
-const 
-	Tabset =
-		'TABSET'.d("* .tab"// :split`help,data"//
-				,'TAB'.d("!? .tab; ! .tab; a!")
-					.a("!? (.tab $tab)eq@selected")
-					.ui("$tab=.")
-			).u("?");
-
  
 'client'.d("$Entity=; $aspects= $entities= $opinions= $lists!= $entities!="
 

@@ -9,30 +9,12 @@ const
 			).u("?")			
 	;
 
-'nav'.d("$tab=`lists"
-
-	,'ROOF'.d("Tabset(tab)")
-	
-	,'H1'.d("! $tab")
-	
-	
-	,'ETAGE'.d("$tab=`tags Tabset(tab)"
-	
-		,'tabs'.d("Tabset(tab)"
-			,'I'.d("! $tab")
-		)
-		
-		,'tabs'.d("& tab; ! Tabset")
-		
-		,'tabs'.d(""
-			,Tabset
-		)
-		
-		,Tabset
-		
-		//,'H2'.d("! $tab")
-	)
+'ETAGE'.d("$tab=`tags"
+	,'tabs'.d("Tabset(tab)")
+	,'i'.d("! $tab")
 )
+
+
 .DICT({
 	Tabset,
 	
