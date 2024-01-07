@@ -1295,11 +1295,11 @@ Fail("bzzz i<0");
 		return elem;
 	},
 	
-	interpret = (res,type) => {
+	mime = (res,type) =>
 		type === "text/plain" ? res.text():
 		type === "application/json" ? res.json():
-		res;
-	}
+		type === "application/x-www-form-urlencoded" ? res.formData():
+		res
 ;
 	
 	return	{
@@ -1403,22 +1403,17 @@ Fail("bzzz i<0");
 				alert : (msg,r) => r&& alert(msg),
 				prompt: (msg,r) => r&& prompt(msg),
 				confirm:(msg,r) => r&& confirm(msg),
-				
-				request:(req,r) => r&& Http.execAsync(req),
-				query	: (req,r) => r&& Http.execAsync(req)
-					.then(Mime.parseResponse)
-					.catch(xhr=>{
-						if(typeof req ==='object'){
-							if('error' in req)req.error = Mime.parseResponse(xhr);
-							if('debug' in req)req.debug = xhr;
-							return req;
-						}
-					})
+									
+				fetch	: (req,r) => r && fetch(req),
+				query	: (req,r) => r && fetch(req).then(res => res.ok && mime(res,res.headers.get("Content-Type").toLowerCase()))
 			},
 			
 			flatten	:{
-				uri	: QueryString.build.ordered,
-				format: (values,tags)=>tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop())
+				format:(values,tags) => tags.reduce((str,tag,i)=>str.split('{'+tag+'}').join(values[i]),values.pop()),
+				uri	:(values,tags) => values
+						.map((v,i) => v==null ? null : tags[i] ? "&"+tags[i]+"="+encodeURIComponent(v) : v )
+						.filter(v => v!==null)
+						.reverse().join("")
 			},
 			
 			operate	:{
