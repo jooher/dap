@@ -1,4 +1,4 @@
-import "/./0.5.js"; //https://dap.js.org
+import "/./0.5.3.js"; //https://dap.js.org
 //import "https://dap.js.org/0.5.2.js"; //
 import "https://dap.js.org/stuff/jsm/pwa.js";
 //import "https://dap.js.org/stuff/html.jsm";
@@ -15,8 +15,8 @@ import Scan from "./scanner.js";
 import guess from "./guess.js";
 
 const
-	grab	= src	=> [...src.children].reduce((a,n)=>{if(n.id)a[n.id]=src.removeChild(n); return a},{}),
-	dataset	= (tags,raws)=>raws.map( raw=>{const row={};tags.forEach((t,i)=>row[t]=raw[i]); return row;} )	
+	grab	= src => Object.fromEntries([...src.parentNode.removeChild(src).children].filter(n=>n.id).map(n=>[n.id,n])),	
+	dataset	= (tags,rows)=>rows.map( row=>Object.fromEntries(tags.map((t,i)=>[t,row[i]]) ) )
 ;
 
  
@@ -64,8 +64,8 @@ const
 			
 			,'DECK'.d(""
 				,'multi'.d("? $checked"
-					,'ICON.remove_circle_outline'.ui("? Ask(dict.remove@.):wait; log `remove; (@list-entity .entity:checked.items $list)dbmul")//
-					,'ICON.delete'.ui("? Ask(dict.delete@.):wait; (@entity $:checked.items)dbmul")
+					,'ICON.remove_circle_outline'.ui("? Ask(dict.remove@.):wait; (@list-entity .entity:checked.all $list)dbmul")//
+					,'ICON.delete'.ui("? Ask(dict.delete@.):wait; (@entity $:checked.all)dbmul")
 					,'ICON.clear'.ui("")//ui("")
 				).u("$checked=$:checked.clear $entities!=()")
 			)

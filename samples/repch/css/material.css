@@ -121,7 +121,7 @@ attic>select{
 	/* border-bottom: 1px solid; */
 	background: white;
 	border-radius: .25em;
-	padding: .5em;
+	padding-left: .5em;
 	margin-right: 1em;
 }
 
@@ -253,7 +253,7 @@ section.entry {
 }
 
 section.opinions {
-    text-align: left;
+    /* text-align: left; */
 }
 
 section::before{
@@ -280,12 +280,14 @@ section.entries {
 
 .summary>.name{
     flex: 1;
-    text-align: left;
+    text-align: right;
+    padding: .5em;
 }
 
 .summary>.credit{
 	flex:1;
-	text-align:right;
+	text-align: left;
+	padding: .5em;
 }
 
 
@@ -319,7 +321,7 @@ stars>stars {
 }
 
 .credit>stars {
-	font: normal 1em/.7em sans-serif;
+	font: normal 1.25em/.7em sans-serif;
 	/* margin-left: .25em; */
 	/* letter-spacing: 4px; */
 }
