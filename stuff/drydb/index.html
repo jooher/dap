@@ -1,0 +1,22 @@
+<html>
+<body style="display:flex; flex-direction:row;">
+	<!-- input id="scheme" value="heading page"/ -->
+	<textarea id="text" style="width:30em" onchange="javascript:process()">
+drive, driver, route, date:date, info:json
+driver, person, vehicle, plate:text, stars
+hike, person, drive, info:json, stars
+person, info:json, stars
+route, title:string, stops:text
+vehicle, name, info:json,seats
+</textarea>
+	<div id="result" style="flex:auto; background:whitesmoke; overflow:auto; padding:1em; white-space:pre; font-family:monospace"/>
+</body>
+
+<script type="module">
+import dry from "./drycreate.js";
+
+window.process=function(e){
+	window.result.textContent=dry(window.text.value);
+}
+
+</script>

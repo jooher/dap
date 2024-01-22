@@ -11,6 +11,12 @@
        url(MaterialIcons-Regular.ttf) format('truetype');
 }
 */
+[data-dap=false]{display:none !important;}
+[ui=click]{cursor:pointer;}
+
+[FADE]{/* position:absolute; */animation: 1s fadein;width: 100%;}
+[FADE].STALE{opacity:0; transition:opacity 1s ease}
+@keyframes fadein { from {opacity:0;} to {opacity:1} }
 
 @keyframes fadein {
     from { opacity: 0; }
