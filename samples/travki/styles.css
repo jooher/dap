@@ -1,0 +1,335 @@
+[data-dap=false]{display:none !important}
+[ui=click]{cursor:pointer}
+
+[label]::before{
+	content:attr(label);
+}
+
+/*
+@media( max-width:380px ) {
+  body {
+		color:red;
+		font-size: 2rem;
+  }
+}
+
+@media( min-width:380px ) {
+  body {
+		font-size: 1rem;
+  }
+}
+
+*/
+
+
+body {
+  font-family: verdana, sans-serif;
+  /* font-size: 4mm; */
+  line-height: 1.5;
+  background-color: #fff;
+  color: darkgreen;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  text-align: center;
+  overflow-y: scroll;
+}
+
+
+header{
+	position:relative;
+	text-align: left;
+	color: #fff;
+	padding: 1em 8em;
+	text-align: center;
+	background: seagreen;
+}
+
+.tag{
+  display: inline-block;
+  padding: .2em .6em;
+  /* margin: .1em; */
+  white-space: nowrap;
+  /* margin-bottom: .2em; */
+  color:green;
+  border-radius: .2em;
+  /* border: 1px solid lightgray; */
+  font-size: .9em;
+}
+
+.place{
+  display: inline-block;
+  position: relative;
+  width: 24em;
+  /* height: 28em; */
+  /* padding: 1px; */
+  margin: .5rem;
+  overflow: hidden;
+  border: 1px solid lightgray;
+  border-radius: .5em .5em 2em;
+}
+
+.place:hover{
+  /* overflow: visible; */
+  box-shadow: 0 0.5em 1em rgba(40,80,0,.5);
+  border-color: olive;
+  position: relative;
+  z-index: 2;
+}
+
+.item {
+  background: white bottom no-repeat; /* */
+  background-size: contain;
+}
+
+.item:hover {
+}
+
+
+.specify{
+	display:flex;
+	background: linear-gradient(0, linen, wheat);
+	padding: 0 10%;
+	overflow-x: auto;
+	/* color: bisque; */
+}
+
+.scope {
+  display: inline-block;
+  text-align: left;
+  margin: 2em;
+}
+.scope::before{
+	display:block;
+	margin: .5em;
+	/* font-style: italic; */
+	font-weight:bold;
+	/* border-bottom: 1px solid mediumseagreen; */
+}
+
+
+.item>.title{
+	font-size: 1.2rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	white-space:pre-wrap;
+	/* display: table-cell; */
+	width: 100%;
+	/* position: absolute; */
+	margin: .5em 0;
+	/* text-align: left; */
+	line-height: 1.2em;
+	/* height: 4em; */
+	margin-top: 2em;
+	vertical-align: bottom;
+}
+
+BUTTON.add::before{
+	content:"В заказ"
+}
+
+.item>.pics {
+  height: 18em;
+  /* text-align: left; */
+}
+
+.pics>img {
+  max-height: 100%;
+}
+
+button.add {
+  color: white;
+  background: mediumseagreen;
+  border: none;
+  padding: .5em;
+  /* position: absolute; */
+  /* font-size: .8em; */
+}
+
+.qty {
+  /* position: absolute; */
+  /* top: 23em; */
+  margin: 1em;
+}
+
+.price {
+  display: inline;
+  margin: 1em;
+  color: mediumseagreen;
+}
+
+.qty>.size {
+  display: inline;
+  color: burlywood;
+}
+
+.cart {
+  background: white;
+  padding-bottom: 3em;
+}
+
+.price::before {
+	content: " ₽ ";
+}
+
+.qty>input {
+	display:inline;
+  width: 4em;
+  text-align: right;
+  border: 4px solid lime;
+}
+
+.info {
+  background: limegreen;
+  font: bold  1.4em sans-serif;
+  color: white;
+  text-shadow: 0 3px 8px darkgreen;
+  box-shadow: 0 .5em 1em rgba(0,50,0,.25);
+  padding: 1em;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.contents {
+  box-shadow: inset 0 0 2em lightgreen;
+  padding-bottom: 3em;
+}
+
+button.order {
+  background: green;
+  color: white;
+  border: none;
+  padding: 1em 2em;
+  border-radius: .5em;
+  font-size: 1em;
+}
+
+
+.catalog {
+  /* margin: 0 10%; */
+}
+
+.tag:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  font-family: cursive;
+}
+
+.tag.selected {
+  background: white;
+  /* color: white; */
+  /* border-color: mediumseagreen; */
+}
+
+.item>.tags {
+  position: absolute;
+  margin-top: 1em;
+  text-align: center;
+  color: lightgray;
+  /* font-size: .75em; */
+  width: 100%;
+}
+
+.hidecart {
+  margin: 4em;
+  color: green;
+}
+
+.items {
+  margin: 3em 0;
+}
+
+.info>span:hover {
+  text-decoration: underline;
+}
+
+.details{
+	height: 24em;
+	display: flex;
+	flex-direction: column;
+}
+
+.desc {
+  overflow-y: auto;
+  transition: opacity .5s;
+  box-sizing: border-box;
+  text-align: left;
+  opacity: 0;
+}
+
+.desc:hover {
+  opacity: 1;
+}
+
+.pros, .cons {
+  margin: 1em;
+  padding: 1em;
+  background: white;
+}
+
+.pros::before{
+	content:"Показания: ";
+	font-style: italic;
+}
+
+.cons::before{
+	content:"Противопоказания: ";
+	font-style: italic;
+}
+
+.cons{color:brown}
+
+.subtitle {
+  height: 1em;
+  margin: 1em;
+}
+
+.short {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 2em;
+  width: 100%;
+  color: white;
+}
+
+.item:hover>.short{
+	display:none;
+}
+
+.brick {
+  background: darkslategray;
+  color: white;
+  display: inline-block;
+  margin: .5em;
+  padding: .25em 1em;
+}
+
+.tags1 {
+  background: darkgreen;
+}
+
+.tags2 {
+  background: gray;
+}
+
+.hints {
+  color: wheat;
+  /* padding: .5em; */
+  /* position: absolute; */
+  /* z-index: 6; */
+  /* width: 100%; */
+  font-size: .8em;
+}
+
+.tags1,.tags2 {
+  /* white-space: nowrap; */
+}
+
+pre.collect {
+  width: 100%;
+  overflow-x: auto;
+}
