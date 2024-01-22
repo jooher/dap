@@ -30,7 +30,7 @@ roof>tabset>tab.selected {color: white}
 .note {
     font-style: italic;
     color: #aaa;
-    text-align: left;
+    /* text-align: left; */
     /* display: inline; */
 }
 
@@ -63,10 +63,10 @@ ul.lists {
 }
 
 .entity>roof {
-  /* background: blueviolet; */
+  /* background: whitesmoke; */
   text-align: center;
   /* height: 8rem; */
-  margin: 1em;
+  padding: 1em;
 }
 
 li>.desc {
