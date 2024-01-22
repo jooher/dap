@@ -5,34 +5,27 @@ const
 		'TABSET'.d("* tab"
 				,'TAB'.d("!? .tab; ! .tab; a!")
 					.a("!? (.tab $tab)eq@selected")
-					.ui("$tab=.")
-			).u("?")			
+					.ui("$tab=.; ?")
+		)
+	,
+
+	unhead = url => url.replace(/^(=[^&]*)&*/, decodeURIComponent),
+	jsonAPI = base => args => base + unhead(new URLSearchParams(args).toString()) // fetch().then( res => res.json() )
+
 	;
 
 'nav'.d("$tab=`lists"
-
 	,'ROOF'.d("Tabset(tab)")
-	
 	,'H1'.d("! $tab")
-	
-	
 	,'ETAGE'.d("$tab=`tags Tabset(tab)"
-	
-		,'tabs'.d("Tabset(tab)"
-			,'I'.d("! $tab")
-		)
-		
-		,'tabs'.d("& tab; ! Tabset")
-		
-		,'tabs'.d(""
-			,Tabset
-		)
-		
-		,Tabset
-		
-		//,'H2'.d("! $tab")
+		,'U'.d("! (`http://get.the.tab? $tab):api")
 	)
 )
+.FUNC({
+	convert:{
+		api: jsonAPI("")
+	}
+})
 .DICT({
 	Tabset,
 	
