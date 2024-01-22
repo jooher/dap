@@ -1,18 +1,26 @@
-.scanner{
+scanner>div {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+scanner {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    text-align: center;
+}
+
+scanner>video {
+    display: none;
+}
+
+scanner>canvas {
+    max-width: 100%;
+}
+
+scanner>.deck{
 	position:absolute;
-	top: 0;
-	width: 100%;
-	margin:auto;
-	text-align:center;
-}
-.scanner>video{
-	display:none;
-}
-.scanner>canvas{
-	display:block;
-	width:100%;
-}
-.scanner>button{
-	padding:.5em;
-	flex: 1;
+	bottom:0;
+	right:0;
+	text-align:right;
 }

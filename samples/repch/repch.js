@@ -10,13 +10,11 @@ import scrollfocus from "/./stuff/scrollfocus.js";
 import Starbar from "/./stuff/bricks/starbar.js";
 
 import {untab} from "/./stuff/parse.js";
+import {dictFrom} from "/./stuff/snippets.js";
 
 import Scan from "./scanner.js";
 import guess from "./guess.js";
 
-const
-	grab	= src => Object.fromEntries([...src.parentNode.removeChild(src).children].filter(n=>n.id).map(n=>[n.id,n])),	
-	dataset	= (tags,rows)=>rows.map( row=>Object.fromEntries(tags.map((t,i)=>[t,row[i]]) ) )
 ;
 
  
@@ -258,7 +256,7 @@ const
 		}
 	},
 	
-	html	:grab(document.getElementById("content"))
+	html	:dictFrom.html(document.getElementById("content"))
 
 })
 

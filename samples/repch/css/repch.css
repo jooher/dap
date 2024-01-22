@@ -1,0 +1,264 @@
+@media(max-width: 38rem){/* orientation:portrait */
+	body{max-width:100%;/* overflow-x: auto; */}
+	.client{ width: 200%;}
+}
+
+.client {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    transition: all .5s;
+}
+
+
+input.credit {
+    width: 3em;
+}
+
+
+.tag {
+    display: inline-block;
+    margin: .2em;
+    padding: .25em .5em;
+    border: 1px solid transparent;
+    border-radius: 1em;
+    background-color: antiquewhite;
+    color: darkgray;
+}
+
+
+
+ul.entities {
+    background: whitesmoke;
+    padding: .5em 0;
+    margin: 0;
+    text-align: left;
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+}
+
+ul.entities>li {
+    margin: .5em 1em;
+    padding: .25rem .5rem;
+    border-radius: .5em;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
+
+
+
+section.entry {
+    width: 100%;
+    display: flex;
+}
+
+section::before{
+	font: italic .75rem sans-serif;
+	padding-top: .25rem;
+	text-align: left;
+	text-transform: uppercase;
+	color: gray;
+	border-top: 1px solid lightgray;
+	display: block;
+}
+
+section.entries {
+    text-align: center;
+    text-decoration: underline;
+}
+
+.title{font-size: 1.25em;margin: .25em 0;}
+
+.aspect>.summary {
+    display: flex;
+}
+
+.summary>.name{
+    flex: 1;
+    text-align: right;
+    padding: .5em;
+}
+
+.summary>.credit{
+	flex:1;
+	text-align: left;
+	padding: .5em;
+}
+
+
+img.stats {
+    width: 2em;
+    height: 1em;
+    vertical-align: bottom;
+    display: none;
+}
+
+section.info{
+    overflow-y: auto;
+}
+
+
+.credit>stars {
+	font: normal 1.25em/.7em sans-serif;
+}
+
+.note {
+    font-style: italic;
+}
+
+.lists>li {
+    display: inline-block;
+    padding: .25em .5em;
+    margin: .2em;
+    border: 1px solid;
+    border-radius: 1em;
+}
+
+.opinion {
+    margin: 1em 0;
+    position: relative;
+}
+
+.addaspect {
+    text-align: left;
+    border-top: 1px dashed;
+    padding: 0;
+    list-style: none;
+}
+
+ul.addaspects {
+    padding: 0;
+    list-style: none;
+}
+
+
+.item {
+    padding: 1rem 0;
+}
+
+.more {
+    display: inline;
+    margin: .5em;
+}
+
+ul.aspects {
+    padding-left: 1rem;
+    list-style: none;
+}
+
+li>.aspect{
+	font-style:normal;
+}
+
+li>.aspect::before {
+    content: "★ ";
+}
+
+li>.category::before {
+	/* content: "- " */
+}
+li>.category{
+	font-style:italic;
+}
+
+
+
+a.entry {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.append {
+    margin-top: 4rem;
+    position: relative;
+    line-height: 2em;
+    text-align: left;
+}
+
+.append>textarea {
+    display: block;
+    width: 100%;
+    height: 24em;
+    margin: 0;
+    box-sizing: border-box;
+    font: normal 1rem/1.4 monospace;
+    border: none;
+}
+
+.append>icon {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+
+.editables {
+	padding-bottom: 1em;
+}
+
+
+.entity>etage {
+    text-align: center;
+}
+
+.fallback {
+    font-style: italic;
+}
+
+.tick {
+    position: absolute;
+    right: 0;
+    width: 25%;
+    height: 100%;
+    top: 0;
+    color: black;
+}
+
+bar>.multi {
+    flex: 1;
+    text-align: end;
+    color: black;
+}
+
+.entities {
+    flex: 1;
+}
+
+
+.details {
+    margin: 1em 0;
+    color: gray;
+}
+
+
+
+.short>.tag.unset {
+  display: none;
+}
+
+section>button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+p>icon {
+    padding: 0;
+    display: inline;
+    vertical-align: middle;
+}
+
+roof>.credit {
+  font-size: 1.5em;
+  margin: .5em;
+}
+
+vault>.key{
+	flex:1;
+	border-radius:.2em;
+}

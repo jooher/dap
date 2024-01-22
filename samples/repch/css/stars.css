@@ -1,0 +1,16 @@
+stars {
+	display: inline-block;
+	position: relative;
+}
+
+stars:before {
+	content:"★★★★★";
+}
+stars>stars {
+	position: absolute;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+	pointer-events: none;
+	text-decoration:underline;
+}

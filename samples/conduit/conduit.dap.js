@@ -5,6 +5,7 @@ import components from "./components.dap.js";
 import router from "./route-m.js";
 import authorizer from "./auth.js";
 import modal from "./modal.js";
+import {dictFrom} from "/./stuff/snippets.js"
 
 const
 
@@ -30,13 +31,7 @@ const
 		"@:username/:feed": {page:"profile"},
 		":page"		: {}
 	}),
-	
-	dictFromHtmlElements = elems =>
-		Object.fromEntries( elems.map(el=>[ el.id||el.tagName, el ]) ),
 		
-	grabFormInputs = form =>
-		Object.fromEntries( [...form.elements].filter(el=>el.name).map( el => [ el.name, el.value ])),		
-	
 	state = "& :parseRoute; $page=. $tag=. $slug=."
 	
 	;
@@ -116,7 +111,7 @@ const
 			,'BUTTON `Save changes'.d("? $slug").ui("(((#.form:grab@. .tagList)@article)@PUT `articles .slug)api:query $page=")
 		)
 	)
-
+ 
 	,'PAGE.settings'
 	.d("?? $page@settings"
 		,'H1 `My settings'.d()
@@ -136,7 +131,7 @@ const
 .DICT(
 	dict,
 	components,
-	{ html : dictFromHtmlElements([...document.getElementById("html").children]) }
+	{ html : dictFrom.html(document.getElementById("html")) }
 )
 
 .FUNC({
@@ -155,6 +150,7 @@ const
 		
 		JSON,
 		auth,
+		grab: dictFrom.form,
 		marked :marked.parse,
 		
 		storage:{
@@ -162,19 +158,17 @@ const
 			save: (k,v) => localStorage.setItem(k,JSON.stringify(v))
 		},
 		
-		
 		split: str=>str.split(","),
 		date: utc => new Date(utc).toDateString(),
 		brackets: txt => '('+txt+')',
 		
-		grab: grabFormInputs,
 		
 		anew: data=>!data&&[{}],
 		
 		str2tags: str=>str&&str.split(" "),
 		tags2str: tags=>tags&&tags.join(" "),
 		
-		pages: $ => Array .from({length:Math.ceil($.pagesCount/$.limit)}) .map(num=>({num,offset:num*$.limit})),
+		pages: $ => Array.from({length:Math.ceil($.pagesCount/$.limit)}) .map(num=>({num,offset:num*$.limit})),
 		
 		parseRoute: (dummy,r) => r && parseRoute(location.hash)
 		
