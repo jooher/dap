@@ -3,16 +3,9 @@ import { auth, api, dictFrom } from '/stuff/snippets.js';
 import Await from '/stuff/await.js';
 import {untab} from '/stuff/parse.js';
 
-
-const
-
-headers = new Headers({
-	"Content-Type": "application/x-www-form-urlencoded" //"application/json;charset=utf-8"
-});
-
 /*
 person, stars, info:json
-route, title:string, stops:text
+route, terms:string, stops:text
 ride, route, person, seats, date:date, info:json
 hike, ride, person, stars, info:json
 
@@ -21,19 +14,23 @@ hike, ride, person, stars, info:json
 */
 
 
-"APP".d('$tab= $date= $route= $from= $to= $note= $ride= $rides=; $user=:auth.load $person="1'
+const
+
+headers = new Headers({
+	"Content-Type": "application/x-www-form-urlencoded" //"application/json;charset=utf-8"
+});
+
+
+
+
+"APP".d('$tab= $date= $Route= $route= $from= $to= $note= $ride= $rides=; $user=:auth.load $person="1'
 
 	,"ROOF".d(''
 		,"INPUT type=date".ui('$date=#:value')
-/*		,"SELECT.route".d('* ("route $from@stop):api'
-			,"OPTION".d('!! .name@ .route@value')
-		).ui('$route=#.value')
-	
-		,"SELECT.from".d('! Places').ui('$from=#.value')
-		,"SELECT.to".d('? $from; ! Places').ui('$to=#.value')	
-*/
-		,"from.select".d('! $from:place').ui('$from=Where(dict.from@label):wait')
-		,"to.select".d('! $to:place').ui('$to=Where(dict.to@label):wait')
+		,"where".d(''
+			,"from.select".d('! $from:place').ui('$from=Where(dict.from@label):wait')
+			,"to.select".d('! $to:place').ui('$to=Where(dict.to@label):wait')
+		)
 	)
 
 	,"ETAGE".d('$tab= Tabset(:|@tab"rider|passenger|admin)'
@@ -42,18 +39,19 @@ hike, ride, person, stars, info:json
 			,"UL.hikes".d('* ("hike $route $date):api'
 				,"LI".d('! Hike')
 			)
-			,"BUTTON `add-ride"//.d('? $person') $from $to //($date $route)! :alert"no
+			,"BUTTON `add-ride"
 				.ui(`	? $person $person=LoginModal():wait;
 					? $date $date=:prompt"date;
 					? $from $from=Where(dict.from@label):wait;
 					? $to $to=Where(dict.to@label):wait;
-					? $rides=(@PUT"ride $date $person ($from $to):route@route ($from $to $note)@info):api;
+					? $route $Route=("route ($from $to):terms@terms):api,first :alert"error; $route=$Route.route;
+					? $rides=(@PUT"ride $date $person $route ($from $to $note)@info):api;
 					:alert"created
 				`)
 		)
 		
 		,"PAGE.passenger".d('?? $tab@passenger'
-			,"UL.rides".d('* ("ride $route $from $to $date):api'
+			,"UL.rides".d('* ("ride $route $date):api'
 				,"LI".d('! Ride').ui('$ride=.')
 			)
 			,"BUTTON `seek-rides".ui('')//subscribe for rides
@@ -209,8 +207,10 @@ hike, ride, person, stars, info:json
 		api : api("https://orders.saxmute.one/poputka/api.php?",{headers}).HttpJson,
 		form: dictFrom.form,
 		
+		first	: arr => Array.isArray(arr) && arr[0],
+		
 		place: o => o && `${o.area} / ${o.place}`, //({area,place})=>`${area} / ${place}`,
-		route: o => o && `${o.from.area} - ${o.to.area}`,
+		terms: o => o && `${o.from.area} - ${o.to.area}`,
 		
 		untab
 	},
