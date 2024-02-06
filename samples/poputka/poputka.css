@@ -1,0 +1,78 @@
+roof,tabset{
+	background: gray;
+	color: white;
+}
+
+tab.selected {
+	background: white;
+	color: black;
+}
+
+button{
+	background: black;
+	color: white;
+}
+
+
+
+
+.place {
+    display: inline-block;
+    padding: .2em .4em;
+    margin: .2em;
+    background: white;
+    color: black;
+    /* font-size: 1rem; */
+}
+
+.area>.name {
+    /* display: inline; */
+}
+
+.area {
+    display: inline-block;
+    border-radius: .2em;
+    background: whitesmoke;
+    padding: .25em .5em;
+    margin: .25em;
+}
+
+.area.selected {
+    background: black;
+    color: white;
+}
+
+.sub {
+    margin-left: 1em;
+}
+
+.select {
+    display: block;
+    height: 1em;
+    border-bottom: 1px solid;
+    margin: .5em;
+    padding: .5em 0;
+}
+
+.all {
+    font-size: 2em;
+}
+
+.areas {
+    margin: 1em;
+}
+
+.regions {
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.region {
+    margin: 1em;
+    border-top: 1px solid gray;
+}
+
+.region>.name {
+    font: bold 1em sans-serif;
+    margin: .5em;
+}

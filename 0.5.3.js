@@ -38,7 +38,9 @@ const	dap=(Env=>
 		"~"	:num=>num?(num>0?"+":"-"):0,		/// sgn
 		
 		"++"	:num=>++num,
-		"--"	:num=>--num
+		"--"	:num=>--num,
+		
+		"|"	:str => str && str.split("|")
 	},
 	
 	flatten	:{
@@ -73,14 +75,17 @@ const	dap=(Env=>
 		// false	- next operand, but not next step
 		
 		"!"	:Print,
+		"?"	:(value,alias)=>	!!value,
+		"??"	:(value,alias)=>	alias?alias==value:!value,
+		"?!"	:(value,alias)=>	alias?alias!=value:!!value,
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		"&"	:(value,alias,node)=>	{ const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
-		"&?":(value,alias,node)=>	{ if(value==null)return; const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
+		"&?"	:(value,alias,node)=>	{ if(value==null)return; const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
 
 		"d"	:(value,alias,node)=>	{ Update.Rebuild(value||node); },
-		"a!":(value,alias,node)=> { Update.Append(value||node); },
-		"u!":(value,alias,node)=>	{ Update.onDemand(value||node); },
+		"a!"	:(value,alias,node)=> { Update.Append(value||node); },
+		"u!"	:(value,alias,node)=>	{ Update.onDemand(value||node); },
 		
 		"a"	:(value,alias,node)=>	{ Env.delay(_=>Update.Append(value||node,alias)); },
 		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node)); },
@@ -88,15 +93,16 @@ const	dap=(Env=>
 		"*"	:(value,alias)=>
 			! value ? false :
 			! alias ? value :
-			! value.map ? {[alias]:value} :
-			value.map(v=>({[alias]:v})),
+			! isArray(value) ? value : //{[alias]:value} :
+			value.map(namify(alias.split(',')))
 				 
-		"?"	:(value,alias)=>	!!value,
-		"??":(value,alias)=>	alias?alias==value:!value,
-		"?!":(value,alias)=>	alias?alias!=value:!!value
 		}
 		
 	}),
+	
+	isArray = Array.isArray,
+	
+	namify = fields => row => isArray(row) ? Object.fromEntries(fields.map((name,i)=>[name,row[i]])) : {[fields[0]]:row},
 	
 	namespaces = {},
 		
@@ -105,7 +111,6 @@ const	dap=(Env=>
 	
 	inherit = o => Object.create(o),
 
-	isArray = Array.isArray,
 	
 	Print	= (value,alias,place,context)=> {
 		if( value != null )
@@ -116,9 +121,6 @@ const	dap=(Env=>
 		
 	Util	={
 			
-		merge	: Object.assign || ((tgt,mix)=>{for(let i in mix)tgt[i]=mix[i]; return tgt;}) ,//() ||
-		union	: (...src)=>src.reduce(Util.merge,{}),
-
 		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
 		
 		reach	: (entry,path)=>{//path.reduce(o,v=>o&&o[v],start),
@@ -170,13 +172,8 @@ const	dap=(Env=>
 						this.value = Util.reach(context.ns.lookup(route),route) || null;
 					}
 					return this.value;
-				},
-
-				_reach:	function(context){
-					const route = this.route.slice(0);
-					return Util.reach(context.ns.lookup(route),route) || null;
 				}
-/**/			};
+			};
 		
 			function Statum(route,entry){
 				route.push(entry);
@@ -1226,7 +1223,8 @@ Fail("bzzz i<0");
 		UIEVENTS : {
 			SELECT :'change',
 			INPUT :'change',
-			TEXTAREA :'change'
+			TEXTAREA :'change',
+			FORM :'submit'
 		},
 		
 		UIEVENT: node => 
@@ -1366,8 +1364,8 @@ Fail("bzzz i<0");
 			console.log('orphan element '+elem);
 		},
 			
-		require: (url,sync) => sync ? Mime.parseResponse(Http.request(url,sync)):
-			fetch(url).then(res => interpret(res,res.headers["content-type"].toLowerCase())),
+		require: url => fetch(url)
+			.then(res => interpret(res,res.headers["content-type"].toLowerCase())),
 				
 		stopEvent	: e=>{
 			e.stopPropagation();

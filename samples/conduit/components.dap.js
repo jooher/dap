@@ -108,12 +108,12 @@ export default{
 		,'FORM'.d(""
 		
 			,'INPUT name=email type=email placeholder="Your Email"'.d()
-			,'Ul.hints'.d("*@hint $!.error.errors.username"
+			,'UL.hints'.d("*@hint $!.error.errors.username"
 				,'LI'.d("! .hint")
 			)
 			
 			,'INPUT name=password type=password placeholder="Password"'.d()
-			,'Ul.hints'.d("*@hint $!.error.errors.password"
+			,'UL.hints'.d("*@hint $!.error.errors.password"
 				,'LI'.d("! .hint")
 			)
 			

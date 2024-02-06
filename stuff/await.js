@@ -4,12 +4,10 @@ export default{
 	},
 	operate:{
 		value:(value,name,node)=>{
-			const
-				data = node.$.getDataContext(),
-				post = data.$post;
-			data[name||"value"]=value;
-			if(post)
-				post.resolve(value);
+			let	data = node.$.data;
+			while(!data[""].$post)data=data.$;//Fail("no $post")
+			data[""].$post.resolve(value);
+			delete data[""].$post;
 		},
 		kill:(value,name,node)=>{ (value||node).remove(); }
 	}
