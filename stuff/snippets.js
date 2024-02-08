@@ -20,7 +20,7 @@ api = (base,options) => {
 		const	key = Object.keys(params)[0];
 		if(key && key===key.toUpperCase()){
 			const url = base + params[key],
-				req = new Object(options);
+				req = Object.create(options);
 			delete params[key];
 			req.method=key;
 			req.body = encode(req.headers.get("Content-type"),params);
@@ -28,7 +28,7 @@ api = (base,options) => {
 		}
 		return [ base + urlencoded(params), options ]
 	};
-		
+
 	return {
 		HttpJson : params => fetch( ...interpret(params) ).then( r => r.ok && r.json() )//.catch ( console.warn )
 	}

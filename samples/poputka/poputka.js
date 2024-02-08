@@ -23,14 +23,14 @@ headers = new Headers({
 
 
 
-"APP".d('$tab= $date= $Route= $route= $from= $to= $note= $ride= $rides=; $user=:auth.load $person="1'
+"APP".d('$tab= $date=:today $Route= $route= $from= $to= $note= $ride= $rides=; $user=:auth.load $person="1'
 
 	,"ROOF".d(''
-		,"INPUT type=date".ui('$date=#:value')
+		,"INPUT type=date".d("log #.value=$date").ui('$date=#:value')
 		,"where".d(''
 			,"from.select".d('! $from:place').ui('$from=Where(dict.from@label):wait')
 			,"to.select".d('! $to:place').ui('$to=Where(dict.to@label):wait')
-		)
+		).u('$route=')
 	)
 
 	,"ETAGE".d('$tab= Tabset(:|@tab"rider|passenger|admin)'
@@ -165,7 +165,7 @@ headers = new Headers({
 	"ride".d('$?='
 		,"title".d('! .date .info.time .info.rider.name').ui('$?=$?:!')
 		,"details".d('? $?; * ("ride .ride):api; ! Rider(.rider@) Passengers')
-		,"BUTTON.contact-rider".ui()
+		//,"BUTTON.contact-rider".ui()
 	),
 	
 	Hike:
@@ -211,6 +211,8 @@ headers = new Headers({
 		
 		place: o => o && `${o.area} / ${o.place}`, //({area,place})=>`${area} / ${place}`,
 		terms: o => o && `${o.from.area} - ${o.to.area}`,
+		
+		today: o => new Date().toISOString().split('T')[0],//.getDate(),
 		
 		untab
 	},
