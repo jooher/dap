@@ -1,6 +1,6 @@
 roof,tabset{
 	background: gray;
-	color: white;
+	/* color: white; */
 }
 
 tab.selected {
@@ -46,12 +46,15 @@ button{
     margin-left: 1em;
 }
 
-.select {
-    display: block;
-    height: 1em;
-    border-bottom: 1px solid;
+.where {
+    background: white;
     margin: .5em;
-    padding: .5em 0;
+    padding: 1em;
+    border-radius: .5em;
+}
+.select {
+    height: 1em;
+    padding: .5em;
 }
 
 .all {
@@ -76,3 +79,4 @@ button{
     font: bold 1em sans-serif;
     margin: .5em;
 }
+

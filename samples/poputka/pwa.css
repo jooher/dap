@@ -78,6 +78,7 @@ roof {
 
 page>ul {
 	flex: 1;
+	overflow:auto;
 }
 
 

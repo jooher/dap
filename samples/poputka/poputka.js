@@ -18,7 +18,14 @@ const
 
 headers = new Headers({
 	"Content-Type": "application/x-www-form-urlencoded" //"application/json;charset=utf-8"
-});
+}),
+
+modal = (...stuff) =>
+	"MODAL".d('top'
+		,"SCRIM".ui('value')
+		,"SHIELD".d(...stuff)
+	).u("kill; ?")
+;
 
 
 
@@ -33,32 +40,38 @@ headers = new Headers({
 		).u('$route=')
 	)
 
-	,"ETAGE".d('$tab= Tabset(:|@tab"rider|passenger|admin)'
+	,"ETAGE".d('$tab= Tabset(:|@tab"passenger|rider|admin)'
 	
-		,"PAGE.driver".d('?? $tab@rider'
-			,"UL.hikes".d('* ("hike $route $date):api'
-				,"LI".d('! Hike')
-			)
-			,"BUTTON `add-ride"
-				.ui(`	? $person $person=LoginModal():wait;
-					? $date $date=:prompt"date;
-					? $from $from=Where(dict.from@label):wait;
-					? $to $to=Where(dict.to@label):wait;
-					? $route $Route=("route ($from $to):terms@terms):api,first :alert"error; $route=$Route.route;
-					? $rides=(@PUT"ride $date $person $route ($from $to $note)@info):api;
-					:alert"created
-				`)
-		)
-		
 		,"PAGE.passenger".d('?? $tab@passenger'
 			,"UL.rides".d('* ("ride $route $date):api'
 				,"LI".d('! Ride').ui('$ride=.')
 			)
-			,"BUTTON `seek-rides".ui('')//subscribe for rides
+			,"BUTTON `seek rides"
+				.d(`	? ($from $to $date)!`)
+				.ui(`	? $route $Route=("route ($from $to):terms@terms):api,first :alert"error; $route=$Route.route;
+					? $person $person=Login():wait;
+					$hikes=(@PUT"hike $date $person $route ($from $to $time $note)@info):api;
+				`)//subscribe for rides
+		)
+		
+		,"PAGE.driver".d('?? $tab@rider'
+			,"UL.hikes".d('* ("hike $route $date):api'
+				,"LI".d('! Hike')
+			)
+			,"BUTTON `add a ride"
+				.ui(`	? $person $person=Login():wait;
+					? $from $from=Where(dict.from@label):wait;
+					? $to $to=Where(dict.to@label):wait;
+					? $route $Route=("route ($from $to):terms@terms):api,first :alert"error; $route=$Route.route;
+					? $date $date=:prompt"date;
+					? $time $time=When(dict.when):wait;
+					? $rides=(@PUT"ride $date $person $route ($from $to $time $note)@info):api;
+					:alert"created
+				`)
 		)
 		
 		,"PAGE.admin".d('?? $tab@admin'
-			,"FORM `add-route".d(''
+			,"FORM `add route".d(''
 				,"INPUT name=name placeholder=name".d()
 				,"TEXTAREA name=stops placeholder=stops".d()
 				,"BUTTON type=submit `Submit".d()
@@ -74,7 +87,11 @@ headers = new Headers({
 	
 	dict:{
 		from :"Откуда",
-		to: "Куда"
+		to: "Куда",
+		when:{
+			title:"Время выезда",
+			
+		}
 	}
 })
 
@@ -87,84 +104,60 @@ headers = new Headers({
 			.ui('$tab=.')
 	).u("?"),
 	
-	
 	Ask
-	:"MODAL".d('top; $value='
-		,"SCRIM".ui('$value=')
-		,"SHIELD".d(''
-			,"title".d('! (.title .message)?')
-			,"details".d('! .details')
-			,"INPUT".d('? .pattern; !! .pattern; focus #')
-				.e("blur","$value=#:value; ?") //change 
-			,"actions".d(''
-				,"ACTION.cancel".ui('$value=')
-				,"ACTION.ok".d('! .action')
-					.ui('value ($value .action)?')//
-					.a("!? (.pattern $value:!)!@disabled")
-			)
+	:modal('$value='
+		,"title".d('! (.title .message)?')
+		,"details".d('! .details')
+		,"INPUT".d('? .pattern; !! .pattern; focus #')
+			.e("blur","$value=#:value; ?") //change 
+		,"actions".d(''
+			,"ACTION.cancel".ui('$value=')
+			,"ACTION.ok".d('! .action')
+				.ui('value ($value .action)?')//
+				.a("!? (.pattern $value:!)!@disabled")
 		)
-	).u("kill; ?"),//value $value; 
+	).u('value $value'),
 	
 	Where
-	:"MODAL".d('top'
-		,"SCRIM".ui('value')
-		,"SHIELD".d('$area= $place='
-			,"label".d('! .label')
-			//,"recent".d('Areas(:recall@areas"recent)')
-			,"regions".d('* areas@areas,area,places'
-				,"region".d('$?= $places='
-					,"name".d('! .area').ui('? $?=$?:!; $places=.places:|; ?')
-					,"details".d('? $?'
-						,"areas".d('? .areas; * .areas@areas,area,places'
-							,"area".d('! .area')
-								.a('!? (.area $area)eq@selected')
-								.ui('$area=. $places=.places:|')
-						)
-						,"places".d('? $places; * $places@place'
-							,"place".d('! .place').ui('value ($area $place=.)') //$area=.. $place=.
-						)
+	:modal('$area= $place='
+		,"label".d('! .label')
+		//,"recent".d('Areas(:recall@areas"recent)')
+		,"regions".d('* areas@areas,area,places'
+			,"region".d('$?= $places='
+				,"name".d('! .area').ui('? $?=$?:!; $places=.places:|; ?')
+				,"details".d('? $?'
+					,"areas".d('? .areas; * .areas@areas,area,places'
+						,"area".d('! .area')
+							.a('!? (.area $area)eq@selected')
+							.ui('$area=. $places=.places:|')
 					)
-				).u("? $place")
-			)
-		)
-	).u('kill; ? :log"close'),
-	
-/*	
-	Places
-	:[
-		,"OPTGROUP".d('* recent.place@'
-			,"OPTION".d('!! .value .value@')
-		)
-		,"OPTGOUP".d('* ("place $route ):api'
-			,"OPTION".d('!! .name@ .name@value')
-		)
-	],
-	
-	
-	Areas_
-	:"areas".d('* .areas@areas,area,place'
-		,"area".d('$?='
-			,"name".d('! .area').ui('$?=$?:!; ?')
-			,"sub".d('? $?'
-				,"places".d('? .place; * .place:|'
-					,"place".d('! .place').ui('$value=(..area .place)') //$area=.. $place=.
+					,"places".d('? $places; * $places@place'
+						,"place".d('! .place').ui('value ($area $place=.)') //$area=.. $place=.
+					)
 				)
-				,'Areas(.areas)'
-			) 
+			).u("? $place")
 		)
 	),
-*/
 	
-	Person:
-	"person".d(''
+	When
+	:modal(
+		"LABEL `when".d(
+			"INPUT type=time".ui('value #.value')
+		)
+	),
+	
+	Person
+	:"person".d(''
 		,"name".d('! .name')
 		,"stars".d('! .stars')
 	),
 	
-	Ride:
-	"ride".d('$?='
-		,"title".d('! .date .info.time .info.rider.name').ui('$?=$?:!')
-		,"details".d('? $?; * ("ride .ride):api; ! Rider(.rider@) Passengers')
+	Ride
+	:"ride".d('$?='
+		,"title".d('! .info:terms').ui('$?=$?:!')
+		,"when".d('! .info.when')
+		,"note".d('! .info.note')
+		,"details".d('? $?; Person(.person@); ! Passengers')
 		//,"BUTTON.contact-rider".ui()
 	),
 	
@@ -174,16 +167,15 @@ headers = new Headers({
 	Passengers:
 	"passengers",
 	
-	Info:
-	"info".d(''
+	Info
+	:"info".d(''
 		,"time".d('! .time')
 		,"rider".d('! .rider.name')
 		,"stars".d('! .rider.stars')
 	),
 	
-	
 	Login
-	:"login".d('$!='
+	:modal('$!='
 		,"FORM".d(''
 			,"INPUT name=tel type=tel placeholder='Your phone number'".d().ui('$phone=#.value; ?')
 			,'INPUT name=otp type=numeric placeholder="Code"'
@@ -191,13 +183,7 @@ headers = new Headers({
 				.ui('$!=(@user"1 @token"2)')
 				//.ui('$!=("auth $phone #.value@code):api; ? $!.')
 		).u("? $!:! $!.user:auth.save")
-	).u("value $!.user"),
-	
-	LoginModal
-	: "MODAL".d('top; $!='
-		,"SCRIM".ui('$!=')
-		,"SHIELD".d('! Login')
-	).u("kill; ?")
+	).u("value $!.user")
 	
 })
 
@@ -214,6 +200,7 @@ headers = new Headers({
 		
 		today: o => new Date().toISOString().split('T')[0],//.getDate(),
 		
+		modal,
 		untab
 	},
 	operate:{

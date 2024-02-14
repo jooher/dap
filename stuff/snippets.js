@@ -1,4 +1,4 @@
-const 
+const
 
 encode = (type,params) =>
 	/json/.test(type) ? JSON.stringify(params) :
@@ -18,7 +18,7 @@ api = (base,options) => {
 	
 	const interpret = params =>{
 		const	key = Object.keys(params)[0];
-		if(key && key===key.toUpperCase()){
+		if(key && key === key.toUpperCase()){
 			const url = base + params[key],
 				req = Object.create(options);
 			delete params[key];
@@ -33,14 +33,14 @@ api = (base,options) => {
 		HttpJson : params => fetch( ...interpret(params) ).then( r => r.ok && r.json() )//.catch ( console.warn )
 	}
 	
-},
+},.
 
 auth = headers => {
 	
 	const auth = user => (headers.authorization = user ? 'Token ${user.token}' : "" ) && user;
 	
 	return {
-		save: user => localStorage.setItem("user",JSON.stringify(user))||auth(user),
+		save: user => localStorage.setItem("user",JSON.stringify(user))||auth(user), 
 		load: _=> auth(JSON.parse(localStorage.getItem("user"))),
 		quit: _=> auth(localStorage.removeItem("user"))&&null
 	}
