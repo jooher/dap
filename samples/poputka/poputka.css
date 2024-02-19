@@ -1,6 +1,7 @@
-roof,tabset{
+roof{
 	background: gray;
 	/* color: white; */
+	padding-bottom: 3rem;
 }
 
 tab.selected {
@@ -13,8 +14,10 @@ button{
 	color: white;
 }
 
-
-
+.select:empty::before {
+    color: gray;
+    font-style: italic;
+}
 
 .place {
     display: inline-block;
@@ -48,13 +51,16 @@ button{
 
 .where {
     background: white;
-    margin: .5em;
-    padding: 1em;
-    border-radius: .5em;
+    margin: .5em 0;
+    border-radius: .25em;
 }
 .select {
     height: 1em;
     padding: .5em;
+}
+
+.dpt.select {
+    border-bottom: 1px solid;
 }
 
 .all {
@@ -80,3 +86,13 @@ button{
     margin: .5em;
 }
 
+
+.time {
+    display: inline-block;
+    padding: .25em .5em;
+    background: wheat;
+    /* color: white; */
+    font-weight: bold;
+    border-radius: .25em;
+    margin-right: 1em;
+}

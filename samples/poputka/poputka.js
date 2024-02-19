@@ -1,5 +1,5 @@
 import "/0.5.3.js";
-import { auth, api, dictFrom } from '/stuff/snippets.js';
+import { auth, api, dictFrom, elemFrom, JsonCSS } from '/stuff/snippets.js';
 import Await from '/stuff/await.js';
 import {untab} from '/stuff/parse.js';
 
@@ -13,6 +13,7 @@ hike, ride, person, stars, info:json
 //rider, person, vehicle, plate:text, stars
 */
 
+JsonCSS('lang/ru.json');
 
 const
 
@@ -30,42 +31,42 @@ modal = (...stuff) =>
 
 
 
-"APP".d('$tab= $date=:today $Route= $route= $from= $to= $note= $ride= $rides=; $user=:auth.load $person="1'
+"APP".d('$tab= $date=:today $time= $dpt= $arv= $Route= $route= $note= $ride= $rides=; $user=:auth.load $person="1'
 
 	,"ROOF".d(''
-		,"INPUT type=date".d("log #.value=$date").ui('$date=#:value')
+		,"INPUT type=date".d("#.value=$date").ui('$date=#:value')
 		,"where".d(''
-			,"from.select".d('! $from:place').ui('$from=Where(dict.from@label):wait')
-			,"to.select".d('! $to:place').ui('$to=Where(dict.to@label):wait')
+			,"select.dpt".d('! $dpt:place').ui('$dpt=Where(dict.dpt@label):wait')
+			,"select.arv".d('! $arv:place').ui('$arv=Where(dict.arv@label):wait')
 		).u('$route=')
 	)
 
 	,"ETAGE".d('$tab= Tabset(:|@tab"passenger|rider|admin)'
 	
 		,"PAGE.passenger".d('?? $tab@passenger'
-			,"UL.rides".d('* ("ride $route $date):api'
+			,"UL.rides".d('* ("ride $route $date):api E'
 				,"LI".d('! Ride').ui('$ride=.')
 			)
-			,"BUTTON `seek rides"
-				.d(`	? ($from $to $date)!`)
-				.ui(`	? $route $Route=("route ($from $to):terms@terms):api,first :alert"error; $route=$Route.route;
+			,"BUTTON.seek-rides"
+				.d(`	? ($dpt $arv $date)!`)
+				.ui(`	? $route $Route=("route ($dpt $arv):terms@terms):api,first :alert"error; $route=$Route.route;
 					? $person $person=Login():wait;
-					$hikes=(@PUT"hike $date $person $route ($from $to $time $note)@info):api;
+					$hikes=(@PUT"hike $date $person $route ($dpt $arv $time $note)@info):api;
 				`)//subscribe for rides
 		)
 		
 		,"PAGE.driver".d('?? $tab@rider'
-			,"UL.hikes".d('* ("hike $route $date):api'
+			,"UL.hikes".d('* ("hike $route $date):api E'
 				,"LI".d('! Hike')
 			)
-			,"BUTTON `add a ride"
+			,"BUTTON.add-ride"
 				.ui(`	? $person $person=Login():wait;
-					? $from $from=Where(dict.from@label):wait;
-					? $to $to=Where(dict.to@label):wait;
-					? $route $Route=("route ($from $to):terms@terms):api,first :alert"error; $route=$Route.route;
+					? $dpt $dpt=Where(dict.dpt@label):wait;
+					? $arv $arv=Where(dict.arv@label):wait;
+					? $route $Route=("route ($dpt $arv):terms@terms):api,first :alert"error; $route=$Route.route;
 					? $date $date=:prompt"date;
 					? $time $time=When(dict.when):wait;
-					? $rides=(@PUT"ride $date $person $route ($from $to $time $note)@info):api;
+					? $rides=(@PUT"ride $date $person $route ($dpt $arv $time $note)@info):api;
 					:alert"created
 				`)
 		)
@@ -83,14 +84,15 @@ modal = (...stuff) =>
 )
 
 .DICT({
+	E:[],
+	
 	areas: await fetch("kg.txt").then(r=>r.ok&&r.text()).then(untab),
 	
 	dict:{
-		from :"Откуда",
-		to: "Куда",
+		dpt :"Откуда",
+		arv: "Куда",
 		when:{
 			title:"Время выезда",
-			
 		}
 	}
 })
@@ -99,7 +101,7 @@ modal = (...stuff) =>
 	
 	Tabset
 	:"TABSET".d('* .tab'
-		,"TAB".d('!? .tab; ! .tab; a!')
+		,"TAB".d('!? .tab@; a!')
 			.a("!? (.tab $tab)eq@selected")
 			.ui('$tab=.')
 	).u("?"),
@@ -154,12 +156,13 @@ modal = (...stuff) =>
 	
 	Ride
 	:"ride".d('$?='
-		,"title".d('! .info:terms').ui('$?=$?:!')
-		,"when".d('! .info.when')
+		,"title".d('! (.info.time .info:places@route)spans')
 		,"note".d('! .info.note')
-		,"details".d('? $?; Person(.person@); ! Passengers')
-		//,"BUTTON.contact-rider".ui()
-	),
+		,"details".d('? $?; Person(.person@); ! Passengers'
+			,"BUTTON `contact rider".ui()
+		).u("?")
+		//
+	).ui('$?=$?:!'),
 	
 	Hike:
 	"hike".d(),
@@ -196,13 +199,22 @@ modal = (...stuff) =>
 		first	: arr => Array.isArray(arr) && arr[0],
 		
 		place: o => o && `${o.area} / ${o.place}`, //({area,place})=>`${area} / ${place}`,
-		terms: o => o && `${o.from.area} - ${o.to.area}`,
+		terms: o => o && `${o.dpt.area} → ${o.arv.area}`,
+		places: o => o && `${o.dpt.place} → ${o.arv.place}`,
+
 		
 		today: o => new Date().toISOString().split('T')[0],//.getDate(),
 		
 		modal,
 		untab
 	},
+	
+	flatten:{
+		spans	: (span => 
+				(values,tags) => values.map( (v,i) => span(v,tags[i]) ).reverse()
+			)(elemFrom("span"))
+	},
+	
 	operate:{
 		top	:(value,alias,node)=>{ 
 			node.style.display="none";

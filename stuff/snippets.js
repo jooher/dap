@@ -1,5 +1,8 @@
 const
 
+skip = e => [],//console.warn (e.message),
+ignore = e => {},
+
 encode = (type,params) =>
 	/json/.test(type) ? JSON.stringify(params) :
 	/urlencoded/.test(type) ? urlencoded(params) :
@@ -9,8 +12,6 @@ urlencoded = obj => new URLSearchParams( Object.entries(obj)
 	.filter(([name,value]) => value!=null )
 	.map(([name,value]) => typeof value === 'object' ? [name,JSON.stringify(value)] : [name,value] )
 ).toString();
-
-
 
 export const
 
@@ -30,10 +31,12 @@ api = (base,options) => {
 	};
 
 	return {
-		HttpJson : params => fetch( ...interpret(params) ).then( r => r.ok && r.json() )//.catch ( console.warn )
+		HttpJson : params => fetch( ...interpret(params) )
+				.then( r => r.ok && r.json() )
+				.catch(ignore)
 	}
 	
-},.
+},
 
 auth = headers => {
 	
@@ -53,4 +56,24 @@ dictFrom = {
 
 datasetFrom = {
 	rows:	(tags,rows) => rows.map( row=>Object.fromEntries(tags.map((t,i)=>[t,row[i]]) ) )
-};
+},
+
+elemFrom = tag => (value,className) =>{
+	const el = document.createElement(tag);
+	el.textContent = value;
+	el.className = className;
+	return el;
+},
+
+JsonCSS = url => fetch(url)
+	.then( r => r.ok && r.json() )
+	.then( obj => new CSSStyleSheet().replace(
+				Object.entries(obj)
+				.map( ([key,label]) =>`${key}::before{content:"${label}"}`)
+				.join("\n")
+			)
+		)
+	.then( stylesheet => 
+		document.adoptedStyleSheets=[stylesheet]
+	)
+;
