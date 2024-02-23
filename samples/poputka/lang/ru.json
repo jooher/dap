@@ -1,14 +1,14 @@
 {
-	"TAB.passenger": "пассажир",
-	"TAB.rider" : "водитель",
+	"TAB.rides": "поездки",
+	"TAB.hikes" : "попутчики",
 	"TAB.admin" : "админ",
 	
-	
-	"UL.rides"	: "Доступные поездки:",
-	"UL.hikes"	: "Пассажиры в поиске:",
 	".dpt:empty": "Откуда",
 	".arv:empty": "Куда",
 	
 	"BUTTON.seek-rides":"Заказать поездку",
-	"BUTTON.add-ride":"Добавить поездку"
+	"BUTTON.add-ride":"Добавить поездку",
+	
+	"LABEL.date": "Дата поездки",
+	"LABEL.time": "Время выезда"
 }

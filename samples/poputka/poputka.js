@@ -24,49 +24,50 @@ headers = new Headers({
 modal = (...stuff) =>
 	"MODAL".d('top'
 		,"SCRIM".ui('value')
-		,"SHIELD".d(...stuff)
+		,"SHIELD".d(...stuff)//.u('value $')
 	).u("kill; ?")
 ;
 
 
 
 
-"APP".d('$tab= $date=:today $time= $dpt= $arv= $Route= $route= $note= $ride= $rides=; $user=:auth.load $person="1'
+"APP".d('$tab= $when=(:today@date :soon@time) $dpt= $arv= $Route= $route= $note= $ride= $rides=; $user=:auth.load $person="1'
 
 	,"ROOF".d(''
-		,"INPUT type=date".d("#.value=$date").ui('$date=#:value')
+		,"when".d(''
+			,"INPUT type=date".d("!! (.date :today)?@value").ui('$when.date=#.value')
+			,"INPUT type=time".d("!! (.time :soon)?@value").ui('$when.time=#.value')
+		)
 		,"where".d(''
 			,"select.dpt".d('! $dpt:place').ui('$dpt=Where(dict.dpt@label):wait')
 			,"select.arv".d('! $arv:place').ui('$arv=Where(dict.arv@label):wait')
 		).u('$route=')
 	)
 
-	,"ETAGE".d('$tab= Tabset(:|@tab"passenger|rider|admin)'
+	,"ETAGE".d('$tab= Tabset(:|@tab"rides|hikes|admin)'
 	
-		,"PAGE.passenger".d('?? $tab@passenger'
-			,"UL.rides".d('* ("ride $route $date):api E'
+		,"PAGE.rides".d('?? $tab@rides'
+			,"UL".d('* ("ride $route $when.date):api E'
 				,"LI".d('! Ride').ui('$ride=.')
 			)
 			,"BUTTON.seek-rides"
-				.d(`	? ($dpt $arv $date)!`)
+				.d(`	? ($dpt $arv)!`)
 				.ui(`	? $route $Route=("route ($dpt $arv):terms@terms):api,first :alert"error; $route=$Route.route;
 					? $person $person=Login():wait;
-					$hikes=(@PUT"hike $date $person $route ($dpt $arv $time $note)@info):api;
+					$hikes=(@PUT"hike $when.date $person $route ($dpt $arv $time $note)@info):api;
 				`)//subscribe for rides
 		)
 		
-		,"PAGE.driver".d('?? $tab@rider'
-			,"UL.hikes".d('* ("hike $route $date):api E'
+		,"PAGE.hikes".d('?? $tab@hikes'
+			,"UL".d('* ("hike $route $when.date):api E'
 				,"LI".d('! Hike')
 			)
 			,"BUTTON.add-ride"
 				.ui(`	? $person $person=Login():wait;
-					? $dpt $dpt=Where(dict.dpt@label):wait;
-					? $arv $arv=Where(dict.arv@label):wait;
+					? $dpt $dpt=Where(@label"dpt):wait;
+					? $arv $arv=Where(@label"arv):wait;
 					? $route $Route=("route ($dpt $arv):terms@terms):api,first :alert"error; $route=$Route.route;
-					? $date $date=:prompt"date;
-					? $time $time=When(dict.when):wait;
-					? $rides=(@PUT"ride $date $person $route ($dpt $arv $time $note)@info):api;
+					? $rides=(@PUT"ride $when.date $person $route ($dpt $arv $when.time $note)@info):api;
 					:alert"created
 				`)
 		)
@@ -88,13 +89,6 @@ modal = (...stuff) =>
 	
 	areas: await fetch("kg.txt").then(r=>r.ok&&r.text()).then(untab),
 	
-	dict:{
-		dpt :"Откуда",
-		arv: "Куда",
-		when:{
-			title:"Время выезда",
-		}
-	}
 })
 
 .DICT({
@@ -122,7 +116,7 @@ modal = (...stuff) =>
 	
 	Where
 	:modal('$area= $place='
-		,"label".d('! .label')
+		,"label".d('!? .label@')
 		//,"recent".d('Areas(:recall@areas"recent)')
 		,"regions".d('* areas@areas,area,places'
 			,"region".d('$?= $places='
@@ -138,13 +132,6 @@ modal = (...stuff) =>
 					)
 				)
 			).u("? $place")
-		)
-	),
-	
-	When
-	:modal(
-		"LABEL `when".d(
-			"INPUT type=time".ui('value #.value')
 		)
 	),
 	
@@ -203,7 +190,8 @@ modal = (...stuff) =>
 		places: o => o && `${o.dpt.place} → ${o.arv.place}`,
 
 		
-		today: o => new Date().toISOString().split('T')[0],//.getDate(),
+		today: o => new Date().toISOString().split('T')[0],
+		soon: o => `${new Date().getHours()+2}:00`,
 		
 		modal,
 		untab

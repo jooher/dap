@@ -50,17 +50,22 @@ button{
 }
 
 .where {
-    background: white;
+    /* background: white; */
     margin: .5em 0;
-    border-radius: .25em;
+    border-radius: .25rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
 }
 .select {
     height: 1em;
     padding: .5em;
+    background: white;
 }
 
 .dpt.select {
-    border-bottom: 1px solid;
+    /* border-bottom: 1px solid; */
 }
 
 .all {
@@ -95,4 +100,17 @@ button{
     font-weight: bold;
     border-radius: .25em;
     margin-right: 1em;
+}
+
+.when {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
+
+.when>input {
+    flex: 1;
+    /* margin: .2em; */
+    text-align: center;
+    font-size: 1.25em;
 }

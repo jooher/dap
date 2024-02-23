@@ -4,8 +4,8 @@ export default{
 	},
 	operate:{
 		value:(value,name,node)=>{
-			let	data = node.$.data;
-			while(!data[""].$post)data=data.$;//Fail("no $post")
+			let data=node.$.data;
+			while(data&&!data[""].$post)data=data.$;//Fail("no $post")
 			data[""].$post.resolve(value);
 			delete data[""].$post;
 		},

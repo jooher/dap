@@ -36,7 +36,7 @@ input, select,textarea {
 	padding:.2em;
 	border:none;
 	margin: .5rem 0;
-	border-radius: .25em;
+	border-radius: .25rem;
 }
 
 input {
@@ -150,7 +150,7 @@ modal>shield {
 	position: relative;
 	margin: auto;
 	max-width: 80%;
-	/* min-width: 24em; */
+	min-width: 50%;
 	display: inline-block;
 	max-height: 80%;
 	overflow: auto;
