@@ -44,6 +44,11 @@ input {
 	text-align: inherit;
 }
 
+input:focus-visible {
+    outline: none;
+    background: antiquewhite;
+}
+
 input[type=number] {
 	text-align: right;
 }
