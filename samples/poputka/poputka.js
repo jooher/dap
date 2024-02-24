@@ -34,11 +34,11 @@ modal = (...stuff) =>
 "APP".d('$tab= $when=(:today@date :soon@time) $dpt= $arv= $Route= $route= $note= $ride= $rides=; $user=:auth.load $person="1'
 
 	,"ROOF".d(''
-		,"when".d(''
+		,"GROUP.when".d(''
 			,"INPUT type=date".d("!! (.date :today)?@value").ui('$when.date=#.value')
 			,"INPUT type=time".d("!! (.time :soon)?@value").ui('$when.time=#.value')
 		)
-		,"where".d(''
+		,"GROUP.where".d(''
 			,"select.dpt".d('! $dpt:place').ui('$dpt=Where(dict.dpt@label):wait')
 			,"select.arv".d('! $arv:place').ui('$arv=Where(dict.arv@label):wait')
 		).u('$route=')

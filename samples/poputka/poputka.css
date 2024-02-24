@@ -1,7 +1,9 @@
-roof{
-	background: gray;
-	/* color: white; */
-	padding-bottom: 3rem;
+app {
+    background: gainsboro;
+}
+
+page {
+    background: white;
 }
 
 tab.selected {
@@ -25,11 +27,6 @@ button{
     margin: .2em;
     background: white;
     color: black;
-    /* font-size: 1rem; */
-}
-
-.area>.name {
-    /* display: inline; */
 }
 
 .area {
@@ -47,25 +44,6 @@ button{
 
 .sub {
     margin-left: 1em;
-}
-
-.where {
-    /* background: white; */
-    margin: .5em 0;
-    border-radius: .25rem;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-.select {
-    height: 1em;
-    padding: .5em;
-    background: white;
-}
-
-.dpt.select {
-    /* border-bottom: 1px solid; */
 }
 
 .all {
@@ -91,26 +69,28 @@ button{
     margin: .5em;
 }
 
-
 .time {
     display: inline-block;
     padding: .25em .5em;
-    background: wheat;
-    /* color: white; */
+    background: gainsboro;
     font-weight: bold;
     border-radius: .25em;
     margin-right: 1em;
 }
 
-.when {
-    display: flex;
-    flex-direction: row;
-    gap: 1em;
+.where {
+    flex-direction: column;
 }
-
+.when{
+    flex-direction: row;
+}
 .when>input {
     flex: 1;
-    /* margin: .2em; */
     text-align: center;
     font-size: 1.25em;
+}
+.select {
+    height: 1em;
+    padding: .5em;
+    background: white;
 }

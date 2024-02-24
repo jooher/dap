@@ -20,6 +20,7 @@ html,body {
 
 body, app, roof, page, etage,form {
 	display: flex;
+	/* gap: .5rem; */
 	flex-direction: column;
 }
 
@@ -35,8 +36,8 @@ input, select,textarea {
 	font-family:inherit;
 	padding:.2em;
 	border:none;
-	margin: .5rem 0;
-	border-radius: .25rem;
+	/* margin: .5rem 0; */
+	/* border-radius: .25rem; */
 }
 
 input {
@@ -74,6 +75,7 @@ page>form {
 roof, page {
 	/* flex: none; */
 	padding: 1rem;
+	gap: 1rem;
 }
 
 page>ul {
@@ -102,10 +104,17 @@ form>button{
 	font-size: 1.5em;
 }
 
+group{
+	display: flex;
+	gap: 1px;
+	border-radius: .75rem;
+	overflow: hidden;
+	box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
 
 tabset {
 	display: flex;
-	margin-top: -2.5rem;
+	/* margin-top: -2.5rem; */
 	height: 2.5rem;
 	bottom:0;
 	left: 1rem;
