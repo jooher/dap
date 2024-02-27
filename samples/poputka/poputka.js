@@ -9,8 +9,8 @@ route, terms:string, stops:text
 ride, route, person, seats, date:date, info:json
 hike, ride, person, stars, info:json
 
+//car, person, vehicle, plate:text, stars
 //vehicle, name, seats, info:json
-//rider, person, vehicle, plate:text, stars
 */
 
 JsonCSS('lang/ru.json');
@@ -25,53 +25,65 @@ modal = (...stuff) =>
 	"MODAL".d('top'
 		,"SCRIM".ui('value')
 		,"SHIELD".d(...stuff)//.u('value $')
-	).u("kill; ?")
+	).u("kill; ?"),
+	
+
+term = loc => loc.split(' / ')[0],
+place = loc => loc.split(' / ')[1]
+
 ;
 
 
 
 
-"APP".d('$tab= $when=(:today@date :soon@time) $dpt= $arv= $Route= $route= $note= $ride= $rides=; $user=:auth.load $person="1'
+"APP".d(`	$tab=
+		$when=soon $dpt= $arv= $route= $ride=
+		$user=:auth.load $person="1`
 
 	,"ROOF".d(''
 		,"GROUP.when".d(''
-			,"INPUT type=date".d("!! (.date :today)?@value").ui('$when.date=#.value')
-			,"INPUT type=time".d("!! (.time :soon)?@value").ui('$when.time=#.value')
+			,"INPUT type=date".d("!! $when.date@value").ui('$when.date=#.value')
+			,"INPUT type=time".d("!! $when.time@value").ui('$when.time=#.value')
 		)
 		,"GROUP.where".d(''
-			,"select.dpt".d('! $dpt:place').ui('$dpt=Where(dict.dpt@label):wait')
-			,"select.arv".d('! $arv:place').ui('$arv=Where(dict.arv@label):wait')
-		).u('$route=')
+			,"select.dpt".d('! $dpt').ui('$dpt=Where(dict.dpt@label):wait')
+			,"select.arv".d('! $arv').ui('$arv=Where(dict.arv@label):wait')
+		).u('? ($dpt $arv)!; $route=("route ($dpt $arv):terms@terms):api,route')
 	)
 
-	,"ETAGE".d('$tab= Tabset(:|@tab"rides|hikes|admin)'
+	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|admin)'
 	
-		,"PAGE.rides".d('?? $tab@rides'
-			,"UL".d('* ("ride $route $when.date):api E'
+		,"PAGE.routes".d('?? $tab@routes'
+			,"UL".d('* ("route $person):api ("route):api E'
+				,"LI".d('! .terms').ui('$dpt=. $arv=. $route=. $tab="rides')
+			)
+		)
+		
+		,"PAGE.rides".d('?? $tab@rides; $rides=("ride $route $when.date):api'
+		
+			,"UL".d('* $rides@'//($rides $filter)filter E'
 				,"LI".d('! Ride').ui('$ride=.')
 			)
-			,"BUTTON.seek-rides"
-				.d(`	? ($dpt $arv)!`)
-				.ui(`	? $route $Route=("route ($dpt $arv):terms@terms):api,first :alert"error; $route=$Route.route;
-					? $person $person=Login():wait;
-					$hikes=(@PUT"hike $when.date $person $route ($dpt $arv $time $note)@info):api;
-				`)//subscribe for rides
-		)
-		
-		,"PAGE.hikes".d('?? $tab@hikes'
-			,"UL".d('* ("hike $route $when.date):api E'
-				,"LI".d('! Hike')
-			)
 			,"BUTTON.add-ride"
-				.ui(`	? $person $person=Login():wait;
-					? $dpt $dpt=Where(@label"dpt):wait;
-					? $arv $arv=Where(@label"arv):wait;
-					? $route $Route=("route ($dpt $arv):terms@terms):api,first :alert"error; $route=$Route.route;
-					? $rides=(@PUT"ride $when.date $person $route ($dpt $arv $when.time $note)@info):api;
-					:alert"created
-				`)
+			.d("$info=")
+			.ui(`	? $person $person=Login():wait;
+				? $dpt $dpt=Where(@label"dpt):wait;
+				? $arv $arv=Where(@label"arv):wait;
+				? $route $route=("route ($dpt $arv):terms@terms):api,route;
+				? $info=Info($when.time ($dpt $arv):places@places):wait;
+				? (@PUT"ride $person $when.date $route $info):api :alert"error;
+				:alert"created;
+			`)
 		)
-		
+/*		
+		,"PAGE.active".d('?? $tab@active'
+			,"UL.hikes".d('* ("hike $person):api'
+			)
+			,"UL.rides".d('* ("ride $person):api'
+				,"LI".
+			)
+		)
+*/		
 		,"PAGE.admin".d('?? $tab@admin'
 			,"FORM `add route".d(''
 				,"INPUT name=name placeholder=name".d()
@@ -86,12 +98,17 @@ modal = (...stuff) =>
 
 .DICT({
 	E:[],
-	
 	areas: await fetch("kg.txt").then(r=>r.ok&&r.text()).then(untab),
-	
+	soon:	(([date,time])=>({date,time:time.split(':')[0]+':00'}))(new Date(Date.now()+1000*60*60*2).toISOString().split('T')), // in 2 hours
+	vehicle: ["легковой", "микроавтобус", "автобус", "грузовой"]
 })
 
 .DICT({
+	
+	filter:{
+		riders: ride => !!ride.info.vehicle,
+		passrs: ride => ! ride.info.vehicle
+	},
 	
 	Tabset
 	:"TABSET".d('* .tab'
@@ -128,11 +145,57 @@ modal = (...stuff) =>
 							.ui('$area=. $places=.places:|')
 					)
 					,"places".d('? $places; * $places@place'
-						,"place".d('! .place').ui('value ($area $place=.)') //$area=.. $place=.
+						,"place".d('! .place').ui('value ($area $place=.):place') //$area=.. $place=.
 					)
 				)
 			).u("? $place")
 		)
+	),
+	
+	Vehicle
+	:modal("$?="
+		,"UL".d('* ("car $person):api'
+			,"LI".d('! (.name .plate)spans').ui('value $')
+		)
+		,"BUTTON.add-car".ui("$?=$?:!")
+		,"add-car".d("? $?; $model= $plate="
+			,"UL".d('* ("car):api'
+				,"LI".d().ui('$model=.')
+			)
+			,"INPUT placeholder=model".d("#.value=$model").ui("$model=#.value")
+			,"INPUT placeholder=plate".ui("$plate=#.value")
+			,"BUTTON".ui(`? ($model $plate)! :alert"uhm;
+				(@PUT"car $model $plate $person);
+			`)
+		)
+	),
+	
+	Info
+	:modal( "title".d('! (.time .places)spans')
+/*		
+		Form({
+			price:"number",
+			note:"text",
+			vehicle:"SELECT".d(''
+				,"OPTION value='' `я пассажир".d()
+				,"OPTGROUP".d('* vehicle'
+					,"OPTION".d('!! .vehicle@value')
+				)
+			)
+		})
+*/	
+		,"FORM.ride".d('' 
+			,"LABEL.vehicle".d(
+				"SELECT".d( "OPTION value='' `я пассажир".d()
+					,"OPTGROUP".d('* vehicle'
+						,"OPTION".d('! .vehicle')
+					)
+				).ui('.vehicle=#:value')
+			)
+			,"LABEL.price".d("INPUT type=number".ui(".price=#:value"))
+			,"LABEL.note".d("TEXTAREA".ui(".note=#:value"))
+		).u("?")
+		,"BUTTON.ok".ui("value $")
 	),
 	
 	Person
@@ -142,11 +205,16 @@ modal = (...stuff) =>
 	),
 	
 	Ride
-	:"ride".d('$?='
-		,"title".d('! (.info.time .info:places@route)spans')
-		,"note".d('! .info.note')
+	:"ride".d('$?=; !? $my=(.person $person)eq'
+		,"title".d('! (.info.time .info.price .info.places .info.note)spans')
 		,"details".d('? $?; Person(.person@); ! Passengers'
-			,"BUTTON `contact rider".ui()
+			,"BUTTON.contact_rider"
+				.d("? $my:!")
+				.ui(`	? $person $person=Login():wait;
+					? $Hike=(@PUT"hike $person $ride ($when.time $dpt $arv $note)@info):api;
+					:alert"created;
+				`)//subscribe for rides
+			//,"BUTTON.cancel"
 		).u("?")
 		//
 	).ui('$?=$?:!'),
@@ -157,7 +225,7 @@ modal = (...stuff) =>
 	Passengers:
 	"passengers",
 	
-	Info
+	_Info
 	:"info".d(''
 		,"time".d('! .time')
 		,"rider".d('! .rider.name')
@@ -184,14 +252,17 @@ modal = (...stuff) =>
 		form: dictFrom.form,
 		
 		first	: arr => Array.isArray(arr) && arr[0],
+		route : arr => Array.isArray(arr) && arr[0]?.route,
 		
-		place: o => o && `${o.area} / ${o.place}`, //({area,place})=>`${area} / ${place}`,
-		terms: o => o && `${o.dpt.area} → ${o.arv.area}`,
-		places: o => o && `${o.dpt.place} → ${o.arv.place}`,
+		
+		place	: ({area,place}) =>`${area} / ${place}`,
+		terms : ({dpt,arv}) => `${term(dpt)} → ${term(arv)}`,
+		places: ({dpt,arv}) => `${place(dpt)} → ${place(arv)}`,
+		dptarv: str => {
+			const [dpt,arv] = str.split(' → ');
+			return {dpt,arv};
+		},
 
-		
-		today: o => new Date().toISOString().split('T')[0],
-		soon: o => `${new Date().getHours()+2}:00`,
 		
 		modal,
 		untab

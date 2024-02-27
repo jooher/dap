@@ -94,3 +94,22 @@ button{
     padding: .5em;
     background: white;
 }
+
+span.places {}
+
+span.places {
+    display: block;
+    font-weight: bold;
+    margin: .5em 0;
+}
+
+.ride {
+    position: relative;
+    border-bottom: 1px solid gainsboro;
+    padding: 1em 0;
+}
+
+span.price {
+    /* position: absolute; */
+    /* right: 0; */
+}

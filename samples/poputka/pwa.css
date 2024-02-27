@@ -18,10 +18,16 @@ html,body {
 	margin: 0;
 }
 
+label {
+    display: block;
+    margin: 1em 0;
+}
+
 body, app, roof, page, etage,form {
 	display: flex;
-	/* gap: .5rem; */
 	flex-direction: column;
+	max-height: 100%;
+	overflow: auto;
 }
 
 body, app, page, etage {
@@ -112,10 +118,14 @@ form>button{
 group{
 	display: flex;
 	gap: 1px;
+	/* padding: .2em; */
 	border-radius: .75rem;
 	overflow: hidden;
 	box-shadow: 0 2px 6px rgba(0,0,0,.1);
+	/* background: white; */
 }
+
+group.when {}
 
 tabset {
 	display: flex;

@@ -479,7 +479,7 @@ const	dap=(Env=>
 						const
 							rule	= rules[k]||rules[""],
 							react	= k||this.elem.getAttribute("ui");
-						react.split(" ").forEach(e=>{rules[e.toLowerCase()]=rule});
+						if(react)react.split(" ").forEach(e=>{rules[e.toLowerCase()]=rule});
 						return (a&&react) ? (a+" "+react) : (react || a) ;
 					},
 					"").split(" ");

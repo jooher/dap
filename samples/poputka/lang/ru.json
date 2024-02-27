@@ -1,4 +1,5 @@
 {
+	"TAB.routes": "маршруты",
 	"TAB.rides": "поездки",
 	"TAB.hikes" : "попутчики",
 	"TAB.admin" : "админ",
@@ -6,9 +7,15 @@
 	".dpt:empty": "Откуда",
 	".arv:empty": "Куда",
 	
+	"SPAN.price": "₽",
+	
+	"LABEL.vehicle": "Автомобиль",
+	"LABEL.price": "Стоимость за 1 место",
+	"LABEL.note": "Примечания",
+	
+	"BUTTON.ok":"Готово",
 	"BUTTON.seek-rides":"Заказать поездку",
 	"BUTTON.add-ride":"Добавить поездку",
-	
-	"LABEL.date": "Дата поездки",
-	"LABEL.time": "Время выезда"
+	"BUTTON.contact-rider":"Связаться с водителем",
+	"BUTTON.contact-passenger":"Связаться с пассажиром"
 }
