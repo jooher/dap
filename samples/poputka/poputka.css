@@ -130,7 +130,7 @@ li>.ride {
 span.price {
     position: absolute;
     right: 0;
-    font-size: 1.7em;
+    font-size: 1.4em;
 }
 
 form.info {
@@ -145,4 +145,8 @@ label.price>input {
 span.note {
     color: gray;
     font-style: italic;
+}
+
+html {
+    background-color: gainsboro;
 }
