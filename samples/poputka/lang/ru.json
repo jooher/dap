@@ -7,13 +7,14 @@
 	".dpt:empty": "Откуда",
 	".arv:empty": "Куда",
 	
-	"SPAN.price": "₽",
+	"SPAN.price": "₽ ",
 	
 	"LABEL.vehicle": "Автомобиль",
 	"LABEL.price": "Стоимость за 1 место",
 	"LABEL.note": "Примечания",
 	
 	"BUTTON.ok":"Готово",
+	"BUTTON.cancel":"Отмена",
 	"BUTTON.seek-rides":"Заказать поездку",
 	"BUTTON.add-ride":"Добавить поездку",
 	"BUTTON.contact-rider":"Связаться с водителем",

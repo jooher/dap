@@ -1,5 +1,5 @@
 app {
-    background: gainsboro;
+    background: gold;
 }
 
 page {
@@ -14,6 +14,10 @@ tab.selected {
 button{
 	background: black;
 	color: white;
+}
+deck>button{
+	margin-left: .5rem;
+	padding: 1em 2em;
 }
 
 .select:empty::before {
@@ -69,13 +73,24 @@ button{
     margin: .5em;
 }
 
-.time {
+span.time {
     display: inline-block;
     padding: .25em .5em;
     background: gainsboro;
     font-weight: bold;
     border-radius: .25em;
-    margin-right: 1em;
+    /* margin-right: 1em; */
+}
+
+span.price {
+    font-weight: bold;
+}
+
+span.vehicle {
+    display: inline-block;
+    padding: 0 .5em;
+    font-style: italic;
+    color: gray;
 }
 
 .where {
@@ -95,21 +110,39 @@ button{
     background: white;
 }
 
-span.places {}
+span.terms {
+	display: block;
+    font-weight: bold;
+}
 
 span.places {
     display: block;
-    font-weight: bold;
     margin: .5em 0;
 }
 
-.ride {
+li>.ride {
     position: relative;
-    border-bottom: 1px solid gainsboro;
-    padding: 1em 0;
+    /* padding: 1em; */
+    /* border: 2px solid gainsboro; */
+    border-radius: .5rem;
 }
 
 span.price {
-    /* position: absolute; */
-    /* right: 0; */
+    position: absolute;
+    right: 0;
+    font-size: 1.7em;
+}
+
+form.info {
+    /* text-align: center; */
+}
+
+label.price>input {
+    text-align: center;
+    font-size: 2em;
+}
+
+span.note {
+    color: gray;
+    font-style: italic;
 }

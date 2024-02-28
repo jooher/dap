@@ -13,6 +13,14 @@ hike, ride, person, stars, info:json
 //vehicle, name, seats, info:json
 */
 
+/*
+Form({
+	price:"number",
+	note:"text",
+	vehicle:[{'':'я пассажир'},vehicles]
+})
+*/
+
 JsonCSS('lang/ru.json');
 
 const
@@ -42,8 +50,8 @@ place = loc => loc.split(' / ')[1]
 
 	,"ROOF".d(''
 		,"GROUP.when".d(''
-			,"INPUT type=date".d("!! $when.date@value").ui('$when.date=#.value')
 			,"INPUT type=time".d("!! $when.time@value").ui('$when.time=#.value')
+			,"INPUT type=date".d("!! $when.date@value").ui('$when.date=#.value')
 		)
 		,"GROUP.where".d(''
 			,"select.dpt".d('! $dpt').ui('$dpt=Where(dict.dpt@label):wait')
@@ -55,7 +63,7 @@ place = loc => loc.split(' / ')[1]
 	
 		,"PAGE.routes".d('?? $tab@routes'
 			,"UL".d('* ("route $person):api ("route):api E'
-				,"LI".d('! .terms').ui('$dpt=. $arv=. $route=. $tab="rides')
+				,"LI".d('! (.terms .places)spans').ui('$dpt=. $arv=. $route=. $tab="rides')
 			)
 		)
 		
@@ -100,7 +108,7 @@ place = loc => loc.split(' / ')[1]
 	E:[],
 	areas: await fetch("kg.txt").then(r=>r.ok&&r.text()).then(untab),
 	soon:	(([date,time])=>({date,time:time.split(':')[0]+':00'}))(new Date(Date.now()+1000*60*60*2).toISOString().split('T')), // in 2 hours
-	vehicle: ["легковой", "микроавтобус", "автобус", "грузовой"]
+	vehicle: ["легковой", "минивэн", "автобус", "грузовой", "мотоцикл"]
 })
 
 .DICT({
@@ -131,13 +139,13 @@ place = loc => loc.split(' / ')[1]
 		)
 	).u('value $value'),
 	
-	Where
-	:modal('$area= $place='
+	_Where
+	:modal('$region= $area= $place='
 		,"label".d('!? .label@')
 		//,"recent".d('Areas(:recall@areas"recent)')
 		,"regions".d('* areas@areas,area,places'
 			,"region".d('$?= $places='
-				,"name".d('! .area').ui('? $?=$?:!; $places=.places:|; ?')
+				,"name".d('! .area').ui('? $?=$?:!; $region= $places=.places:|; ?')
 				,"details".d('? $?'
 					,"areas".d('? .areas; * .areas@areas,area,places'
 						,"area".d('! .area')
@@ -152,6 +160,27 @@ place = loc => loc.split(' / ')[1]
 		)
 	),
 	
+	Where
+	:modal('$region= $area= $place='
+		,"label".d('!? .label@')
+		//,"recent".d('Areas(:recall@areas"recent)')
+		,"regions".d('* areas@areas,region,places'
+			,"region".d('$?= $places='
+				,"name".d('! .region').ui('? $?=$?:!; $region=. $places=.places:|; ?')
+				,"details".d('? $?'
+					,"areas".d('? .areas; * .areas@areas,area,places'
+						,"area".d('! .area')
+							.a('!? (.area $area)eq@selected')
+							.ui('$area=. $places=.places:|')
+					)
+					,"places".d('? $places; * $places@place'
+						,"place".d('! .place').ui('value ($area $place=.):place') //$area=.. $place=.
+					)
+				)
+			).u("? $place")
+		)
+	),
+/*	
 	Vehicle
 	:modal("$?="
 		,"UL".d('* ("car $person):api'
@@ -169,33 +198,27 @@ place = loc => loc.split(' / ')[1]
 			`)
 		)
 	),
-	
-	Info
-	:modal( "title".d('! (.time .places)spans')
-/*		
-		Form({
-			price:"number",
-			note:"text",
-			vehicle:"SELECT".d(''
-				,"OPTION value='' `я пассажир".d()
-				,"OPTGROUP".d('* vehicle'
-					,"OPTION".d('!! .vehicle@value')
-				)
-			)
-		})
 */	
-		,"FORM.ride".d('' 
+	Info
+	:modal(
+
+		"title".d('! (.time .places)spans')
+	
+		,"FORM.info".d('' 
 			,"LABEL.vehicle".d(
 				"SELECT".d( "OPTION value='' `я пассажир".d()
 					,"OPTGROUP".d('* vehicle'
 						,"OPTION".d('! .vehicle')
 					)
-				).ui('.vehicle=#:value')
+				).ui('.vehicle=#.value')
 			)
-			,"LABEL.price".d("INPUT type=number".ui(".price=#:value"))
-			,"LABEL.note".d("TEXTAREA".ui(".note=#:value"))
+			,"LABEL.price".d("INPUT type=number".ui(".price=#.value"))
+			,"LABEL.note".d("TEXTAREA".ui(".note=#.value"))
 		).u("?")
-		,"BUTTON.ok".ui("value $")
+		,"DECK".d(''
+			,"BUTTON.cancel".ui('value :?')
+			,"BUTTON.ok".ui("value $")
+		)
 	),
 	
 	Person
@@ -206,7 +229,7 @@ place = loc => loc.split(' / ')[1]
 	
 	Ride
 	:"ride".d('$?=; !? $my=(.person $person)eq'
-		,"title".d('! (.info.time .info.price .info.places .info.note)spans')
+		,"title".d('! (.info.time .info.price .info.vehicle .info.places .info.note)spans')
 		,"details".d('? $?; Person(.person@); ! Passengers'
 			,"BUTTON.contact_rider"
 				.d("? $my:!")

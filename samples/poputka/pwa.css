@@ -20,7 +20,7 @@ html,body {
 
 label {
     display: block;
-    margin: 1em 0;
+    margin: .5rem 0;
 }
 
 body, app, roof, page, etage,form {
@@ -36,23 +36,21 @@ body, app, page, etage {
 
 
 
-input, select,textarea {
+input,select,textarea {
 	display:block;
 	font-size: inherit;
 	font-family:inherit;
 	padding:.2em;
 	border:none;
-	/* margin: .5rem 0; */
-	/* border-radius: .25rem; */
-}
-
-input {
-	text-align: inherit;
 }
 
 input:focus-visible {
     outline: none;
     background: antiquewhite;
+}
+
+input {
+	text-align: inherit;
 }
 
 input[type=number] {
@@ -63,37 +61,39 @@ input::placeholder, textarea::placeholder{
 	font: italic 1em sans-serif;
 }
 
+label>input, label>select, label>textarea{
+	box-sizing: border-box;
+	width:100%;
+	margin: .5rem 0;
+	border-radius: .25rem;
+}
+
 
 
 
 button {
-	/* margin: 1em; */
 	padding: .5em;
-	border-radius: .25em;
+	border-radius: .5em;
 	border: none;
 }
 
 
-
-
-page>form {
-	/* margin: 1em; */
+form {
 	background: lightgrey;
-	padding: 1em;
-	border-radius: 1em;
+	padding: 1rem;
+	margin: 1rem 0;
+	border-radius: .5rem;
 }
 
 roof, page {
-	/* flex: none; */
 	padding: 1rem;
 	gap: 1rem;
 }
 
 page>ul {
 	flex: 1;
-	overflow:auto;
+	overflow-н: auto;
 	padding: 0;
-	/* margin: 0; */
 }
 
 page>ul::before {
@@ -102,8 +102,11 @@ page>ul::before {
     margin-bottom: 2rem;
 }
 
-page>ul>li {
-    padding: 1em 0;
+page>ul>li{
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+	margin-bottom: 3em;
 }
 
 
@@ -129,8 +132,8 @@ group.when {}
 
 tabset {
 	display: flex;
-	/* margin-top: -2.5rem; */
-	height: 2.5rem;
+	margin-top: .2rem;
+	height: 2.2rem;
 	bottom:0;
 	left: 1rem;
 	text-transform: capitalize;
@@ -141,7 +144,7 @@ tabset {
 tab {
 	/* display: inline-block; */
 	transition: all .5s;
-	padding: .5em;
+	padding: .4em .5em;
 	/* margin: 0 .1em; */
 	border-radius: .25em .25em 0 0;
 }
@@ -166,7 +169,7 @@ modal>scrim{
 	animation: fadein .25s ease-out;
 }
 modal>shield {
-	padding: 1rem 1.5rem;
+	padding: 1rem;
 	background: white;
 	border: none;
 	border-radius: 4px;
@@ -186,3 +189,9 @@ shield>input {
 	border-bottom: 2px solid;
 }
 shield>.actions{padding:.5rem;text-align: right;margin: 1rem -1rem -1rem -1rem;}
+
+shield>deck {
+    display: block;
+    text-align: right;
+    margin-top: 2rem;
+}
