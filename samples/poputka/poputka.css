@@ -144,6 +144,7 @@ span.price {
     position: absolute;
     right: 1em;
     font-size: 1.25em;
+    color: lightslategrey;
 }
 
 form.info {
@@ -177,4 +178,8 @@ html {
     background: gold;
     font-weight: bold;
     border-radius: .5em;
+}
+
+.vehicle span.price {
+    color: black;
 }
