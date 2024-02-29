@@ -1,7 +1,6 @@
 {
 	"TAB.routes": "маршруты",
-	"TAB.rides": "поездки",
-	"TAB.hikes" : "попутчики",
+	"TAB.rides": "попутчики",
 	"TAB.admin" : "админ",
 	
 	".dpt:empty": "Откуда",

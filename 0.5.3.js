@@ -1120,15 +1120,15 @@ Fail("bzzz i<0");
 				result = new Execute.Branch(node,change).execBranch(todo);
 			
 			if(result instanceof Execute.Postpone)
-				return result.locate(node);
+				return !!result.locate(node);
 
 			const
 				defs = node.P.scope.defines,
 				up = defs && (!parent || node.$!=parent.$)
 					? adopt(node.$.stata,defs,change,{})
-					: change;					
-
-			return (parent && parent.P && checkUp(parent,up,result,node)>3) || checkDown(node,change,snitch)>3;
+					: change;
+					
+			return (parent && parent.P && checkUp(parent,up,result,node)) || checkDown(node,change,snitch)>3;
 		},			
 		
 		checkDown = (node,change,snitch)=>{//

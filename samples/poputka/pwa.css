@@ -74,8 +74,8 @@ label>input, label>select, label>textarea{
 
 button {
 	padding: .5em;
-	border-radius: .5em;
 	border: none;
+	/* border-radius: .5em; */
 }
 
 
@@ -86,7 +86,7 @@ form {
 	border-radius: .5rem;
 }
 
-roof, page {
+roof, _page {
 	padding: 1rem;
 	gap: 1rem;
 }
@@ -107,13 +107,10 @@ page>ul>li{
 	display: block;
 	max-width: 100%;
 	overflow: hidden;
-	margin-bottom: 3em;
+	padding: 1em;
+	/* margin-bottom: 2em; */
 }
 
-
-page>button {
-	font-size: 1.5em;
-}
 
 form>button{
 	font-size: 1.5em;
@@ -128,8 +125,6 @@ group{
 	box-shadow: 0 2px 6px rgba(0,0,0,.1);
 	/* background: white; */
 }
-
-group.when {}
 
 tabset {
 	display: flex;

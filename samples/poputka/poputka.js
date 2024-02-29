@@ -36,8 +36,34 @@ modal = (...stuff) =>
 	).u("kill; ?"),
 	
 
+/*
 term = loc => loc.split(' / ')[0],
-place = loc => loc.split(' / ')[1]
+place = loc => loc.split(' / ')[1],
+*/
+
+where	= { //$where={dpt,arv}
+	
+	convert: ((slash,arrow) => ({
+		//fromda:({dpt,arv})=>dpt&&arv&&[dpt,arv],
+		fromtp:({terms,places})=>{
+				if(terms&&places){
+					const	w = terms.split(arrow).map(t=>t.split(slash)),
+						p = places.split(arrow);
+					w[0].push(p[0]);
+					w[1].push(p[1]);
+					return {dpt:w[0],arv:w[1]};
+				}
+			},
+		//toda	:w => w&&{ dpt:w[0], arv:w[1] },
+		totp	:w => w&&{
+				terms : [w.dpt.slice(0,-1),w.arv.slice(0,-1)].map(a=>a.join(slash)).join(arrow),
+				places: [w.dpt.at(-1),w.arv.at(-1)].join(arrow)
+			},
+			
+		loc	:a => a && a.join(', ')
+		
+	}))(' / ',' → ')
+}
 
 ;
 
@@ -45,7 +71,8 @@ place = loc => loc.split(' / ')[1]
 
 
 "APP".d(`	$tab=
-		$when=soon $dpt= $arv= $route= $ride=
+		$when=soon $where=
+		$route= $ride=
 		$user=:auth.load $person="1`
 
 	,"ROOF".d(''
@@ -53,35 +80,38 @@ place = loc => loc.split(' / ')[1]
 			,"INPUT type=time".d("!! $when.time@value").ui('$when.time=#.value')
 			,"INPUT type=date".d("!! $when.date@value").ui('$when.date=#.value')
 		)
-		,"GROUP.where".d(''
-			,"select.dpt".d('! $dpt').ui('$dpt=Where(dict.dpt@label):wait')
-			,"select.arv".d('! $arv').ui('$arv=Where(dict.arv@label):wait')
-		).u('? ($dpt $arv)!; $route=("route ($dpt $arv):terms@terms):api,route')
+		,"GROUP.where".d('& $where@'
+			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
+			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+		).u('$where=(.dpt .arv); ? (.dpt .arv)!; & $where:totp@; $route=("route .terms):api,route')//
 	)
 
 	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|admin)'
 	
 		,"PAGE.routes".d('?? $tab@routes'
 			,"UL".d('* ("route $person):api ("route):api E'
-				,"LI".d('! (.terms .places)spans').ui('$dpt=. $arv=. $route=. $tab="rides')
+				,"LI"	.d('! (.terms .places)spans')
+					.ui('$where=(.terms .places):fromtp $route=. $tab="rides')
 			)
 		)
 		
-		,"PAGE.rides".d('?? $tab@rides; $rides=("ride $route $when.date):api'
+		,"PAGE.rides".d('?? $tab@rides'
 		
-			,"UL".d('* $rides@'//($rides $filter)filter E'
-				,"LI".d('! Ride').ui('$ride=.')
+			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
+				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle'
+					,"title".d('! (.info.time .info.price .info.vehicle .info.places .info.note)spans')
+					.ui('$?=$?:!')
+					,"details".d('? $?; Person(.person@)'
+						,"BUTTON.contact_rider"
+							.d("? $my:!")
+							.ui(`	? $person $person=Login():wait;
+								? $Hike=(@PUT"hike $person $ride ($when.time $dpt $arv $note)@info):api;
+								:alert"created;
+							`)//subscribe for rides
+						//,"BUTTON.cancel"
+					).ui('$ride=.')
+				)
 			)
-			,"BUTTON.add-ride"
-			.d("$info=")
-			.ui(`	? $person $person=Login():wait;
-				? $dpt $dpt=Where(@label"dpt):wait;
-				? $arv $arv=Where(@label"arv):wait;
-				? $route $route=("route ($dpt $arv):terms@terms):api,route;
-				? $info=Info($when.time ($dpt $arv):places@places):wait;
-				? (@PUT"ride $person $when.date $route $info):api :alert"error;
-				:alert"created;
-			`)
 		)
 /*		
 		,"PAGE.active".d('?? $tab@active'
@@ -99,6 +129,18 @@ place = loc => loc.split(' / ')[1]
 				,"BUTTON type=submit `Submit".d()
 			).ui('? (@PUT"route #:form@.):api :alert`error')
 		)
+		
+		,"BUTTON.add-ride"
+		.d("$info=")
+		.ui(`	? $person $person=Login():wait;
+			? .dpt .dpt=Where(@label"dpt):wait;
+			? .arv .arv=Where(@label"arv):wait;
+			& $where:totp=(.dpt .arv)@;
+			? $info=Info($when.time .places):wait;
+			? $route=("route .terms):api,route;
+			? (@PUT"ride $person $when.date $route $info):api :alert"error;
+			:alert"created;
+		`)
 	
 	)
 
@@ -107,8 +149,8 @@ place = loc => loc.split(' / ')[1]
 .DICT({
 	E:[],
 	areas: await fetch("kg.txt").then(r=>r.ok&&r.text()).then(untab),
-	soon:	(([date,time])=>({date,time:time.split(':')[0]+':00'}))(new Date(Date.now()+1000*60*60*2).toISOString().split('T')), // in 2 hours
-	vehicle: ["легковой", "минивэн", "автобус", "грузовой", "мотоцикл"]
+	soon:	(([date,time])=>({date,time:time.split(':')[0]+':00'}))(new Date(Date.now()+1000*60*60).toISOString().split('T')), // in 1 hour
+	vehicle: ["седан", "универсал", "минивэн", "автобус", "грузовик", "мотоцикл"]
 })
 
 .DICT({
@@ -143,9 +185,9 @@ place = loc => loc.split(' / ')[1]
 	:modal('$region= $area= $place='
 		,"label".d('!? .label@')
 		//,"recent".d('Areas(:recall@areas"recent)')
-		,"regions".d('* areas@areas,area,places'
+		,"regions".d('* areas@areas,region,places'
 			,"region".d('$?= $places='
-				,"name".d('! .area').ui('? $?=$?:!; $region= $places=.places:|; ?')
+				,"name".d('! .region').ui('? $?=$?:!; $region=. $places=.places:|; ?')
 				,"details".d('? $?'
 					,"areas".d('? .areas; * .areas@areas,area,places'
 						,"area".d('! .area')
@@ -153,7 +195,7 @@ place = loc => loc.split(' / ')[1]
 							.ui('$area=. $places=.places:|')
 					)
 					,"places".d('? $places; * $places@place'
-						,"place".d('! .place').ui('value ($area $place=.):place') //$area=.. $place=.
+						,"place".d('! .place').ui('value ($region $area $place=.)*') //$area=.. $place=.
 					)
 				)
 			).u("? $place")
@@ -174,7 +216,7 @@ place = loc => loc.split(' / ')[1]
 							.ui('$area=. $places=.places:|')
 					)
 					,"places".d('? $places; * $places@place'
-						,"place".d('! .place').ui('value ($area $place=.):place') //$area=.. $place=.
+						,"place".d('! .place').ui('value ($region $area $place=.)*')
 					)
 				)
 			).u("? $place")
@@ -227,21 +269,6 @@ place = loc => loc.split(' / ')[1]
 		,"stars".d('! .stars')
 	),
 	
-	Ride
-	:"ride".d('$?=; !? $my=(.person $person)eq'
-		,"title".d('! (.info.time .info.price .info.vehicle .info.places .info.note)spans')
-		,"details".d('? $?; Person(.person@); ! Passengers'
-			,"BUTTON.contact_rider"
-				.d("? $my:!")
-				.ui(`	? $person $person=Login():wait;
-					? $Hike=(@PUT"hike $person $ride ($when.time $dpt $arv $note)@info):api;
-					:alert"created;
-				`)//subscribe for rides
-			//,"BUTTON.cancel"
-		).u("?")
-		//
-	).ui('$?=$?:!'),
-	
 	Hike:
 	"hike".d(),
 	
@@ -269,6 +296,7 @@ place = loc => loc.split(' / ')[1]
 })
 
 .FUNC({
+
 	convert:{
 		auth: auth(headers),
 		api : api("https://orders.saxmute.one/poputka/api.php?",{headers}).HttpJson,
@@ -276,16 +304,6 @@ place = loc => loc.split(' / ')[1]
 		
 		first	: arr => Array.isArray(arr) && arr[0],
 		route : arr => Array.isArray(arr) && arr[0]?.route,
-		
-		
-		place	: ({area,place}) =>`${area} / ${place}`,
-		terms : ({dpt,arv}) => `${term(dpt)} → ${term(arv)}`,
-		places: ({dpt,arv}) => `${place(dpt)} → ${place(arv)}`,
-		dptarv: str => {
-			const [dpt,arv] = str.split(' → ');
-			return {dpt,arv};
-		},
-
 		
 		modal,
 		untab
@@ -307,9 +325,7 @@ place = loc => loc.split(' / ')[1]
 			},0);
 		}
 	}
-			
 
-	
-}, Await)
+}, where, Await)
 
 .RENDER();
