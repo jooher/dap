@@ -243,7 +243,7 @@ where	= { //$where={dpt,arv}
 	:"person `person details".d(''//'* ("person .person):api E'
 		,"B `name".d('! .name')
 		,"S `stars".d('! .stars')
-		,"A.tg `contact me".d('!! @href"//t.me/+79268274271')
+		,"A.tg `contact me".d('!! @href"https://t.me/+79268274271')
 	),
 	
 	Hike:
