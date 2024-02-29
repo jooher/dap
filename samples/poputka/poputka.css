@@ -99,8 +99,9 @@ span.vehicle {
     /* color: gray; */
 }
 
-.where {
+group.where {
     flex-direction: column;
+    position: relative;
 }
 .when{
     flex-direction: row;
@@ -161,4 +162,19 @@ span.note {
 
 html {
     background-color: gainsboro;
+}
+
+.swap {
+    display: block;
+    position: absolute;
+    right: 1em;
+    top: 1em;
+    width: 2em;
+    height: 2em;
+    box-sizing: border-box;
+    padding: .4em;
+    text-align: center;
+    background: gold;
+    font-weight: bold;
+    border-radius: .5em;
 }

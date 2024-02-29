@@ -79,6 +79,7 @@ where	= { //$where={dpt,arv}
 		,"GROUP.where".d('& $where@'
 			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
 			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+			,"swap `↕↕".ui('& (.dpt@arv .arv@dpt)')
 		).u('? (.dpt .arv)!; & $where:totp=(.dpt .arv)@; $route=("route .terms):api,route $tab="rides')//
 	)
 
@@ -104,7 +105,6 @@ where	= { //$where={dpt,arv}
 								? $Hike=(@PUT"hike $person $ride ($when.time $dpt $arv $note)@info):api;
 								:alert"created;
 							`)//subscribe for rides
-						//,"BUTTON.cancel"
 					).ui('$ride=.')
 				)
 			)
@@ -117,7 +117,6 @@ where	= { //$where={dpt,arv}
 				,"LI".
 			)
 		)
-*/		
 		,"PAGE.admin".d('?? $tab@admin'
 			,"FORM `add route".d(''
 				,"INPUT name=name placeholder=name".d()
@@ -125,6 +124,7 @@ where	= { //$where={dpt,arv}
 				,"BUTTON type=submit `Submit".d()
 			).ui('? (@PUT"route #:form@.):api :alert`error')
 		)
+*/		
 		
 		,"BUTTON.add-ride"
 		.d("$info=")
@@ -177,27 +177,6 @@ where	= { //$where={dpt,arv}
 				.a("!? (.pattern $value:!)!@disabled")
 		)
 	).u('value $value'),
-	
-	_Where
-	:modal('$region= $area= $place='
-		,"label".d('!? .label@')
-		//,"recent".d('Areas(:recall@areas"recent)')
-		,"regions".d('* areas@areas,region,places'
-			,"region".d('$?= $places='
-				,"name".d('! .region').ui('? $?=$?:!; $region=. $places=.places:|; ?')
-				,"details".d('? $?'
-					,"areas".d('? .areas; * .areas@areas,area,places'
-						,"area".d('! .area')
-							.a('!? (.area $area)eq@selected')
-							.ui('$area=. $places=.places:|')
-					)
-					,"places".d('? $places; * $places@place'
-						,"place".d('! .place').ui('value ($region $area $place=.)*') //$area=.. $place=.
-					)
-				)
-			).u("? $place")
-		)
-	),
 	
 	Where
 	:modal('$region= $area= $place='
@@ -261,9 +240,10 @@ where	= { //$where={dpt,arv}
 	),
 	
 	Person
-	:"person `person details".d('* ("person .person):api'
-		,"name".d('! .name')
-		,"stars".d('! .stars')
+	:"person `person details".d(''//'* ("person .person):api E'
+		,"B `name".d('! .name')
+		,"S `stars".d('! .stars')
+		,"A.tg `contact me".d('!! @href"//t.me/+79268274271')
 	),
 	
 	Hike:
