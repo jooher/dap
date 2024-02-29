@@ -44,17 +44,13 @@ place = loc => loc.split(' / ')[1],
 where	= { //$where={dpt,arv}
 	
 	convert: ((slash,arrow) => ({
-		//fromda:({dpt,arv})=>dpt&&arv&&[dpt,arv],
 		fromtp:({terms,places})=>{
 				if(terms&&places){
-					const	w = terms.split(arrow).map(t=>t.split(slash)),
-						p = places.split(arrow);
-					w[0].push(p[0]);
-					w[1].push(p[1]);
-					return {dpt:w[0],arv:w[1]};
+					const	p = places.split(arrow),
+						[dpt,arv] = terms.split(arrow).map( (t,i) => [...t.split(slash),p[i]] );
+					return {dpt,arv};
 				}
 			},
-		//toda	:w => w&&{ dpt:w[0], arv:w[1] },
 		totp	:w => w&&{
 				terms : [w.dpt.slice(0,-1),w.arv.slice(0,-1)].map(a=>a.join(slash)).join(arrow),
 				places: [w.dpt.at(-1),w.arv.at(-1)].join(arrow)
@@ -76,14 +72,14 @@ where	= { //$where={dpt,arv}
 		$user=:auth.load $person="1`
 
 	,"ROOF".d(''
-		,"GROUP.when".d(''
-			,"INPUT type=time".d("!! $when.time@value").ui('$when.time=#.value')
-			,"INPUT type=date".d("!! $when.date@value").ui('$when.date=#.value')
-		)
+		,"GROUP.when".d('& $when@'
+			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
+			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
+		).u('? (.date .time)!; $when=(.date .time)')
 		,"GROUP.where".d('& $where@'
 			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
 			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
-		).u('$where=(.dpt .arv); ? (.dpt .arv)!; & $where:totp@; $route=("route .terms):api,route')//
+		).u('? (.dpt .arv)!; & $where:totp=(.dpt .arv)@; $route=("route .terms):api,route $tab="rides')//
 	)
 
 	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|admin)'
@@ -96,10 +92,10 @@ where	= { //$where={dpt,arv}
 		)
 		
 		,"PAGE.rides".d('?? $tab@rides'
-		
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
 				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle'
-					,"title".d('! (.info.time .info.price .info.vehicle .info.places .info.note)spans')
+					,"title"
+					.d('! (.info.time .info.price .info.vehicle .info.places .info.note)spans')
 					.ui('$?=$?:!')
 					,"details".d('? $?; Person(.person@)'
 						,"BUTTON.contact_rider"
@@ -150,6 +146,7 @@ where	= { //$where={dpt,arv}
 	E:[],
 	areas: await fetch("kg.txt").then(r=>r.ok&&r.text()).then(untab),
 	soon:	(([date,time])=>({date,time:time.split(':')[0]+':00'}))(new Date(Date.now()+1000*60*60).toISOString().split('T')), // in 1 hour
+	today: new Date().toISOString().split('T')[0],
 	vehicle: ["седан", "универсал", "минивэн", "автобус", "грузовик", "мотоцикл"]
 })
 
@@ -264,7 +261,7 @@ where	= { //$where={dpt,arv}
 	),
 	
 	Person
-	:"person".d(''
+	:"person `person details".d('* ("person .person):api'
 		,"name".d('! .name')
 		,"stars".d('! .stars')
 	),
