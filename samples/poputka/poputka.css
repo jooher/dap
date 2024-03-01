@@ -88,15 +88,10 @@ span.time {
     /* margin-right: 1em; */
 }
 
-span.price {
-    font-weight: bold;
-}
-
 span.vehicle {
     display: inline-block;
     padding: 0 .5em;
     font-style: italic;
-    /* color: gray; */
 }
 
 group.where {
@@ -182,4 +177,14 @@ html {
 
 .vehicle span.price {
     color: black;
+}
+
+a.tg { 
+    display: inline-block;
+    padding: .5em;
+    margin: .5em;
+    border-radius: .5em;
+    background: cornflowerblue;
+    color: white;
+    text-decoration: none;
 }

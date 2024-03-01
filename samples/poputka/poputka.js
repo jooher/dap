@@ -35,8 +35,18 @@ modal = (...stuff) =>
 		,"SHIELD".d(...stuff)//.u('value $')
 	).u("kill; ?"),
 	
-
 /*
+inputs = i => Object.entries(i).map(([name,type])=>{
+	const	label = document.createElement("label"),
+		input = document.createElement("input");
+	label.setAttribute("class",name);
+	input.setAttribute("name",name);
+	input.setAttribute("type",type);
+	label.append(input);
+	return label;
+}),
+
+
 term = loc => loc.split(' / ')[0],
 place = loc => loc.split(' / ')[1],
 */
@@ -51,7 +61,7 @@ where	= { //$where={dpt,arv}
 					return {dpt,arv};
 				}
 			},
-		totp	:w => w&&{
+		totp	:w => w&&w.dpt&&w.arv&&{
 				terms : [w.dpt.slice(0,-1),w.arv.slice(0,-1)].map(a=>a.join(slash)).join(arrow),
 				places: [w.dpt.at(-1),w.arv.at(-1)].join(arrow)
 			},
@@ -69,7 +79,8 @@ where	= { //$where={dpt,arv}
 "APP".d(`	$tab=
 		$when=soon $where=
 		$route= $ride=
-		$user=:auth.load $person="1`
+		$user=:auth.load
+		$person="1`
 
 	,"ROOF".d(''
 		,"GROUP.when".d('& $when@'
@@ -80,10 +91,10 @@ where	= { //$where={dpt,arv}
 			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
 			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
 			,"swap `↕↕".ui('& (.dpt@arv .arv@dpt)')
-		).u('? (.dpt .arv)!; & $where:totp=(.dpt .arv)@; $route=("route .terms):api,route $tab="rides')//
+		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
 	)
 
-	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|admin)'
+	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|account)'
 	
 		,"PAGE.routes".d('?? $tab@routes'
 			,"UL".d('* ("route $person):api ("route):api E'
@@ -100,13 +111,29 @@ where	= { //$where={dpt,arv}
 					.ui('$?=$?:!')
 					,"details".d('? $?; Person(.person@)'
 						,"BUTTON.contact_rider"
-							.d("? $my:!")
-							.ui(`	? $person $person=Login():wait;
-								? $Hike=(@PUT"hike $person $ride ($when.time $dpt $arv $note)@info):api;
-								:alert"created;
-							`)//subscribe for rides
+						.d("? $my:!")
+						.ui(`	? $person $person=Login():wait;
+							? $Hike=(@PUT"hike $person $ride ($when.time $dpt $arv $note)@info):api;
+							:alert"created;
+						`)//subscribe for rides
 					).ui('$ride=.')
 				)
+			)
+		)
+		
+		,"PAGE.account".d('?? $tab@account'
+			,"FORM.contacts".d('* $user.info.contacts@ ()'
+				,"LABEL.name"	.d("INPUT type=text name=name".d("!! .name@value"))
+				
+				,"LABEL.tel"	.d("INPUT type=tel name=tel autocomplete=tel".d("!! .tel@value"))
+				,"LABEL.tg"		.d("INPUT type=tel name=tg autocomplete=tel".d("!! .tg@value"))
+				,"LABEL.wa"		.d("INPUT type=tel name=wa autocomplete=tel".d("!! .wa@value"))
+				,"BUTTON `submit"
+				.ui(`	$user.info.contacts=#.form:form
+					$user=(@PUT"person $user.person $user.info):api,first
+					$user:auth.save;
+					log "updated; ?
+				`)
 			)
 		)
 /*		
@@ -128,7 +155,7 @@ where	= { //$where={dpt,arv}
 		
 		,"BUTTON.add-ride"
 		.d("$info=")
-		.ui(`	? $person $person=Login():wait;
+		.ui(`	? $person $person=("person):api Login():modal;
 			? .dpt .dpt=Where(@label"dpt):wait;
 			? .arv .arv=Where(@label"arv):wait;
 			& $where:totp=(.dpt .arv)@;
@@ -240,10 +267,12 @@ where	= { //$where={dpt,arv}
 	),
 	
 	Person
-	:"person `person details".d(''//'* ("person .person):api E'
+	:"person".d(''//'* ("person .person):api E'
+	/*
 		,"B `name".d('! .name')
 		,"S `stars".d('! .stars')
-		,"A.tg `contact me".d('!! @href"https://t.me/+79268274271')
+	*/
+		,"A.tg `contact me".d('!! @href"https://t.me/+79268274271').u('?')
 	),
 	
 	Hike:

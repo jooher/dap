@@ -2,6 +2,7 @@
 	"TAB.routes": "маршруты",
 	"TAB.rides": "попутчики",
 	"TAB.admin" : "админ",
+	"TAB.account" : "аккаунт",
 	
 	".dpt:empty": "Откуда",
 	".arv:empty": "Куда",
@@ -11,6 +12,11 @@
 	"LABEL.vehicle": "Автомобиль",
 	"LABEL.price": "Стоимость за 1 место",
 	"LABEL.note": "Примечания",
+	
+	"LABEL.name": "Имя или псевдоним",
+	"LABEL.tel": "Номер телефона",
+	"LABEL.tg": "Телеграм",
+	"LABEL.wa": "Whatsapp",
 	
 	"BUTTON.ok":"Готово",
 	"BUTTON.cancel":"Отмена",

@@ -22,6 +22,7 @@ html,body {
 label {
     display: block;
     margin: .5rem 0;
+    /* border-bottom: 1px solid; */
 }
 
 body, app, roof, page, etage,form {
@@ -66,7 +67,8 @@ label>input, label>select, label>textarea{
 	box-sizing: border-box;
 	width:100%;
 	margin: .5rem 0;
-	border-radius: .25rem;
+	/* border-radius: .25rem; */
+	border-bottom: 1px solid;
 }
 
 
@@ -80,10 +82,10 @@ button {
 
 
 form {
-	background: lightgrey;
-	padding: 1rem;
-	margin: 1rem 0;
-	border-radius: .5rem;
+	/* background: lightgrey; */
+	/* padding: 1rem; */
+	margin: 1rem;
+	/* border-radius: .5rem; */
 }
 
 roof, _page {
@@ -108,7 +110,6 @@ page>ul>li{
 	max-width: 100%;
 	overflow: hidden;
 	padding: 1em;
-	/* margin-bottom: 2em; */
 }
 
 
@@ -119,11 +120,9 @@ form>button{
 group{
 	display: flex;
 	gap: 1px;
-	/* padding: .2em; */
 	border-radius: .75rem;
 	overflow: hidden;
 	box-shadow: 0 2px 6px rgba(0,0,0,.1);
-	/* background: white; */
 }
 
 tabset {
@@ -138,10 +137,8 @@ tabset {
 }
 
 tab {
-	/* display: inline-block; */
 	transition: all .5s;
 	padding: .4em .5em;
-	/* margin: 0 .1em; */
 	border-radius: .25em .25em 0 0;
 }
 
