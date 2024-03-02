@@ -272,7 +272,7 @@ where	= { //$where={dpt,arv}
 		,"B `name".d('! .name')
 		,"S `stars".d('! .stars')
 	*/
-		,"A.tg `contact me".d('!! @href"https://t.me/+79268274271').u('?')
+		,"A.tg `contact me".d('!! @href"https://t.me/popuutka_bot').u('?')
 	),
 	
 	Hike:
