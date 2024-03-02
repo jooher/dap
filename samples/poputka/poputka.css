@@ -135,7 +135,7 @@ span.places {
 li.ride {
     position: relative;
     padding: 1em;
-    /* margin: 1em -1em; */
+    margin: .5em 0;
     /* border: 2px solid gainsboro; */
     /* border-radius: .5rem; */
 }
@@ -182,9 +182,9 @@ html {
     padding: .4em;
     text-align: center;
     background: gold center no-repeat url(/stuff/icons/swap-v.svg);
-    background-size: 1.5em;
+    background-size: 1.25em;
     font-weight: bold;
-    border-radius: .5em;
+    border-radius: 1em;
 }
 
 .vehicle span.price {

@@ -90,7 +90,7 @@ where	= { //$where={dpt,arv}
 		,"GROUP.where".d('& $where@'
 			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
 			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
-			,"swap `↕↕".ui('& (.dpt@arv .arv@dpt)')
+			,"swap".ui('& (.dpt@arv .arv@dpt)')
 		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
 	)
 
