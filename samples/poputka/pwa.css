@@ -46,9 +46,13 @@ input,select,textarea {
 	border:none;
 }
 
-input:focus-visible {
+group>select {
+    flex: 1;
+}
+
+:focus-visible {
     outline: none;
-    background: antiquewhite;
+    background: floralwhite;
 }
 
 input {
@@ -56,19 +60,24 @@ input {
 }
 
 input[type=number] {
-	text-align: right;
+	text-align: center;
+}
+
+group>input[type="number"] {
+    width: 4em;
 }
 
 input::placeholder, textarea::placeholder{
 	font: italic 1em sans-serif;
 }
 
-label>input, label>select, label>textarea{
+label>input, label>select, label>textarea,label>group{
 	box-sizing: border-box;
 	width:100%;
 	margin: .5rem 0;
-	/* border-radius: .25rem; */
-	border-bottom: 1px solid;
+	border-radius: .5rem;
+	/* border-bottom: 1px solid; */
+	/* background: floralwhite; */
 }
 
 
@@ -82,10 +91,10 @@ button {
 
 
 form {
-	/* background: lightgrey; */
-	/* padding: 1rem; */
-	margin: 1rem;
-	/* border-radius: .5rem; */
+	background: lavender;
+	padding: 1rem;
+	/* margin: 1rem; */
+	border-radius: .5rem;
 }
 
 roof, _page {
@@ -119,9 +128,12 @@ form>button{
 
 group{
 	display: flex;
-	gap: 1px;
+	gap: .1em;
 	border-radius: .75rem;
 	overflow: hidden;
+}
+
+roof>group {
 	box-shadow: 0 2px 6px rgba(0,0,0,.1);
 }
 
@@ -170,7 +182,7 @@ modal>shield {
 	position: relative;
 	margin: auto;
 	max-width: 80%;
-	min-width: 50%;
+	/* min-width: 16rem; */
 	display: inline-block;
 	max-height: 80%;
 	overflow: auto;

@@ -1183,13 +1183,11 @@ Fail("bzzz i<0");
 			},
 			
 			onEvent: (event,target)=>{
-				Env.stopEvent(event);
-
 				const
 					node = target||event.currentTarget,
 					value = event.type;
-					
-				Execute.Perf(event.type,new Date(),checkUp(node,{event},value));
+				Env.stopEvent(event);
+				Execute.Perf(event.type,new Date(),checkUp(node,{},value));//{event}
 			}
 			
 		};
@@ -1369,7 +1367,7 @@ Fail("bzzz i<0");
 				
 		stopEvent	: e=>{
 			e.stopPropagation();
-			if(e.cancelable)
+			if(e.cancelable && !e.target.href)
 				e.preventDefault();
 			return e;
 		},

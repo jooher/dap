@@ -107,7 +107,7 @@ where	= { //$where={dpt,arv}
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
 				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle'
 					,"title"
-					.d('! (.info.time .info.price .info.vehicle .info.places .info.note)spans')
+					.d('* .info@; ! (.time .price .vehicle .seats .places .note)spans')
 					.ui('$?=$?:!')
 					,"details".d('? $?; Person(.person@)'
 						,"BUTTON.contact_rider"
@@ -249,13 +249,16 @@ where	= { //$where={dpt,arv}
 
 		"title".d('! (.time .places)spans')
 	
-		,"FORM.info".d('' 
-			,"LABEL.vehicle".d(
-				"SELECT".d( "OPTION value='' `я пассажир".d()
-					,"OPTGROUP".d('* vehicle'
-						,"OPTION".d('! .vehicle')
-					)
-				).ui('.vehicle=#.value')
+		,"FORM.info".d(''
+			,"LABEL.vehicle".d(''
+				,"GROUP".d(''
+					,"SELECT".d( "OPTION value='' `я пассажир".d()
+						,"OPTGROUP".d('* vehicle'
+							,"OPTION".d('! .vehicle')
+						)
+					).ui('.vehicle=#.value')
+					,"INPUT type=number".ui(".seats=#.value")
+				)
 			)
 			,"LABEL.price".d("INPUT type=number".ui(".price=#.value"))
 			,"LABEL.note".d("TEXTAREA".ui(".note=#.value"))
@@ -272,7 +275,7 @@ where	= { //$where={dpt,arv}
 		,"B `name".d('! .name')
 		,"S `stars".d('! .stars')
 	*/
-		,"A.tg `contact me".d('!! @href"https://t.me/popuutka_bot').u('?')
+		,"A.tg target=tg".d('!! @href"https://t.me/popuutka_bot').u('?')
 	),
 	
 	Hike:

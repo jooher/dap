@@ -14,13 +14,16 @@ tab.selected {
 button{
 	background: black;
 	color: white;
+	border-radius: .5em;
 }
 deck>button{
 	margin-left: .5rem;
 	padding: 1em 2em;
 }
-etage>button {
+button.add-ride {
 	font-size: 1.5em;
+	/* border-radius: unset; */
+	margin: .5em;
 }
 
 
@@ -91,7 +94,14 @@ span.time {
 span.vehicle {
     display: inline-block;
     padding: 0 .5em;
-    font-style: italic;
+}
+
+span.vehicle:empty {
+	    font-style: italic;
+}
+
+span.vehicle:not(:empty) {
+	    font-weight: bold;
 }
 
 group.where {
@@ -144,10 +154,11 @@ span.price {
 
 form.info {
     /* text-align: center; */
+    max-width: 18rem;
 }
 
 label.price>input {
-    text-align: center;
+    /* text-align: center; */
     font-size: 2em;
 }
 
@@ -170,7 +181,8 @@ html {
     box-sizing: border-box;
     padding: .4em;
     text-align: center;
-    background: gold;
+    background: gold center no-repeat url(/stuff/icons/swap-v.svg);
+    background-size: 1.5em;
     font-weight: bold;
     border-radius: .5em;
 }
@@ -179,12 +191,20 @@ html {
     color: black;
 }
 
-a.tg { 
+a.tg {
     display: inline-block;
-    padding: .5em;
-    margin: .5em;
-    border-radius: .5em;
-    background: cornflowerblue;
-    color: white;
-    text-decoration: none;
+    height: 2em;
+    width: 2em;
+    /* margin: .5em; */
+    /* border-radius: .5em; */
+    background: left no-repeat url(/stuff/icons/tg.png);
+    background-size: contain;
+    /* color: white; */
+    /* text-decoration: none; */
+}
+
+.ride a.tg {
+    position: absolute;
+    right: 1em;
+    bottom: 1em;
 }

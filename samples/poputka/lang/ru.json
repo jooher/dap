@@ -8,8 +8,10 @@
 	".arv:empty": "Куда",
 	
 	"SPAN.price": "₽ ",
+	"SPAN.vehicle:empty": "пассажир",
+	"SPAN.seats:not(:empty)": "мест: ",
 	
-	"LABEL.vehicle": "Автомобиль",
+	"LABEL.vehicle": "Автомобиль, места",
 	"LABEL.price": "Стоимость за 1 место",
 	"LABEL.note": "Примечания",
 	
@@ -23,5 +25,5 @@
 	"BUTTON.seek-rides":"Заказать поездку",
 	"BUTTON.add-ride":"Добавить поездку",
 	"BUTTON.contact-rider":"Связаться с водителем",
-	"BUTTON.contact-passenger":"Связаться с пассажиром"	
+	"BUTTON.contact-passenger":"Связаться с пассажиром"
 }
