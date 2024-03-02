@@ -149,7 +149,7 @@ span.price {
     position: absolute;
     right: 1em;
     font-size: 1.25em;
-    color: lightslategrey;
+    /* color: lightslategrey; */
 }
 
 form.info {
@@ -189,6 +189,7 @@ html {
 
 .vehicle span.price {
     color: black;
+    font-weight: bold;
 }
 
 a.tg {
