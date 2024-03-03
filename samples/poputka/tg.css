@@ -202,3 +202,8 @@ deck {
     flex-direction: row;
     gap: .5em;
 }
+
+
+app {
+    padding-bottom: 1em;
+}
