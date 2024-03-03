@@ -13,7 +13,7 @@
 
 html,body {
 	font: normal 1rem Roboto, sans-serif;
-	/* height: 100%; */
+	height: 100%;
 	padding: 0;
 	max-width: 24rem;
 	margin: auto;
@@ -26,17 +26,12 @@ label {
     /* border-bottom: 1px solid; */
 }
 
-app, roof, page, etage, form {
+body, app, roof, page, etage, form {
 	display: flex;
 	flex-direction: column-reverse;
 	max-height: 100%;
 	overflow: auto;
 }
-
-body, app, page, etage {
-	/* flex: 1; */
-}
-
 
 
 input,select,textarea {
