@@ -21,24 +21,38 @@
 --tg-theme-destructive-text-color: #d14e4e;
 */
 
+:root{
+	--shade-color: 100,150,250;
+}
+
 body,form {
 	background-color: var(--tg-theme-secondary-bg-color);
 	color:var(--tg-theme-text-color);
 }
 
-page, shield, tab.selected, input, .input, select, textarea {
+page, shield, input, .input, select, textarea {
 	background: var(--tg-theme-bg-color);
 	color:var(--tg-theme-text-color);
 }
 
-button{
+button, tab.selected{
 	background: var(--tg-theme-button-color);
 	color: var(--tg-theme-button-text-color);
 }
 
-group{
-	border-color:var(--tg-theme-button-color);
+tabset{
+	color: var(--tg-theme-button-color);
 }
+
+page {
+    border: 1px solid var(--tg-theme-button-color);
+}
+
+.input::before{
+	color: var(--tg-theme-button-color);
+}
+
+
 
 .swap{
 	background-color: var(--tg-theme-button-color);
@@ -50,18 +64,32 @@ span.time {
 	color: black;
 }
 
-li.ride.vehicle {
-	/* background: var(--tg-theme-section-bg-color); */
+group{
+	border-color:var(--tg-theme-button-color);
 }
+
 
 .rider {
    background-color:rgba(0,250,0,.1);
 }
 
+
+span.places{
+	font-style: italic;
+	color: var(--tg-theme-subtitle-text-color);
+}
+
+
+
+:focus-visible {
+    background-color: rgba(var(--shade-color),0.1);
+}
+
+
 .area{
-	background-color: rgba(100,150,250,.1);
+	background-color: rgba(var(--shade-color),.1);
 }
 
 .area.selected {
-	background-color: rgba(100,150,250,.3);
+	background-color: rgba(var(--shade-color),.3);
 }

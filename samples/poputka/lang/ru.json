@@ -6,6 +6,7 @@
 	
 	".input.dpt": "Откуда",
 	".input.arv": "Куда",
+	
 	"LABEL.when": "Время и дата поездки",
 	
 	"SPAN.price": "₽ ",

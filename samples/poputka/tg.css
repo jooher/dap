@@ -60,7 +60,7 @@ group>select {
 
 :focus-visible {
     outline: none;
-    background: floralwhite;
+    /* background: floralwhite; */
 }
 
 input {

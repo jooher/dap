@@ -109,9 +109,9 @@ where	= { //$where={dpt,arv}
 	.ui(`	? $person $person=("person):api Login():modal;
 		? .dpt .dpt=Where(@label"dpt):wait;
 		? .arv .arv=Where(@label"arv):wait;
-		& $where:totp=(.dpt .arv)@;
-		? $info=Info($when .places):wait;
-		? $route=("route .terms):api,route;
+		& $where:totp=(.dpt .arv);
+		? $info=Info($when .where):wait;
+		? $route=("route .where.terms):api,route;
 		? $!=(@PUT"ride $person $when.date $route $info):api :alert"error;
 	`)//:alert"created;
 
@@ -128,7 +128,7 @@ where	= { //$where={dpt,arv}
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
 				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
 					,"title"
-					.d('* .info@; ! (.when.time .price .vehicle .seats .places .note)spans')
+					.d('* .info@; ! (.when.time .price .vehicle .seats .where.places .note)spans')
 					.ui('$?=$?:!')
 					,"details".d('? $?; Person(.person@)'
 						,"BUTTON.contact_rider"
@@ -259,7 +259,7 @@ where	= { //$where={dpt,arv}
 	Info
 	:modal(
 
-		"title".d('! (.when.time .when.date .places)spans')
+		"title".d('! (.when.time .when.date .where.terms .where.places)spans')
 	
 		,"FORM.info".d(''
 			,"LABEL.vehicle".d(''
