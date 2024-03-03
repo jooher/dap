@@ -54,7 +54,14 @@ li.ride.vehicle {
 	/* background: var(--tg-theme-section-bg-color); */
 }
 
-
 .rider {
    background-color:rgba(0,250,0,.1);
+}
+
+.area{
+	background-color: rgba(100,150,250,.1);
+}
+
+.area.selected {
+	background-color: rgba(100,150,250,.3);
 }
