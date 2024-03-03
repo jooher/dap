@@ -57,7 +57,7 @@ body{
 		
 	tg.expand();
 
-	tg.onEvent(themeChanged, function(){alert("theme changed")});
+	tg.onEvent('themeChanged', function(){alert("theme changed")});
 
 	btn.addEventListener('click', function(){
 		if (tg.MainButton.isVisible)tg.MainButton.hide();
