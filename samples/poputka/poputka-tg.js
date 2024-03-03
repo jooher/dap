@@ -4,6 +4,15 @@ import Await from '/stuff/await.js';
 import {untab} from '/stuff/parse.js';
 
 /*
+const	tg = window.Telegram.WebApp;
+if(!tg)return;
+tg.expand();
+if (tg.MainButton.isVisible)tg.MainButton.hide();
+tg.onEvent('themeChanged', function(){alert("theme changed")});
+*/
+
+
+/*
 person, stars, info:json
 route, terms:string, stops:text
 ride, route, person, seats, date:date, info:json
@@ -69,10 +78,7 @@ where	= { //$where={dpt,arv}
 		loc	:a => a && a.join(', ')
 		
 	}))(' / ',' → ')
-}
-
-;
-
+};
 
 
 
@@ -81,18 +87,6 @@ where	= { //$where={dpt,arv}
 		$route= $ride=
 		$user=:auth.load
 		$person="1`
-
-	,"ROOF".d(''
-		,"GROUP.when".d('& $when@'
-			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
-			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
-		).u('? (.date .time)!; $when=(.date .time)')
-		,"GROUP.where".d('& $where@'
-			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
-			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
-			,"swap".ui('& (.dpt@arv .arv@dpt)')
-		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
-	)
 
 	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|account)'
 	
@@ -151,7 +145,20 @@ where	= { //$where={dpt,arv}
 				,"BUTTON type=submit `Submit".d()
 			).ui('? (@PUT"route #:form@.):api :alert`error')
 		)
-*/		
+*/	
+	
+	)
+
+	,"ROOF".d(''
+		,"GROUP.when".d('& $when@'
+			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
+			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
+		).u('? (.date .time)!; $when=(.date .time)')
+		,"GROUP.where".d('& $where@'
+			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
+			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+			,"swap".ui('& (.dpt@arv .arv@dpt)')
+		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
 		
 		,"BUTTON.add-ride"
 		.d("$info=")
@@ -164,7 +171,6 @@ where	= { //$where={dpt,arv}
 			? (@PUT"ride $person $when.date $route $info):api :alert"error;
 		`)//:alert"created;
 
-	
 	)
 
 )
@@ -178,6 +184,9 @@ where	= { //$where={dpt,arv}
 })
 
 .DICT({
+	
+	//user: tg.initDataUnsafe.user,
+
 	
 	filter:{
 		riders: ride => !!ride.info.vehicle,

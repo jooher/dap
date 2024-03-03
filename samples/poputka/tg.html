@@ -1,70 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html style="
+--tg-theme-accent-text-color: #168acd;
+--tg-color-scheme: light;
+--tg-theme-bg-color: #ffffff;
+--tg-theme-button-color: #40a7e3;
+--tg-theme-button-text-color: #ffffff;
+--tg-theme-destructive-text-color: #d14e4e;
+--tg-theme-header-bg-color: #ffffff;
+--tg-theme-hint-color: #999999;
+--tg-theme-link-color: #168acd;
+--tg-theme-secondary-bg-color: #f1f1f1;
+--tg-theme-section-bg-color: #ffffff;
+--tg-theme-section-header-text-color: #168acd;
+--tg-theme-subtitle-text-color: #999999;
+--tg-theme-text-color: #000000;
+--tg-viewport-height: 590px;
+--tg-viewport-stable-height: 590px;
+">
 <head>
 	<meta charset="utf-8">
-
 	<title>Poput4k</title>
-	
 	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0" />
-<style>
-
-body{
-	color: var(--tg-theme-text-color);
-	background: var(--tg-theme-bg-color);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	font-size: 18px;
-}
-
-.hint{
-	color: var(--tg-theme-hint-color);
-}
-
-.link{
-	color: var(--tg-theme-link-color);
-}
-
-.button{
-	background: var(--tg-theme-button-color);
-	color: var(--tg-theme-button-text-color);
-	border: none;
-	font-size: 18px;
-}
-
-.button:not(:last-child){
-	margin-bottom: 20px
-}
-
-#usercard{
-	text-align: center;
-}
-
-</style>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+	<link rel="stylesheet" href="pwa.css"/>
+	<link rel="stylesheet" href="poputka.css"/>
+	<link rel="stylesheet" href="colors-tg.css"/>
 </head>
-
-
-<body>
-	<div id="usercard"></div>
-	<p>Just text</p>
-	<button id="btn" class="button">Show/Hide Main Button</button>
-	<script>
-	const
-		tg = window.Telegram.WebApp,
-		tguser = tg.initDataUnsafe.user;
-		
-	tg.expand();
-
-	tg.onEvent('themeChanged', function(){alert("theme changed")});
-
-	btn.addEventListener('click', function(){
-		if (tg.MainButton.isVisible)tg.MainButton.hide();
-		else tg.MainButton.show();
-	});
-	</script>
-</body>
-
-
-<!--script src="poputka.js" type=module></script-->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="poputka-tg.js" type=module></script>

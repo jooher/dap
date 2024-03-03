@@ -1,0 +1,26 @@
+html {
+	background-color: gainsboro;
+}
+
+app {
+	background: gold;
+}
+
+page,tab.selected,.select,.place {
+	background: white;
+}
+
+button{
+	background: black;
+	color: white;
+	border-radius: .5em;
+}
+
+span.time {
+	background: gold;
+	color: black;
+}
+
+li.ride.vehicle {
+	background: lavender;
+}
