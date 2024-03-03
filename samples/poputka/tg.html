@@ -41,32 +41,30 @@ body{
 }
 
 </style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 </head>
 
 
 <body>
-	<div id="usercard"> <!--Карта профиля, человека, который к нам обратился-->
-	</div>
-	<p>Just text</p> <!--Просто текст для проверки-->
-	<p class="hint">Some little hint</p> <!--Просто текст-подсказка для проверки-->
-	<button id="btn" class="button">Show/Hide Main Button</button> <!--Кнопка, чтобы скрыть / показать основную кнопку-->
+	<div id="usercard"></div>
+	<p>Just text</p>
+	<button id="btn" class="button">Show/Hide Main Button</button>
+	<script>
+	const
+		tg = window.Telegram.WebApp,
+		tguser = tg.initDataUnsafe.user;
+		
+	tg.expand();
+
+	tg.onEvent(themeChanged, function(){alert("theme changed")});
+
+	btn.addEventListener('click', function(){
+		if (tg.MainButton.isVisible)tg.MainButton.hide();
+		else tg.MainButton.show();
+	});
+	</script>
 </body>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-const
-	tg = window.Telegram.WebApp,
-	tguser = tg.initDataUnsafe.user;
-	
-tg.expand();
 
-tg.onEvent(themeChanged, function(){});
-
-btn.addEventListener('click', function(){
-	if (tg.MainButton.isVisible)tg.MainButton.hide();
-	else tg.MainButton.show();
-});
-</script>
-
-<script src="poputka.js" type=module></script>
+<!--script src="poputka.js" type=module></script-->
