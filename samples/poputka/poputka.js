@@ -31,7 +31,7 @@ headers = new Headers({
 
 modal = (...stuff) =>
 	"MODAL".d('top'
-		,"SCRIM".ui('value')
+		,"SCRIM".ui('value :?')
 		,"SHIELD".d(...stuff)//.u('value $')
 	).u("kill; ?"),
 	
@@ -162,8 +162,8 @@ where	= { //$where={dpt,arv}
 			? $info=Info($when.time .places):wait;
 			? $route=("route .terms):api,route;
 			? (@PUT"ride $person $when.date $route $info):api :alert"error;
-			:alert"created;
-		`)
+		`)//:alert"created;
+
 	
 	)
 
@@ -268,9 +268,9 @@ where	= { //$where={dpt,arv}
 			)
 			,"DECK".d(''
 				,"BUTTON.cancel".ui('value :?')
-				,"BUTTON.ok type=submit".d()
+				,"BUTTON.ok type=submit".ui('& #.form:form@; value $')
 			)
-		).ui("& #:form; value $")
+		)
 	),
 	
 	Person

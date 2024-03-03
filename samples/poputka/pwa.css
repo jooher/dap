@@ -47,13 +47,6 @@ input,select,textarea {
 	background: white;
 }
 
-input[type=number]::-webkit-inner-spin-button {
-   -webkit-appearance: inner-spin-button;
-   opacity: 1;
-   margin-left: 10px;
-}
-
-
 group>select {
     flex: 1;
 }
@@ -207,4 +200,12 @@ shield>deck {
     display: block;
     text-align: right;
     margin-top: 2rem;
+}
+
+deck {
+    margin-top: 2em;
+    /* text-align: right; */
+    display: flex;
+    flex-direction: row;
+    gap: .5em;
 }
