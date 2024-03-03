@@ -54,6 +54,7 @@ li.ride.vehicle {
 
 etage {
     margin: 1rem;
+    /* flex: 1; */
     /* flex-direction: column-reverse; */
     /* flex-flow: column-reverse; */
 }

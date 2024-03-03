@@ -206,9 +206,12 @@ deck {
     gap: .5em;
 }
 
-etage {}
+etage {
+    flex: 1;
+}
 
 page {
+    flex: 1;
     border-radius: 1em;
 }
 
