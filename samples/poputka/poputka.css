@@ -2,11 +2,6 @@ app {
     background: gold;
 }
 
-app::before {
-    /* content: "Poput4K"; */
-    font: bold 1.4em sans-serif;
-}
-
 page {
     background: white;
 }
@@ -22,13 +17,11 @@ button{
 	border-radius: .5em;
 }
 deck>button{
-	/* margin-left: .5rem; */
 	padding: 1em 2em;
 	flex: 1;
 }
 button.add-ride {
 	font-size: 1.5em;
-	/* border-radius: unset; */
 	margin: .5em;
 }
 
@@ -103,11 +96,11 @@ span.vehicle {
 }
 
 span.vehicle:empty {
-	    font-style: italic;
+	font-style: italic;
 }
 
 span.vehicle:not(:empty) {
-	    font-weight: bold;
+	font-weight: bold;
 }
 
 group.where {
