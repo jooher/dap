@@ -287,7 +287,7 @@ where	= { //$where={dpt,arv}
 	
 	Person
 	:"person".d(''
-		,"A.tg target=tg".d('!! @href"https://t.me/popuutka_bot').u('?')
+		,"A.tg target=tg".d('!! @href"https://t.me/+79268274271').u('?')
 	),
 	
 	Hike:
