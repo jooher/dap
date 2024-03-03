@@ -4,8 +4,8 @@
 	"TAB.admin" : "админ",
 	"TAB.account" : "аккаунт",
 	
-	".dpt:empty": "Откуда",
-	".arv:empty": "Куда",
+	"LABEL.where": "Откуда и куда",
+	"LABEL.when": "Время и дата поездки",
 	
 	"SPAN.price": "₽ ",
 	"SPAN.vehicle:empty": "пассажир",

@@ -92,12 +92,18 @@ where	= { //$where={dpt,arv}
 		,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
 		,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
 	).u('? (.date .time)!; $when=(.date .time)')
+
 	,"GROUP.where".d('& $where@'
-		,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
-		,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+		,"INPUT.dpt placeholder=Откуда".d('!! .dpt:loc@value').ui('.dpt=Where(@label"dpt):wait')
+		,"INPUT.arv placeholder=Куда".d('!! .arv:loc@value').ui('.arv=Where(@label"arv):wait')
 		,"swap".ui('& (.dpt@arv .arv@dpt)')
 	).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
-	
+/*
+	,"LABEL.when".d(
+	)
+	,"LABEL.where".d(
+	)
+*/	
 	,"BUTTON.add-ride"
 	.d("$info=")
 	.ui(`	? $person $person=("person):api Login():modal;
@@ -120,7 +126,7 @@ where	= { //$where={dpt,arv}
 		
 		,"PAGE.rides".d('?? $tab@rides'
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
-				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle'
+				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
 					,"title"
 					.d('* .info@; ! (.time .price .vehicle .seats .places .note)spans')
 					.ui('$?=$?:!')

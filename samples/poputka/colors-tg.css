@@ -21,21 +21,22 @@
 --tg-theme-destructive-text-color: #d14e4e;
 */
 
-body {
+body,form {
 	background-color: var(--tg-theme-secondary-bg-color);
 	color:var(--tg-theme-text-color);
-	/* padding-bottom:2em; */
 }
 
-page,tab.selected,.select,.place {
+page, shield, tab.selected, input, select, textarea {
 	background: var(--tg-theme-bg-color);
-	/* border-radius: 1rem; */
 }
 
 button{
 	background: var(--tg-theme-button-color);
 	color: var(--tg-theme-button-text-color);
-	border-radius: 1em;
+}
+
+group{
+	border-color:var(--tg-theme-button-color);
 }
 
 .swap{
@@ -44,17 +45,15 @@ button{
 }
 
 span.time {
-	background: --tg-theme-header-bg-color;
-	color: --tg-theme-accent-text-color;
+	background: gold;
+	color: black;
 }
 
 li.ride.vehicle {
-	background: var(--tg-theme-section-bg-color);
+	/* background: var(--tg-theme-section-bg-color); */
 }
 
-etage {
-    margin: 1rem;
-    /* flex: 1; */
-    /* flex-direction: column-reverse; */
-    /* flex-flow: column-reverse; */
+
+.rider {
+   background-color:rgba(100,100,200,.2);
 }

@@ -14,25 +14,32 @@
 html,body {
 	font: normal 1rem Roboto, sans-serif;
 	height: 100%;
-	padding: 0;
 	max-width: 24rem;
+	padding: 0;
 	margin: auto;
-	/* flex-direction: column; */
 }
 
-label {
-    display: block;
-    margin: .5rem 0;
-    /* border-bottom: 1px solid; */
-}
-
-body, app, roof, page, etage, form {
+body, app, roof, page, etage {
 	display: flex;
 	flex-direction: column-reverse;
 	max-height: 100%;
 	overflow: auto;
 }
 
+roof {
+	padding: 1rem;
+	gap: 1rem;
+}
+
+etage {
+    flex: 1;
+    margin: 1rem;
+}
+
+page {
+    flex: 1;
+    border-radius: 1em;
+}
 
 input,select,textarea {
 	display:block;
@@ -41,6 +48,10 @@ input,select,textarea {
 	padding:.2em;
 	border:none;
 	background: white;
+}
+
+group>input {
+	padding: .5em;
 }
 
 group>select {
@@ -73,42 +84,30 @@ label>input, label>select, label>textarea,label>group{
 	width:100%;
 	margin: .5rem 0;
 	border-radius: .5rem;
-	/* border-bottom: 1px solid; */
-	/* background: floralwhite; */
 }
 
 
-
-
 button {
-	padding: .5em;
+	padding: 1em;
 	border: none;
-	/* border-radius: .5em; */
+	border-radius: 1.5em;
 }
 
 
 form {
 	background: lavender;
 	padding: 1rem;
-	/* margin: 1rem; */
 	border-radius: .5rem;
 }
 
-roof, _page {
-	padding: 1rem;
-	gap: 1rem;
+label {
+    display: block;
+    margin: .5rem 0;
 }
+
 
 page>ul {
-	/* flex: 1; */
-	overflow-н: auto;
 	padding: 0;
-}
-
-page>ul::before {
-    display: block;
-    font-size: 1.25em;
-    margin-bottom: 2rem;
 }
 
 page>ul>li{
@@ -117,7 +116,6 @@ page>ul>li{
 	overflow: hidden;
 	padding: 1em;
 }
-
 
 form>button{
 	font-size: 1.5em;
@@ -129,6 +127,7 @@ group{
 	border-radius: .75rem;
 	overflow: hidden;
 	margin: .5rem 1rem;
+	border:1px solid;
 }
 
 roof>group {
@@ -137,13 +136,12 @@ roof>group {
 
 tabset {
 	display: flex;
+	flex-direction: row;
+	padding: 0 1em;
 	margin-bottom: .2rem;
 	height: 2.2rem;
 	bottom:0;
 	left: 1rem;
-	text-transform: capitalize;
-	padding: 0 1em;
-	flex-direction: row;
 }
 
 tab {
@@ -173,14 +171,13 @@ modal>scrim{
 }
 modal>shield {
 	padding: 1rem;
-	background: white;
+	/* background: white; */
 	border: none;
-	border-radius: 4px;
+	border-radius: 1em;
 	box-shadow: 0 0.5rem 1rem rgba(0,0,0,.4);
 	position: relative;
 	margin: auto;
 	max-width: 80%;
-	/* min-width: 16rem; */
 	display: inline-block;
 	max-height: 80%;
 	overflow: auto;
@@ -205,14 +202,3 @@ deck {
     flex-direction: row;
     gap: .5em;
 }
-
-etage {
-    flex: 1;
-}
-
-page {
-    flex: 1;
-    border-radius: 1em;
-}
-
-page.routes {}

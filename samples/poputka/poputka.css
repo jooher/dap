@@ -1,5 +1,5 @@
 deck>button{
-	padding: 1em 2em;
+	/* padding: 1em; */
 	flex: 1;
 }
 button.add-ride {
@@ -74,11 +74,15 @@ span.vehicle {
 	padding: 0 .5em;
 }
 
-span.vehicle:empty {
+.rider span.price {
+	font-weight: bold;
+}
+
+.passenger .vehicle {
 	font-style: italic;
 }
 
-span.vehicle:not(:empty) {
+.rider .vehicle {
 	font-weight: bold;
 }
 
@@ -144,9 +148,6 @@ span.note {
 	border-radius: 1em;
 }
 
-.vehicle span.price {
-	font-weight: bold;
-}
 
 a.tg {
 	display: inline-block;
