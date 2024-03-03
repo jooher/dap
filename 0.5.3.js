@@ -1378,7 +1378,7 @@ Fail("bzzz i<0");
 					place = instead ? instead.parentNode : document.body;
 				}
 				if(!data)
-					data=location.hash ? QueryString.parse.hash(location.hash.replace(/^#!?/,'')) : {};
+					data=location.hash&&QueryString ? QueryString.parse.hash(location.hash.replace(/^#!?/,'')) : {};
 				const	ready = proto.print(place, new dap.Execute.Context(data));//||newStub("dap"); ||State.read()//()).subData()
 				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
 				return 0;
