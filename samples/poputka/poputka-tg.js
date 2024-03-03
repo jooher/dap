@@ -82,7 +82,7 @@ where	= { //$where={dpt,arv}
 
 
 
-"APP".d(`	$tab=
+"APP".d(`	$!= $tab=
 		$when=soon $where=
 		$route= $ride=
 		$user=:auth.load
@@ -94,8 +94,8 @@ where	= { //$where={dpt,arv}
 	).u('? (.date .time)!; $when=(.date .time)')
 
 	,"GROUP.where".d('& $where@'
-		,"INPUT.dpt placeholder=Откуда".d('!! .dpt:loc@value').ui('.dpt=Where(@label"dpt):wait')
-		,"INPUT.arv placeholder=Куда".d('!! .arv:loc@value').ui('.arv=Where(@label"arv):wait')
+		,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
+		,"input.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
 		,"swap".ui('& (.dpt@arv .arv@dpt)')
 	).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
 /*
@@ -110,25 +110,25 @@ where	= { //$where={dpt,arv}
 		? .dpt .dpt=Where(@label"dpt):wait;
 		? .arv .arv=Where(@label"arv):wait;
 		& $where:totp=(.dpt .arv)@;
-		? $info=Info($when.time .places):wait;
+		? $info=Info($when .places):wait;
 		? $route=("route .terms):api,route;
-		? (@PUT"ride $person $when.date $route $info):api :alert"error;
+		? $!=(@PUT"ride $person $when.date $route $info):api :alert"error;
 	`)//:alert"created;
 
 	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides)'//|account
 	
-		,"PAGE.routes".d('?? $tab@routes'
+		,"PAGE.routes".d('?? $tab@routes; $!'
 			,"UL".d('* ("route $person):api ("route):api E'
 				,"LI"	.d('! (.terms .places)spans')
 					.ui('$where=(.terms .places):fromtp $route=. $tab="rides')
 			)
 		)
 		
-		,"PAGE.rides".d('?? $tab@rides'
+		,"PAGE.rides".d('?? $tab@rides; $!'
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
 				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
 					,"title"
-					.d('* .info@; ! (.time .price .vehicle .seats .places .note)spans')
+					.d('* .info@; ! (.when.time .price .vehicle .seats .places .note)spans')
 					.ui('$?=$?:!')
 					,"details".d('? $?; Person(.person@)'
 						,"BUTTON.contact_rider"
@@ -259,7 +259,7 @@ where	= { //$where={dpt,arv}
 	Info
 	:modal(
 
-		"title".d('! (.time .places)spans')
+		"title".d('! (.when.time .when.date .places)spans')
 	
 		,"FORM.info".d(''
 			,"LABEL.vehicle".d(''

@@ -88,9 +88,9 @@ label>input, label>select, label>textarea,label>group{
 
 
 button {
-	padding: 1em;
+	padding: .5em;
 	border: none;
-	border-radius: 1.5em;
+	border-radius: 1em;
 }
 
 

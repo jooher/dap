@@ -26,8 +26,9 @@ body,form {
 	color:var(--tg-theme-text-color);
 }
 
-page, shield, tab.selected, input, select, textarea {
+page, shield, tab.selected, input, .input, select, textarea {
 	background: var(--tg-theme-bg-color);
+	color:var(--tg-theme-text-color);
 }
 
 button{
@@ -55,5 +56,5 @@ li.ride.vehicle {
 
 
 .rider {
-   background-color:rgba(100,100,200,.2);
+   background-color:rgba(0,250,0,.1);
 }

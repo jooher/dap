@@ -8,12 +8,12 @@ button.add-ride {
 }
 
 
-.select {
+.input {
 	height: 1em;
 	padding: .5em;
 }
 
-.select:empty::before {
+.input:empty::before {
 	color: gray;
 	font-style: italic;
 }
@@ -49,7 +49,7 @@ button.add-ride {
 .regions {
 	text-align: center;
 	font-size: 1.2em;
-	max-width: 18em;
+	width: 16em;
 }
 
 .region {
