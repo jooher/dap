@@ -129,7 +129,7 @@ span.note {
 }
 
 .swap {
-	background: gold center no-repeat url(/stuff/icons/swap-v.svg);
+	background: center no-repeat url(/stuff/icons/swap-v.svg);
 	display: block;
 	position: absolute;
 	right: 1em;

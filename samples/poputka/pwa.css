@@ -132,6 +132,7 @@ group{
 	gap: .1em;
 	border-radius: .75rem;
 	overflow: hidden;
+	margin: .5rem 1rem;
 }
 
 roof>group {
@@ -183,7 +184,6 @@ modal>shield {
 	position: relative;
 	margin: auto;
 	max-width: 80%;
-	/* min-width: 16rem; */
 	display: inline-block;
 	max-height: 80%;
 	overflow: auto;
@@ -204,7 +204,6 @@ shield>deck {
 
 deck {
     margin-top: 2em;
-    /* text-align: right; */
     display: flex;
     flex-direction: row;
     gap: .5em;

@@ -28,12 +28,17 @@ app {
 
 page,tab.selected,.select,.place {
 	background: var(--tg-theme-bg-color);
+	/* border-radius: 1rem; */
 }
 
 button{
 	background: var(--tg-theme-button-color);
 	color: var(--tg-theme-button-text-color);
 	border-radius: 1em;
+}
+
+.swap{
+	background-color: var(--tg-theme-button-color);
 }
 
 span.time {
@@ -46,6 +51,7 @@ li.ride.vehicle {
 }
 
 etage {
-    flex-direction: column-reverse;
+    margin: 1rem;
+    /* flex-direction: column-reverse; */
     /* flex-flow: column-reverse; */
 }

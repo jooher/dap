@@ -13,10 +13,11 @@
 
 html,body {
 	font: normal 1rem Roboto, sans-serif;
-	height: 100%;
+	/* height: 100%; */
 	padding: 0;
 	max-width: 24rem;
-	margin: 0 auto
+	margin: auto;
+	/* flex-direction: column; */
 }
 
 label {
@@ -25,15 +26,15 @@ label {
     /* border-bottom: 1px solid; */
 }
 
-body, app, roof, page, etage,form {
+app, roof, page, etage, form {
 	display: flex;
-	flex-direction: column;
+	flex-direction: column-reverse;
 	max-height: 100%;
 	overflow: auto;
 }
 
 body, app, page, etage {
-	flex: 1;
+	/* flex: 1; */
 }
 
 
@@ -104,7 +105,7 @@ roof, _page {
 }
 
 page>ul {
-	flex: 1;
+	/* flex: 1; */
 	overflow-н: auto;
 	padding: 0;
 }
@@ -132,6 +133,7 @@ group{
 	gap: .1em;
 	border-radius: .75rem;
 	overflow: hidden;
+	margin: .5rem 1rem;
 }
 
 roof>group {
@@ -140,7 +142,7 @@ roof>group {
 
 tabset {
 	display: flex;
-	margin-top: .2rem;
+	margin-bottom: .2rem;
 	height: 2.2rem;
 	bottom:0;
 	left: 1rem;
@@ -152,7 +154,7 @@ tabset {
 tab {
 	transition: all .5s;
 	padding: .4em .5em;
-	border-radius: .25em .25em 0 0;
+	border-radius: 0 0 1em 1em;
 }
 
 
@@ -204,8 +206,15 @@ shield>deck {
 
 deck {
     margin-top: 2em;
-    /* text-align: right; */
     display: flex;
     flex-direction: row;
     gap: .5em;
 }
+
+etage {}
+
+page {
+    border-radius: 1em;
+}
+
+page.routes {}

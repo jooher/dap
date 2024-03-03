@@ -88,7 +88,28 @@ where	= { //$where={dpt,arv}
 		$user=:auth.load
 		$person="1`
 
-	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|account)'
+	,"GROUP.when".d('& $when@'
+		,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
+		,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
+	).u('? (.date .time)!; $when=(.date .time)')
+	,"GROUP.where".d('& $where@'
+		,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
+		,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+		,"swap".ui('& (.dpt@arv .arv@dpt)')
+	).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
+	
+	,"BUTTON.add-ride"
+	.d("$info=")
+	.ui(`	? $person $person=("person):api Login():modal;
+		? .dpt .dpt=Where(@label"dpt):wait;
+		? .arv .arv=Where(@label"arv):wait;
+		& $where:totp=(.dpt .arv)@;
+		? $info=Info($when.time .places):wait;
+		? $route=("route .terms):api,route;
+		? (@PUT"ride $person $when.date $route $info):api :alert"error;
+	`)//:alert"created;
+
+	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides)'//|account
 	
 		,"PAGE.routes".d('?? $tab@routes'
 			,"UL".d('* ("route $person):api ("route):api E'
@@ -147,30 +168,6 @@ where	= { //$where={dpt,arv}
 		)
 */	
 	
-	)
-
-	,"ROOF".d(''
-		,"GROUP.when".d('& $when@'
-			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
-			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
-		).u('? (.date .time)!; $when=(.date .time)')
-		,"GROUP.where".d('& $where@'
-			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
-			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
-			,"swap".ui('& (.dpt@arv .arv@dpt)')
-		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
-		
-		,"BUTTON.add-ride"
-		.d("$info=")
-		.ui(`	? $person $person=("person):api Login():modal;
-			? .dpt .dpt=Where(@label"dpt):wait;
-			? .arv .arv=Where(@label"arv):wait;
-			& $where:totp=(.dpt .arv)@;
-			? $info=Info($when.time .places):wait;
-			? $route=("route .terms):api,route;
-			? (@PUT"ride $person $when.date $route $info):api :alert"error;
-		`)//:alert"created;
-
 	)
 
 )
