@@ -49,7 +49,7 @@ etage {
 
 page {
     flex: 1;
-    border-radius: 1em;
+    /* border-radius: 1em; */
 }
 
 input,select,textarea {

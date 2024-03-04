@@ -45,7 +45,7 @@ tabset{
 }
 
 page {
-    border: 1px solid var(--tg-theme-button-color);
+    border-bottom: 1px solid var(--tg-theme-button-color);
 }
 
 .input::before, label::before{
