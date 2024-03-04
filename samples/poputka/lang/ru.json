@@ -4,10 +4,13 @@
 	"TAB.admin" : "админ",
 	"TAB.account" : "аккаунт",
 	
-	".input.dpt": "Откуда",
-	".input.arv": "Куда",
+	".input.dpt": "Откуда:",
+	".input.arv": "Куда:",
 	
-	"LABEL.when": "Время и дата поездки",
+	"SHIELD.dpt":"Откуда (область, район, пункт)",
+	"SHIELD.arv":"Куда (область, район, пункт)",
+	
+	"LABEL.when": "Дата и время поездки",
 	
 	"SPAN.price": "₽ ",
 	"SPAN.vehicle:empty": "пассажир",

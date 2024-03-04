@@ -75,66 +75,50 @@ where	= { //$where={dpt,arv}
 				places: [w.dpt.at(-1),w.arv.at(-1)].join(arrow)
 			},
 			
-		loc	:a => a && a.join(slash)
+		loc	:a => a && a.join(', ')
 		
-	}))(', ',' → ')
+	}))(' / ',' → ')
 };
 
 
 
-"APP".d(`	$!= $?= $tab="routes
+"APP".d(`	$!= $tab=
 		$when=soon $where=
 		$route= $ride=
 		$user=:auth.load
 		$person="1`
 
-	,"ROOF".d(''
-	
-		,"GROUP.where".d('& $where@'
-			,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
-			,"input.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
-			,"swap".ui('& (.dpt@arv .arv@dpt)')
-		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
-		
-		,"GROUP.when".d('& $when@'
-			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
-			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
-		).u('? (.date .time)!; $when=(.date .time)')
-		//,"LABEL.when".d()
+	,"GROUP.when".d('& $when@'
+		,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
+		,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
+	).u('? (.date .time)!; $when=(.date .time)')
 
-		,"BUTTON.add-ride".d("? ($?:! $where.dpt $where.arv)!").ui('$?=:!')
-		
-		,"FORM.info".d('? $?'
-			,"LABEL.vehicle".d(''
-				,"GROUP".d(''
-					,"SELECT name=vehicle".d( "OPTION value='' `я пассажир".d()
-						,"OPTGROUP".d('* vehicle'
-							,"OPTION".d('! .vehicle')
-						)
-					)//.ui('.vehicle=#.value')
-					,"INPUT name=seats type=number value=1 min=1".d()//.ui(".seats=#.value")
-				)
-			)
-			,"LABEL.price".d(
-				"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
-			)//
-			,"LABEL.note".d(
-				"TEXTAREA name=note maxlength=200".d()//.ui(".note=#.value")
-			)
-			,"BUTTON.ok type=submit".d("$info=")
-			.ui(`	? $person $person=("person):api Login():modal;
-				? $route=(@PUT"route .terms):api,route :alert"error;
-				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places)@info ):api :alert"error;
-				$?=
-			`)//:alert"created;
-
-		)
-
+	,"GROUP.where".d('& $where@'
+		,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
+		,"input.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+		,"swap".ui('& (.dpt@arv .arv@dpt)')
+	).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
+/*
+	,"LABEL.when".d(
 	)
-	,"ETAGE".d('Tabset(:|@tab"routes|rides)'//|account
+	,"LABEL.where".d(
+	)
+*/	
+	,"BUTTON.add-ride"
+	.d("$info=")
+	.ui(`	? $person $person=("person):api Login():modal;
+		? .dpt .dpt=Where(@label"dpt):wait;
+		? .arv .arv=Where(@label"arv):wait;
+		& $where:totp=(.dpt .arv);
+		? $info=Info($when .where):wait;
+		? $route=("route .where.terms):api,route;
+		? $!=(@PUT"ride $person $when.date $route $info):api :alert"error;
+	`)//:alert"created;
+
+	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides)'//|account
 	
 		,"PAGE.routes".d('?? $tab@routes; $!'
-			,"UL".d('* ("routeride $person $when.date):api ("route):api E'
+			,"UL".d('* ("route $person):api ("route):api E'
 				,"LI"	.d('! (.terms .places)spans')
 					.ui('$where=(.terms .places):fromtp $route=. $tab="rides')
 			)
@@ -144,7 +128,7 @@ where	= { //$where={dpt,arv}
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
 				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
 					,"title"
-					.d('* .info@; ! (.time .price .vehicle .seats .where .places .note)spans')
+					.d('* .info@; ! (.when.time .price .vehicle .seats .where.places .note)spans')
 					.ui('$?=$?:!')
 					,"details".d('? $?; Person(.person@)'
 						,"BUTTON.contact_rider"
@@ -275,6 +259,28 @@ where	= { //$where={dpt,arv}
 
 		"title".d('! (.when.time .when.date .where.terms .where.places)spans')
 	
+		,"FORM.info".d(''
+			,"LABEL.vehicle".d(''
+				,"GROUP".d(''
+					,"SELECT name=vehicle".d( "OPTION value='' `я пассажир".d()
+						,"OPTGROUP".d('* vehicle'
+							,"OPTION".d('! .vehicle')
+						)
+					)//.ui('.vehicle=#.value')
+					,"INPUT name=seats type=number value=1 min=1".d()//.ui(".seats=#.value")
+				)
+			)
+			,"LABEL.price".d(
+				"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
+			)//
+			,"LABEL.note".d(
+				"TEXTAREA name=note maxlength=200".d()//.ui(".note=#.value")
+			)
+			,"DECK".d(''
+				,"BUTTON.cancel".ui('value :?')
+				,"BUTTON.ok type=submit".ui('& #.form:form@; value $')
+			)
+		)
 	),
 	
 	Person

@@ -64,7 +64,7 @@ span.time {
 	color: black;
 }
 
-group{
+group,label>input,label>textarea{
 	border-color:var(--tg-theme-button-color);
 }
 

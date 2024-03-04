@@ -21,14 +21,25 @@ html,body {
 
 body, app, roof, page, etage {
 	display: flex;
-	flex-direction: column-reverse;
-	max-height: 100%;
-	overflow: auto;
 }
 
-roof {
-	padding: 1rem;
-	gap: 1rem;
+body, app, etage {
+	flex-direction: column-reverse;
+}
+
+roof{
+	padding: 1em;
+	gap: 1em;
+	
+}
+
+page{
+	max-height: 100%;
+	overflow: auto;	
+}
+
+roof,page {
+	flex-direction: column;
 }
 
 etage {
@@ -95,14 +106,18 @@ button {
 
 
 form {
-	background: lavender;
-	padding: 1rem;
-	border-radius: .5rem;
+	/* background: lavender; */
+	/* padding: 1rem; */
+	/* border-radius: .5rem; */
 }
 
 label {
     display: block;
-    margin: .5rem 0;
+    /* margin: .5rem 0; */
+}
+
+form>label {
+    margin-top: 1.5em;
 }
 
 
@@ -124,10 +139,7 @@ form>button{
 group{
 	display: flex;
 	gap: .1em;
-	border-radius: .75rem;
 	overflow: hidden;
-	margin: .5rem 1rem;
-	border:1px solid;
 }
 
 roof>group {
@@ -181,6 +193,11 @@ modal>shield {
 	display: inline-block;
 	max-height: 80%;
 	overflow: auto;
+}
+
+shield::before{
+	display: block;
+	text-align:inherit;
 }
 
 shield>input {

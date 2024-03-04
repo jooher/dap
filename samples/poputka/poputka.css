@@ -4,7 +4,7 @@ deck>button{
 }
 button.add-ride {
 	font-size: 1.5em;
-	margin: .5em;
+	/* margin: 1em; */
 }
 
 
@@ -18,7 +18,7 @@ button.add-ride {
 	display:inline-block;
 	font-size: .8em;
 	width:4em;
-	text-align:right;
+	/* text-align:right; */
 	padding-right: 1em;
 	font-style: italic;
 }
@@ -62,7 +62,7 @@ button.add-ride {
 
 span.time {
 	display: inline-block;
-	padding: .25em .5em;
+	padding: .1em .5em;
 	font-weight: bold;
 	border-radius: .25em;
 }
@@ -104,12 +104,12 @@ span.terms, span.places {
 
 span.places {
 	display: block;
-	/* margin: .5em 0; */
+	margin: .5em 0;
 }
 
 li.ride {
 	position: relative;
-	padding: 1em;
+	padding: .5em 1em;
 	margin: .5em 0;
 }
 
@@ -120,7 +120,7 @@ span.price {
 }
 
 form.info {
-	max-width: 18rem;
+	/* max-width: 18rem; */
 }
 
 label.price>input {
@@ -129,6 +129,8 @@ label.price>input {
 
 span.note {
 	font-style: italic;
+	display: block;
+	margin: .5em 0;
 }
 
 .swap {
@@ -162,6 +164,11 @@ a.tg {
 	bottom: 1em;
 }
 
-.title>.places {
+.title {
     margin: 1em 0;
+}
+
+span.date {
+    display: inline-block;
+    padding: .5em;
 }
