@@ -181,8 +181,8 @@ deck>.vehicle {
     flex: 1;
 }
 
-deck>label::before {
-    margin: .5em;
+label::before {
+    margin: .1em;
 }
 
 deck>.price {
