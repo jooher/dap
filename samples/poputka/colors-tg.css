@@ -48,7 +48,7 @@ page {
     border: 1px solid var(--tg-theme-button-color);
 }
 
-.input::before{
+.input::before, label::before{
 	color: var(--tg-theme-button-color);
 }
 
@@ -64,7 +64,9 @@ span.time {
 	color: black;
 }
 
-group,label>input,label>textarea{
+group, label>input, label>textarea, label>select{
+	border-radius: .75rem;
+	border:1px solid;
 	border-color:var(--tg-theme-button-color);
 }
 

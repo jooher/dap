@@ -16,8 +16,9 @@
 	"SPAN.vehicle:empty": "пассажир",
 	"SPAN.seats:not(:empty)": "мест: ",
 	
-	"LABEL.vehicle": "Автомобиль, места/пассажиры",
-	"LABEL.price": "Стоимость за 1 место",
+	"LABEL.vehicle": "Авто",
+	"LABEL.seats": "мест",
+	"LABEL.price": "цена",
 	"LABEL.note": "Примечания",
 	
 	"LABEL.name": "Имя или псевдоним",

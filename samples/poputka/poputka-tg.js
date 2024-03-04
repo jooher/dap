@@ -105,19 +105,22 @@ where	= { //$where={dpt,arv}
 		,"BUTTON.add-ride".d("? ($?:! $where.dpt $where.arv)!").ui('$?=:!')
 		
 		,"FORM.info".d('? $?'
-			,"LABEL.vehicle".d(''
-				,"GROUP".d(''
-					,"SELECT name=vehicle".d( "OPTION value='' `я пассажир".d()
+			,"DECK".d(''
+				,"LABEL.vehicle".d(
+					"SELECT name=vehicle".d(
+						"OPTION value='' `я пассажир".d()
 						,"OPTGROUP".d('* vehicle'
 							,"OPTION".d('! .vehicle')
 						)
 					)//.ui('.vehicle=#.value')
-					,"INPUT name=seats type=number value=1 min=1".d()//.ui(".seats=#.value")
 				)
+				,"LABEL.seats".d(
+					"INPUT name=seats type=number value=1 min=1".d()//.ui(".seats=#.value")
+				)
+				,"LABEL.price".d(
+					"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
+				)//
 			)
-			,"LABEL.price".d(
-				"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
-			)//
 			,"LABEL.note".d(
 				"TEXTAREA name=note maxlength=200".d()//.ui(".note=#.value")
 			)
