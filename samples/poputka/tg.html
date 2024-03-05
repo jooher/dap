@@ -60,7 +60,7 @@ style="
 const
 
 tg = window.Telegram.WebApp,
-user =tg.initDataUnsafe.user;
+user =tg.initDataUnsafe.user||{};
 
 if(user)localStorage.setItem("user",JSON.stringify(user));
 
@@ -74,14 +74,17 @@ const mainButtonLabels = {
 
 let mainButton;
 
-window._tgmain = btn =>{
-	btn.style.display='none';
-	mainButton = btn;
-	const label = [...btn.classList].pop();
-	tg.MainButton.setText(mainButtonLabels[label]||label);
-};
+if(tg.initDataUnsafe){
 
-tg.onEvent('mainButtonClicked', function(){mainButton&&mainButton.click()});
+	window.tgmain = btn =>{
+		btn.style.display='none';
+		mainButton = btn;
+		const label = [...btn.classList].pop();
+		tg.MainButton.setText(mainButtonLabels[label]||label);
+	};
+
+	tg.onEvent('mainButtonClicked', function(){mainButton&&mainButton.click()});
+}
 
 /*
 tg.initData //получаем данные от пользователя в виде строки (работает только при запуске из меню команд бота). 
