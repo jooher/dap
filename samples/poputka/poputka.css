@@ -170,6 +170,7 @@ a.tg {
 
 .title {
     /* margin: 1em 0; */
+    font-weight: bold;
 }
 
 span.date {

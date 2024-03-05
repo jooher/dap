@@ -89,7 +89,7 @@ where	= { //$where={dpt,arv}
 		$person="1`
 
 	,"BUTTON.tgmain.add-ride".d('? $?:!; tgmain').ui('$?=:!')
-				
+	
 	,"ROOF".d('? $?'
 	
 		,"GROUP.when".d('& $when@'
@@ -115,10 +115,12 @@ where	= { //$where={dpt,arv}
 					)//.ui('.vehicle=#.value')
 				)
 				,"LABEL.seats".d(
-					"INPUT name=seats type=number value=1 min=1".d()//.ui(".seats=#.value")
+					"SELECT name=seats".d('* seats@value', "OPTION".d('! .value'))
+					//"INPUT name=seats type=number value=1 min=1".d()//.ui(".seats=#.value")
 				)
 				,"LABEL.price".d(
-					"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
+					"SELECT name=price".d('* price@value', "OPTION".d('! .value'))
+					//"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
 				)//
 			)
 			,"LABEL.note".d(
@@ -202,7 +204,9 @@ where	= { //$where={dpt,arv}
 	areas: await fetch("kg.txt").then(r=>r.ok&&r.text()).then(untab),
 	soon:	(([date,time])=>({date,time:time.split(':')[0]+':00'}))(new Date(Date.now()+1000*60*60).toISOString().split('T')), // in 1 hour
 	today: new Date().toISOString().split('T')[0],
-	vehicle: ["седан", "универсал", "минивэн", "автобус", "грузовик", "мотоцикл"]
+	vehicle: ["седан", "универсал", "минивэн", "автобус", "грузовик", "мотоцикл"],
+	seats: [1,2,3,4,5,6,7,8,9,10],
+	price: [100,150,200,250,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000]
 })
 
 .DICT({

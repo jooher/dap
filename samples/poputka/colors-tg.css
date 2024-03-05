@@ -48,8 +48,12 @@ page {
     border-bottom: 1px solid var(--tg-theme-button-color);
 }
 
-.input::before, label::before{
+.input::before, label::before, roof::before{
 	color: var(--tg-theme-button-color);
+}
+
+roof::before {
+    font-weight: bold;
 }
 
 
