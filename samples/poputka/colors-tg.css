@@ -66,8 +66,8 @@ span.time {
 
 group, label>input, label>textarea, label>select{
 	border-radius: .75rem;
-	border:1px solid;
-	border-color:var(--tg-theme-button-color);
+	border: .5px solid;
+	border-color: var(--tg-theme-button-color);
 }
 
 
@@ -95,3 +95,5 @@ span.places{
 .area.selected {
 	background-color: rgba(var(--shade-color),.3);
 }
+
+optiuon {}

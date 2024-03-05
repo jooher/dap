@@ -48,5 +48,26 @@ style="
 	<link rel="stylesheet" href="poputka.css"/>
 	<link rel="stylesheet" href="colors-tg.css"/>
 </head>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="poputka-tg.js" type=module></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+
+const tg = window.Telegram.WebApp;
+
+/*
+tg.MainButton.text // текст кнопки, по умолчанию: "Continue"
+tg.MainButton.color // цвет текста
+tg.MainButton.textColor // цвет подложки
+tg.MainButton.isVisible // видна ли кнопка (по умолчанию false) 
+tg.MainButton.isActive // активна ли кнопка (по умолчанию true)
+tg.MainButton.setText(text) //  метод для задания текста
+tg.MainButton.onClick(callback) // метод при нажатии на кнопку
+tg.MainButton.show() // показать кнопку 
+tg.MainButton.hide() // скрыть кнопку
+tg.MainButton.enable() // сделать активной 
+tg.MainButton.disable() // сделать неактивной 
+tg.MainButton.setParams(params) // задает параметры в виде объекта
+*/
+
+tg.MainButton.show();
+</script>

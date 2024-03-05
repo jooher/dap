@@ -88,7 +88,16 @@ where	= { //$where={dpt,arv}
 		$user=:auth.load
 		$person="1`
 
-	,"ROOF".d(''
+	,"BUTTON.add-ride".d('? $?:!').ui('$?=:!')//.d("? ($?:! $where.dpt $where.arv)!")
+	
+	,"BUTTON.ok type=submit".d("? $?")
+	.ui(`	? $person $person=("person):api Login():modal;
+		? $route=(@PUT"route .terms):api,route :alert"error;
+		? $!=(@PUT"ride $person $when.date $route (.info@. .time .terms .places)@info ):api :alert"error;
+		$?=
+	`)//:alert"created;
+			
+	,"ROOF".d('? $?'
 	
 		,"GROUP.where".d('& $where@'
 			,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
@@ -102,9 +111,7 @@ where	= { //$where={dpt,arv}
 		).u('? (.date .time)!; $when=(.date .time)')
 		//,"LABEL.when".d()
 
-		,"BUTTON.add-ride".d("? ($?:! $where.dpt $where.arv)!").ui('$?=:!')
-		
-		,"FORM.info".d('? $?'
+		,"FORM.info".d(''
 			,"DECK".d(''
 				,"LABEL.vehicle".d(
 					"SELECT name=vehicle".d(
@@ -124,14 +131,7 @@ where	= { //$where={dpt,arv}
 			,"LABEL.note".d(
 				"TEXTAREA name=note maxlength=200".d()//.ui(".note=#.value")
 			)
-			,"BUTTON.ok type=submit".d("$info=")
-			.ui(`	? $person $person=("person):api Login():modal;
-				? $route=(@PUT"route .terms):api,route :alert"error;
-				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places)@info ):api :alert"error;
-				$?=
-			`)//:alert"created;
-
-		)
+		).u('& #:form@info')
 
 	)
 	,"ETAGE".d('Tabset(:|@tab"routes|rides)'//|account
