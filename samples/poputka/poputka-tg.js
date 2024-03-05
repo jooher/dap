@@ -41,26 +41,10 @@ headers = new Headers({
 modal = (...stuff) =>
 	"MODAL".d('top'
 		,"SCRIM".ui('value :?')
-		,"SHIELD".d(...stuff)//.u('value $')
+		,"SHIELD".d(...stuff)
 	).u("kill; ?"),
-	
-/*
-inputs = i => Object.entries(i).map(([name,type])=>{
-	const	label = document.createElement("label"),
-		input = document.createElement("input");
-	label.setAttribute("class",name);
-	input.setAttribute("name",name);
-	input.setAttribute("type",type);
-	label.append(input);
-	return label;
-}),
 
-
-term = loc => loc.split(' / ')[0],
-place = loc => loc.split(' / ')[1],
-*/
-
-where	= { //$where={dpt,arv}
+where	= { //$where={dpt,arv,terms,places}
 	
 	convert: ((slash,arrow) => ({
 		fromtp:({terms,places})=>{
@@ -85,8 +69,8 @@ where	= { //$where={dpt,arv}
 "APP".d(`	$!= $?= $tab="routes
 		$when=soon $where=
 		$route= $ride=
-		$user=:auth.load
-		$person="1`
+		$user=:auth.load,user
+		$person=$user.id`
 
 	,"BUTTON.tgmain.add-ride".d('? $?:!; tgmain').ui('$?=:!')
 	
@@ -96,7 +80,6 @@ where	= { //$where={dpt,arv}
 			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
 			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
 		).u('? (.date .time)!; $when=(.date .time)')
-		//,"LABEL.when".d()
 
 		,"GROUP.where".d('& $where@'
 			,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
@@ -109,33 +92,29 @@ where	= { //$where={dpt,arv}
 				,"LABEL.vehicle".d(
 					"SELECT name=vehicle".d(
 						"OPTION value='' `я пассажир".d()
-						,"OPTGROUP".d('* vehicle'
-							,"OPTION".d('! .vehicle')
-						)
-					)//.ui('.vehicle=#.value')
+						,'Options(vehicle@value)'
+					)
 				)
 				,"LABEL.seats".d(
-					"SELECT name=seats".d('* seats@value', "OPTION".d('! .value'))
-					//"INPUT name=seats type=number value=1 min=1".d()//.ui(".seats=#.value")
+					"SELECT name=seats".d('Options(seats@value)')
 				)
 				,"LABEL.price".d(
-					"SELECT name=price".d('* price@value', "OPTION".d('! .value'))
+					"SELECT name=price".d('Options(price@value)')
 					//"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
-				)//
+				)
 			)
 			,"LABEL.note".d(
-				"TEXTAREA name=note maxlength=200".d()//.ui(".note=#.value")
+				"TEXTAREA name=note maxlength=200".d()
 			)
-			,"BUTTON.tgmain.ok".d('tgmain') //.add-ride
+			,"BUTTON.tgmain.ok".d('tgmain')
 			.ui(`? $?;
 				? $route=(@PUT"route .terms):api,route :alert"error;
-				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places)@info ):api :alert"error;
+				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places $user )@info ):api :alert"error;
 				$?=:?
 			`)
 		)
-
 	)
-	,"ETAGE".d('Tabset(:|@tab"routes|rides)'//|account
+	,"ETAGE".d('Tabset(:|@tab"routes|rides)'
 	
 		,"PAGE.routes".d('?? $tab@routes; $!'
 			,"UL".d('* ("routeride $person $when.date):api ("route):api E'
@@ -146,55 +125,14 @@ where	= { //$where={dpt,arv}
 		
 		,"PAGE.rides".d('?? $tab@rides; $!'
 			,"title".d('! $where.terms').ui('$tab="routes')
-			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
-				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
-					,"title"
-					.d('* .info@; ! (.time .price .vehicle .seats .where .places .note)spans')
-					.ui('$?=$?:!')
-					,"details".d('? $?; Person(.person@)'
-						,"BUTTON.contact_rider"
-						.d("? $my:!")
-						.ui(`	? $person $person=Login():wait;
-							? $Hike=(@PUT"hike $person $ride ($when.time $dpt $arv $note)@info):api;
-							:alert"created;
-						`)//subscribe for rides
-					).ui('$ride=.')
+			,"UL".d('* ("ride $route $when.date):api'
+				,"LI.ride".d('!? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'//$?=; 
+					,"title".d('* .info@; ! (.time .price .vehicle .seats .where .places .user:fullname .note )spans')
+					//.ui('$?=$?:!')
+					,"A.tg target=tg".d('!! .user:sendMessageLink@href').u('?')//? $?; ? $my:!; 
 				)
 			)
-		)
-		
-		,"PAGE.account".d('?? $tab@account'
-			,"FORM.contacts".d('* $user.info.contacts@ ()'
-				,"LABEL.name"	.d("INPUT type=text name=name".d("!! .name@value"))
-				
-				,"LABEL.tel"	.d("INPUT type=tel name=tel autocomplete=tel".d("!! .tel@value"))
-				,"LABEL.tg"		.d("INPUT type=tel name=tg autocomplete=tel".d("!! .tg@value"))
-				,"LABEL.wa"		.d("INPUT type=tel name=wa autocomplete=tel".d("!! .wa@value"))
-				,"BUTTON `submit"
-				.ui(`	$user.info.contacts=#.form:form
-					$user=(@PUT"person $user.person $user.info):api,first
-					$user:auth.save;
-					log "updated; ?
-				`)
-			)
-		)
-/*		
-		,"PAGE.active".d('?? $tab@active'
-			,"UL.hikes".d('* ("hike $person):api'
-			)
-			,"UL.rides".d('* ("ride $person):api'
-				,"LI".
-			)
-		)
-		,"PAGE.admin".d('?? $tab@admin'
-			,"FORM `add route".d(''
-				,"INPUT name=name placeholder=name".d()
-				,"TEXTAREA name=stops placeholder=stops".d()
-				,"BUTTON type=submit `Submit".d()
-			).ui('? (@PUT"route #:form@.):api :alert`error')
-		)
-*/	
-	
+		)	
 	)
 
 )
@@ -211,9 +149,6 @@ where	= { //$where={dpt,arv}
 
 .DICT({
 	
-	//user: tg.initDataUnsafe.user,
-
-	
 	filter:{
 		riders: ride => !!ride.info.vehicle,
 		passrs: ride => ! ride.info.vehicle
@@ -226,19 +161,8 @@ where	= { //$where={dpt,arv}
 			.ui('$tab=.')
 	).u("?"),
 	
-	Ask
-	:modal('$value='
-		,"title".d('! (.title .message)?')
-		,"details".d('! .details')
-		,"INPUT".d('? .pattern; !! .pattern; focus #')
-			.e("blur","$value=#:value; ?") //change 
-		,"actions".d(''
-			,"ACTION.cancel".ui('$value=')
-			,"ACTION.ok".d('! .action')
-				.ui('value ($value .action)?')//
-				.a("!? (.pattern $value:!)!@disabled")
-		)
-	).u('value $value'),
+	Options
+	:"OPTGROUP".d('* .value',"OPTION".d('! .value')),
 	
 	Where
 	:modal('$region= $area= $place=; !? .label@'
@@ -257,61 +181,7 @@ where	= { //$where={dpt,arv}
 				)
 			).u("? $place")
 		)
-	),
-/*	
-	Vehicle
-	:modal("$?="
-		,"UL".d('* ("car $person):api'
-			,"LI".d('! (.name .plate)spans').ui('value $')
-		)
-		,"BUTTON.add-car".ui("$?=$?:!")
-		,"add-car".d("? $?; $model= $plate="
-			,"UL".d('* ("car):api'
-				,"LI".d().ui('$model=.')
-			)
-			,"INPUT placeholder=model".d("#.value=$model").ui("$model=#.value")
-			,"INPUT placeholder=plate".ui("$plate=#.value")
-			,"BUTTON".ui(`? ($model $plate)! :alert"uhm;
-				(@PUT"car $model $plate $person);
-			`)
-		)
-	),
-*/	
-	Info
-	:modal(
-
-		"title".d('! (.when.time .when.date .where.terms .where.places)spans')
-	
-	),
-	
-	Person
-	:"person".d(''
-		,"A.tg target=tg".d('!! @href"https://t.me/+79268274271').u('?')
-	),
-	
-	Hike:
-	"hike".d(),
-	
-	Passengers:
-	"passengers",
-	
-	_Info
-	:"info".d(''
-		,"time".d('! .time')
-		,"rider".d('! .rider.name')
-		,"stars".d('! .rider.stars')
-	),
-	
-	Login
-	:modal('$!='
-		,"FORM".d(''
-			,"INPUT name=tel type=tel placeholder='Your phone number'".d().ui('$phone=#.value; ?')
-			,'INPUT name=otp type=numeric placeholder="Code"'
-				.d('? $phone')
-				.ui('$!=(@user"1 @token"2)')
-				//.ui('$!=("auth $phone #.value@code):api; ? $!.')
-		).u("? $!:! $!.user:auth.save")
-	).u("value $!.user")
+	)
 	
 })
 
@@ -324,6 +194,10 @@ where	= { //$where={dpt,arv}
 		
 		first	: arr => Array.isArray(arr) && arr[0],
 		route : arr => Array.isArray(arr) && arr[0]?.route,
+		
+		user	: u => u,
+		fullname: u => u&&`${u.first_name} ${u.last_name}`,
+		sendMessageLink: u => 'https://t.me/'+user.username,
 		
 		modal,
 		untab

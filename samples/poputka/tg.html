@@ -49,7 +49,7 @@ style="
 	<link rel="stylesheet" href="colors-tg.css"/>
 	
 <style>
-	//.tgMainButton{display:none !important}
+	//.mainButton{display:none !important}
 </style>
 
 </head>
@@ -57,7 +57,31 @@ style="
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 
-const tg = window.Telegram.WebApp;
+const
+
+tg = window.Telegram.WebApp,
+user =tg.initDataUnsafe.user;
+
+if(user)localStorage.setItem("user",JSON.stringify(user));
+
+tg.expand();
+tg.MainButton.show();
+
+const mainButtonLabels = {
+	"add-ride" : "Добавить поездку",
+	"ok": "Да, все верно!"
+};
+
+let mainButton;
+
+window._tgmain = btn =>{
+	btn.style.display='none';
+	mainButton = btn;
+	const label = [...btn.classList].pop();
+	tg.MainButton.setText(mainButtonLabels[label]||label);
+};
+
+tg.onEvent('mainButtonClicked', function(){mainButton&&mainButton.click()});
 
 /*
 tg.initData //получаем данные от пользователя в виде строки (работает только при запуске из меню команд бота). 
@@ -84,25 +108,4 @@ tg.MainButton.disable() // сделать неактивной
 tg.MainButton.setParams(params) // задает параметры в виде объекта
 */
 
-tg.expand();
-tg.MainButton.show();
-
-let tgMainButton;
-
-const tgMainButtonLabels = {
-	"add-ride" : "Добавить поездку",
-	"ok": "Да, все верно!"
-}
-
-window.tgmain = btn =>{
-	btn.style.display='none';
-	tgMainButton = btn;
-	const label = [...btn.classList].pop();
-	tg.MainButton.setText(tgMainButtonLabels[label]||label);
-};
-
-tg.onEvent('mainButtonClicked', function(){
-	console.log("tgMainButton clicked");
-	tgMainButton.click();
-});
 </script>

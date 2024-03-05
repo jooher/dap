@@ -164,11 +164,11 @@ a.tg {
 
 .ride a.tg {
 	position: absolute;
-	right: 1em;
-	bottom: 1em;
+	right: 1.25em;
+	top: 2.75em;
 }
 
-.title {
+page>.title {
     /* margin: 1em 0; */
     font-weight: bold;
 }

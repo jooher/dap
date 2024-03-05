@@ -23,6 +23,8 @@
 	"LABEL.price": "цена за 1",
 	"LABEL.note": "Примечания",
 	
+	".vehicle>SELECT>OPTION[value='']": "я пассажирec",
+	
 	"LABEL.name": "Имя или псевдоним",
 	"LABEL.tel": "Номер телефона",
 	"LABEL.tg": "Телеграм",
