@@ -73,18 +73,14 @@ const mainButtonLabels = {
 };
 
 let mainButton;
+window.tgmain = btn =>{
+	btn.style.display='none';
+	mainButton = btn;
+	const label = [...btn.classList].pop();
+	tg.MainButton.setText(mainButtonLabels[label]||label);
+};
 
-if(tg.initDataUnsafe){
-
-	window.tgmain = btn =>{
-		btn.style.display='none';
-		mainButton = btn;
-		const label = [...btn.classList].pop();
-		tg.MainButton.setText(mainButtonLabels[label]||label);
-	};
-
-	tg.onEvent('mainButtonClicked', function(){mainButton&&mainButton.click()});
-}
+tg.onEvent('mainButtonClicked', function(){mainButton&&mainButton.click()});
 
 /*
 tg.initData //получаем данные от пользователя в виде строки (работает только при запуске из меню команд бота). 
