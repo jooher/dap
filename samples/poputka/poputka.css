@@ -120,7 +120,7 @@ li.ride {
 span.price {
 	position: absolute;
 	right: 1em;
-	font-size: 1.25em;
+	/* font-size: 1.25em; */
 }
 
 form.info {
