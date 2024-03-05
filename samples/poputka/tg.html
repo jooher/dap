@@ -47,6 +47,11 @@ style="
 	<link rel="stylesheet" href="tg.css"/>
 	<link rel="stylesheet" href="poputka.css"/>
 	<link rel="stylesheet" href="colors-tg.css"/>
+	
+<style>
+	.tgMainButton{display:none !important}
+</style>
+
 </head>
 <script src="poputka-tg.js" type=module></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -83,10 +88,7 @@ tg.expand();
 tg.MainButton.show();
 
 tg.onEvent('mainButtonClicked', function(){
-	const tgt = document.getElementById("tgMainButton");
-	if(tgt)
-		tgt.click();
 	console.log("tgMainButton clicked");
-	//tg.sendData("some string that we need to send"); 
+	[...document.getElementsByClassName("tgMainButton")].forEach( btn=>btn.click() );
 });
 </script>

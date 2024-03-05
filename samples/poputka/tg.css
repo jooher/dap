@@ -10,7 +10,7 @@
 	to { opacity: 1; }
 }
 
-BUTTON#tgMainButton{display:none}
+BUTTON#tgMainButton{/* display:none; */}
 
 
 html,body {
@@ -36,11 +36,6 @@ roof{
 	
 }
 
-page{
-	max-height: 100%;
-	overflow: auto;	
-}
-
 roof,page {
 	flex-direction: column;
 }
@@ -54,7 +49,8 @@ etage {
 
 page {
     flex: 1;
-    /* border-radius: 1em; */
+    overflow-y: auto;
+    padding: 1em;
 }
 
 input,select,textarea {
@@ -122,7 +118,7 @@ label {
 }
 
 form>label {
-    margin-top: 1.5em;
+    margin: .5em 0;
 }
 
 
@@ -134,11 +130,14 @@ page>ul>li{
 	display: block;
 	max-width: 100%;
 	overflow: hidden;
-	padding: 1em;
+	padding: 1em 0;
 }
 
 form>button{
 	font-size: 1.5em;
+	margin-top: 1em;
+	display: block;
+	width: 100%;
 }
 
 group{

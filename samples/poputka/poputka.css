@@ -114,7 +114,7 @@ span.places {
 li.ride {
 	position: relative;
 	padding: .5em 1em;
-	margin: .5em 0;
+	margin: .5em -1em;
 }
 
 span.price {
@@ -174,7 +174,7 @@ a.tg {
 
 span.date {
     display: inline-block;
-    padding: .5em;
+    /* padding: .5em; */
 }
 
 deck>.seats {
@@ -192,4 +192,8 @@ label::before {
 
 deck>.price {
     width: 5em;
+}
+
+page>.title {
+    /* margin: 1em; */
 }

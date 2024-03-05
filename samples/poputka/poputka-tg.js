@@ -67,10 +67,10 @@ where	= { //$where={dpt,arv}
 				if(terms&&places){
 					const	p = places.split(arrow),
 						[dpt,arv] = terms.split(arrow).map( (t,i) => [...t.split(slash),p[i]] );
-					return {dpt,arv};
+					return {dpt,arv,terms,places};
 				}
 			},
-		totp	:w => w&&w.dpt&&w.arv&&{
+		totp	:w => w&&w.dpt&&w.arv&&{ dpt:w.dpt, arv:w.arv,
 				terms : [w.dpt.slice(0,-1),w.arv.slice(0,-1)].map(a=>a.join(slash)).join(arrow),
 				places: [w.dpt.at(-1),w.arv.at(-1)].join(arrow)
 			},
@@ -88,14 +88,9 @@ where	= { //$where={dpt,arv}
 		$user=:auth.load
 		$person="1`
 
-	,"BUTTON#tgMainButton".d('') //.add-ride
-	.ui('? $?:!; $?=$:!')//.d("? ($?:! $where.dpt $where.arv)!")
-	.ui(`? $?;
-		? $route=(@PUT"route .terms):api,route :alert"error;
-		? $!=(@PUT"ride $person $when.date $route (.info@. .time .terms .places)@info ):api :alert"error;
-		$?=
-	`);
-
+	,"BUTTON.tgMainButton.add-ride".d('? $?:!') //.add-ride
+	.ui('$?=:!')//.d("? ($?:! $where.dpt $where.arv)!")
+	
 /*	
 	,"BUTTON.ok type=submit".d("? $?")
 	.ui(`	? $person $person=("person):api Login():modal;
@@ -136,7 +131,13 @@ where	= { //$where={dpt,arv}
 			,"LABEL.note".d(
 				"TEXTAREA name=note maxlength=200".d()//.ui(".note=#.value")
 			)
-		).u('& #:form@info')
+			,"BUTTON.tgMainButton.ok".d() //.add-ride
+			.ui(`? $?;
+				? $route=(@PUT"route .terms):api,route :alert"error;
+				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places)@info ):api :alert"error;
+				$?=:?
+			`)
+		)
 
 	)
 	,"ETAGE".d('Tabset(:|@tab"routes|rides)'//|account
@@ -149,6 +150,7 @@ where	= { //$where={dpt,arv}
 		)
 		
 		,"PAGE.rides".d('?? $tab@rides; $!'
+			,"title".d('! ($when.date $where.terms)spans').ui('$tab="routes')
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
 				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
 					,"title"

@@ -97,3 +97,7 @@ span.places{
 }
 
 optiuon {}
+
+page>.title {
+    color: var(--tg-theme-button-color);
+}
