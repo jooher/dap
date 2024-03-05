@@ -124,13 +124,14 @@ form>label {
 
 page>ul {
 	padding: 0;
+	margin: .5em 0;
 }
 
 page>ul>li{
 	display: block;
 	max-width: 100%;
 	overflow: hidden;
-	padding: 1em 0;
+	padding: .5em 0;
 }
 
 form>button{

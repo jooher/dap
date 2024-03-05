@@ -49,7 +49,7 @@ style="
 	<link rel="stylesheet" href="colors-tg.css"/>
 	
 <style>
-	.tgMainButton{display:none !important}
+	//.tgMainButton{display:none !important}
 </style>
 
 </head>
@@ -87,8 +87,22 @@ tg.MainButton.setParams(params) // задает параметры в виде �
 tg.expand();
 tg.MainButton.show();
 
+let tgMainButton;
+
+const tgMainButtonLabels = {
+	"add-ride" : "Добавить поездку",
+	"ok": "Да, все верно!"
+}
+
+window.tgmain = btn =>{
+	btn.style.display='none';
+	tgMainButton = btn;
+	const label = [...btn.classList].pop();
+	tg.MainButton.setText(tgMainButtonLabels[label]||label);
+};
+
 tg.onEvent('mainButtonClicked', function(){
 	console.log("tgMainButton clicked");
-	[...document.getElementsByClassName("tgMainButton")].forEach( btn=>btn.click() );
+	tgMainButton.click();
 });
 </script>

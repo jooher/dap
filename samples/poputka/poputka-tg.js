@@ -88,29 +88,22 @@ where	= { //$where={dpt,arv}
 		$user=:auth.load
 		$person="1`
 
-	,"BUTTON.tgMainButton.add-ride".d('? $?:!') //.add-ride
-	.ui('$?=:!')//.d("? ($?:! $where.dpt $where.arv)!")
-	
-/*	
-	,"BUTTON.ok type=submit".d("? $?")
-	.ui(`	? $person $person=("person):api Login():modal;
-	`)//:alert"created;
-*/
-			
+	,"BUTTON.tgmain.add-ride".d('? $?:!; tgmain').ui('$?=:!')
+				
 	,"ROOF".d('? $?'
 	
-		,"GROUP.where".d('& $where@'
-			,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
-			,"input.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
-			,"swap".ui('& (.dpt@arv .arv@dpt)')
-		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
-		
 		,"GROUP.when".d('& $when@'
 			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
 			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
 		).u('? (.date .time)!; $when=(.date .time)')
 		//,"LABEL.when".d()
 
+		,"GROUP.where".d('& $where@'
+			,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
+			,"input.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+			,"swap".ui('& (.dpt@arv .arv@dpt)')
+		).u('& $where=(.dpt .arv):totp@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
+		
 		,"FORM.info".d(''
 			,"DECK".d(''
 				,"LABEL.vehicle".d(
@@ -131,7 +124,7 @@ where	= { //$where={dpt,arv}
 			,"LABEL.note".d(
 				"TEXTAREA name=note maxlength=200".d()//.ui(".note=#.value")
 			)
-			,"BUTTON.tgMainButton.ok".d() //.add-ride
+			,"BUTTON.tgmain.ok".d('tgmain') //.add-ride
 			.ui(`? $?;
 				? $route=(@PUT"route .terms):api,route :alert"error;
 				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places)@info ):api :alert"error;
@@ -150,7 +143,7 @@ where	= { //$where={dpt,arv}
 		)
 		
 		,"PAGE.rides".d('?? $tab@rides; $!'
-			,"title".d('! ($when.date $where.terms)spans').ui('$tab="routes')
+			,"title".d('! $where.terms').ui('$tab="routes')
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
 				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
 					,"title"
@@ -346,7 +339,9 @@ where	= { //$where={dpt,arv}
 				document.body.appendChild(node);
 				node.style.display="";
 			},0);
-		}
+		},
+		
+		tgmain: (value,alias,node)=>{ window.tgmain && window.tgmain(node) } //|| ()=>{} //
 	}
 
 }, where, Await)

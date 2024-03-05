@@ -65,8 +65,8 @@ span.time {
 }
 
 group, label>input, label>textarea, label>select{
-	border-radius: .75rem;
-	border: .5px solid;
+	border-radius: .3rem;
+	/* border: .5px solid; */
 	border-color: var(--tg-theme-button-color);
 }
 
