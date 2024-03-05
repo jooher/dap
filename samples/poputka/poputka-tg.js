@@ -88,7 +88,7 @@ where	= { //$where={dpt,arv}
 		$user=:auth.load
 		$person="1`
 
-	,"BUTTON.add-ride".d('? $?:!').ui('$?=:!')//.d("? ($?:! $where.dpt $where.arv)!")
+	,"BUTTON.add-ride#tgMainButton".d('? $?:!').ui('$?=$?:!')//.d("? ($?:! $where.dpt $where.arv)!")
 	
 	,"BUTTON.ok type=submit".d("? $?")
 	.ui(`	? $person $person=("person):api Login():modal;
