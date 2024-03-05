@@ -88,14 +88,19 @@ where	= { //$where={dpt,arv}
 		$user=:auth.load
 		$person="1`
 
-	,"BUTTON.add-ride#tgMainButton".d('? $?:!').ui('$?=$?:!')//.d("? ($?:! $where.dpt $where.arv)!")
-	
-	,"BUTTON.ok type=submit".d("? $?")
-	.ui(`	? $person $person=("person):api Login():modal;
+	,"BUTTON#tgMainButton".d('') //.add-ride
+	.ui('? $?:!; $?=$:!')//.d("? ($?:! $where.dpt $where.arv)!")
+	.ui(`? $?;
 		? $route=(@PUT"route .terms):api,route :alert"error;
 		? $!=(@PUT"ride $person $when.date $route (.info@. .time .terms .places)@info ):api :alert"error;
 		$?=
+	`);
+
+/*	
+	,"BUTTON.ok type=submit".d("? $?")
+	.ui(`	? $person $person=("person):api Login():modal;
 	`)//:alert"created;
+*/
 			
 	,"ROOF".d('? $?'
 	
