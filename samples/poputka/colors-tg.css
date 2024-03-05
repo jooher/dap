@@ -25,8 +25,8 @@
 	--shade-color: 100,150,250;
 }
 
-body,form {
-	background-color: var(--tg-theme-secondary-bg-color);
+body {
+	background-color: var(--tg-theme-bg-color);
 	color:var(--tg-theme-text-color);
 }
 
@@ -49,7 +49,7 @@ page {
 }
 
 .input::before, label::before, roof::before{
-	color: var(--tg-theme-button-color);
+	color: var(--tg-theme-hint-color);
 }
 
 roof::before {
@@ -64,19 +64,19 @@ roof::before {
 }
 
 span.time {
-	background: gold;
-	color: black;
+	/* background: var(--tg-theme-section-bg-color); */
+	color: var(--tg-theme-section-header-text-color);
 }
 
 group, label>input, label>textarea, label>select{
 	border-radius: .3rem;
 	/* border: .5px solid; */
-	border-color: var(--tg-theme-button-color);
+	border-color: var(--tg-theme-hint-color);
 }
 
 
 .rider {
-   background-color:rgba(0,250,0,.1);
+   background-color: rgba(var(--shade-color),.25);
 }
 
 
@@ -103,5 +103,5 @@ span.places{
 optiuon {}
 
 page>.title {
-    color: var(--tg-theme-button-color);
+    color: var(--tg-theme-subtitle-text-color);
 }
