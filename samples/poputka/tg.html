@@ -83,8 +83,9 @@ tg.expand();
 tg.MainButton.show();
 
 tg.onEvent('mainButtonClicked', function(){
-	const tgt = dociment.getElementById("tgMainButton");
-	tgt.click();
+	const tgt = document.getElementById("tgMainButton");
+	if(tgt)
+		tgt.click();
 	console.log("tgMainButton clicked");
 	//tg.sendData("some string that we need to send"); 
 });
