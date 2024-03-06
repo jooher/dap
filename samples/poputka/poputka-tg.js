@@ -101,7 +101,9 @@ where	= { //$where={dpt,arv,terms,places}
 				,"LI.ride".d('!? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'//$?=; 
 					,"title".d('* .info@; ! (.time .price .vehicle .seats .where .places .user:fullname .note )spans')
 					//.ui('$?=$?:!')
-					,"A.tg target=tg".d('!! .user:sendMessageLink@href').u('?')//? $?; ? $my:!; 
+					,"A.tg target=tg href=tg://user?id=1517442438"
+					//.d('!! .user:sendMessageLink@href')
+					.u('?')//? $?; ? $my:!; 
 				)
 			)
 		)	
