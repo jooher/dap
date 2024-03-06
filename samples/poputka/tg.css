@@ -203,7 +203,8 @@ modal>shield {
 	max-width: 80%;
 	display: inline-block;
 	max-height: 80%;
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 shield::before{

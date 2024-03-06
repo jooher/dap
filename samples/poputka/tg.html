@@ -47,22 +47,31 @@ style="
 	<link rel="stylesheet" href="tg.css"/>
 	<link rel="stylesheet" href="poputka.css"/>
 	<link rel="stylesheet" href="colors-tg.css"/>
-	
-<style>
-	//.mainButton{display:none !important}
-</style>
 
 </head>
 <script src="poputka-tg.js" type=module></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<a href="https://t.me/430743027">me</a>
 <script>
+
 
 const
 
 tg = window.Telegram.WebApp,
-user =tg.initDataUnsafe.user||{};
+user =tg.initDataUnsafe.user,
+tgIsHere = !!user,
 
-if(user)localStorage.setItem("user",JSON.stringify(user));
+mockUser ={
+	"id": 0,
+	"is_bot": false,
+	"first_name": "Mock",
+	"last_name": "User",
+	"username": "MaxSazhin",
+	"language_code": "en"
+};
+
+localStorage.setItem("user",JSON.stringify(user||mockUser));
 
 tg.expand();
 tg.MainButton.show();
@@ -74,6 +83,8 @@ const mainButtonLabels = {
 
 let mainButton;
 window.tgmain = btn =>{
+	if(!tgIsHere)
+		return;
 	btn.style.display='none';
 	mainButton = btn;
 	const label = [...btn.classList].pop();

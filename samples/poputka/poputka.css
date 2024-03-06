@@ -4,7 +4,7 @@ deck>button{
 }
 button.add-ride {
 	font-size: 1.5em;
-	/* margin: 1em; */
+	margin: 1em;
 }
 
 
@@ -191,4 +191,9 @@ deck>.price {
 
 page>.title {
     margin: .5em;
+}
+
+page>ul:empty::before {
+    display: block;
+    margin: 1em .5em;
 }

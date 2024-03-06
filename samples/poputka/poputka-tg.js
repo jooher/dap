@@ -3,33 +3,6 @@ import { auth, api, dictFrom, elemFrom, JsonCSS } from '/stuff/snippets.js';
 import Await from '/stuff/await.js';
 import {untab} from '/stuff/parse.js';
 
-/*
-const	tg = window.Telegram.WebApp;
-if(!tg)return;
-tg.expand();
-if (tg.MainButton.isVisible)tg.MainButton.hide();
-tg.onEvent('themeChanged', function(){alert("theme changed")});
-*/
-
-
-/*
-person, stars, info:json
-route, terms:string, stops:text
-ride, route, person, seats, date:date, info:json
-hike, ride, person, stars, info:json
-
-//car, person, vehicle, plate:text, stars
-//vehicle, name, seats, info:json
-*/
-
-/*
-Form({
-	price:"number",
-	note:"text",
-	vehicle:[{'':'я пассажир'},vehicles]
-})
-*/
-
 JsonCSS('lang/ru.json');
 
 const
@@ -40,7 +13,7 @@ headers = new Headers({
 
 modal = (...stuff) =>
 	"MODAL".d('top'
-		,"SCRIM".ui('value :?')
+		,"SCRIM".ui('value :!')
 		,"SHIELD".d(...stuff)
 	).u("kill; ?"),
 
@@ -63,7 +36,6 @@ where	= { //$where={dpt,arv,terms,places}
 		
 	}))(', ',' → ')
 };
-
 
 
 "APP".d(`	$!= $?= $tab="routes
@@ -110,7 +82,7 @@ where	= { //$where={dpt,arv,terms,places}
 			.ui(`? $?;
 				? $route=(@PUT"route .terms):api,route :alert"error;
 				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places $user )@info ):api :alert"error;
-				$?=:?
+				$?= $tab="rides
 			`)
 		)
 	)
@@ -197,7 +169,7 @@ where	= { //$where={dpt,arv,terms,places}
 		
 		user	: u => u,
 		fullname: u => u&&`${u.first_name} ${u.last_name}`,
-		sendMessageLink: u => 'https://t.me/'+user.username,
+		sendMessageLink: u => user&&('https://t.me/'+user.username),
 		
 		modal,
 		untab
@@ -213,7 +185,6 @@ where	= { //$where={dpt,arv,terms,places}
 		top	:(value,alias,node)=>{ 
 			node.style.display="none";
 			window.setTimeout(()=>{
-				//node.showModal();
 				document.body.appendChild(node);
 				node.style.display="";
 			},0);
