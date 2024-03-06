@@ -25,19 +25,19 @@
 	--shade-color: 100,150,250;
 }
 
-body {
-	background-color: var(--tg-theme-bg-color);
+body, page, shield, input, .input, select, textarea {
+	background: var(--tg-theme-secondary-bg-color);
 	color:var(--tg-theme-text-color);
 }
 
-page, shield, input, .input, select, textarea {
+roof, page>ul>li{
 	background: var(--tg-theme-bg-color);
-	color:var(--tg-theme-text-color);
+	border-radius: 1em;
 }
 
-button, tab.selected{
-	background: var(--tg-theme-button-color);
+button, tab.selected, .swap{
 	color: var(--tg-theme-button-text-color);
+	background-color: var(--tg-theme-button-color);
 }
 
 tabset{
@@ -45,40 +45,22 @@ tabset{
 }
 
 page {
-    border-bottom: 1px solid var(--tg-theme-button-color);
+	border-bottom: 1px solid var(--tg-theme-button-color);
 }
 
 .input::before, label::before, roof::before{
 	color: var(--tg-theme-hint-color);
 }
 
-roof::before {
-    font-weight: bold;
-}
-
-
-
-.swap{
-	background-color: var(--tg-theme-button-color);
-	color: white;
-}
-
-span.time {
-	/* background: var(--tg-theme-section-bg-color); */
-	color: var(--tg-theme-section-header-text-color);
-}
-
 group, label>input, label>textarea, label>select{
 	border-radius: .3rem;
-	/* border: .5px solid; */
 	border-color: var(--tg-theme-hint-color);
 }
 
 
-.rider {
-   background-color: rgba(var(--shade-color),.25);
+span.time {
+	color: var(--tg-theme-section-header-text-color);
 }
-
 
 span.places{
 	font-style: italic;
@@ -86,11 +68,13 @@ span.places{
 }
 
 
-
-:focus-visible {
-    background-color: rgba(var(--shade-color),0.1);
+page>.title {
+	color: var(--tg-theme-subtitle-text-color);
 }
 
+.rider {
+	background-color: rgba(var(--shade-color),.25);
+}
 
 .area{
 	background-color: rgba(var(--shade-color),.1);
@@ -98,10 +82,4 @@ span.places{
 
 .area.selected {
 	background-color: rgba(var(--shade-color),.3);
-}
-
-optiuon {}
-
-page>.title {
-    color: var(--tg-theme-subtitle-text-color);
 }
