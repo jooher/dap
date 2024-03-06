@@ -22,7 +22,7 @@
 */
 
 :root{
-	--shade-color: 100,150,250;
+	--shade-color: 100,200,250;
 }
 
 body, page, shield, input, .input, select, textarea {
@@ -32,7 +32,7 @@ body, page, shield, input, .input, select, textarea {
 
 roof, page>ul>li{
 	background: var(--tg-theme-bg-color);
-	border-radius: 1em;
+	border-radius: .5em;
 }
 
 button, tab.selected, .swap{
@@ -54,7 +54,8 @@ page {
 
 group, label>input, label>textarea, label>select{
 	border-radius: .3rem;
-	border-color: var(--tg-theme-hint-color);
+	/* border: 1px solid; */
+	border-color: var(--tg-theme-link-color);
 }
 
 
@@ -65,6 +66,9 @@ span.time {
 span.places{
 	font-style: italic;
 	color: var(--tg-theme-subtitle-text-color);
+}
+
+span.user {
 }
 
 

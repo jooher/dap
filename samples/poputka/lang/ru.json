@@ -1,11 +1,8 @@
 {
-	"ROOF":"Моя поездка",
-	
 	"TAB.routes": "маршруты",
 	"TAB.rides": "попутчики",
-	"TAB.admin" : "админ",
-	"TAB.account" : "аккаунт",
 	
+	"ROOF":"Моя поездка:",
 	".input.dpt": "Откуда:",
 	".input.arv": "Куда:",
 	
@@ -23,19 +20,11 @@
 	"LABEL.price": "цена за 1",
 	"LABEL.note": "Примечания",
 	
-	".vehicle>SELECT>OPTION[value='']": "я пассажирec",
-	
-	"LABEL.name": "Имя или псевдоним",
-	"LABEL.tel": "Номер телефона",
-	"LABEL.tg": "Телеграм",
-	"LABEL.wa": "Whatsapp",
+	".vehicle>SELECT>OPTION[value='']": "я пассажирус",
 	
 	"BUTTON.ok":"OK",
 	"BUTTON.cancel":"Отмена",
-	"BUTTON.seek-rides":"Заказать поездку",
 	"BUTTON.add-ride":"Добавить поездку",
-	"BUTTON.contact-rider":"Связаться с водителем",
-	"BUTTON.contact-passenger":"Связаться с пассажиром",
 	
 	".rides>UL:empty":"Здесь будут предложения поездок по этому маршруту.\nПока таких предложений нет.\nСоздайте свою поездку!"
 }
