@@ -97,7 +97,7 @@ where	= { //$where={dpt,arv,terms,places}
 		
 		,"PAGE.rides".d('?? $tab@rides; $!'
 			,"title".d('! $where.terms').ui('$tab="routes')
-			,"UL".d('* ("ride $route $when.date):api'
+			,"UL".d('* ("ride $route $when.date):api E'
 				,"LI.ride".d('!? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'//$?=; 
 					,"title".d('* .info@; ! (.time .price .vehicle .seats .where .places .user:fullname .note )spans')
 					//.ui('$?=$?:!')
