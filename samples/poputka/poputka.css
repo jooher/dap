@@ -2,11 +2,6 @@ deck>button{
 	/* padding: 1em; */
 	flex: 1;
 }
-button.add-ride {
-	font-size: 1.5em;
-	margin: .5em;
-}
-
 
 .input {
 	height: 1em;

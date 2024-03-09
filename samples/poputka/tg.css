@@ -35,7 +35,7 @@ roof,page {
 	flex-direction: column;
 }
 
-roof,etage,app>button{
+roof, etage{
 	margin: .5rem;
 }
 
@@ -214,4 +214,11 @@ deck {
 
 span.user {
 	font-weight: bold;
+}
+
+button.tgmain {
+	font-size: 1.25em;
+	margin: 0;
+	border-radius: 0;
+	margin-top: 1em;
 }
