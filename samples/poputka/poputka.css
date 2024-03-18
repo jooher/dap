@@ -191,3 +191,7 @@ a[href^="https://t.me/"]{
 a[href^="tel:"]{
 	background-image:url(/stuff/icons/tel.svg);
 }
+
+app {
+    padding: .5rem;
+}

@@ -40,11 +40,11 @@ etage{
 }
 
 roof {
-    margin: 0.5rem;
+    /* margin: 0.5rem; */
 }
 
 roof	{
-	/* padding: 1em; */
+	/* padding: .5em; */
 	gap: 1em;
 }
 
@@ -61,6 +61,7 @@ etage {
 page {
 	flex: 1;
 	overflow-y: auto;
+	border-radius: .5rem;
 }
 
 page>ul {
@@ -133,7 +134,7 @@ form>label {
 }
 
 form>button{
-	font-size: 1.5em;
+	font-size: 1.25em;
 	margin-top: 1em;
 	display: block;
 	width: 100%;
@@ -221,8 +222,8 @@ span.user {
 }
 
 button.tgmain {
-	font-size: 1.25em;
-	margin: 0;
+	/* font-size: 1.25em; */
+	/* margin: 0; */
 	border-radius: 0;
-	/* margin-top: 1em; */
+	margin-top: 1em;
 }
