@@ -46,7 +46,7 @@ button, .swap{
 }
 
 tab.selected{
-	color: var(--tg-theme-button-text-color);
+	color: var(--tg-theme-text-color);
 	background-color: var(--tg-theme-bg-color);
 }
 
