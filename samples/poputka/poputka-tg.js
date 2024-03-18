@@ -14,6 +14,7 @@ headers = new Headers({
 Ahref = url =>{
 	const a = document.createElement("A");
 	a.setAttribute("href",url);
+	a.setAttribute("target","call");
 	return a;
 },
 
