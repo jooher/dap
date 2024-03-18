@@ -25,14 +25,19 @@
 	--shade-color: 100,200,250;
 }
 
-body, page, shield, input, .input, select, textarea {
+body, shield {
 	background: var(--tg-theme-secondary-bg-color);
 	color:var(--tg-theme-text-color);
 }
 
+input, .input, select, textarea {
+    background: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+}
+
 roof, page>ul>li{
-	background: var(--tg-theme-bg-color);
-	border-radius: .5em;
+	/* background: var(--tg-theme-bg-color); */
+	/* border-radius: .5em; */
 }
 
 button, tab.selected, .swap{
@@ -46,6 +51,8 @@ tabset{
 
 page {
 	border-bottom: 1px solid var(--tg-theme-button-color);
+	background: var(--tg-theme-bg-color);
+	padding: .5em;
 }
 
 .input::before, label::before, roof::before{
