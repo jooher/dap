@@ -153,7 +153,7 @@ tabset {
 
 tab {
 	transition: all .5s;
-	padding: .4em .5em;
+	padding: .4em 1em;
 	border-radius: 0 0 1em 1em;
 }
 
