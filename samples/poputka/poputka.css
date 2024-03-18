@@ -101,7 +101,7 @@ span.terms, span.places {
 
 span.places {
 	display: block;
-	margin: .5em 0;
+	/* margin: .5em 0; */
 }
 
 span.price {
@@ -173,8 +173,8 @@ page>ul:empty::before {
 
 .contact {
 	position: absolute;
-	right: 1.25em;
-	top: 2.75em;
+	right: .8em;
+	top: 2em;
 }
 
 .contact>a {
