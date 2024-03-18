@@ -54,10 +54,15 @@ page {
 
 group, label>input, label>textarea, label>select{
 	border-radius: .3rem;
-	/* border: 1px solid; */
 	border-color: var(--tg-theme-link-color);
 }
 
+.import{
+	color: var(--tg-theme-hint-color);
+	position: relative;
+	margin: -1em;
+	padding: 1em;
+}
 
 span.time {
 	color: var(--tg-theme-section-header-text-color);
@@ -66,9 +71,6 @@ span.time {
 span.places{
 	font-style: italic;
 	color: var(--tg-theme-subtitle-text-color);
-}
-
-span.user {
 }
 
 
@@ -87,3 +89,4 @@ page>.title {
 .area.selected {
 	background-color: rgba(var(--shade-color),.3);
 }
+

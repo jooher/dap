@@ -51,18 +51,19 @@ style="
 </head>
 <script src="poputka-tg.js" type=module></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
 
+<script type="module">
+</script>
+
+<script>
 
 const
 
 tg = window.Telegram.WebApp,
 user =tg.initDataUnsafe.user,
-tgIsHere = !!user,
-
 mockUser ={
 	"id": 0,
-	"is_bot": false,
+	"is_bot": true,
 	"first_name": "Mock",
 	"last_name": "User",
 	"username": "poput4k_bot",
@@ -81,7 +82,7 @@ const mainButtonLabels = {
 
 let mainButton;
 window.tgmain = btn =>{
-	if(!tgIsHere)
+	if(!user)
 		return;
 	btn.style.display='none';
 	mainButton = btn;

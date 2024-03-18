@@ -11,6 +11,12 @@ headers = new Headers({
 	"Content-Type": "application/x-www-form-urlencoded" //"application/json;charset=utf-8"
 }),
 
+Ahref = url =>{
+	const a = document.createElement("A");
+	a.setAttribute("href",url);
+	return a;
+},
+
 modal = (...stuff) =>
 	"MODAL".d('top'
 		,"SCRIM".ui('value :!')
@@ -39,15 +45,20 @@ where	= { //$where={dpt,arv,terms,places}
 
 
 "APP".d(`	$!= $?= $tab="routes
+		$input=.
 		$when=soon $where=
 		$route= $ride=
-		$user=:auth.load,user
-		$person=$user.id`
+		$person=$user=:auth.load`
 
 	,"BUTTON.tgmain.add-ride".d('? $?:!; tgmain').ui('$?=:!')
 	
 	,"ROOF".d('? $?'
 	
+		,"import".d('* $user:imprt@'
+			,"text".d('! .text').ui('$person=.user')
+			,"contact".d('! .user:contact')
+		).a('!? ($person .user)eq@active')
+		
 		,"GROUP.when".d('& $when@'
 			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
 			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
@@ -78,18 +89,27 @@ where	= { //$where={dpt,arv,terms,places}
 			,"LABEL.note".d(
 				"TEXTAREA name=note maxlength=200".d()
 			)
+			,"DECK".d('?'
+				,"LABEL.tel".d(
+					"INPUT name=tel".d()
+				)
+				,"LABEL.tgchat".d(//'? $user.username:!',
+					"INPUT name=tgchat".d('')
+				)
+			)
 			,"BUTTON.tgmain.ok".d('tgmain')
 			.ui(`? $?;
 				? $route=(@PUT"route .terms):api,route :alert"error;
-				? $!=(@PUT"ride $person $when.date $route (#.form:form@. .time .terms .places $user )@info ):api :alert"error;
+				? $!=(@PUT"ride $person.id@person $when.date $route (#.form:form@. .time .terms .places $person )@info ):api :alert"error;
 				$?= $tab="rides
 			`)
 		)
 	)
+	
 	,"ETAGE".d('Tabset(:|@tab"routes|rides)'
 	
 		,"PAGE.routes".d('?? $tab@routes; $!'
-			,"UL".d('* ("routeride $person $when.date):api ("route):api E'
+			,"UL".d('* ("routeride $person.id@person $when.date):api ("route):api E'
 				,"LI"	.d('! (.terms .places)spans')
 					.ui('$where=(.terms .places):fromtp $route=. $tab="rides')
 			)
@@ -98,14 +118,13 @@ where	= { //$where={dpt,arv,terms,places}
 		,"PAGE.rides".d('?? $tab@rides; $!'
 			,"title".d('! $where.terms').ui('$tab="routes')
 			,"UL".d('* ("ride $route $when.date):api E'
-				,"LI.ride".d('!? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'//$?=; 
-					,"title".d('* .info@; ! (.time .price .vehicle .seats .where .places .user:fullname .note )spans')
-					//.ui('$?=$?:!')
-					,"A.tg target=tg".d('!! .user:sendMessageLink@href')
-					.u('?')//? $?; ? $my:!; 
+				,"LI.ride".d('!? $my=(.person $user.id)eq .info.vehicle@rider .info.vehicle:!@passenger; * .info@'//$?=; 
+					,"title".d('! (.time .price .vehicle .seats .where .places .person:fullname .note )spans')
+					,"contact".d('! .person:contact')
 				)
 			)
-		)	
+		)
+		
 	)
 
 )
@@ -136,7 +155,7 @@ where	= { //$where={dpt,arv,terms,places}
 	
 	Options
 	:"OPTGROUP".d('* .value',"OPTION".d('! .value')),
-	
+		
 	Where
 	:modal('$region= $area= $place=; !? .label@'
 		,"regions".d('* areas@areas,region,places'
@@ -169,8 +188,14 @@ where	= { //$where={dpt,arv,terms,places}
 		route : arr => Array.isArray(arr) && arr[0]?.route,
 		
 		user	: u => u,
-		fullname: u => u&&`${u.first_name} ${u.last_name}`,
-		sendMessageLink: u => user&&('https://t.me/'+user.username),
+		fullname: u => u&&`${u.first_name||''} ${u.last_name||''}`,
+		
+		contact: u => u&&[
+			u.username&& Ahref('https://t.me/'+u.username),
+			u.tel&& Ahref('tel:'+u.tel)
+		],
+		
+		imprt: u => u && fetch(`https://orders.saxmute.one/_tgbot/import/${u.id}.json?1`).then(r=>r.ok&&r.json()),
 		
 		modal,
 		untab

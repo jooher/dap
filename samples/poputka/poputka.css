@@ -18,8 +18,7 @@ deck>button{
 }
 
 .input::before {
-	width:4em;
-
+	width: 1.4em;
 }
 
 .place {
@@ -45,7 +44,7 @@ deck>button{
 
 .regions {
 	text-align: center;
-	font-size: 1.2em;
+	/* font-size: 1.2em; */
 	width: 16em;
 }
 
@@ -86,6 +85,7 @@ span.vehicle {
 group.where {
 	flex-direction: column;
 	position: relative;
+	font-size: .9rem;
 }
 .when{
 	flex-direction: row;
@@ -93,12 +93,10 @@ group.where {
 .when>input {
 	flex: 1;
 	text-align: center;
-	/* font-size: 1.25em; */
 }
 span.terms, span.places {
 	display: block;
 	white-space: nowrap;
-	/* font-weight: bold; */
 }
 
 span.places {
@@ -109,19 +107,9 @@ span.places {
 span.price {
 	position: absolute;
 	right: 1em;
-	/* font-size: 1.25em; */
-}
-
-form.info {
-	/* max-width: 18rem; */
-}
-
-label.price>input {
-	/* font-size: 2em; */
 }
 
 span.note {
-	/* font-style: italic; */
 	display: block;
 	margin: .5em 0;
 }
@@ -140,55 +128,66 @@ span.note {
 	background-size: 1.25em;
 	font-weight: bold;
 	border-radius: 1em;
+	border: .2em solid var(--tg-theme-bg-color);
 }
 
 
-a.tg {
+page>.title {
+	font-weight: bold;
+}
+
+span.date {
 	display: inline-block;
-	height: 2em;
-	width: 2em;
-	background: left no-repeat url(/stuff/icons/tg.png);
-	background-size: contain;
 }
 
-.ride a.tg {
+deck>.seats {
+	width: 4em;
+}
+
+deck>.vehicle {
+	flex: 1;
+}
+
+label::before {
+	margin: .1em;
+	white-space: nowrap;
+}
+
+deck>.price {
+	width: 5em;
+}
+
+page>.title {
+	margin: .5em;
+}
+
+page>ul:empty::before {
+	display: block;
+	margin: 1em .5em;
+}
+
+.import>.text {
+	white-space: pre;
+	font: normal .8em monospace;
+}
+
+.contact {
 	position: absolute;
 	right: 1.25em;
 	top: 2.75em;
 }
 
-page>.title {
-    /* margin: 1em 0; */
-    font-weight: bold;
+.contact>a {
+	display: inline-block;
+	height: 2em;
+	width: 2em;
+	background: left/contain no-repeat;
 }
 
-span.date {
-    display: inline-block;
-    /* padding: .5em; */
+a[href^="https://t.me/"]{
+	background-image: url(/stuff/icons/tg.svg);
 }
 
-deck>.seats {
-    width: 4em;
-}
-
-deck>.vehicle {
-    flex: 1;
-}
-
-label::before {
-    margin: .1em;
-    white-space: nowrap;
-}
-
-deck>.price {
-    width: 5em;
-}
-
-page>.title {
-    margin: .5em;
-}
-
-page>ul:empty::before {
-    display: block;
-    margin: 1em .5em;
+a[href^="tel:"]{
+	background-image:url(/stuff/icons/tel.svg);
 }
