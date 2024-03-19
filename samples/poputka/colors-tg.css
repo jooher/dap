@@ -25,6 +25,10 @@
 	--shade-color: 100,200,250;
 }
 
+body {
+    touch-action: none !important;
+}
+
 body, shield {
 	background: var(--tg-theme-secondary-bg-color);
 	color:var(--tg-theme-text-color);
