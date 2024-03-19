@@ -203,7 +203,7 @@ a[href^="tel:"]{
 }
 
 app {
-    padding: .5rem;
+    padding: 0 1rem;
 }
 
 .ride>.title {
