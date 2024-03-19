@@ -26,22 +26,22 @@ modal = (...stuff) =>
 
 where	= { //$where={dpt,arv,terms,places}
 	
-	convert: ((slash,arrow) => ({
+	convert: ((slash,br,arrow) => ({
 		fromtp:({terms,places})=>{
 				if(terms&&places){
 					const	p = places.split(arrow),
-						[dpt,arv] = terms.split(arrow).map( (t,i) => [...t.split(slash),p[i]] );
+						[dpt,arv] = terms.split(br).map( (t,i) => [...t.split(slash),p[i]] );
 					return {dpt,arv,terms,places};
 				}
 			},
-		totp	:w => w&&w.dpt&&w.arv&&{ dpt:w.dpt, arv:w.arv,
-				terms : [w.dpt.slice(0,-1),w.arv.slice(0,-1)].map(a=>a.join(slash)).join(arrow),
+		fromda:w => w&&w.dpt&&w.arv&&{ dpt:w.dpt, arv:w.arv,
+				terms : [w.dpt.slice(0,-1),w.arv.slice(0,-1)].map(a=>a.join(slash)).join(br),
 				places: [w.dpt.at(-1),w.arv.at(-1)].join(arrow)
 			},
 			
 		loc	:a => a && a.join(slash)
 		
-	}))(', ','\n')
+	}))(', ','\n',' → ')
 };
 
 
@@ -57,6 +57,8 @@ where	= { //$where={dpt,arv,terms,places}
 	,"BUTTON.tgmain.add-ride".d('? $?:!; tgmain').ui('$?=:!')
 	
 	,"ROOF".d('? $?; '
+	
+		,"BUTTON.done".ui('$?=')
 /*	
 		,"import".d('* @'
 			,"text".d('! .text').ui('$person=.user')
@@ -72,7 +74,7 @@ where	= { //$where={dpt,arv,terms,places}
 			,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
 			,"input.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
 			,"swap".ui('& (.dpt@arv .arv@dpt)')
-		).u('& $where=(.dpt .arv):totp@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
+		).u('& $where=(.dpt .arv):fromda@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
 		
 		,"FORM.info".d(''
 			,"DECK".d(''
@@ -111,8 +113,9 @@ where	= { //$where={dpt,arv,terms,places}
 	,"ETAGE".d('Tabset(:|@tab"routes|rides)'
 	
 		,"PAGE.routes".d('?? $tab@routes; $!'
+			,"title".d()
 			,"UL".d('* ("routeride $person.id@person $when.date):api ("route):api E'
-				,"LI"	.d('! (.terms .places)spans')
+				,"LI"	.d('! (.terms)spans') // .places
 					.ui('$where=(.terms .places):fromtp $route=. $tab="rides')
 			)
 		)

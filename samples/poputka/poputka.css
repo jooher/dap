@@ -89,6 +89,7 @@ group.where {
 }
 .when{
 	flex-direction: row;
+	margin-right: 4em;
 }
 .when>input {
 	flex: 1;
@@ -96,7 +97,7 @@ group.where {
 }
 span.terms, span.places {
 	display: block;
-	white-space: nowrap;
+	white-space: pre;
 }
 
 span.places {
@@ -140,7 +141,7 @@ page>.title {
 
 page>.title::before {
     display: block;
-    font-weight: normal;
+    font-weight: bold;
     /* color: white; */
 }
 
@@ -224,3 +225,13 @@ li.ride {
 }
 
 page.rides {}
+
+button.done {
+    position: absolute;
+    right: 1.5rem;
+    background: none;
+    color: var(--tg-theme-button-color);
+    font-size: 2em;
+    padding: 0;
+    margin: -.5rem;
+}
