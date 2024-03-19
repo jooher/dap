@@ -58,7 +58,9 @@ tabset{
 page {
 	/* border-bottom: 1px solid var(--tg-theme-button-color); */
 	background: var(--tg-theme-bg-color);
-	padding: .5em;
+	padding: 0 .5em;
+	position: relative;
+	/* box-shadow: inset 0 -1em 1em var(--tg-theme-accent-text-color); */
 }
 
 .input::before, label::before, roof::before{

@@ -36,7 +36,7 @@ roof,page {
 }
 
 etage{
-	margin: 2rem 0;
+	margin-block-end: 2rem;
 }
 
 roof {
