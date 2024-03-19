@@ -24,6 +24,7 @@ html,body {
 body, app, etage, roof, page {
 	display: flex;
 	max-height: 100%;
+	box-sizing: border-box;
 }
 
 body, app, etage {
@@ -74,8 +75,8 @@ page>ul>li{
 	max-width: 100%;
 	overflow: hidden;
 	position: relative;
-	padding: 1em .5em;
-	/* margin: 1em 0; */
+	padding: .5em;
+	margin: .25em 0;
 }
 
 

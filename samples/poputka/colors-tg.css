@@ -29,6 +29,10 @@ html,body,app {
     touch-action: none !important;
 }
 
+app{
+	touch-action:auto;
+}
+
 body, shield {
 	background: var(--tg-theme-secondary-bg-color);
 	color:var(--tg-theme-text-color);
@@ -98,7 +102,8 @@ page>.title {
 }
 
 .rider {
-	background-color: rgba(var(--shade-color),.25);
+	background-color: rgba(var(--shade-color),.1);
+	border-radius: .5em;
 }
 
 .area{

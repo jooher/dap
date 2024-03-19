@@ -111,7 +111,7 @@ span.price {
 
 span.note {
 	display: block;
-	/* margin: .5em 0; */
+	/* margin: .1em 0; */
 	font-size: small;
 }
 
@@ -183,7 +183,7 @@ page>ul:empty::before {
 .contact {
 	position: absolute;
 	right: .3em;
-	top: 2.5em;
+	top: 2em;
 }
 
 .contact>a {
