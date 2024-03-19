@@ -106,12 +106,13 @@ span.places {
 
 span.price {
 	position: absolute;
-	right: 1em;
+	right: .5em;
 }
 
 span.note {
 	display: block;
-	margin: .5em 0;
+	/* margin: .5em 0; */
+	font-size: small;
 }
 
 .swap {
@@ -133,7 +134,14 @@ span.note {
 
 
 page>.title {
-	font-weight: bold;
+	/* font-weight: bold; */
+	white-space: pre;
+}
+
+page>.title::before {
+    display: block;
+    font-weight: normal;
+    /* color: white; */
 }
 
 span.date {
@@ -159,6 +167,7 @@ deck>.price {
 
 page>.title {
 	margin: .5em;
+	/* border-bottom: 1px solid var(--tg-theme-hint-color); */
 }
 
 page>ul:empty::before {
@@ -173,14 +182,15 @@ page>ul:empty::before {
 
 .contact {
 	position: absolute;
-	right: .8em;
-	top: 2em;
+	right: .3em;
+	top: 2.5em;
 }
 
 .contact>a {
 	display: inline-block;
 	height: 2em;
 	width: 2em;
+	margin: .1em;
 	background: left/contain no-repeat;
 }
 
@@ -194,4 +204,21 @@ a[href^="tel:"]{
 
 app {
     padding: .5rem;
+}
+
+.ride>.title {
+    padding-right: 2em;
+}
+
+span.name {
+    font-weight: bold;
+}
+
+li.ride {
+    min-height: 4em;
+}
+
+.note>textarea {
+    height: 6em;
+    font-size: .8rem;
 }

@@ -38,6 +38,7 @@ input, .input, select, textarea {
 roof, page>ul>li{
 	/* background: var(--tg-theme-bg-color); */
 	/* border-radius: .5em; */
+	border-top: 1px solid var(--tg-theme-secondary-bg-color);
 }
 
 button, .swap{
@@ -81,8 +82,8 @@ span.time {
 }
 
 span.places{
-	font-style: italic;
-	color: var(--tg-theme-subtitle-text-color);
+	/* font-style: italic; */
+	color: var(--tg-theme-hint-color);
 }
 
 
@@ -102,3 +103,12 @@ page>.title {
 	background-color: rgba(var(--shade-color),.3);
 }
 
+
+
+span.note {
+    color: var(--tg-theme-hint-color);
+}
+
+span.name {
+    color: var(--tg-theme-link-color);
+}

@@ -41,7 +41,7 @@ where	= { //$where={dpt,arv,terms,places}
 			
 		loc	:a => a && a.join(slash)
 		
-	}))(', ',' → ')
+	}))(', ','\n')
 };
 
 
@@ -49,17 +49,20 @@ where	= { //$where={dpt,arv,terms,places}
 		$input=.
 		$when=soon $where=
 		$route= $ride=
-		$person=$user=:auth.load`
+		$person=
+		$user=:auth.load
+		$import=$user:imprt
+		`
 
 	,"BUTTON.tgmain.add-ride".d('? $?:!; tgmain').ui('$?=:!')
 	
-	,"ROOF".d('? $?'
-	
-		,"import".d('* $user:imprt@'
+	,"ROOF".d('? $?; '
+/*	
+		,"import".d('* @'
 			,"text".d('! .text').ui('$person=.user')
 			,"contact".d('! .user:contact')
 		).a('!? ($person .user)eq@active')
-		
+*/		
 		,"GROUP.when".d('& $when@'
 			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
 			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
@@ -87,21 +90,19 @@ where	= { //$where={dpt,arv,terms,places}
 					//"INPUT name=price type=number min=100 step=50 value=500".d()//.ui(".price=#.value")
 				)
 			)
-			,"LABEL.note".d(
-				"TEXTAREA name=note maxlength=200".d()
-			)
-			,"DECK".d('?'
-				,"LABEL.tel".d(
-					"INPUT name=tel".d()
-				)
-				,"LABEL.tgchat".d(//'? $user.username:!',
-					"INPUT name=tgchat".d('')
-				)
-			)
+			,"LABEL.note".d("TEXTAREA name=note maxlength=200".d('! $import.text'))
+			,"DECK".d('*@ $import.user $user'
+				,"LABEL.tg".d("INPUT name=username".d('!! .username@value; !! $import:!@disabled'))
+				,"LABEL.tel".d("INPUT name=tel".d('!! .tel@value'))
+				,"INPUT name=person type=hidden".d('!! .id?@value')
+				,"INPUT name=name type=hidden".d('!! $:fullname@value')
+				,"BUTTON.drop".d('? $import').ui('$import=')
+			).ui('?')
 			,"BUTTON.tgmain.ok".d('tgmain')
 			.ui(`? $?;
+				.info=(#.form:form@. .time .terms .places );
 				? $route=(@PUT"route .terms):api,route :alert"error;
-				? $!=(@PUT"ride $person.id@person $when.date $route (#.form:form@. .time .terms .places $person )@info ):api :alert"error;
+				? $!=(@PUT"ride .info.person $when.date $route .info ):api :alert"error;
 				$?= $tab="rides
 			`)
 		)
@@ -120,8 +121,8 @@ where	= { //$where={dpt,arv,terms,places}
 			,"title".d('! $where.terms').ui('$tab="routes')
 			,"UL".d('* ("ride $route $when.date):api E'
 				,"LI.ride".d('!? $my=(.person $user.id)eq .info.vehicle@rider .info.vehicle:!@passenger; * .info@'//$?=; 
-					,"title".d('! (.time .price .vehicle .seats .where .places .person:fullname .note )spans')
-					,"contact".d('! .person:contact')
+					,"title".d('! (.time .price .vehicle .seats .where .places .note .name )spans')
+					,"contact".d('! $:contact')
 				)
 			)
 		)
