@@ -1,4 +1,4 @@
-import "/0.5.3.js";
+import "/0.5.4.js";
 import { auth, api, dictFrom, elemFrom, JsonCSS } from '/stuff/snippets.js';
 import Await from '/stuff/await.js';
 import {untab} from '/stuff/parse.js';
@@ -96,7 +96,7 @@ where	= { //$where={dpt,arv,terms,places}
 			,"DECK".d('*@ $import.user $user'
 				,"LABEL.tg".d("INPUT name=username".d('!! .username@value; !! $import:!@disabled'))
 				,"LABEL.tel".d("INPUT name=tel".d('!! .tel@value'))
-				,"INPUT name=person type=hidden".d('!! .id?@value')
+				,"INPUT name=person type=hidden".d('!! .id@value')
 				,"INPUT name=name type=hidden".d('!! $:fullname@value')
 				,"BUTTON.drop".d('? $import').ui('$import=')
 			).ui('?')
@@ -159,7 +159,7 @@ where	= { //$where={dpt,arv,terms,places}
 	).u("?"),
 	
 	Options
-	:"OPTGROUP".d('* .value',"OPTION".d('! .value')),
+	:"OPTGROUP".d('* .value@',"OPTION".d('! $')),
 		
 	Where
 	:modal('$region= $area= $place=; !? .label@'
@@ -169,8 +169,8 @@ where	= { //$where={dpt,arv,terms,places}
 				,"details".d('? $?'
 					,"areas".d('? .areas; * .areas@areas,area,places'
 						,"area".d('! .area')
-							.a('!? (.area $area)eq@selected')
-							.ui('$area=. $places=.places:|')
+						.a('!? (.area $area)eq@selected')
+						.ui('$area=. $places=.places:|')
 					)
 					,"places".d('? $places; * $places@place'
 						,"place".d('! .place').ui('value ($region $area $place=.)*')
@@ -200,7 +200,9 @@ where	= { //$where={dpt,arv,terms,places}
 			u.tel&& Ahref('tel:'+u.tel)
 		],
 		
-		imprt: u => u && fetch(`https://orders.saxmute.one/_tgbot/import/${u.id}.json?1`).then(r=>r.ok&&r.json()),
+		imprt: u => u && fetch(`https://orders.saxmute.one/_tgbot/import/${u.id}.json?${Date.now()}`)
+			.then(r=>r.ok&&r.json())
+			.catch(console.warn),
 		
 		modal,
 		untab

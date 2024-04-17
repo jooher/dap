@@ -4,22 +4,43 @@
 		<title>Polyrule</title>
 		<style>
 		.ui{cursor:pointer}
-		iframe{height:16em; width:100%; border:4px dashed orange;}
 		</style>
-		<script src="../0.4.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0" />
+		<script src="../0.5.4.js"></script>
 	</head>
 	<body>  
 		<script>
-'UL'.d("* n@"
-	,'LI'.d("! `hi")
+'app'.d("! `hi foo.bee"
+/*
+	,'UL'.d("* arr@"
+		,'LI'.d("! `= .jo")
+	)
+	,'OL'.d("* eng@"
+		,'LI'.d("! `hi $")
+	)
+	,'OL'.d("* n"
+		,'LI'.d("! .n:check `$= $")
+	)
+*/
+	
+	,'SELECT'.d("Options(erus@value)")
+
 
 )
 .DICT({
+	foo:{jo:"bar", bee:"solo"},
+	arr:[
+		{jo:"one", bee:"solo"},
+		{jo:"two", bee:"solo"}
+	],
 	n:5,
 	erus: "раз два три".split(" "),
-	eng: "one two three".split(" ")
-})
+	eng: "one two three".split(" "),
+	
+	Options
+	:"OPTGROUP".d('* .value',"OPTION".d('! .value')),
 
+})
 .RENDER()
 		</script>
 

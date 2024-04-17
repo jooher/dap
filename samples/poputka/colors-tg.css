@@ -43,7 +43,7 @@ input, .input, select, textarea {
     color: var(--tg-theme-text-color);
 }
 
-roof, page>ul>li{
+page>ul>li{
 	/* background: var(--tg-theme-bg-color); */
 	/* border-radius: .5em; */
 	border-top: 1px solid var(--tg-theme-secondary-bg-color);
