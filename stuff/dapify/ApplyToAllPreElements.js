@@ -1,17 +1,20 @@
 (nodes=>{
 	
+let id=0;
+	
 const
 
 hilite	= code => code
 	.replace(/</g,"&lt;").replace(/>/g,"&gt;")	// html
 	.replace(/( \/\/.+?)$/gm,"<i>$1</i>")		// comments
 	.replace(/('.+?')/g,"<em>$1</em>") 		// element signatures
-	.replace(/(\$[^\s=.;@:"()`]*)/g,"<b>$1</b>"),	// $status variables
+	.replace(/(\$[^\s=.;@:"()`]*)/g,"<b>$1</b>")	// $status variables
+	.replace(/import (\S+) from ([^\s;]+)/,"<b>import</b> $1 from <a href=$2>$2</a>"),
 	
 dapify	= dap &&
 
 	'dapify'.d("$edit=.code $run=.code $dirty= $own="
-		,'PRE contenteditable'
+		,'PRE contenteditable spellcheck=false'
 			.d("! .code; a!")
 			.a("log `a; #.innerHTML=$run:hilite")
 			.e("keyup","$edit=#.innerText")
@@ -44,8 +47,16 @@ dapify	= dap &&
 		operate	: {
 			inline	:(value,alias,node)=>{
 				try{
-					eval(value)
-					.RENDER({},node);
+					const
+						script = document.createElement('script'),
+						sid = "dapified"+(++id);
+					script.type = 'module';
+					script.id = sid;
+					script.textContent = value+"\n.RENDER({},null,document.getElementById('"+sid+"'));";
+					setTimeout(()=>{
+						node.appendChild(script);
+					},0);
+					//eval(value).RENDER({},node);
 				}
 				catch(e){
 					alert(e.message);

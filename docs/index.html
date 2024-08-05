@@ -271,7 +271,9 @@
 <p>If invoked with brackets, template parameters become its data context, descendant to the caller's data context. If inlined, template is executed in the caller's data context.</p>
 <p>A multi-level list of recursive structure is a good use case for reusable templates. Here is an example table of contents (for RFC7540, HTTP/2 specs), built from an external file.</p>
 <pre class="dap">
-'contents-sample'.d("List( URL:query,untab.decode@items )") // root invokes List() for the top-level items as a parameter
+import untab from "/stuff/untab.dap.js";
+
+'contents-sample'.d("List( URL:query,decode@items )") // root invokes List() for the top-level items as a parameter
 .DICT({
 	URL	:"/samples/rfc7540contents.txt",
 	
@@ -282,9 +284,7 @@
 	
 	href	:"https://tools.ietf.org/html/rfc7540#"
 })
-.USES({
-	untab	:"/stuff/untab.dap.js" // external namespace, that provides a decoder for the custom-formatted data
-})
+.FUNC(untab)
 </pre>
 <p>Here, the URL provides <a href="/samples/rfc7540contents.txt" target="_blank">textual data</a> in a custom indented table format, which is not JSON. Thus, the <code>:query</code> converter does not parse it automatically, but only performs a HTTP request and returns the response text "as is". To have it converted to a dataset, we use a <code>decode</code> converter from an external dap file, <a href="/stuff/untab.dap.js" target="untab.dap.js">untab.dap.js</a>, that converts indented text to a dataset object. Of course, we could simply have used <a href="/samples/rfc7540contents.json" target="_blank">an equivalent JSON file</a> instead, and wouldn't need an extra decoder then... But the example above takes us to <i>namespaces</i>.
 

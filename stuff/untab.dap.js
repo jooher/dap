@@ -1,6 +1,5 @@
-dap.NS()
-
-.FUNC({
+export default({
+	
 	convert	:{
 		decode	:source=>{
 			const	stack	=[],

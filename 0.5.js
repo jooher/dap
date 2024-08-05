@@ -307,18 +307,15 @@ const	dap=(Env=>
 		
 		const
 		
-//		evaluate= js	=> Function('return '+js)(dap),
-		
-		require	= uri	=> {
+		require = async(uri) => {
 			if(!namespaces[uri]){
-				const p = load(uri);
+				const t = "";//await fetch(uri).then( res=>res.ok&&res.text()),
+					p = eval("return dap.NS()"+t);
 				p.prepare();
 				namespaces[uri] = p.ns;
 			}
 			return namespaces[uri];
 		},
-		
-		load = async (uri) => await Env.require(uri,true) || Fail("Can't resolve namespace: "+uri),
 		
 		rootns	= new Namespace("",{}).inherit(
 			{
@@ -753,7 +750,7 @@ const	dap=(Env=>
 							return epilog;
 						
 						let tail=todo;
-						while(tail.todo)tail=tail.todo;			
+						while(tail.todo)tail=tail.todo;
 						tail.todo=epilog;
 					}
 
@@ -790,7 +787,7 @@ const	dap=(Env=>
 			}
 		})();		
 			
-		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr, require }
+		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr }
 		
 	})(),
 	
@@ -1237,8 +1234,8 @@ Fail("bzzz i<0");
 	
 	parseWithExtra= (dummy => (tag,extra)=>{
 		dummy.innerHTML="<"+tag+" "+extra+"></"+tag+">";
-		return dummy.firstChild;			
-	})(newElem("div")),			
+		return dummy.firstChild;
+	})(newElem("div")),
 	
 	Blend	={
 		
@@ -1295,11 +1292,15 @@ Fail("bzzz i<0");
 		return elem;
 	},
 	
-	mime = (res,type) =>
-		type === "text/plain" ? res.text():
-		type === "application/json" ? res.json():
-		type === "application/x-www-form-urlencoded" ? res.formData():
-		res
+	mime = res =>{
+		const type = res.headers["content-type"]?.toLowerCase();
+		return res.ok && (
+			type === "text/plain" ? res.text():
+			type === "application/json" ? res.json():
+			type === "application/x-www-form-urlencoded" ? res.formData():
+			res.text()
+		);
+	}
 ;
 	
 	return	{
@@ -1366,8 +1367,8 @@ Fail("bzzz i<0");
 			console.log('orphan element '+elem);
 		},
 			
-		require: (url,sync) => sync ? Mime.parseResponse(Http.request(url,sync)):
-			fetch(url).then(res => interpret(res,res.headers["content-type"].toLowerCase())),
+		require: (url,sync) => //sync ? Mime.parseResponse(Http.request(url,sync)):
+			fetch(url).then(mime),
 				
 		stopEvent	: e=>{
 			e.stopPropagation();
@@ -1404,8 +1405,8 @@ Fail("bzzz i<0");
 				prompt: (msg,r) => r&& prompt(msg),
 				confirm:(msg,r) => r&& confirm(msg),
 									
-				fetch	: (req,r) => r && fetch(req),
-				query	: (req,r) => r && fetch(req).then(res => res.ok && mime(res,res.headers.get("Content-Type").toLowerCase()))
+				fetch	: (req,r) => r&& fetch(req),
+				query	: (req,r) => r&& fetch(req).then(mime)
 			},
 			
 			flatten	:{
