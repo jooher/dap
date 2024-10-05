@@ -1,4 +1,4 @@
-// 0.5
+// not backwards safe with 0.5 !!!
 
 function check(value,r){
 	return r && value;
@@ -84,8 +84,8 @@ const	dap=(Env=>
 		
 		"!"	:Print,
 		"?"	:(value,alias)=>	!!value,
-		"??"	:(value,alias)=>	alias?alias==value:!value,
-		"?!"	:(value,alias)=>	alias?alias!=value:!!value,
+		"??"	:(value,alias)=>	alias?alias==value:!!value,
+		"?!"	:(value,alias)=>	alias?alias!=value:!value,
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		"&"	:(value,alias,node)=>	{ const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
