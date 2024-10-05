@@ -1,7 +1,6 @@
 import "/0.5.4.js";
 import { auth, api, dictFrom, elemFrom, JsonCSS } from '/stuff/snippets.js';
-import Await from '/stuff/await.js';
-import {untab} from '/stuff/parse.js';
+import { untab } from '/stuff/parse.js';
 
 JsonCSS('lang/ru.json');
 
@@ -17,12 +16,6 @@ Ahref = url =>{
 	a.setAttribute("target","call");
 	return a;
 },
-
-modal = (...stuff) =>
-	"MODAL".d('top'
-		,"SCRIM".ui('value :!')
-		,"SHIELD".d(...stuff)
-	).u("kill; ?"),
 
 where	= { //$where={dpt,arv,terms,places}
 	
@@ -42,7 +35,15 @@ where	= { //$where={dpt,arv,terms,places}
 		loc	:a => a && a.join(slash)
 		
 	}))(', ','\n',' → ')
-};
+},
+
+modal = (...stuff) =>
+	"MODAL".d('top; $!='
+		,"SCRIM".ui('$!=')
+		,"SHIELD".d(...stuff)
+	).u('value $!; remove');
+
+
 
 
 "APP".d(`	$!= $?= $tab="routes
@@ -56,7 +57,7 @@ where	= { //$where={dpt,arv,terms,places}
 
 	,"BUTTON.tgmain.add-ride".d('? $?:!; tgmain').ui('$?=:!')
 	
-	,"ROOF".d('? $?; '
+	,"ROOF".d('? $?'
 	
 		,"BUTTON.done".ui('$?=')
 /*	
@@ -152,10 +153,10 @@ where	= { //$where={dpt,arv,terms,places}
 	},
 	
 	Tabset
-	:"TABSET".d('* .tab'
-		,"TAB".d('!? .tab@; a!')
-			.a("!? (.tab $tab)eq@selected")
-			.ui('$tab=.')
+	:"TABSET".d('* .tab@'
+		,"TAB".d('!? $@; a!')
+			.a("!? ($ $tab)eq@selected")
+			.ui('$tab=$')
 	).u("?"),
 	
 	Options
@@ -173,7 +174,7 @@ where	= { //$where={dpt,arv,terms,places}
 						.ui('$area=. $places=.places:|')
 					)
 					,"places".d('? $places; * $places@place'
-						,"place".d('! .place').ui('value ($region $area $place=.)*')
+						,"place".d('! .place').ui('$!=($region $area $place=.)*')
 					)
 				)
 			).u("? $place")
@@ -226,6 +227,6 @@ where	= { //$where={dpt,arv,terms,places}
 		tgmain: (value,alias,node)=>{ window.tgmain && window.tgmain(node) } //|| ()=>{} //
 	}
 
-}, where, Await)
+}, where)
 
 .RENDER();

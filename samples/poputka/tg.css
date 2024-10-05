@@ -46,6 +46,7 @@ roof {
 
 roof	{
 	/* padding: .5em; */
+	position: relative;
 	gap: 1em;
 	background: rgba(var(--shade-color),.1);
 	padding: 1em;

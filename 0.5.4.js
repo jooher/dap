@@ -48,6 +48,12 @@ const	dap=(Env=>
 	flatten	:{
 	
 		"&"	: values=> Object.assign(values.pop(),...values),
+		"^"	: values=> {
+				const a = values.pop(),
+					p = Object.assign({},...values),
+					inherit = r => Object.assign(Object.create(p),r);
+				return Array.isArray(a) ? a.map(inherit) : inherit(a); 
+			},
 		
 		"*"	: values=>values.reverse(),
 		
@@ -104,7 +110,7 @@ const	dap=(Env=>
 	isArray = Array.isArray,
 	
 	range = length => Array.from({length}).map((a,i)=>i),
-	
+		
 	rowsArray = (value,alias) => 
 		!alias ? value : value.map(namify(alias.split(','))),
 		
@@ -249,20 +255,7 @@ const	dap=(Env=>
 		};
 		
 		const
-		
-//		evaluate= js	=> Function('return '+js)(dap),
-		
-		require	= uri	=> {
-			if(!namespaces[uri]){
-				const p = load(uri);
-				p.prepare();
-				namespaces[uri] = p.ns;
-			}
-			return namespaces[uri];
-		},
-		
-		load = async (uri) => await Env.require(uri,true) || Fail("Can't resolve namespace: "+uri),
-		
+
 		rootns	= new Namespace("",{}).inherit(
 			{
 				uses	:[],
@@ -277,7 +270,7 @@ const	dap=(Env=>
 			this.defines = null;
 			this.depends = null;
 			
-			this.id= ++ids;
+			//this.id= ++ids;
 		}
 		Scope.prototype = {
 			
@@ -705,7 +698,7 @@ const	dap=(Env=>
 							return epilog;
 						
 						let tail=todo;
-						while(tail.todo)tail=tail.todo;			
+						while(tail.todo)tail=tail.todo;
 						tail.todo=epilog;
 					}
 
@@ -742,17 +735,16 @@ const	dap=(Env=>
 			}
 		})();		
 			
-		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr, require }
+		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr }
 		
 	})(),
 	
 	Execute	= (function(){
 		
-		const
-		sub = (obj,up) => obj ? Object.assign(Object.create(up||null),obj) : up;
+		const	sub = (obj,up) => obj ? Object.assign(Object.create(up||null),obj) : up;
 		
 		function Context(derive,data,stata){
-			this.data = data!=undefined ? data : derive.data; // sub(data,derive.data); //
+			this.data = data!=undefined ? data : derive.data; //  // sub(data,derive.data); //
 			this.stata = sub(stata,derive.stata);
 		}
 		Context.prototype={
@@ -954,7 +946,7 @@ const	dap=(Env=>
 							});
 							
 						if(proto)
-							proto.print(this.node,this.$,value);//
+							value = proto.print(this.node,this.$,value);//
 				
 					}
 				}
@@ -1255,11 +1247,15 @@ const	dap=(Env=>
 		return elem;
 	},
 	
-	mime = (res,type) =>
-		type === "text/plain" ? res.text():
-		type === "application/json" ? res.json():
-		type === "application/x-www-form-urlencoded" ? res.formData():
-		res
+	mime = res =>{
+		const type = res.headers["content-type"]?.toLowerCase();
+		return res.ok && (
+			type === "text/plain" ? res.text():
+			type === "application/json" ? res.json():
+			type === "application/x-www-form-urlencoded" ? res.formData():
+			res.text()
+		);
+	}
 ;
 	
 	return	{
@@ -1326,8 +1322,7 @@ const	dap=(Env=>
 			console.log('orphan element '+elem);
 		},
 			
-		require: url => fetch(url)
-			.then(res => interpret(res,res.headers["content-type"].toLowerCase())),
+		require: url => fetch(url).then(mime),
 				
 		stopEvent	: e=>{
 			e.stopPropagation();
@@ -1354,8 +1349,9 @@ const	dap=(Env=>
 			
 			convert	:{ 
 			
-				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
-				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
+				text	: node => (node.innerText||node.textContent||node.value||"").trim(),
+				value	: node => (node.value||node.textContent||node.innerText||"").trim(),
+				wait	: node => new Promise((resolve,reject)=>{node.$.post={resolve,reject}}),
 				
 				//run-time converters
 				
@@ -1365,7 +1361,7 @@ const	dap=(Env=>
 				confirm:(msg,r) => r&& confirm(msg),
 									
 				fetch	: (req,r) => r && fetch(req),
-				query	: (req,r) => r && fetch(req).then(res => res.ok && mime(res,res.headers.get("Content-Type").toLowerCase()))
+				query	: (req,r) => r && fetch(req).then(mime)
 			},
 			
 			flatten	:{
@@ -1377,21 +1373,24 @@ const	dap=(Env=>
 			},
 			
 			operate	:{
-				log	:(value,alias)	=>{ log(alias+": "+value); },
-				
-				"!!"	:(value,alias,node)=>{
+				"!!"	:(value,alias,node) => {
 						if(alias)
 							value ? node.setAttribute(alias,value):node.removeAttribute(alias);
 						else
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ 
+				"!?"	:(value,alias,node) => { 
 						if(alias) 
 							node.classList.toggle(alias,!!value) 
 						else
 							value && node.classList.add(value)
-					}			
+					},
+					
+				log	:(value,alias) => { log(alias+": "+value) },
+				
+				value	:(value,name,node) => { node.$.post?.resolve(value) },
+				remove:(value,name,node) => { (value||node).remove() }
 
 			}
 		}
