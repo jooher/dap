@@ -1,5 +1,7 @@
 # Dap.js: for massively interactive web-applications.
 
+[![Join the chat at https://gitter.im/dapjs/community](https://badges.gitter.im/dapjs/community.svg)](https://gitter.im/dapjs/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Dap (initially stood for "data access page") is a lightweight javascript framework for interactive data-driven web applications.
 
 ## Clear, concise and observable
