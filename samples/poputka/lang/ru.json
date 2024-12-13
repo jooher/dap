@@ -6,6 +6,8 @@
 	"PAGE.rides>.title":"Попутчики по маршруту:",
 	"PAGE.routes>.title":"Популярные маршруты:",
 	
+	"ROOF":"Создать поездку",
+	
 	".import:empty":"Моя поездка:",
 	
 	".input.dpt": "из",
@@ -22,7 +24,7 @@
 	
 	"LABEL.vehicle": "авто",
 	"LABEL.seats": "мест",
-	"LABEL.price": "цена за 1",
+	"LABEL.price": "цена за место",
 	"LABEL.note": "примечания",
 	"LABEL.tel":"телефон",
 	"LABEL.tg":"telegram",

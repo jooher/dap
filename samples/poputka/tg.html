@@ -2,8 +2,8 @@
 <html
 
 _style="
---tg-theme-accent-text-color: #168acd;
 --tg-color-scheme: light;
+--tg-theme-accent-text-color: #168acd;
 --tg-theme-bg-color: #ffffff;
 --tg-theme-button-color: #40a7e3;
 --tg-theme-button-text-color: #ffffff;
@@ -21,8 +21,8 @@ _style="
 "
 
 style="
---tg-theme-accent-text-color: #6ab2f2;
 --tg-color-scheme: dark;
+--tg-theme-accent-text-color: #6ab2f2;
 --tg-theme-bg-color: #17212b;
 --tg-theme-button-color: #5288c1;
 --tg-theme-button-text-color: #ffffff;
@@ -47,13 +47,10 @@ style="
 	<link rel="stylesheet" href="tg.css"/>
 	<link rel="stylesheet" href="poputka.css"/>
 	<link rel="stylesheet" href="colors-tg.css"/>
-
 </head>
+
 <script src="poputka-tg.js" type=module></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<script type="module">
-</script>
 
 <script>
 
@@ -82,8 +79,7 @@ const mainButtonLabels = {
 
 let mainButton;
 window.tgmain = btn =>{
-	if(!user)
-		return;
+	if(!user)return;
 	btn.style.display='none';
 	mainButton = btn;
 	const label = [...btn.classList].pop();

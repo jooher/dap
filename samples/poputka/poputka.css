@@ -89,7 +89,7 @@ group.where {
 }
 .when{
 	flex-direction: row;
-	margin-right: 4em;
+	/* margin-right: 4em; */
 }
 .when>input {
 	flex: 1;
@@ -150,7 +150,7 @@ span.date {
 }
 
 deck>.seats {
-	width: 4em;
+	width: 3em;
 }
 
 deck>.vehicle {
@@ -158,12 +158,12 @@ deck>.vehicle {
 }
 
 label::before {
-	margin: .1em;
+	margin: .3em 0;
 	white-space: nowrap;
 }
 
 deck>.price {
-	width: 5em;
+	width: 7em;
 }
 
 page>.title {

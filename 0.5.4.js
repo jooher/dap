@@ -137,7 +137,7 @@ const	dap=(Env=>
 		
 	Util	={
 			
-		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
+		//stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
 		
 		reach	: (entry,path)=>{//path.reduce(o,v=>o&&o[v],start),
 				let i=path.length; 

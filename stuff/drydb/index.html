@@ -13,7 +13,7 @@ vehicle, name, info:json,seats
 </body>
 
 <script type="module">
-import dry from "./drycreate.js";
+import dry from "./drycreate-ydb.js";
 
 window.process=function(e){
 	window.result.textContent=dry(window.text.value);

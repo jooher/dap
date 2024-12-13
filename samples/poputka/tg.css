@@ -19,6 +19,7 @@ html,body {
 	max-width: 24rem;
 	padding: 0;
 	margin: auto;
+	background: lightslategray;
 }
 
 body, app, etage, roof, page {

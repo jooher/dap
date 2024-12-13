@@ -116,7 +116,7 @@ modal = (...stuff) =>
 		,"PAGE.routes".d('?? $tab@routes; $!'
 			,"title".d()
 			,"UL".d('* ("routeride $person.id@person $when.date):api ("route):api E'
-				,"LI"	.d('! (.terms)spans') // .places
+				,"LI"	.d('! (.places)spans') // .places
 					.ui('$where=(.terms .places):fromtp $route=. $tab="rides')
 			)
 		)
