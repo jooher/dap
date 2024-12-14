@@ -1,0 +1,42 @@
+{
+	"TAB.routes": "маршруты",
+	"TAB.rides": "попутчики",
+	"TAB.import": "импорт",
+	
+	"PAGE.rides>.title":"Попутчики по маршруту:",
+	"PAGE.routes>.title":"Популярные маршруты:",
+	
+	"ROOF":"Создать поездку",
+	
+	".import:empty":"Моя поездка:",
+	
+	".input.dpt": "из",
+	".input.arv": "в",
+	
+	"SHIELD.dpt":"Откуда (область, район, пункт)",
+	"SHIELD.arv":"Куда (область, район, пункт)",
+	
+	"LABEL.when": "Дата и время поездки",
+	
+	"SPAN.price": "₽ ",
+	"SPAN.vehicle:empty": "пассажир",
+	"SPAN.seats:not(:empty)": "мест: ",
+	
+	"LABEL.vehicle": "авто",
+	"LABEL.seats": "мест",
+	"LABEL.price": "цена за место",
+	"LABEL.note": "примечания",
+	"LABEL.tel":"телефон",
+	"LABEL.tg":"telegram",
+	
+	".vehicle>SELECT>OPTION[value='']": "я пассажирус",
+	
+	"BUTTON.ok":"OK",
+	"BUTTON.cancel":"Отмена",
+	"BUTTON.add-ride":"Добавить поездку",
+	"BUTTON.drop":"×",
+	"BUTTON.done":"×",
+	
+	".routes>UL:empty":"Здесь будут маршруты, планируемые на сегодня. Данных пока нет. Проверьте соединение с интернетом.",
+	".rides>UL:empty":"Здесь будут предложения поездок по выбранному маршруту. Пока таких предложений нет. Добавьте свою поездку!"
+}

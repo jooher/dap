@@ -4,6 +4,15 @@ import Await from '/stuff/await.js';
 import {untab} from '/stuff/parse.js';
 
 /*
+const	tg = window.Telegram.WebApp;
+if(!tg)return;
+tg.expand();
+if (tg.MainButton.isVisible)tg.MainButton.hide();
+tg.onEvent('themeChanged', function(){alert("theme changed")});
+*/
+
+
+/*
 person, stars, info:json
 route, terms:string, stops:text
 ride, route, person, seats, date:date, info:json
@@ -69,45 +78,57 @@ where	= { //$where={dpt,arv}
 		loc	:a => a && a.join(', ')
 		
 	}))(' / ',' → ')
-}
-
-;
+};
 
 
 
-
-"APP".d(`	$tab=
+"APP".d(`	$!= $tab=
 		$when=soon $where=
 		$route= $ride=
 		$user=:auth.load
 		$person="1`
 
-	,"ROOF".d(''
-		,"GROUP.when".d('& $when@'
-			,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
-			,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
-		).u('? (.date .time)!; $when=(.date .time)')
-		,"GROUP.where".d('& $where@'
-			,"select.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
-			,"select.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
-			,"swap".ui('& (.dpt@arv .arv@dpt)')
-		).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
-	)
+	,"GROUP.when".d('& $when@'
+		,"INPUT type=time".d("!! .time@value").ui('.time=#.value')
+		,"INPUT type=date".d("!! .date@value today@min").ui('.date=#.value')
+	).u('? (.date .time)!; $when=(.date .time)')
 
-	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides|account)'
+	,"GROUP.where".d('& $where@'
+		,"input.dpt".d('! .dpt:loc').ui('.dpt=Where(@label"dpt):wait')
+		,"input.arv".d('! .arv:loc').ui('.arv=Where(@label"arv):wait')
+		,"swap".ui('& (.dpt@arv .arv@dpt)')
+	).u('& $where:totp=(.dpt .arv)@; ? (.dpt .arv)!; $route=("route .terms):api,route $tab="rides')//
+/*
+	,"LABEL.when".d(
+	)
+	,"LABEL.where".d(
+	)
+*/	
+	,"BUTTON.add-ride"
+	.d("$info=")
+	.ui(`	? $person $person=("person):api Login():modal;
+		? .dpt .dpt=Where(@label"dpt):wait;
+		? .arv .arv=Where(@label"arv):wait;
+		& $where:totp=(.dpt .arv);
+		? $info=Info($when .where):wait;
+		? $route=("route .where.terms):api,route;
+		? $!=(@PUT"ride $person $when.date $route $info):api :alert"error;
+	`)//:alert"created;
+
+	,"ETAGE".d('$tab=`routes Tabset(:|@tab"routes|rides)'//|account
 	
-		,"PAGE.routes".d('?? $tab@routes'
+		,"PAGE.routes".d('?? $tab@routes; $!'
 			,"UL".d('* ("route $person):api ("route):api E'
 				,"LI"	.d('! (.terms .places)spans')
 					.ui('$where=(.terms .places):fromtp $route=. $tab="rides')
 			)
 		)
 		
-		,"PAGE.rides".d('?? $tab@rides'
+		,"PAGE.rides".d('?? $tab@rides; $!'
 			,"UL".d('* ("ride $route $when.date):api'//($rides $filter)filter E'
-				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle'
+				,"LI.ride".d('$?=; !? $my=(.person $person)eq .info.vehicle@rider .info.vehicle:!@passenger'
 					,"title"
-					.d('* .info@; ! (.time .price .vehicle .seats .places .note)spans')
+					.d('* .info@; ! (.when.time .price .vehicle .seats .where.places .note)spans')
 					.ui('$?=$?:!')
 					,"details".d('? $?; Person(.person@)'
 						,"BUTTON.contact_rider"
@@ -151,19 +172,7 @@ where	= { //$where={dpt,arv}
 				,"BUTTON type=submit `Submit".d()
 			).ui('? (@PUT"route #:form@.):api :alert`error')
 		)
-*/		
-		
-		,"BUTTON.add-ride"
-		.d("$info=")
-		.ui(`	? $person $person=("person):api Login():modal;
-			? .dpt .dpt=Where(@label"dpt):wait;
-			? .arv .arv=Where(@label"arv):wait;
-			& $where:totp=(.dpt .arv)@;
-			? $info=Info($when.time .places):wait;
-			? $route=("route .terms):api,route;
-			? (@PUT"ride $person $when.date $route $info):api :alert"error;
-		`)//:alert"created;
-
+*/	
 	
 	)
 
@@ -178,6 +187,9 @@ where	= { //$where={dpt,arv}
 })
 
 .DICT({
+	
+	//user: tg.initDataUnsafe.user,
+
 	
 	filter:{
 		riders: ride => !!ride.info.vehicle,
@@ -206,9 +218,7 @@ where	= { //$where={dpt,arv}
 	).u('value $value'),
 	
 	Where
-	:modal('$region= $area= $place='
-		,"label".d('!? .label@')
-		//,"recent".d('Areas(:recall@areas"recent)')
+	:modal('$region= $area= $place=; !? .label@'
 		,"regions".d('* areas@areas,region,places'
 			,"region".d('$?= $places='
 				,"name".d('! .region').ui('? $?=$?:!; $region=. $places=.places:|; ?')
@@ -247,7 +257,7 @@ where	= { //$where={dpt,arv}
 	Info
 	:modal(
 
-		"title".d('! (.time .places)spans')
+		"title".d('! (.when.time .when.date .where.terms .where.places)spans')
 	
 		,"FORM.info".d(''
 			,"LABEL.vehicle".d(''
@@ -275,7 +285,7 @@ where	= { //$where={dpt,arv}
 	
 	Person
 	:"person".d(''
-		,"A.tg target=tg".d('!! @href"https://t.me/popuutka_bot').u('?')
+		,"A.tg target=tg".d('!! @href"https://t.me/+79268274271').u('?')
 	),
 	
 	Hike:

@@ -1,20 +1,17 @@
 export const
 
-untab	= source=>{
+untab	= source => { // [0:subitems,1:item]
 	
 	const
 		stack =[],
 		tab = /;\s+/g,
-		lines = source.split(/[\r\n]+/g);
+		lines = source.split(/[\r\n]+/g).filter(str => str);
 		
 	let
 		rows=[],
 		last=[];
 		
 	lines.forEach(line=>{
-		
-		if(!line)
-			return;
 			
 		const
 			prep	= /^(\s*)(.*)/.exec(line),
@@ -36,4 +33,4 @@ untab	= source=>{
 	});
 	
 	return stack[0];
-};
+}

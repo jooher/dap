@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html
+
+_style="
+--tg-color-scheme: light;
+--tg-theme-accent-text-color: #168acd;
+--tg-theme-bg-color: #ffffff;
+--tg-theme-button-color: #40a7e3;
+--tg-theme-button-text-color: #ffffff;
+--tg-theme-destructive-text-color: #d14e4e;
+--tg-theme-header-bg-color: #ffffff;
+--tg-theme-hint-color: #999999;
+--tg-theme-link-color: #168acd;
+--tg-theme-secondary-bg-color: #f1f1f1;
+--tg-theme-section-bg-color: #ffffff;
+--tg-theme-section-header-text-color: #168acd;
+--tg-theme-subtitle-text-color: #999999;
+--tg-theme-text-color: #000000;
+--tg-viewport-height: 590px;
+--tg-viewport-stable-height: 590px;
+"
+
+style="
+--tg-color-scheme: dark;
+--tg-theme-accent-text-color: #6ab2f2;
+--tg-theme-bg-color: #17212b;
+--tg-theme-button-color: #5288c1;
+--tg-theme-button-text-color: #ffffff;
+--tg-theme-destructive-text-color: #ec3942;
+--tg-theme-header-bg-color: #17212b;
+--tg-theme-hint-color: #708499;
+--tg-theme-link-color: #6ab3f3;
+--tg-theme-secondary-bg-color: #232e3c;
+--tg-theme-section-bg-color: #17212b;
+--tg-theme-section-header-text-color: #6ab3f3;
+--tg-theme-subtitle-text-color: #708499;
+--tg-theme-text-color: #f5f5f5;
+--tg-viewport-height: 590px;
+--tg-viewport-stable-height: 590px;
+"
+
+>
+<head>
+	<meta charset="utf-8">
+	<title>Poput4k</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0" />
+	<link rel="stylesheet" href="tg.css"/>
+	<link rel="stylesheet" href="poputka.css"/>
+	<link rel="stylesheet" href="colors-tg.css"/>
+</head>
+
+<script src="poputka-tg.js" type=module></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<script>
+
+const
+
+tg = window.Telegram.WebApp,
+user =tg.initDataUnsafe.user,
+mockUser ={
+	"id": 0,
+	"is_bot": true,
+	"first_name": "Mock",
+	"last_name": "User",
+	"username": "poput4k_bot",
+	"language_code": "en"
+};
+
+localStorage.setItem("user",JSON.stringify(user||mockUser));
+
+tg.expand();
+tg.MainButton.show();
+
+const mainButtonLabels = {
+	"add-ride" : "Добавить поездку",
+	"ok": "Да, все верно!"
+};
+
+let mainButton;
+window.tgmain = btn =>{
+	if(!user)return;
+	btn.style.display='none';
+	mainButton = btn;
+	const label = [...btn.classList].pop();
+	tg.MainButton.setText(mainButtonLabels[label]||label);
+};
+
+tg.onEvent('mainButtonClicked', function(){mainButton&&mainButton.click()});
+
+/*
+tg.initData //получаем данные от пользователя в виде строки (работает только при запуске из меню команд бота). 
+tg.initDataUnsafe // получаем данные от пользователя в виде объекта (работает только при запуске из меню команд бота). 
+tg.isExpanded // возвращает true, если приложение открыто на всю высоту, false - если нет. 
+tg.viewportHeight // вернёт ширину окна.
+tg.sendData(data) // отправляет данные  боту в строковом виде, после чего закрывает приложение (работает только если приложение запущено с keyboard button). 
+tg.ready() // метод позволяет отследить, когда приложение готово к отображению.
+tg.expand() // метод позволяет растянуть окно на всю высоту.
+tg.close() // метод закрывает приложение.
+
+
+tg.MainButton.text // текст кнопки, по умолчанию: "Continue"
+tg.MainButton.color // цвет текста
+tg.MainButton.textColor // цвет подложки
+tg.MainButton.isVisible // видна ли кнопка (по умолчанию false) 
+tg.MainButton.isActive // активна ли кнопка (по умолчанию true)
+tg.MainButton.setText(text) //  метод для задания текста
+tg.MainButton.onClick(callback) // метод при нажатии на кнопку
+tg.MainButton.show() // показать кнопку 
+tg.MainButton.hide() // скрыть кнопку
+tg.MainButton.enable() // сделать активной 
+tg.MainButton.disable() // сделать неактивной 
+tg.MainButton.setParams(params) // задает параметры в виде объекта
+*/
+
+</script>

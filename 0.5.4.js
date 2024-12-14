@@ -1,4 +1,4 @@
-// 0.5
+// not backwards safe with 0.5 !!!
 
 function check(value,r){
 	return r && value;
@@ -10,7 +10,9 @@ const	dap=(Env=>
 	
 	const
 
-	Fail	= reason=>{throw new Error("dap error: "+reason)},
+	Fail	= (reason,context) => {
+		throw new Error("dap error: "+reason)
+	},
 	
 	Canonical= ()=>({
 
@@ -23,15 +25,15 @@ const	dap=(Env=>
 		"?"	:bool=>!!bool,	/// test
 		"!"	:bool=>!bool,	/// test inverse
 		
-		"+?"	:num=>parseFloat(num)>0,	/// test positive
-		"-?"	:num=>parseFloat(num)<0,	/// test negative
-		"0?"	:num=>parseFloat(num)===0,	/// test zero
-		"!0"	:num=>parseFloat(num)||"",	/// non-zero only
-		
 		"!!"	:arr=>!isArray(arr),			/// not an array
 		"!?"	:arr=>!isArray(arr)&&arr!=null,	/// anything but an array
 		"?!"	:arr=>isArray(arr)&&!arr.length,	/// empty array
 		"??"	:arr=>isArray(arr)&&arr.length,	/// non-empty array
+		
+		"+?"	:num=>parseFloat(num)>0,	/// test positive
+		"-?"	:num=>parseFloat(num)<0,	/// test negative
+		"0?"	:num=>parseFloat(num)===0,	/// test zero
+		"!0"	:num=>parseFloat(num)||"",	/// non-zero only
 		
 		"+"	:num=>Math.abs(parseFloat(num)||0),	/// abs
 		"-"	:num=>-(parseFloat(num)||0),		/// neg
@@ -46,6 +48,12 @@ const	dap=(Env=>
 	flatten	:{
 	
 		"&"	: values=> Object.assign(values.pop(),...values),
+		"^"	: values=> {
+				const a = values.pop(),
+					p = Object.assign({},...values),
+					inherit = r => Object.assign(Object.create(p),r);
+				return Array.isArray(a) ? a.map(inherit) : inherit(a); 
+			},
 		
 		"*"	: values=>values.reverse(),
 		
@@ -76,8 +84,8 @@ const	dap=(Env=>
 		
 		"!"	:Print,
 		"?"	:(value,alias)=>	!!value,
-		"??"	:(value,alias)=>	alias?alias==value:!value,
-		"?!"	:(value,alias)=>	alias?alias!=value:!!value,
+		"??"	:(value,alias)=>	alias?alias==value:!!value,
+		"?!"	:(value,alias)=>	alias?alias!=value:!value,
 		
 		"#"	:(value,alias,node)=>	{ node[alias]=value; },
 		"&"	:(value,alias,node)=>	{ const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
@@ -90,19 +98,27 @@ const	dap=(Env=>
 		"a"	:(value,alias,node)=>	{ Env.delay(_=>Update.Append(value||node,alias)); },
 		"u"	:(value,alias,node)=>	{ Env.delay(_=>Update.onDemand(value,alias,node)); },
 		
-		"*"	:(value,alias)=>
-			! value ? false :
-			! alias ? value :
-			! isArray(value) ? value : //{[alias]:value} :
-			value.map(namify(alias.split(',')))
-				 
+		"*"	:(value,alias)=> !value ? false :
+			Array.isArray(value) ? rowsArray(value,alias) :
+			Number.isInteger(value) ? rowsNumber(value,alias) :
+			value
+			
 		}
 		
 	}),
 	
 	isArray = Array.isArray,
 	
-	namify = fields => row => isArray(row) ? Object.fromEntries(fields.map((name,i)=>[name,row[i]])) : {[fields[0]]:row},
+	range = length => Array.from({length}).map((a,i)=>i),
+		
+	rowsArray = (value,alias) => 
+		!alias ? value : value.map(namify(alias.split(','))),
+		
+	rowsNumber = (value,alias) => 
+		!alias ? range(value) : range(value).map(n=>({[alias]:n})),
+	
+	namify = fields => 
+		row => isArray(row) ? Object.fromEntries(fields.map((name,i)=>[name,row[i]])) : {[fields[0]]:row},
 	
 	namespaces = {},
 		
@@ -121,7 +137,7 @@ const	dap=(Env=>
 		
 	Util	={
 			
-		stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
+		//stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
 		
 		reach	: (entry,path)=>{//path.reduce(o,v=>o&&o[v],start),
 				let i=path.length; 
@@ -149,89 +165,35 @@ const	dap=(Env=>
 		const
 		
 		makePath = (()=>{
-		
-			function This(route,where){
-				this.route=route;
-				this.where=where;
-			}
-			This.prototype={
-				reach: function(context,branch){
-					return branch[this.where] || Fail("Unknown mesh: #"+this.where);
-				}
-			};
-		
-			function Const(route,entry){
-				route.push(entry);
-				this.route=route;
-				this.value=undefined;
-			}
-			Const.prototype={
-				reach: function(context){
-					if(this.value === undefined){
-						const route = this.route.slice(0);
-						this.value = Util.reach(context.ns.lookup(route),route) || null;
-					}
-					return this.value;
-				}
-			};
-		
-			function Statum(route,entry){
-				route.push(entry);
-				this.route=route;
-				this.entry=entry;
-			}
-			Statum.prototype={
-				reach: function(context){
-					let target = context.stata;
-					while(!(this.entry in target))
-						target=target.$ || Fail("Statum not declared: $"+this.entry);
-					return target;
-				}
-			};
-			
-			function Datum(route){
-				let lift=0;
-				while(!route[route.length-1]){
-					route.pop();
-					++lift;
-				}
-				this.route=route;
-				this.lift=lift;
-			}
-			Datum.prototype={
-				reach: function(context){
-					let
-						target = context.data,
-						i=this.lift;
-					while(i-->0)
-						target=target.$ || Fail("Out of data contexts: "+this.route);
-					return target[''];
-				}
-			};
 
 			const
 			
 			cache = {
-				"$" : new This(['','data','$'],'node'),
-				"#" : new This([],'node'),
-				"#event": new This(['event'],'up')
+				'' :{path:null,resolved:true}
 			},
 			
-			parse = route=>{
-				
-				const entry = route.pop();
-				
-				return	!entry || entry==='$' ? new Datum(route) :
-					entry.startsWith('$') ? new Statum(route,entry.substr(1)) :
-					entry.startsWith('#') ? new This(route,entry.substr(1)||'node') :
-					new Const(route,entry);
-			}
+			runtime = {
+				"$" : branch => branch.$.data,
+				"#" : branch => branch.node
+			};
+			
 	
-			return (str,tag)=>{
-				if(str.slice(-1)==".")
-					str += tag || Fail("Invalid shorthand: "+str);
-				return cache[str] || (cache[str]=parse(str.split(".").reverse())); //
-//				return cache[str] || parse(str.split(".").reverse()); //(cache[str]=)
+			return str => { //: [path,resolved]
+				if(!str)return cache[''];
+				
+				if(!(str in cache)){
+					const path = str.split("."),
+						entry = path[0];//.shift();
+
+					path[0] =
+						!entry ? null :
+						runtime[entry] ? runtime[entry] :
+						entry[0] === '$' ? entry.slice(1) :
+						entry;
+					
+					cache[str] = path[0]===entry ? null : path;
+				}
+				return cache[str];
 			}
 			
 		})();
@@ -280,43 +242,20 @@ const	dap=(Env=>
 			},
 
 			reach	:function(route,domain){
-					const
-						path = route.split(".").reverse(),
-						entry = this.lookup(path,domain);
-					return Util.reach(entry,path)||Fail( domain+" not found: "+route);
+					const path = route.split("."),
+						entry = this.lookup(path.shift(),domain);
+					return path.length ? Util.reach(entry,path) : entry ||Fail( domain+" not found: "+route);
 				},
 
-			lookup	: function(path,domain,key){
-			
-				if(!key)
-					key= path.pop();
-				
-				const	
-					scope	= domain ? this.func[domain] : this.dict,
-					xtrn	= this.uses && this.uses[key],
-					entry	= xtrn
-						? (path.length?require(xtrn).lookup(path,domain):require(xtrn))
-						: scope[key]; // scope&& || this.inherit&&this.inherit.lookup(path,domain,key);
-				return entry;
+			lookup	: function(entry,domain,key){
+				const	scope	= domain ? this.func[domain] : this.dict;
+				return scope[entry];
 			}
 			
 		};
 		
 		const
-		
-//		evaluate= js	=> Function('return '+js)(dap),
-		
-		require	= uri	=> {
-			if(!namespaces[uri]){
-				const p = load(uri);
-				p.prepare();
-				namespaces[uri] = p.ns;
-			}
-			return namespaces[uri];
-		},
-		
-		load = async (uri) => await Env.require(uri,true) || Fail("Can't resolve namespace: "+uri),
-		
+
 		rootns	= new Namespace("",{}).inherit(
 			{
 				uses	:[],
@@ -331,7 +270,7 @@ const	dap=(Env=>
 			this.defines = null;
 			this.depends = null;
 			
-			this.id= ++ids;
+			//this.id= ++ids;
 		}
 		Scope.prototype = {
 			
@@ -485,7 +424,7 @@ const	dap=(Env=>
 					"").split(" ");
 			},
 			
-			print	:function(place,context,instead,data){
+			print	:function(place,context,data,instead){
 				
 				if(!this.scope)
 					this.prepare(place.P);
@@ -498,7 +437,7 @@ const	dap=(Env=>
 					todo = d&&d.engage();
 				
 				if(a)
-					a.engage();					
+					a.engage();
 					
 				node.P = this;
 				node.$ = context.subContext(data,this.scope.defines);
@@ -521,7 +460,7 @@ const	dap=(Env=>
 			this.todo	= todo;
 		};
 		Step.prototype={
-			print: function(place){new Execute.Branch(place).execBranch(this)}//.subContext(data,this.scope.defines)
+			print: function(place){new Execute.Branch(place).execBranch(this)}
 		};
 		
 		function Feed(values,tags,tokens){
@@ -616,7 +555,7 @@ const	dap=(Env=>
 						head	= !/[<$=:`]/.test(tokens[0]) && tokens.shift().split("@"),
 						operate = head[0] && rule.ns.reach(head[0],FUNCS.OPERATE),
 						alias	= head[1],
-						feed	= tokens.length && makeFeed( tokens.reverse(), alias );
+						feed	= tokens.length && makeFeed( tokens.reverse(), alias);
 					
 					return new Step(null, operate, feed, makeTodo(steps,epilog));// steps.length ? : epilog
 				};
@@ -644,54 +583,63 @@ const	dap=(Env=>
 							lvalues	= a.length>0 && a.map( lvalue=> {
 								const
 									a = lvalue.split(":"),
-									convert	= a[1] && makeConverts(a[1]),
-									path	= a[0] && makePath(a[0],tag) || Fail("Zero-length path (check for ==)");
+									convert = a[1] && makeConverts(a[1]),
+									path = a[0]
+										? makePath(a[0]) || Fail("Const can't be lvalue: "+path)
+										: Fail("Bad lvalue (check for ==)"),
+									entry = path[0];
 									
-								if(path){						
-									if(!tag)
-										tag=path.route[0];
-									if(path.entry&&path.route.length==1)
-										rule.scope.lvalue(path.entry,rule.define);
-								}
+								if(entry)
+									if(typeof entry==='string')// statum
+										if(path.length===1) // $foo.bar doesn't fire... Hmm...
+											rule.scope.lvalue(entry,rule.define);
+									//else, runtime
+								//else, datum
+								if(!tag)tag = path.at(-1);
 								return new Lvalue(path,convert);
 							});
 						
 						if(rval){
 							
-							let a=rval;
+							let a = rval;
 								
 							const
 								convert = (a=a.split(":")).length>1 && makeConverts(a[1]),
-								expr = (a=a[0].split("<")).length>1 && makeExpr(a[1]),
-								path = (a=a[0]) && makePath(a,tag);
+								expr = (a=a[0].split("<")).length>1 && makeExpr(a[1]);
+							
+							let path, resolved = !expr;
+							
+							if(a=a[0]){
 								
-							let resolved = !expr;
+								if(a.at(-1)==='.')
+									a += tag || Fail("Invalid shorthand: "+a);
 								
-							if(path){
-								if(!tag)
-									tag=path.route[0];
-								
-								if("value" in path){
-									literal = path.reach(rule) || literal;
-								}else{
-									resolved=false;
-									if(path.entry)
-										rule.scope.rvalue(path.entry,rule.depend); // TODO: static init
-								}
-							}
-
-							if( resolved && convert )
-							while(convert.length){
-								const
-									bak = literal,
-									c = convert.pop();
-								if((literal=c(literal)) === undefined){ // run-time converter
-									literal=bak;
-									convert.push(c);
+								if(path = makePath(a)){
 									resolved = false;
-									break;
-								}
+									const entry = path[0];
+									if(entry)
+										if(typeof entry==='string')//statum
+											rule.scope.rvalue(entry,rule.depend);
+										//else, runtime
+									//else, statum
+								}else //const
+									literal = rule.ns.reach(a) || literal;
 							}
+							
+							tag = alias || tag || a.split(".").pop();
+								
+							if( resolved && convert )
+								while(convert.length){
+									const
+										bak = literal,
+										c = convert.pop();
+									if((literal=c(literal)) === undefined){ // run-time converter
+										literal = bak;
+										convert.push(c);
+										resolved = false;
+										break;
+									}
+								}
 							
 							if(!resolved)
 								rvalue = new Rvalue(convert,expr,path);
@@ -750,7 +698,7 @@ const	dap=(Env=>
 							return epilog;
 						
 						let tail=todo;
-						while(tail.todo)tail=tail.todo;			
+						while(tail.todo)tail=tail.todo;
 						tail.todo=epilog;
 					}
 
@@ -787,27 +735,26 @@ const	dap=(Env=>
 			}
 		})();		
 			
-		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr, require }
+		return	{ Namespace, Proto, Rule, Step, Feed, Token, Rvalue, Expr }
 		
 	})(),
 	
 	Execute	= (function(){
 		
-		const GlobalContext={};
+		const	sub = (obj,up) => obj ? Object.assign(Object.create(up||null),obj) : up;
 		
-		function Context(data,stata,derive){
-			if(!derive)derive=GlobalContext;
-			this.data = data ? {"":data, $:derive.data} : derive.data;
-			this.stata=stata ? Object.assign({$:derive.stata},stata) : derive.stata;
+		function Context(derive,data,stata){
+			this.data = data!=undefined ? data : derive.data; //  // sub(data,derive.data); //
+			this.stata = sub(stata,derive.stata);
 		}
 		Context.prototype={
 			
 			getDataContext:
-				function(){return this.data['']},
+				function(){return this.data},
 			
 			subContext:
 				function(data,stata){
-					return data || stata ?  new Context(data,stata,this) : this;
+					return data!=undefined || stata ? new Context(this,data,stata) : this;
 				}
 		}
 		
@@ -885,7 +832,7 @@ const	dap=(Env=>
 								todo: new Compile.Step(value.todo,null,null,step.todo)
 							});
 					}
-					else{									
+					else{
 						flow	= null;
 							
 						const
@@ -927,9 +874,8 @@ const	dap=(Env=>
 								flow = null; // skip to next step
 							
 							if(flow){
-								const
-									rows	= isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
-								rows.forEach( row=>
+								const rows = isArray(flow) ? flow : !isNaN(-flow) ? Array(flow) : [flow];
+								rows.forEach( row =>
 									new Branch(node,this.up,row).execBranch(todo)
 								);
 							}
@@ -964,13 +910,28 @@ const	dap=(Env=>
 						expr = rvalue.expr;
 						
 					if(path){
-						value = (up && (path.entry in up)) ? up : path.reach(context,this);
-						for(let route=path.route, i = route.length; value && i-->0; )
-							value = value[route[i]];
+						const entry = path[0],
+							stata = entry && (up && (entry in up) ? up : context.stata);
+							
+						value =
+							!entry ? context.data :
+							typeof entry === 'function' ? entry(this) :
+							entry in stata ? stata[entry] :
+							Fail("Statum not found: "+entry,context); // path.reach(context,this);
+							
+						for(let i=0; value!=null && ++i<path.length; ){
+							const key = path[i];
+							value =
+								!key ? value._prototype :
+								typeof value==='object' ? value[key] :
+								null
+						}
 					}
 					
 					if(expr){
-						value = this.execExpr(expr,value||literal);
+						const proto = value||literal;
+						
+						value = this.execExpr(expr);
 						
 						if(value instanceof Postpone)
 							return value.assign({
@@ -983,6 +944,10 @@ const	dap=(Env=>
 									)
 								)
 							});
+							
+						if(proto)
+							value = proto.print(this.node,this.$,value);//
+				
 					}
 				}
 
@@ -1002,32 +967,30 @@ const	dap=(Env=>
 										)
 									);
 							}
-							
-						//if(value==null)value="";
 				
 						if(p--){
 							
 							const
 								lvalue = lvalues[p],
 								path = lvalue.path,
-								route = path.route,
-								entry = path.entry;
+								entry = path[0],
+								len = path.length-1;
 								
-							let
-								i = route.length,
-								key = route[--i],
-								target = up && entry && (!i||up[entry]) ? up : path.reach(context,this);
-							
-if(i<0)
-Fail("bzzz i<0");	
+							let	tgt = !entry ? context.data :
+									typeof entry === 'function' ? entry(this) :
+									up||context.stata,
+								i = typeof entry === 'string' ? 0:1,
+								key = path[i];
 								
-							while(i){ //>0
-								target=target[key]||(target[key]={});
-								key=route[--i];
+							while(i<len){
+								tgt = key
+									? tgt[key]||(tgt[key]={})
+									: tgt._prototype;
+								key = path[++i];
 							}
 							
-							if(target[key]!==value)//(typeof value === 'object') || 
-								target[key]=value;
+							if(tgt[key]!==value)// || (typeof value === 'object')
+								tgt[key]=value;
 								
 							convert = lvalue.convert;
 						}
@@ -1046,7 +1009,7 @@ Fail("bzzz i<0");
 					
 					for(let i = tokens.length;i-->0;){
 						const
-							value	=this.execToken(values[i],tokens[i]);
+							value	= this.execToken(values[i],tokens[i]);
 							
 						if(value instanceof Postpone)
 							return value.blocking(true) && value.assign({// in a feed - always blocking?      !!i
@@ -1059,14 +1022,7 @@ Fail("bzzz i<0");
 						values[i]=value;
 					}
 					
-				const
-					value = (expr.flatten||Util.hash)(values,tags);
-					
-				if(proto){
-					proto.print(this.node,this.$,null,value)//this.$.subContext(value));//dap.Execute.					
-				}
-				
-				return value;
+				return (expr.flatten||Util.hash)(values,tags);
 			},
 
 			runDown:
@@ -1079,7 +1035,7 @@ Fail("bzzz i<0");
 				if(postponed)
 					result.locate(elem);
 			}
-						
+			
 		};
 		
 		const
@@ -1171,7 +1127,7 @@ Fail("bzzz i<0");
 
 		Rebuild	=(node)	=>{
 			const place=node.parentNode;
-			node.P.print(place,node.$,node);//(node.$.data!=place.$.data)&&node.$.data[""]
+			node.P.print(place,node.$,null,node);//(node.$.data!=place.$.data)&&node.$.data[""]
 		};
 		
 		return {
@@ -1233,8 +1189,8 @@ Fail("bzzz i<0");
 	
 	parseWithExtra= (dummy => (tag,extra)=>{
 		dummy.innerHTML="<"+tag+" "+extra+"></"+tag+">";
-		return dummy.firstChild;			
-	})(newElem("div")),			
+		return dummy.firstChild;
+	})(newElem("div")),
 	
 	Blend	={
 		
@@ -1291,11 +1247,15 @@ Fail("bzzz i<0");
 		return elem;
 	},
 	
-	mime = (res,type) =>
-		type === "text/plain" ? res.text():
-		type === "application/json" ? res.json():
-		type === "application/x-www-form-urlencoded" ? res.formData():
-		res
+	mime = res =>{
+		const type = res.headers["content-type"]?.toLowerCase();
+		return res.ok && (
+			type === "text/plain" ? res.text():
+			type === "application/json" ? res.json():
+			type === "application/x-www-form-urlencoded" ? res.formData():
+			res.text()
+		);
+	}
 ;
 	
 	return	{
@@ -1362,8 +1322,7 @@ Fail("bzzz i<0");
 			console.log('orphan element '+elem);
 		},
 			
-		require: url => fetch(url)
-			.then(res => interpret(res,res.headers["content-type"].toLowerCase())),
+		require: url => fetch(url).then(mime),
 				
 		stopEvent	: e=>{
 			e.stopPropagation();
@@ -1379,8 +1338,8 @@ Fail("bzzz i<0");
 				}
 				if(!data)
 					data=location.hash ? new URLSearchParams(location.hash.replace(/^#!?/,'')) : {};
-				const	ready = proto.print(place, new dap.Execute.Context(data));
-				instead ? place.replaceChild(ready,instead) : place.appendChild(ready);
+				
+				proto.print(place, new dap.Execute.Context({},data), instead);
 				return 0;
 			},
 			
@@ -1390,8 +1349,9 @@ Fail("bzzz i<0");
 			
 			convert	:{ 
 			
-				value	: node=>(node.value||node.textContent||node.innerText||"").trim(),
-				text	: node=>(node.innerText||node.textContent||node.value||"").trim(),
+				text	: node => (node.innerText||node.textContent||node.value||"").trim(),
+				value	: node => (node.value||node.textContent||node.innerText||"").trim(),
+				wait	: node => new Promise((resolve,reject)=>{node.$.post={resolve,reject}}),
 				
 				//run-time converters
 				
@@ -1401,7 +1361,7 @@ Fail("bzzz i<0");
 				confirm:(msg,r) => r&& confirm(msg),
 									
 				fetch	: (req,r) => r && fetch(req),
-				query	: (req,r) => r && fetch(req).then(res => res.ok && mime(res,res.headers.get("Content-Type").toLowerCase()))
+				query	: (req,r) => r && fetch(req).then(mime)
 			},
 			
 			flatten	:{
@@ -1413,21 +1373,24 @@ Fail("bzzz i<0");
 			},
 			
 			operate	:{
-				log	:(value,alias)	=>{ log(alias+": "+value); },
-				
-				"!!"	:(value,alias,node)=>{
+				"!!"	:(value,alias,node) => {
 						if(alias)
 							value ? node.setAttribute(alias,value):node.removeAttribute(alias);
 						else
 							node.innerHTML+=value;
 					},
 					
-				"!?"	:(value,alias,node)=>{ 
+				"!?"	:(value,alias,node) => { 
 						if(alias) 
 							node.classList.toggle(alias,!!value) 
 						else
 							value && node.classList.add(value)
-					}			
+					},
+					
+				log	:(value,alias) => { log(alias+": "+value) },
+				
+				value	:(value,name,node) => { node.$.post?.resolve(value) },
+				remove:(value,name,node) => { (value||node).remove() }
 
 			}
 		}

@@ -1,0 +1,125 @@
+/*
+--tg-color-scheme: light;
+--tg-viewport-height: 590px;
+--tg-viewport-stable-height: 590px;
+
+--tg-theme-bg-color: #ffffff;
+--tg-theme-secondary-bg-color: #f1f1f1;
+--tg-theme-section-bg-color: #ffffff;
+--tg-theme-header-bg-color: #ffffff;
+
+--tg-theme-button-color: #40a7e3;
+--tg-theme-button-text-color: #ffffff;
+
+--tg-theme-hint-color: #999999;
+--tg-theme-link-color: #168acd;
+
+--tg-theme-text-color: #000000;
+--tg-theme-section-header-text-color: #168acd;
+--tg-theme-subtitle-text-color: #999999;
+--tg-theme-accent-text-color: #168acd;
+--tg-theme-destructive-text-color: #d14e4e;
+*/
+
+:root{
+	--shade-color: 100,200,250;
+}
+
+html,body,app {
+    touch-action: none !important;
+}
+
+app{
+	touch-action:auto;
+}
+
+body, shield {
+	background: var(--tg-theme-secondary-bg-color);
+	color:var(--tg-theme-text-color);
+}
+
+input, .input, select, textarea {
+    background: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+}
+
+page>ul>li{
+	/* background: var(--tg-theme-bg-color); */
+	/* border-radius: .5em; */
+	border-top: 1px solid var(--tg-theme-secondary-bg-color);
+}
+
+button, .swap{
+	background-color: var(--tg-theme-button-color);
+	color: var(--tg-theme-button-text-color);
+}
+
+tab.selected{
+	color: var(--tg-theme-text-color);
+	background-color: var(--tg-theme-bg-color);
+}
+
+tabset{
+	color: var(--tg-theme-button-color);
+}
+
+page {
+	/* border-bottom: 1px solid var(--tg-theme-button-color); */
+	background: var(--tg-theme-bg-color);
+	padding: 0 .5em;
+	position: relative;
+	/* box-shadow: inset 0 -1em 1em var(--tg-theme-accent-text-color); */
+}
+
+.input::before, label::before, roof::before{
+	color: var(--tg-theme-hint-color);
+}
+
+group, label>input, label>textarea, label>select{
+	border-radius: .3rem;
+	border-color: var(--tg-theme-link-color);
+}
+
+.import{
+	color: var(--tg-theme-hint-color);
+	position: relative;
+	margin: -1em;
+	padding: 1em;
+}
+
+span.time {
+	color: var(--tg-theme-section-header-text-color);
+}
+
+span.places{
+	/* font-style: italic; */
+	color: var(--tg-theme-hint-color);
+}
+
+
+page>.title {
+	color: var(--tg-theme-subtitle-text-color);
+}
+
+.rider {
+	background-color: rgba(var(--shade-color),.1);
+	border-radius: .5em;
+}
+
+.area{
+	background-color: rgba(var(--shade-color),.1);
+}
+
+.area.selected {
+	background-color: rgba(var(--shade-color),.3);
+}
+
+
+
+span.note {
+    color: var(--tg-theme-hint-color);
+}
+
+span.name {
+    color: var(--tg-theme-link-color);
+}

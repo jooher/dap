@@ -1,16 +1,4 @@
-/*
-@font-face {
-  font-family: 'Material Icons';
-  font-style: normal;
-  font-weight: 400;
-  src: url(MaterialIcons-Regular.eot);
-  src: local('Material Icons'),
-       local('MaterialIcons-Regular'),
-       url(MaterialIcons-Regular.woff2) format('woff2'),
-       url(MaterialIcons-Regular.woff) format('woff'),
-       url(MaterialIcons-Regular.ttf) format('truetype');
-}
-*/
+
 [data-dap=false]{display:none !important;}
 [ui=click]{cursor:pointer;}
 
@@ -25,10 +13,16 @@
 
 
 html,body {
-	font: normal 1rem Roboto, serif;
+	font: normal 1rem Roboto, sans-serif;
 	height: 100%;
 	padding: 0;
 	margin: 0;
+}
+
+app{
+	display:block;
+	height:100%;
+	max-width:40em;
 }
 
 h1{font:normal 60px Roboto,sans-serif}
@@ -50,53 +44,8 @@ h6{font:normal 20px Roboto,sans-serif}
 	font: italic 1em sans-serif; 
 }
 
-
-icon, button::before, .checked::before
-{
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 1.5rem;  /* Preferred icon size */
-  padding: .2em;
-  margin: 0 .2em;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;	/* Support for all WebKit browsers. */
-  text-rendering: optimizeLegibility;	/* Support for Safari and Chrome. */
-  -moz-osx-font-smoothing: grayscale; 	/* Support for Firefox. */
-  font-feature-settings: 'liga';		/* Support for IE. */
-}
-
-.checked::before {content: "check";position: absolute;right:0;top:0;}
-
-icon::before, button::before, action:empty::before{
-	content:attr(class);
-}
-
-button::before{
-	vertical-align: middle;
-	box-shadow:0 4px 4px rgba(0,0,0,.25);
-	border:none;
-	border-radius:50%;
-	z-index: 1;
-}
-
-action{
-	display: inline-block;
-	font-size: .85em;
-	margin: .5em;
-	text-transform:uppercase;
-}
-
-input, button {outline:none}
-
-
 roof{
+    display: block;
     position:relative;
     z-index: 1;
 }
@@ -173,6 +122,13 @@ vault {
     z-index: 1;
 }
 
+action{
+	display: inline-block;
+	font-size: .85em;
+	margin: .5em;
+	text-transform:uppercase;
+}
+
 
 
 // ----
@@ -198,9 +154,7 @@ tab.selected {
 }
 
 
-
 // ----
-
 
 
 input.key {
@@ -223,13 +177,11 @@ input[type=number] {
 }
 
 input::placeholder {
-    font: italic 1em sans-serif;
+	font: italic 1em sans-serif;
 }
 
 
-
 // ----
-
 
 
 .modal {
@@ -266,5 +218,4 @@ input::placeholder {
     width:100%;
     border-bottom: 2px solid;
 }
-
 .dialog>.actions{padding:.5rem;text-align: right;margin: 1rem -1rem -1rem -1rem;}

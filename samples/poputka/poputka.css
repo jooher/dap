@@ -1,0 +1,237 @@
+deck>button{
+	/* padding: 1em; */
+	flex: 1;
+}
+
+.input {
+	height: 1em;
+	padding: .5em;
+	white-space: nowrap;
+}
+
+.input::before, label::before {
+	display:inline-block;
+	font-size: .9em;
+	/* text-align:right; */
+	padding-right: .2em;
+	font-style: italic;
+}
+
+.input::before {
+	width: 1.4em;
+}
+
+.place {
+	display: inline-block;
+	padding: .2em .4em;
+	margin: .2em;
+}
+
+.area {
+	display: inline-block;
+	border-radius: .2em;
+	padding: .25em .5em;
+	margin: .25em;
+}
+
+.sub {
+	margin-left: 1em;
+}
+
+.areas {
+	margin: 1em;
+}
+
+.regions {
+	text-align: center;
+	/* font-size: 1.2em; */
+	width: 16em;
+}
+
+.region {
+	margin: 1em;
+	border-top: 1px solid gray;
+}
+
+.region>.name {
+	font: bold 1em sans-serif;
+	margin: .5em;
+}
+
+span.time {
+	/* display: inline-block; */
+	/* padding: .1em .5em; */
+	/* font-weight: bold; */
+	/* border-radius: .25em; */
+}
+
+span.vehicle {
+	display: inline-block;
+	padding: 0 .5em;
+}
+
+.rider span.price {
+	/* font-weight: bold; */
+}
+
+.passenger .vehicle {
+	font-style: italic;
+}
+
+.rider .vehicle {
+	font-weight: bold;
+}
+
+group.where {
+	flex-direction: column;
+	position: relative;
+	font-size: .9rem;
+}
+.when{
+	flex-direction: row;
+	/* margin-right: 4em; */
+}
+.when>input {
+	flex: 1;
+	text-align: center;
+}
+span.terms, span.places {
+	display: block;
+	white-space: pre;
+}
+
+span.places {
+	display: block;
+	/* margin: .5em 0; */
+}
+
+span.price {
+	position: absolute;
+	right: .5em;
+}
+
+span.note {
+	display: block;
+	/* margin: .1em 0; */
+	font-size: small;
+}
+
+.swap {
+	background: center no-repeat url(/stuff/icons/swap-v.svg);
+	display: block;
+	position: absolute;
+	right: 0;
+	top: 1em;
+	width: 2em;
+	height: 2em;
+	box-sizing: border-box;
+	padding: .4em;
+	text-align: center;
+	background-size: 1.25em;
+	font-weight: bold;
+	border-radius: 1em;
+	border: .2em solid var(--tg-theme-bg-color);
+}
+
+
+page>.title {
+	/* font-weight: bold; */
+	white-space: pre;
+}
+
+page>.title::before {
+    display: block;
+    font-weight: bold;
+    /* color: white; */
+}
+
+span.date {
+	display: inline-block;
+}
+
+deck>.seats {
+	width: 3em;
+}
+
+deck>.vehicle {
+	flex: 1;
+}
+
+label::before {
+	margin: .3em 0;
+	white-space: nowrap;
+}
+
+deck>.price {
+	width: 7em;
+}
+
+page>.title {
+	margin: .5em;
+	/* border-bottom: 1px solid var(--tg-theme-hint-color); */
+}
+
+page>ul:empty::before {
+	display: block;
+	margin: 1em .5em;
+}
+
+.import>.text {
+	white-space: pre;
+	font: normal .8em monospace;
+}
+
+.contact {
+	position: absolute;
+	right: .3em;
+	top: 2em;
+}
+
+.contact>a {
+	display: inline-block;
+	height: 2em;
+	width: 2em;
+	margin: .1em;
+	background: left/contain no-repeat;
+}
+
+a[href^="https://t.me/"]{
+	background-image: url(/stuff/icons/tg.svg);
+}
+
+a[href^="tel:"]{
+	background-image:url(/stuff/icons/tel.svg);
+}
+
+app {
+    /* padding: 1rem; */
+}
+
+.ride>.title {
+    padding-right: 2em;
+}
+
+span.name {
+    font-weight: bold;
+}
+
+li.ride {
+    min-height: 4em;
+}
+
+.note>textarea {
+    height: 8em;
+    font-size: .8rem;
+}
+
+page.rides {}
+
+button.done {
+    position: absolute;
+    right: 1.5rem;
+    background: none;
+    color: var(--tg-theme-button-color);
+    font-size: 2em;
+    padding: 0;
+    margin: -.5rem;
+}

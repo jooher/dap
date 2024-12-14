@@ -1,0 +1,248 @@
+[data-dap=false]{display:none !important;}
+[ui=click]{cursor:pointer;}
+
+[FADE]{/* position:absolute; */animation: 1s fadein;width: 100%;}
+[FADE].STALE{opacity:0; transition:opacity 1s ease}
+@keyframes fadein { from {opacity:0;} to {opacity:1} }
+
+@keyframes fadein {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+BUTTON#tgMainButton{/* display:none; */}
+
+
+html,body {
+	font: normal 1rem Roboto, sans-serif;
+	height: 100%;
+	max-width: 24rem;
+	padding: 0;
+	margin: auto;
+	background: lightslategray;
+}
+
+body, app, etage, roof, page {
+	display: flex;
+	max-height: 100%;
+	box-sizing: border-box;
+}
+
+body, app, etage {
+	flex-direction: column-reverse;
+}
+
+
+roof,page {
+	flex-direction: column;
+}
+
+etage{
+	margin-block-end: 2rem;
+}
+
+roof {
+    /* margin: 0.5rem; */
+}
+
+roof	{
+	/* padding: .5em; */
+	position: relative;
+	gap: 1em;
+	background: rgba(var(--shade-color),.1);
+	padding: 1em;
+	/* margin: -1em; */
+}
+
+roof::before {
+	font-weight: bold;
+}
+
+etage {
+	flex: 1;
+	height: 100%;
+	overflow: auto;
+	padding: 1em;
+}
+
+page {
+	flex: 1;
+	overflow-y: auto;
+	border-radius: .5rem;
+}
+
+page>ul {
+	padding: 0;
+	margin: 0;
+}
+
+page>ul>li{
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+	position: relative;
+	padding: .5em;
+	margin: .25em 0;
+}
+
+
+input,select,textarea {
+	display:block;
+	font-size: inherit;
+	font-family:inherit;
+	padding:.2em;
+	border:none;
+}
+
+
+group{
+	display: flex;
+	gap: .2em;
+	overflow: hidden;
+}
+
+group>select {
+	flex: 1;
+}
+group>input[type="number"] {
+	width: 4em;
+}
+
+input {
+	text-align: inherit;
+}
+
+input[type=number] {
+	text-align: center;
+}
+
+input::placeholder, textarea::placeholder{
+	font: italic 1em sans-serif;
+}
+
+label>input, label>select, label>textarea,label>group{
+	box-sizing: border-box;
+	width:100%;
+}
+
+button {
+	padding: .5em;
+	border: none;
+	border-radius: 1em;
+}
+
+
+label {
+	display: block;
+}
+
+form>label {
+	margin: .5em 0;
+}
+
+form>button{
+	/* font-size: 1.25em; */
+	margin-top: 1em;
+	display: block;
+	width: 100%;
+}
+
+
+
+tabset {
+	display: flex;
+	flex-direction: row;
+	padding: 0 1em;
+	margin-bottom: .2rem;
+	height: 2.2rem;
+	bottom:0;
+	left: 1rem;
+}
+
+tab {
+	transition: all .5s;
+	padding: .4em 1em;
+	border-radius: 0 0 1em 1em;
+}
+
+
+modal {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 3;
+	display: flex;
+}
+modal>scrim{
+	background: rgba(0,0,0,.32);
+	position:absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	animation: fadein .25s ease-out;
+}
+modal>shield {
+	padding: 1rem;
+	border: none;
+	border-radius: 1em;
+	box-shadow: 0 0.5rem 1rem rgba(0,0,0,.4);
+	position: relative;
+	margin: auto;
+	max-width: 80%;
+	display: inline-block;
+	max-height: 80%;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+shield::before{
+	display: block;
+	text-align:inherit;
+}
+
+shield>input {
+	border: none;
+	width:100%;
+	border-bottom: 2px solid;
+}
+shield>.actions{padding:.5rem;text-align: right;margin: 1rem -1rem -1rem -1rem;}
+
+shield>deck {
+	display: block;
+	text-align: right;
+	margin-top: 2rem;
+}
+
+deck {
+	display: flex;
+	flex-direction: row;
+	gap: .5em;
+}
+
+
+
+span.user {
+	font-weight: bold;
+}
+
+button.tgmain {
+	/* font-size: 1.25em; */
+	/* margin: 0; */
+	border-radius: 0;
+	margin-top: 1em;
+}
+
+page::after {
+    content: "-";
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    /* width: 100%; */
+    background: linear-gradient(0, var(--tg-theme-bg-color), transparent);
+    height: 4em;
+    display: block;
+    color: var(--tg-theme-bg-color);
+}

@@ -1,0 +1,54 @@
+/*
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(MaterialIcons-Regular.eot);
+  src: local('Material Icons'),
+       local('MaterialIcons-Regular'),
+       url(MaterialIcons-Regular.woff2) format('woff2'),
+       url(MaterialIcons-Regular.woff) format('woff'),
+       url(MaterialIcons-Regular.ttf) format('truetype');
+}
+*/
+
+
+icon, button::before, .checked::before
+{
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.5rem;
+  padding: .2em;
+  margin: 0 .2em;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;	
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  
+}
+
+button::before{
+	vertical-align: middle;
+	box-shadow:0 4px 4px rgba(0,0,0,.25);
+	border:none;
+	border-radius:50%;
+	z-index: 1;
+}
+
+.checked::before {content: "check";position: absolute;right:0;top:0;}
+
+icon::before, button::before, action:empty::before{
+	content:attr(class);
+}
+
+input, button {outline:none}
