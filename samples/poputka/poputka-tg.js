@@ -194,7 +194,7 @@ modal = (...stuff) =>
 		route : arr => Array.isArray(arr) && arr[0]?.route,
 		
 		user	: u => u,
-		fullname: u => u&&`${u.first_name||''} ${u.last_name||''}`,
+		fullname: u => u&&`${u.first_name||'~'} ${u.last_name||'~'}`,
 		
 		contact: u => u&&[
 			u.username&& Ahref('https://t.me/'+u.username),

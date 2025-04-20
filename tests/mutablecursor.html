@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test</title>
+		<style>
+		.ui{cursor:pointer}
+		iframe{height:16em; width:100%; border:4px dashed orange;}
+		</style>
+		<script src="../0.5.4.js"></script>
+	</head>
+	<body>  
+		<script>
+'heroes'.d("$heroes=heroes" // S
+	,'UL'.d("* $heroes@" // D
+		,'LI.hero'
+			.d("!! .name@ .checked@") // 
+			.ui(".checked=.:!")
+	).u("log $heroes:json")
+)
+.DICT({
+	heroes:[
+		{name:"alice",checked:true},
+		{name:"bob"}
+	],
+})
+.FUNC({
+	convert:{
+		json: JSON.stringify 
+	}
+})
+.RENDER();
+
+		</script>
+
+	</body>
+</html>

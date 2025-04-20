@@ -10,7 +10,7 @@ const	dap=(Env=>
 	
 	const
 
-	Fail	= (reason,context) => {
+	Fail	= (reason,$) => {
 		throw new Error("dap error: "+reason)
 	},
 	
@@ -54,6 +54,8 @@ const	dap=(Env=>
 					inherit = r => Object.assign(Object.create(p),r);
 				return Array.isArray(a) ? a.map(inherit) : inherit(a); 
 			},
+			
+		"^"	: values => values.reduce( (up,o) => Object.assign(Object.create(up),o) ),
 		
 		"*"	: values=>values.reverse(),
 		
@@ -77,9 +79,9 @@ const	dap=(Env=>
 	
 	operate	:{
 	
-		// null		- keep on
+		// null	- keep on
 		// array	- subscope
-		// true		- skip to next step
+		// true	- skip to next step
 		// false	- next operand, but not next step
 		
 		"!"	:Print,
@@ -92,7 +94,7 @@ const	dap=(Env=>
 		"&?"	:(value,alias,node)=>	{ if(value==null)return; const data=node.$.getDataContext(); if(alias)data[alias]=value; else Object.assign(data,value); },
 
 		"d"	:(value,alias,node)=>	{ Update.Rebuild(value||node); },
-		"a!"	:(value,alias,node)=> { Update.Append(value||node); },
+		"a!"	:(value,alias,node)=>	{ Update.Append(value||node); },
 		"u!"	:(value,alias,node)=>	{ Update.onDemand(value||node); },
 		
 		"a"	:(value,alias,node)=>	{ Env.delay(_=>Update.Append(value||node,alias)); },
@@ -126,19 +128,16 @@ const	dap=(Env=>
 	E	= "",
 	
 	inherit = o => Object.create(o),
-
 	
-	Print	= (value,alias,place,context)=> {
+	Print	= (value,alias,place,$)=> {
 		if( value != null )
-			isArray(value) ? value.forEach(v=>Print(v,null,place,context)) :
-			value.print	? value.print(place,context) :
+			isArray(value) ? value.forEach(v=>Print(v,null,place,$)) :
+			value.print	? value.print(place,$) :
 			Env.Print(place,value);
 		},
 		
 	Util	={
 			
-		//stub	: (tgt,map)=>{for(let k in map)tgt=tgt.split(k).join(map[k]);return tgt},
-		
 		reach	: (entry,path)=>{//path.reduce(o,v=>o&&o[v],start),
 				let i=path.length; 
 				while(entry&&i--)entry=entry[path[i]];
@@ -160,7 +159,7 @@ const	dap=(Env=>
 	
 	Func	= Canonical(),
 	
-	Compile	= (function(){
+	Compile = (function(){
 		
 		const
 		
@@ -424,7 +423,7 @@ const	dap=(Env=>
 					"").split(" ");
 			},
 			
-			print	:function(place,context,data,instead){
+			print	:function(place,$,data,instead){
 				
 				if(!this.scope)
 					this.prepare(place.P);
@@ -440,7 +439,7 @@ const	dap=(Env=>
 					a.engage();
 					
 				node.P = this;
-				node.$ = context.subContext(data,this.scope.defines);
+				node.$ = Execute.context($,data,this.scope.defines);
 					
 				new Execute.Branch(node).runDown(todo,place,instead); 
 				
@@ -741,22 +740,15 @@ const	dap=(Env=>
 	
 	Execute	= (function(){
 		
-		const	sub = (obj,up) => obj ? Object.assign(Object.create(up||null),obj) : up;
-		
-		function Context(derive,data,stata){
-			this.data = data!=undefined ? data : derive.data; //  // sub(data,derive.data); //
-			this.stata = sub(stata,derive.stata);
-		}
-		Context.prototype={
-			
-			getDataContext:
-				function(){return this.data},
-			
-			subContext:
-				function(data,stata){
-					return data!=undefined || stata ? new Context(this,data,stata) : this;
-				}
-		}
+		const
+		context = ($,data,stata) => {
+			if(data!=undefined || stata){
+				$ = Object.create($);
+				if(data) $[""] = data;
+				if(stata) Object.assign($,stata);
+			}
+			return $;
+		};
 		
 		function Postpone(promise,block,token){//(info,handle)
 			this.time	= Date.now();
@@ -801,7 +793,7 @@ const	dap=(Env=>
 
 		function Branch(node,up,data){
 			this.node = node;
-			this.$ = node.$.subContext(data);
+			this.$ = context(node.$,data);
 			this.up = up;
 		}
 		Branch.prototype={
@@ -894,7 +886,7 @@ const	dap=(Env=>
 				
 				const
 					up = this.up,
-					context = this.$||this.node.$,
+					$ = this.$||this.node.$,
 					rvalue = token.rvalue,
 					lvalues = token.lvalues;
 					
@@ -911,13 +903,13 @@ const	dap=(Env=>
 						
 					if(path){
 						const entry = path[0],
-							stata = entry && (up && (entry in up) ? up : context.stata);
+							stata = entry && (up && (entry in up) ? up : $);
 							
 						value =
-							!entry ? context.data :
+							!entry ? $[""] :
 							typeof entry === 'function' ? entry(this) :
 							entry in stata ? stata[entry] :
-							Fail("Statum not found: "+entry,context); // path.reach(context,this);
+							Fail("Statum not found: "+entry, $);
 							
 						for(let i=0; value!=null && ++i<path.length; ){
 							const key = path[i];
@@ -976,9 +968,9 @@ const	dap=(Env=>
 								entry = path[0],
 								len = path.length-1;
 								
-							let	tgt = !entry ? context.data :
+							let	tgt = !entry ? $[""] :
 									typeof entry === 'function' ? entry(this) :
-									up||context.stata,
+									up || $,
 								i = typeof entry === 'string' ? 0:1,
 								key = path[i];
 								
@@ -1043,7 +1035,7 @@ const	dap=(Env=>
 		Perf	= (info,since)=>info,//Env.log("PERF "+(Date.now()-since)+" ms "+info),
 		recap	=(arr,i,v)=>{const a=arr.slice(0,i); if(v)a.push(v); return a;};
 			
-		return	{ Context, Branch, Postpone, Perf };
+		return	{ context, Branch, Postpone, Perf };
 
 	})(),
 
@@ -1122,7 +1114,7 @@ const	dap=(Env=>
 		Append = (node,rule)=>{
 			if(!rule)
 				rule=node.P.rules.a||Fail("no a-rule");
-			new Execute.Branch(node).execBranch(rule.todo); //,node.$.subData()
+			new Execute.Branch(node).execBranch(rule.todo);
 		},
 
 		Rebuild	=(node)	=>{
@@ -1339,7 +1331,7 @@ const	dap=(Env=>
 				if(!data)
 					data=location.hash ? new URLSearchParams(location.hash.replace(/^#!?/,'')) : {};
 				
-				proto.print(place, new dap.Execute.Context({},data), instead);
+				proto.print(place,{},data,instead);
 				return 0;
 			},
 			

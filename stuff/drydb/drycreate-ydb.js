@@ -12,7 +12,7 @@ const
 	table = str => {
 		const fields = str.split(/,\s*/g).filter(str=>str),
 			name = fields.shift();
-		return [name,Object.fromEntries(fields.map(field))]			
+		return [name,Object.fromEntries(fields.map(field))]
 	},
 	
 	field = str => {
@@ -37,7 +37,7 @@ const
 	inputParams = fields => Object.keys(fields).map(name=>`_${name}`), //.join(", "),
 	
 	GET = (key,fields) =>`
-CREATE PROCEDURE "get.${key}"(_${key} int)
+CREATE VIEW "get.${key}"(_${key} int)
 select ${key}, ${fieldsList(fields)} from ${key} where _${key} is null or ${key}=_${key};`,
 	
 	PUT = (key,fields) =>`
