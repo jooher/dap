@@ -1,37 +1,38 @@
 /*
-drive, driver, route, date:date, info:json
-driver, person, vehicle, plate:text, stars
-hike, person, drive, info:json, stars
-person, info:json, stars
-route, title:string, stops:text
-vehicle, name, info:json, seats
+route title:string stops:text
+event date: route info:json
+person info:json stars
+visit person event stars
+
+vehicle name info:json seats
 */
 
 const 
 
+	sqltypes = {
+		string:"utf8",
+		text:"utf8"
+	},
+	
 	table = str => {
-		const fields = str.split(/,\s*/g).filter(str=>str),
-			name = fields.shift();
-		return [name,Object.fromEntries(fields.map(field))]
+		const fields = str.split(/\s+/g).filter(str=>str),
+			key = fields.shift();
+		return [key, Object.fromEntries(fields.map(field))]			
 	},
 	
 	field = str => {
 		const spec = str.split(":"),
-			name = spec[0],
-			type = spec[1],
-			sqltype = !type ? "int" : sqltypes[type] || type;
-		return [name,sqltype]
-	},
-	
-	sqltypes = {
-		string:"nvarchar(60)"
+			name = spec.shift(),
+			type = spec.length ? spec.shift()||"int" : name;
+		return [name, sqltypes[type]||type]
 	},
 	
 	PK = name => `PRIMARY KEY (${name})`,
 	IX = name => `KEY ix_${name}(${name})`,
 	FK = name => IX(name)+`, CONSTRAINT fk_${name} FOREIGN KEY (${name}) REFERENCES ${name}(${name})`,
+	
 		
-	procParams = fields => Object.entries(fields).map(([name,sqltype])=>`_${name} ${sqltype}`).join(", "),
+	procParams = fields => Object.entries(fields).map(([name,type])=>`_${name} ${type}`).join(", "),
 	fieldsList = fields => Object.keys(fields).map(name=>`"${name}"`),//.join(", "),
 	assignList = fields => Object.keys(fields).map(name=>`"${name}"=_${name}`),//.join(", "),
 	inputParams = fields => Object.keys(fields).map(name=>`_${name}`), //.join(", "),
@@ -51,7 +52,7 @@ end;`;
 
 export default desc => {
 	
-	const tables = Object.fromEntries(desc.split(/\n/g).filter(str=>str).map(table)),
+	const tables = Object.fromEntries(desc.split(/\n+/g).filter(str=>str).map(table)),
 	
 		tablestuff = (key,fields) => [
 			`${key} serial`,
@@ -63,7 +64,7 @@ export default desc => {
 	
 	return Object.entries(tables).map(([key,fields]) => [
 			`CREATE TABLE ${key}(`,
-			tablestuff(key,fields),
+				tablestuff(key,fields),
 			`)`,
 			GET(key,fields),
 			PUT(key,fields)

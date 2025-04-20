@@ -1,5 +1,4 @@
 deck>button{
-	/* padding: 1em; */
 	flex: 1;
 }
 
@@ -12,7 +11,6 @@ deck>button{
 .input::before, label::before {
 	display:inline-block;
 	font-size: .9em;
-	/* text-align:right; */
 	padding-right: .2em;
 	font-style: italic;
 }
@@ -89,7 +87,6 @@ group.where {
 }
 .when{
 	flex-direction: row;
-	/* margin-right: 4em; */
 }
 .when>input {
 	flex: 1;
@@ -102,7 +99,6 @@ span.terms, span.places {
 
 span.places {
 	display: block;
-	/* margin: .5em 0; */
 }
 
 span.price {
@@ -112,7 +108,6 @@ span.price {
 
 span.note {
 	display: block;
-	/* margin: .1em 0; */
 	font-size: small;
 }
 
@@ -135,14 +130,18 @@ span.note {
 
 
 page>.title {
-	/* font-weight: bold; */
 	white-space: pre;
+	margin: .5em;
 }
 
 page>.title::before {
     display: block;
     font-weight: bold;
-    /* color: white; */
+}
+
+page>ul:empty::before {
+	display: block;
+	margin: 1em .5em;
 }
 
 span.date {
@@ -164,16 +163,6 @@ label::before {
 
 deck>.price {
 	width: 7em;
-}
-
-page>.title {
-	margin: .5em;
-	/* border-bottom: 1px solid var(--tg-theme-hint-color); */
-}
-
-page>ul:empty::before {
-	display: block;
-	margin: 1em .5em;
 }
 
 .import>.text {
@@ -201,10 +190,6 @@ a[href^="https://t.me/"]{
 
 a[href^="tel:"]{
 	background-image:url(/stuff/icons/tel.svg);
-}
-
-app {
-    /* padding: 1rem; */
 }
 
 .ride>.title {
