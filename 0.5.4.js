@@ -1240,12 +1240,12 @@ const	dap=(Env=>
 	},
 	
 	mime = res =>{
-		const type = res.headers["content-type"]?.toLowerCase();
+		const type = res.headers.get("content-type")?.toLowerCase();
 		return res.ok && (
-			type === "text/plain" ? res.text():
-			type === "application/json" ? res.json():
-			type === "application/x-www-form-urlencoded" ? res.formData():
-			res.text()
+			type.startsWith("text/plain") ? res.text():
+			type.startsWith("application/json") ? res.json():
+			type.startsWith("application/x-www-form-urlencoded") ? res.formData():
+			res
 		);
 	}
 ;
