@@ -10,12 +10,15 @@
 	</head>
 	<body>  
 		<script>
-'heroes'.d("$heroes=heroes" // S
+'heroes'.d("$heroes=heroes $up=" // S
 	,'UL'.d("* $heroes@" // D
 		,'LI.hero'
 			.d("!! .name@ .checked@") // 
 			.ui(".checked=.:!")
-	).u("log $heroes:json")
+	).u("log $heroes:json; $up=()")
+	,'OL'.d("$up; * $heroes@"
+		,'LI'.d("! .name `: .checked")
+	)
 )
 .DICT({
 	heroes:[

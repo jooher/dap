@@ -1043,13 +1043,13 @@ const	dap=(Env=>
 		
 		const
 		
-		adopt = (stata,defs,change,sift) => {
+		adopt = ($,defs,change,sift) => {
 			for(const k in change)
 				if(k in defs)
-					if(stata[k]===change[k]&&(typeof change[k]!=='object'))
+					if($[k]===change[k]&&(typeof change[k]!=='object'))
 						delete change[k];
 					else
-						stata[k]=change[k];
+						$[k]=change[k];
 				else
 					sift[k]=change[k];
 			return sift;
@@ -1073,7 +1073,7 @@ const	dap=(Env=>
 			const
 				defs = node.P.scope.defines,
 				up = defs && (!parent || node.$!=parent.$)
-					? adopt(node.$.stata,defs,change,{})
+					? adopt(node.$,defs,change,{})
 					: change;
 					
 			return (parent && parent.P && checkUp(parent,up,result,node)) || checkDown(node,change,snitch)>3;
