@@ -48,14 +48,16 @@ const	dap=(Env=>
 	flatten	:{
 	
 		"&"	: values=> Object.assign(values.pop(),...values),
-		"^"	: values=> {
+		
+		"^"	: values => values.reduce( (up,o) => Object.assign(Object.create(up),o) ),
+		
+		"^^"	: values=> {
 				const a = values.pop(),
 					p = Object.assign({},...values),
 					inherit = r => Object.assign(Object.create(p),r);
 				return Array.isArray(a) ? a.map(inherit) : inherit(a); 
 			},
 			
-		"^"	: values => values.reduce( (up,o) => Object.assign(Object.create(up),o) ),
 		
 		"*"	: values=>values.reverse(),
 		
@@ -1277,8 +1279,6 @@ const	dap=(Env=>
 			const el = elem.cloneNode(true);
 			if(events)
 				events.forEach( e=> {
-					if(!e)
-						whut();
 					const evtype=e.toLowerCase();
 					if(e===evtype)
 						el.addEventListener(evtype,handler);
@@ -1314,8 +1314,6 @@ const	dap=(Env=>
 			console.log('orphan element '+elem);
 		},
 			
-		require: url => fetch(url).then(mime),
-				
 		stopEvent	: e=>{
 			e.stopPropagation();
 			if(e.cancelable && !e.target.href)
