@@ -1374,7 +1374,7 @@ const	dap=(Env=>
 						if(alias) 
 							node.classList.toggle(alias,!!value) 
 						else
-							value && node.classList.add(value)
+							(value ? node.classList.add : node.classList.remove)(value)
 					},
 					
 				log	:(value,alias) => { log(alias+": "+value) },
